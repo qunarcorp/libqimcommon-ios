@@ -1,0 +1,128 @@
+PODS:
+  - ASIHTTPRequest (1.8.2):
+    - ASIHTTPRequest/ASIWebPageRequest (= 1.8.2)
+    - ASIHTTPRequest/CloudFiles (= 1.8.2)
+    - ASIHTTPRequest/Core (= 1.8.2)
+    - ASIHTTPRequest/S3 (= 1.8.2)
+  - ASIHTTPRequest/ASIWebPageRequest (1.8.2):
+    - ASIHTTPRequest/Core
+  - ASIHTTPRequest/CloudFiles (1.8.2):
+    - ASIHTTPRequest/Core
+  - ASIHTTPRequest/Core (1.8.2):
+    - Reachability
+  - ASIHTTPRequest/S3 (1.8.2):
+    - ASIHTTPRequest/Core
+  - AvoidCrash (2.5.2)
+  - CocoaAsyncSocket (7.6.3)
+  - CocoaLumberjack (3.4.2):
+    - CocoaLumberjack/Default (= 3.4.2)
+    - CocoaLumberjack/Extensions (= 3.4.2)
+  - CocoaLumberjack/Default (3.4.2)
+  - CocoaLumberjack/Extensions (3.4.2):
+    - CocoaLumberjack/Default
+  - ProtocolBuffers (1.9.11)
+  - QIMCommonCategories (0.0.4)
+  - QIMDataBase (0.0.1)
+  - QIMKitVendor (0.0.1):
+    - QIMKitVendor/Audio (= 0.0.1)
+    - QIMKitVendor/Crashlytics (= 0.0.1)
+    - QIMKitVendor/DES (= 0.0.1)
+    - QIMKitVendor/DOG (= 0.0.1)
+    - QIMKitVendor/Fabric (= 0.0.1)
+    - QIMKitVendor/GCD (= 0.0.1)
+    - QIMKitVendor/HTTP (= 0.0.1)
+    - QIMKitVendor/JSON (= 0.0.1)
+    - QIMKitVendor/PinYin (= 0.0.1)
+    - QIMKitVendor/UUID (= 0.0.1)
+    - QIMKitVendor/ZBar (= 0.0.1)
+    - QIMKitVendor/Zip (= 0.0.1)
+    - ZipArchive
+  - QIMKitVendor/Audio (0.0.1):
+    - ZipArchive
+  - QIMKitVendor/Crashlytics (0.0.1):
+    - ZipArchive
+  - QIMKitVendor/DES (0.0.1):
+    - ZipArchive
+  - QIMKitVendor/DOG (0.0.1):
+    - ZipArchive
+  - QIMKitVendor/Fabric (0.0.1):
+    - ZipArchive
+  - QIMKitVendor/GCD (0.0.1):
+    - ZipArchive
+  - QIMKitVendor/HTTP (0.0.1):
+    - ASIHTTPRequest
+    - ZipArchive
+  - QIMKitVendor/JSON (0.0.1):
+    - ZipArchive
+  - QIMKitVendor/PinYin (0.0.1):
+    - ZipArchive
+  - QIMKitVendor/UUID (0.0.1):
+    - UICKeyChainStore
+    - ZipArchive
+  - QIMKitVendor/ZBar (0.0.1):
+    - ZipArchive
+  - QIMKitVendor/Zip (0.0.1):
+    - ZipArchive
+  - QIMOpenSSL (0.0.2)
+  - QIMPublicRedefineHeader (0.0.1):
+    - CocoaLumberjack
+  - Reachability (3.2)
+  - UICKeyChainStore (2.1.2)
+  - YYCache (1.0.4)
+  - YYModel (1.0.4)
+  - ZipArchive (1.4.0)
+
+DEPENDENCIES:
+  - ASIHTTPRequest
+  - AvoidCrash
+  - CocoaAsyncSocket
+  - CocoaLumberjack
+  - ProtocolBuffers
+  - QIMCommonCategories
+  - QIMDataBase
+  - QIMKitVendor
+  - QIMOpenSSL
+  - QIMPublicRedefineHeader
+  - UICKeyChainStore
+  - YYCache
+  - YYModel
+
+SPEC REPOS:
+  "git@gitlab.corp.qunar.com:qchat/libQIMKit-iOS-Cook.git":
+    - QIMCommonCategories
+    - QIMDataBase
+    - QIMKitVendor
+    - QIMOpenSSL
+    - QIMPublicRedefineHeader
+  https://github.com/cocoapods/specs.git:
+    - ASIHTTPRequest
+    - AvoidCrash
+    - CocoaAsyncSocket
+    - CocoaLumberjack
+    - ProtocolBuffers
+    - Reachability
+    - UICKeyChainStore
+    - YYCache
+    - YYModel
+    - ZipArchive
+
+SPEC CHECKSUMS:
+  ASIHTTPRequest: ec013992946676b7978dcbde6396d57312d21db4
+  AvoidCrash: 28c6916fe19bd2b84126b8dec7cbe61c9a12741d
+  CocoaAsyncSocket: eafaa68a7e0ec99ead0a7b35015e0bf25d2c8987
+  CocoaLumberjack: db7cc9e464771f12054c22ff6947c5a58d43a0fd
+  ProtocolBuffers: d509225eb2ea43d9582a59e94348fcf86e2abd65
+  QIMCommonCategories: 7d32d70f412e070424c1bc4b9b0ae10d8bfa562a
+  QIMDataBase: dd0edd025da50d55a357691b04960cdefda5254a
+  QIMKitVendor: 917d890e2b2a0b6e9101c38f2f678a7242a5c828
+  QIMOpenSSL: 2219ae2128c7d81acef304f0225e19d8ea8d815f
+  QIMPublicRedefineHeader: 1be4e7811681a8246200c1825bfec6192354cee6
+  Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
+  UICKeyChainStore: 85db518bb1d294366d15ec9b92a416c4e670518f
+  YYCache: 8105b6638f5e849296c71f331ff83891a4942952
+  YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
+  ZipArchive: e25a4373192673e3229ac8d6e9f64a3e5713c966
+
+PODFILE CHECKSUM: 6a9e59092b0ccc1368f6fe53210060a983ea92fa
+
+COCOAPODS: 1.5.3

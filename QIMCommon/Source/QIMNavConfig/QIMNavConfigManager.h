@@ -1,0 +1,115 @@
+//
+//  NavConfigManager.h
+//  qunarChatIphone
+//
+//  Created by admin on 16/3/25.
+//
+//
+
+#import <Foundation/Foundation.h>
+#import "QIMCommonEnum.h"
+
+@interface QIMNavConfigManager : NSObject
+@property (nonatomic, readonly, copy) NSString *httpHost;
+@property (nonatomic, readonly, copy) NSString *newerHttpUrl;
+@property (nonatomic, readonly, copy) NSString *takeSmsUrl;
+@property (nonatomic, readonly, copy) NSString *wikiUrl;
+@property (nonatomic, readonly, copy) NSString *checkSmsUrl;
+@property (nonatomic, readonly, copy) NSString *tokenSmsUrl;
+@property (nonatomic, readonly, copy) NSString *javaurl;
+@property (nonatomic, readonly, copy) NSString *pubkey;
+@property (nonatomic, readonly, copy) NSString *domain;
+@property (nonatomic, readonly, assign) QTLoginType loginType; //登录方式
+@property (nonatomic, readonly, copy) NSString *xmppHost;
+@property (nonatomic, readonly, copy) NSString *innerFileHttpHost;
+@property (nonatomic, readonly, copy) NSString *port;  //xmpp端口
+@property (nonatomic, readonly, copy) NSString *protobufPort;   //Pb端口
+@property (nonatomic, readonly, copy) NSString *checkConfig;
+
+
+//hosts
+@property (nonatomic, readonly, copy) NSString *hashHosts;
+@property (nonatomic, readonly, copy) NSString *qcHost;
+
+@property (nonatomic, readonly, strong) NSArray *adItems;
+@property (nonatomic, readonly, assign) int  adSec;
+@property (nonatomic, readonly, assign) BOOL adShown;
+@property (nonatomic, readonly, assign) BOOL adCarousel;
+@property (nonatomic, readonly, assign) int  adCarouselDelay;
+@property (nonatomic, readonly, assign) BOOL adAllowSkip;
+@property (nonatomic, readonly, assign) long long adInterval;   //两次广告的间隔之间
+@property (nonatomic, readonly, copy) NSString *adSkipTips;
+
+//imConfig
+@property (nonatomic, readonly, assign) BOOL showOA;                //展示OA
+@property (nonatomic, readonly, assign) BOOL showOrganizational;    //展示组织架构
+
+//ability
+@property (nonatomic, readonly, copy)  NSString *getPushState;
+@property (nonatomic, readonly, copy)  NSString *setPushState;
+@property (nonatomic, readonly, copy)  NSString *qCloudHost;
+@property (nonatomic, readonly, copy)  NSString *resetpwd;
+@property (nonatomic, readonly, copy)  NSString *mconfig;
+@property (nonatomic, readonly, copy)  NSString *searchUrl;
+@property (nonatomic, readonly, copy)  NSString *qcGrabOrder;
+@property (nonatomic, readonly, copy)  NSString *qcOrderManager;
+@property (nonatomic, readonly, assign) BOOL newPush;
+@property (nonatomic, readonly, assign) BOOL showmsgstat;
+
+//RN Ability
+@property (nonatomic, readonly, assign) BOOL RNMineView;      //展示RNMineView
+@property (nonatomic, readonly, assign) BOOL RNAboutView;     //展示RNAboutView
+@property (nonatomic, readonly, assign) BOOL RNGroupCardView; //展示RNGroupCardView
+@property (nonatomic, readonly, assign) BOOL RNContactView;   //展示RNContactView
+@property (nonatomic, readonly, assign) BOOL RNSettingView;   //展示RNSettingView
+@property (nonatomic, readonly, assign) BOOL RNUserCardView;  //展示RNUserCardView
+@property (nonatomic, readonly, assign) BOOL RNGroupListView;   //展示RN 群组列表
+@property (nonatomic, readonly, assign) BOOL RNPublicNumberListView;    //展示RN 公众号列表
+
+//OPS
+@property (nonatomic, readonly, copy)  NSString *opsHost;
+
+//Video
+@property (nonatomic, readonly, copy) NSString *group_room_host;
+@property (nonatomic, readonly, copy) NSString *signal_host;
+@property (nonatomic, readonly, copy) NSString *wssHost;
+@property (nonatomic, readonly, copy) NSString *videoApiHost;
+//Versions
+@property (nonatomic, readonly, assign) long long navVersion;
+@property (nonatomic, readonly, assign) long long checkConfigVersion;
+
+@property (nonatomic, copy) NSString *navUrl;
+
+@property (nonatomic, copy) NSString *navTitle;
+
+@property (nonatomic, readonly, assign) BOOL debug;
+
+@property (nonatomic, readonly, copy) NSString *healthcheckUrl;
+
++ (QIMNavConfigManager *)sharedInstance;
+
+//- (NSString *)getAdvertImageFilePath;
+
+- (NSArray *)qimNav_getDebugers;
+
+// 更新导航配置
+
+- (BOOL)qimNav_updateNavigationConfigWithCheck:(BOOL)check;
+
+- (void)qimNav_clearAdvertSource;
+
+- (void)qimNav_swicthLocalNavConfigWithNavDict:(NSDictionary *)navDict;
+
+- (NSString *)qimNav_getAdvertImageFilePath;
+
+- (void)qimNav_updateAdvertConfigWithCheck:(BOOL)check;
+
+- (BOOL)qimNav_updateNavigationConfigWithDomain:(NSString *)domain WithUserName:(NSString *)userName;
+
+- (BOOL)qimNav_updateNavigationConfigWithNavDict:(NSDictionary *)navDict WithUserName:(NSString *)userName Check:(BOOL)check WithForcedUpdate:(BOOL)forcedUpdate;
+
+- (void)qimNav_updateAdvertConfigWithCheck:(BOOL)check;
+
+- (NSString *)qimNav_getRSACodePublicKeyPathWithFileName:(NSString *)fileName;
+
+@end
