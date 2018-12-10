@@ -21,7 +21,7 @@ Pod::Spec.new do |s|
 
     pc.platform     = :ios, "9.0"
 
-    pc.public_header_files = "QIMCommon/QIMKit/**/*.{h,m,c}", "QIMCommon/NoArc/**/*.{h,m}"
+    pc.public_header_files = "QIMCommon/QIMKit/**/*.{h}", "QIMCommon/NoArc/**/*.{h}"
 
     pc.source_files = "QIMCommon/3rdPart&tools/*.{h,m,c}", "QIMCommon/Source/**/*.{h,m,c}", "QIMCommon/QIMKit/**/*.{h,m,c}", "QIMCommon/NoArc/**/*.{h,m}"
     pc.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => 'DEBUGLOG=1'}
@@ -35,11 +35,10 @@ Pod::Spec.new do |s|
 
     sc.source_files = "QIMCommon/PrivateCommon/**/*.{h,m,c}"
     sc.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => 'DEBUGLOG=1'}
-    sc.public_header_files = "QIMCommon/PrivateCommon/**/*.{h,m,c}"
+    sc.public_header_files = "QIMCommon/PrivateCommon/**/*.{h}"
 
   end
   
-    s.dependency 'QIMOpenSSL'
     s.dependency 'ASIHTTPRequest'
     s.dependency 'YYCache'
     s.dependency 'YYModel'
@@ -51,6 +50,12 @@ Pod::Spec.new do |s|
     
     s.dependency 'CocoaLumberjack'
     
+    # s.dependency 'QIMOpenSSL'
+    s.dependency 'QIMKitVendor'
+    s.dependency 'QIMCommonCategories'
+    s.dependency 'QIMDataBase'
+    s.dependency 'QIMPublicRedefineHeader'
+
     s.frameworks = 'Foundation', 'CoreTelephony', 'SystemConfiguration', 'AudioToolbox', 'AVFoundation', 'UserNotifications', 'CoreTelephony','QuartzCore', 'CoreGraphics', 'Security'
     s.libraries = 'sqlite3.0', 'stdc++', 'bz2'
 
