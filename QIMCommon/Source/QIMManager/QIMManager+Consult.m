@@ -12,6 +12,7 @@
 @implementation QIMManager (Consult)
 
 #pragma mark - setter and getter
+/*
 - (void)setVirtualRealJidDic:(NSMutableDictionary *)virtualRealJidDic {
     objc_setAssociatedObject(self, "virtualRealJidDic", virtualRealJidDic, OBJC_ASSOCIATION_COPY);
 }
@@ -23,7 +24,9 @@
     }
     return virtualRealJidDic;
 }
+*/
 
+/*
 - (void)setVirtualList:(NSArray *)virtualList {
     objc_setAssociatedObject(self, "virtualList", virtualList, OBJC_ASSOCIATION_COPY);
 }
@@ -35,6 +38,32 @@
         virtualList = [[XmppImManager sharedInstance] getVirtualList];
     }
     return virtualList;
+}
+
+*/
+
+- (void)setVirtualDic:(NSDictionary *)virtualDic {
+    objc_setAssociatedObject(self, "virtualDic", virtualDic, OBJC_ASSOCIATION_COPY);
+}
+
+- (NSDictionary *)getVirtualDic {
+    NSDictionary *virtualDic = objc_getAssociatedObject(self, "virtualDic");
+    if (!virtualDic) {
+        virtualDic = [NSDictionary dictionary];
+    }
+    return virtualDic;
+}
+
+- (void)setMyhotLinelist:(NSArray *)myhotLinelist {
+    objc_setAssociatedObject(self, "myhotLinelist", myhotLinelist, OBJC_ASSOCIATION_COPY);
+}
+
+- (NSArray *)getMyhotLinelist {
+    NSArray *myhotLinelist = objc_getAssociatedObject(self, "myhotLinelist");
+    if (!myhotLinelist) {
+        myhotLinelist = [NSArray array];
+    }
+    return myhotLinelist;
 }
 
 - (Message *)sendConsultMessageId:(NSString *)msgId WithMessage:(NSString *)msg WithInfo:(NSString *)info toJid:(NSString *)toJid realToJid:(NSString *)realToJid WithChatType:(ChatType)chatType WithMsgType:(int)msgType {
@@ -175,6 +204,33 @@
     return nil;
 }
 
+- (void)getHotlineShopList {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/qcadmin/getHotlineShopList.qunar?line=%@&username=%@&host=%@", [[QIMNavConfigManager sharedInstance] newerHttpUrl], @"qtalk", [QIMManager getLastUserName], [[QIMManager sharedInstance] getDomain]];
+    __weak __typeof(self) weakSelf = self;
+    [self sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[responseDic objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[responseDic objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [responseDic objectForKey:@"data"];
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                NSDictionary *allhotlines = [data objectForKey:@"allhotlines"];
+                NSArray *myhotlines = [data objectForKey:@"myhotlines"];
+                __typeof(self) strongSelf = weakSelf;
+                if (!strongSelf) {
+                    return;
+                }
+                strongSelf.virtualDic = [NSDictionary dictionaryWithDictionary:allhotlines];
+                strongSelf.myhotLinelist = myhotlines;
+                NSLog(@"getHotlineShopList.qunar : %@", data);
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        
+    }];
+}
+
+/*
 - (NSString *)getRealJidForVirtual:(NSString *)virtualJid{
     if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
         NSString *realJid = [self.virtualRealJidDic objectForKey:virtualJid];
@@ -193,6 +249,7 @@
         return realJid;
     }
 }
+*/
 
 //V2版获取客服坐席列表：支持多店铺
 - (NSArray *)getSeatSeStatus {
@@ -281,31 +338,33 @@
     return serviceStatus;
 }
 
-- (NSString *)closeSessionWithShopId:(NSString *)shopId WithVisitorId:(NSString *)visitorId {
+- (void)closeSessionWithShopId:(NSString *)shopId WithVisitorId:(NSString *)visitorId withBlock:(QIMCloseSessionBlock)block{
     
     if (!shopId.length || !visitorId.length) {
-        return nil;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (block) {
+                block(nil);
+            }
+        });
     }
-    shopId = [[shopId componentsSeparatedByString:@"@"] firstObject];
     NSString *destUrl = [NSString stringWithFormat:@"%@/admin/api/seat/closeSession.qunar?userName=%@&seatName=%@&virtualname=%@", [[QIMNavConfigManager sharedInstance] javaurl], visitorId, [[QIMManager sharedInstance] getLastJid], shopId];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
-    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
-    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
-    [request setRequestHeaders:cookieProperties];
-    [request setUseCookiePersistence:NO];
-    [request startSynchronous];
-    NSError *error = request.error;
-    if (!error && [request responseStatusCode] == 200) {
-        NSData *responseData = [request responseData];
-        NSDictionary *responseDict = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        BOOL ret = [[responseDict objectForKey:@"ret"] boolValue];
-        if (ret) {
-            NSString *promotMsg = [responseDict objectForKey:@"data"];
-            return promotMsg;
+    [self sendTPPOSTRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[responseDic objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[responseDic objectForKey:@"errcode"] integerValue];
+        if (ret && errcode==0) {
+            NSString *data = [responseDic objectForKey:@"data"];
+            if ([data isKindOfClass:[NSString class]]) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (block) {
+                        block(data);
+                    }
+                });
+            }
         }
-    }
-    return nil;
+    } withFailedCallBack:^(NSError *error) {
+        
+    }];
 }
 
 

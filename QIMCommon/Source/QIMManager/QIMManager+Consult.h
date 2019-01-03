@@ -13,24 +13,40 @@
 /**
  虚拟账号的RealJid列表
  */
-@property (nonatomic, strong) NSMutableDictionary *virtualRealJidDic;
+//@property (nonatomic, strong) NSMutableDictionary *virtualRealJidDic;
 
 /**
  虚拟账号列表
  */
-@property (nonatomic, strong) NSArray *virtualList;
+//@property (nonatomic, strong) NSArray *virtualList;
+
+/**
+ 虚拟账号列表
+ */
+@property (nonatomic, strong) NSDictionary *virtualDic;
+
+/**
+ 我的热线账号列表
+ */
+@property (nonatomic, strong) NSArray *myhotLinelist;
 
 /**
  获取虚拟账号列表
  */
-- (NSArray *)getVirtualList;
+//- (NSArray *)getVirtualList;
+
+- (NSDictionary *)getVirtualDic;
+
+- (NSArray *)getMyhotLinelist;
+
+- (void)getHotlineShopList;
 
 /**
  根据虚拟Id获取真实RealJid
 
  @param virtualJid 虚拟Id
  */
-- (NSString *)getRealJidForVirtual:(NSString *)virtualJid;
+//- (NSString *)getRealJidForVirtual:(NSString *)virtualJid;
 
 /**
  发送Consult消息
@@ -90,6 +106,6 @@
  @param visitorId 客人Id
  @return 关闭之后的提示语
  */
-- (NSString *)closeSessionWithShopId:(NSString *)shopId WithVisitorId:(NSString *)visitorId;
+- (void)closeSessionWithShopId:(NSString *)shopId WithVisitorId:(NSString *)visitorId withBlock:(QIMCloseSessionBlock)block;
 
 @end

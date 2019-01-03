@@ -6,6 +6,7 @@
 #import "IMDataManager+QIMDBClientConfig.h"
 #import "IMDataManager+QIMDBQuickReply.h"
 #import "IMDataManager+QIMNote.h"
+#import "IMDataManager+QIMUserMedal.h"
 
 #define DEFAULT_MSG_NUM 450
 #define DEFAULT_CHATMSG_NUM 1000
@@ -19,7 +20,9 @@
 #if OS_OBJECT_USE_OBJC
 @property (nonatomic, strong) dispatch_queue_t receive_msg_queue;
 @property (nonatomic, strong) dispatch_queue_t load_user_state_queue;
-@property (nonatomic, strong) dispatch_queue_t loginComplateQueue;
+@property (nonatomic, strong) NSOperationQueue *loginComplateQueue;
+@property (nonatomic, strong) NSInvocationOperation *loginComplateOperation;
+//@property (nonatomic, strong) dispatch_queue_t loginComplateQueue;
 @property (nonatomic, strong) dispatch_queue_t load_history_msg;
 @property (nonatomic, strong) dispatch_queue_t load_offlineSingleHistory_msg;
 @property (nonatomic, strong) dispatch_queue_t load_offlineGroupHistory_msg;
@@ -37,7 +40,9 @@
 #else
 @property (nonatomic, assign) dispatch_queue_t receive_msg_queue;
 @property (nonatomic, assign) dispatch_queue_t load_user_state_queue;
-@property (nonatomic, assign) dispatch_queue_t loginComplateQueue;
+@property (nonatomic, assign) NSOperationQueue *loginComplateQueue;
+@property (nonatomic, assign) NSInvocationOperation *loginComplateOperation;
+//@property (nonatomic, assign) dispatch_queue_t loginComplateQueue;
 @property (nonatomic, assign) dispatch_queue_t load_history_msg;
 @property (nonatomic, assign) dispatch_queue_t load_offlineSingleHistory_msg;
 @property (nonatomic, assign) dispatch_queue_t load_offlineGroupHistory_msg;
@@ -140,6 +145,7 @@
 
 @property (nonatomic, strong) NSMutableDictionary *lastLoginTimeDic;
 
+@property (nonatomic, assign) NSTimeInterval lastSingleReadFlagMsgTime;     //拉取单人已读未读消息时间戳
 @property (nonatomic, assign) NSTimeInterval lastSingleMsgTime;     //拉取单人消息时间戳
 @property (nonatomic, assign) NSTimeInterval lastGroupMsgTime;      //拉取群组消息时间戳
 @property (nonatomic, assign) NSTimeInterval lastSystemMsgTime;     //拉取HeadLine消息时间戳

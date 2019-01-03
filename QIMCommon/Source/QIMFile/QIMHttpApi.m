@@ -35,16 +35,6 @@
 #define	kNetworkTaskDIP								@"10010"
 #define kNetworkTaskDIC								@"C1001"
 
-//NSString *kIMNetworkTaskServer = @"http://lvtu.dev.qunar.com/mobile_ugc/";
-//NSString *kIMInnerNetworTaskServer = @"http://l-lvtu8.lvtu.dev.cn6.qunar.com:7082/";
-//NSString *kIMNetworkTaskServer = @"http://lvtu.qunar.com/mobile_ugc/";
-//NSString *kIMNetworkTaskServer = @"http://lvtu.beta.cn6.qunar.com/mobile_ugc/";
-//NSString *kIMInnerNetworTaskServer = @"http://http.im.lvtu.qunar.com/";
-//NSString *kIMInnerFileServer = @"http://files.qtalk.qunar.com:6060/";
-//NSString *kIMInnerFileServer = @"https://qt.qunar.com";
-//"https://qcweb.qunar.com/
-
-
 #define FileHashDefaultChunkSizeForReadingData 1024*8
 
 @interface QIMHttpApi(PrivateCommonMethod)
@@ -249,7 +239,7 @@ done:
     NSString *fileName =  [NSString stringWithFormat:@"%@.%@",key,extension];
     long long size = ceil(fileData.length / 1024.0 / 1024.0);
 
-    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=mac&u=%@&k=%@&v=%@&key=%@&size=%lld",
+    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=ios&u=%@&k=%@&v=%@&key=%@&size=%lld",
                          [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileName,
                          [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
                          [[QIMManager sharedInstance] myRemotelogginKey],
@@ -299,7 +289,7 @@ done:
     NSString *method = @"file/v2/upload/file";
     NSString *fileName =  [NSString stringWithFormat:@"%@.amr",fileKey];
     long long size = ceil(voiceFileData.length / 1024.0 / 1024.0);
-    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=mac&u=%@&k=%@&v=%@&key=%@&size=%lld",
+    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=ios&u=%@&k=%@&v=%@&key=%@&size=%lld",
                          [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileName,
                          [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
                          [[QIMManager sharedInstance] myRemotelogginKey],
@@ -373,7 +363,7 @@ done:
     NSString *method = @"file/v2/upload/avatar";
     NSString *fileName = [fileKey stringByAppendingPathExtension:[self getFileExt:headerData]];
     long long size = ceil(headerData.length / 1024.0 / 1024.0);
-    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=mac&u=%@&k=%@&v=%@&key=%@&size=%lld",
+    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=ios&u=%@&k=%@&v=%@&key=%@&size=%lld",
                          [QIMNavConfigManager sharedInstance].innerFileHttpHost,
                          method,
                          fileName,

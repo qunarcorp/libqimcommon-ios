@@ -27,6 +27,10 @@
     return [[QIMManager sharedInstance] getSessionList];
 }
 
+- (NSArray *)getNotReadSessionList {
+    return [[QIMManager sharedInstance] getNotReadSessionList];
+}
+
 - (void)deleteSessionList {
     [[QIMManager sharedInstance] deleteSessionList];
 }
@@ -39,8 +43,12 @@
     [[QIMManager sharedInstance] removeConsultSessionById:sid RealId:realJid];
 }
 
-- (ChatType)openChatSessionByUserId:(NSString *)userId ByName:(NSString *)name {
-    return [[QIMManager sharedInstance] openChatSessionByUserId:userId ByName:name];
+- (ChatType)getChatSessionTypeByXmppId:(NSString *)xmppId {
+    return [[QIMManager sharedInstance] getChatSessionTypeByXmppId:xmppId];
+}
+
+- (ChatType)openChatSessionByUserId:(NSString *)userId {
+    return [[QIMManager sharedInstance] openChatSessionByUserId:userId];
 }
 
 - (void)openGroupSessionByGroupId:(NSString *)groupId ByName:(NSString *)name {

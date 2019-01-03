@@ -51,7 +51,7 @@ static QIMAppInfo *__globalAppInfo = nil;
         QIMWarnLog(@"PushToken 改变: %@", change);
         BOOL deleteFlag = [change[@"new"] isEqual:[NSNull null]] || !change[@"new"];
         dispatch_async(dispatch_get_global_queue(DISPATCH_TARGET_QUEUE_DEFAULT, 0), ^{
-            [[QIMManager sharedInstance] sendPushTokenWithMyToken:[[QIMUserCacheManager sharedInstance] userObjectForKey:@"myPushToken"] WithDeleteFlag:deleteFlag];
+            [[QIMManager sharedInstance] sendPushTokenWithMyToken:[[QIMAppInfo sharedInstance] pushToken] WithDeleteFlag:deleteFlag];
         });
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];

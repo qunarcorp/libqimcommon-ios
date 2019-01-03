@@ -11,14 +11,16 @@
 
 @implementation QIMKit (QIMConsult)
 
-- (NSMutableDictionary *)virtualRealJidDic {
-    return [[QIMManager sharedInstance] virtualRealJidDic];
-}
+//- (NSMutableDictionary *)virtualRealJidDic {
+//    return [[QIMManager sharedInstance] virtualRealJidDic];
+//}
 
+/*
 - (NSArray *)getVirtualList{
     
     return [[QIMManager sharedInstance] getVirtualList];
 }
+*/
 
 - (Message *)sendConsultMessageId:(NSString *)msgId WithMessage:(NSString *)msg WithInfo:(NSString *)info toJid:(NSString *)toJid realToJid:(NSString *)realToJid WithChatType:(ChatType)chatType WithMsgType:(int)msgType {
     return [[QIMManager sharedInstance] sendConsultMessageId:msgId WithMessage:msg WithInfo:info toJid:toJid realToJid:realToJid WithChatType:chatType WithMsgType:msgType];
@@ -51,8 +53,24 @@
     return [[QIMManager sharedInstance] getSuggestOrganizationBySuggestId:suggestId];
 }
 
+/*
 - (NSString *)getRealJidForVirtual:(NSString *)virtualJid{
     return [[QIMManager sharedInstance] getRealJidForVirtual:virtualJid];
+}
+*/
+
+/**
+ 获取虚拟帐号列表
+ */
+- (NSDictionary *)getVirtualDic {
+    return [[QIMManager sharedInstance] getVirtualDic];
+}
+
+/**
+ 获取我服务的虚拟帐号列表
+ */
+- (NSArray *)getMyhotLinelist {
+    return [[QIMManager sharedInstance] getMyhotLinelist];
 }
 
 //V2版获取客服坐席列表：支持多店铺
@@ -79,8 +97,8 @@
     return [[QIMManager sharedInstance]availableUserSeatStatus];
 }
 
-- (NSString *)closeSessionWithShopId:(NSString *)shopId WithVisitorId:(NSString *)visitorId {
-    return [[QIMManager sharedInstance] closeSessionWithShopId:shopId WithVisitorId:visitorId];
+- (void)closeSessionWithShopId:(NSString *)shopId WithVisitorId:(NSString *)visitorId withBlock:(QIMCloseSessionBlock)block{
+    [[QIMManager sharedInstance] closeSessionWithShopId:shopId WithVisitorId:visitorId withBlock:block];
 }
 
 @end

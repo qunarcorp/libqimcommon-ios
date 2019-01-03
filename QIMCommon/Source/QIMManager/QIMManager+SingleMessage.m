@@ -36,7 +36,9 @@
     QIMVerboseLog(@"强制塞本地单人消息时间戳到为 kGetSingleHistoryMsgError : %f完成", self.lastSingleMsgTime);
     
     QIMVerboseLog(@"强制塞本地单人消息消息时间戳完成之后再取一下本地错误时间戳 : %lld", [[[QIMUserCacheManager sharedInstance] userObjectForKey:kGetSingleHistoryMsgError] longLongValue]);
+    self.lastSingleReadFlagMsgTime = self.lastSingleMsgTime;
     QIMVerboseLog(@"最终获取到的本地单人最后消息时间戳为 : %lf", self.lastSingleMsgTime);
+    QIMVerboseLog(@"最终获取到的本地单人已读未读最后消息时间戳为 : %lf", self.lastSingleReadFlagMsgTime);
 }
 
 - (void)getReadFlag {
@@ -53,7 +55,7 @@
     }
     NSDictionary *jsonDic = @{
                               @"domain": [self getDomain],
-                              @"time": @(self.lastSingleMsgTime),
+                              @"time": @(self.lastSingleReadFlagMsgTime),
                               };
     QIMVerboseLog(@"请求单人离线消息阅读状态消息 Body参数 ：%@", jsonDic);
     destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -133,95 +135,59 @@
             QIMVerboseLog(@"self.lastSingleMsgTime : %f", self.lastSingleMsgTime);
             retryCount ++;
             QIMVerboseLog(@"第%d次尝试获取个人历史记录", retryCount);
-            NSArray *chatlog = [self getUserChatlogSince:self.lastSingleMsgTime success:&isSuccess timeOut:timeOut];
-            timeOut += 4;
-            QIMVerboseLog(@"单人结束 %d", self.latestSingleMessageFlag);
-            
-            if (chatlog.count <= 0 || retryCount > 3) {
-                QIMWarnLog(@"三次重试 或者 已经是最后一批消息");
-                self.latestSingleMessageFlag = NO;
-            }
-            if ([chatlog count] > 0) {
-                NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                NSMutableDictionary *msgList = [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:chatlog to:[self getLastJid] supportedMsgTypes:msgTypeList WithDidReadState:MessageState_didRead];
-                //#TODO http方式的语音（可能的语音)
-                for (NSString *key in [msgList allKeys]) {
-                    int notReadCount = [self getNotReadMsgCountByJid:key];
-                    NSDictionary *value = [msgList objectForKey:key];
-                    BOOL isConsult = [[value objectForKey:@"Consult"] boolValue];
-                    NSString *userId = [value objectForKey:@"UserId"];
-                    NSString *realJid = [value objectForKey:@"RealJid"];
-                    ChatType chatType = [[value objectForKey:@"ChatType"] intValue];
-                    NSArray *msgs = [value objectForKey:@"msgList"];
-                    long long msgTime = [[value objectForKey:@"lastDate"] longLongValue];
-                    if (self.lastSingleMsgTime < msgTime) {
-                        self.lastSingleMsgTime = msgTime;
-                    }
-                    NSString *msgId = nil;
-                    // channelid
-                    NSString *channelInfo = nil;
-                    NSMutableArray *list = [NSMutableArray array];
-                    for (NSDictionary *infoDic in msgs) {
-                        Message *msg = [Message new];
-                        [msg setMessageId:[infoDic objectForKey:@"MsgId"]];
-                        [msg setFrom:[infoDic objectForKey:@"From"]];
-                        [msg setTo:[infoDic objectForKey:@"To"]];
-                        [msg setMessage:[infoDic objectForKey:@"Content"]];
-                        [msg setExtendInformation:[infoDic objectForKey:@"ExtendInfo"]];
-                        [msg setPlatform:[[infoDic objectForKey:@"Platform"] intValue]];
-                        [msg setMessageType:[[infoDic objectForKey:@"MsgType"] intValue]];
-                        [msg setMessageState:[[infoDic objectForKey:@"MsgState"] intValue]];
-                        [msg setMessageDirection:[[infoDic objectForKey:@"MsgDirection"] intValue]];
-                        [msg setMessageDate:[[infoDic objectForKey:@"MsgDateTime"] longLongValue]];
-                        [msg setPropress:[[infoDic objectForKey:@"ExtendedFlag"] floatValue]];
-                        [list addObject:msg];
-                        if (self.lastSingleMsgTime < [[infoDic objectForKey:@"MsgDateTime"] longLongValue]) {
-                            self.lastSingleMsgTime = [[infoDic objectForKey:@"MsgDateTime"] longLongValue];
-                        }
-                        if (msg.messageType != QIMMessageType_Time) {
-                            notReadCount++;
-                        }
-                        if (msg.messageType == QIMMessageType_Voice) {
-                            
-                            [[QIMVoiceNoReadStateManager sharedVoiceNoReadStateManager] setVoiceNoReadStateWithMsgId:msg.messageId ChatId:infoDic[@"SessionId"] withState:NO];
-                        }
-                        if ([infoDic isEqual:[msgs lastObject]]) {
-                            msgTime = [[infoDic objectForKey:@"MsgDateTime"] longLongValue];
-                            msgId = [infoDic objectForKey:@"MsgId"];
-                        }
-                        // channelid
-                        channelInfo = [infoDic objectForKey:@"channelid"];
-                        
-                    }
-                    [self setChannelInfo:channelInfo ForUserId:key];
-                    BOOL isSystem = NO;
-                    if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
-                        if ([key hasPrefix:@"rbt-system"] || [key hasPrefix:@"rbt-notice"] || [key hasPrefix:@"rbt-qiangdan"] || [key hasPrefix:@"rbt-zhongbao"]) {
-                            isSystem = YES;
+            @autoreleasepool {
+                NSArray *chatlog = [self getUserChatlogSince:self.lastSingleMsgTime success:&isSuccess timeOut:timeOut];
+                timeOut += 4;
+                QIMVerboseLog(@"单人结束 %d", self.latestSingleMessageFlag);
+                
+                if (chatlog.count <= 0 || retryCount > 3) {
+                    QIMWarnLog(@"三次重试 或者 已经是最后一批消息");
+                    self.latestSingleMessageFlag = NO;
+                }
+                if ([chatlog count] > 0) {
+                    @autoreleasepool {
+                        NSMutableDictionary *msgList = [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:chatlog to:[self getLastJid] WithDidReadState:MessageState_didRead];
+                        for (NSString *key in [msgList allKeys]) {
+                            //                        int notReadCount = [self getNotReadMsgCountByJid:key];
+                            NSDictionary *value = [msgList objectForKey:key];
+                            BOOL isConsult = [[value objectForKey:@"Consult"] boolValue];
+                            NSString *userId = [value objectForKey:@"UserId"];
+                            NSString *realJid = [value objectForKey:@"RealJid"];
+                            ChatType chatType = [[value objectForKey:@"ChatType"] intValue];
+                            NSArray *msgs = [value objectForKey:@"msgList"];
+                            long long msgTime = [[value objectForKey:@"lastDate"] longLongValue];
+                            if (self.lastSingleMsgTime < msgTime) {
+                                self.lastSingleMsgTime = msgTime;
+                            }
+                            BOOL isSystem = NO;
+                            if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
+                                if ([key hasPrefix:@"rbt-system"] || [key hasPrefix:@"rbt-notice"] || [key hasPrefix:@"rbt-qiangdan"] || [key hasPrefix:@"rbt-zhongbao"]) {
+                                    isSystem = YES;
+                                }
+                            }
+                            if (isConsult) {
+                                
+                                [self addConsultSessionById:userId ByRealJid:realJid WithUserId:userId ByMsgId:nil WithOpen:NO WithLastUpdateTime:msgTime WithChatType:chatType];
+                            } else {
+                                if ([key containsString:@"collection_rbt"]) {
+                                    [self addSessionByType:ChatType_CollectionChat
+                                                      ById:key
+                                                   ByMsgId:nil
+                                               WithMsgTime:msgTime
+                                            WithNeedUpdate:NO];
+                                } else {
+                                    [self addSessionByType:isSystem ? ChatType_System : ChatType_SingleChat
+                                                      ById:key
+                                                   ByMsgId:nil
+                                               WithMsgTime:msgTime
+                                            WithNeedUpdate:YES];
+                                }
+                            }
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationOfflineMessageUpdate object:key userInfo:nil];
+                            });
                         }
                     }
-                    if (isConsult) {
-                        
-                        [self addConsultSessionById:userId ByRealJid:realJid WithUserId:userId ByMsgId:nil WithOpen:NO WithLastUpdateTime:msgTime WithChatType:chatType];
-                    } else {
-                        if ([key containsString:@"collection_rbt"]) {
-                            [self addSessionByType:ChatType_CollectionChat
-                                              ById:key
-                                           ByMsgId:msgId
-                                       WithMsgTime:msgTime
-                                    WithNeedUpdate:NO];
-                        } else {
-                            [self addSessionByType:isSystem ? ChatType_System : ChatType_SingleChat
-                                              ById:key
-                                           ByMsgId:msgId
-                                       WithMsgTime:msgTime
-                                    WithNeedUpdate:YES];
-                        }
-                    }
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationOfflineMessageUpdate object:key userInfo:@{@"MsgList": list}];
-                    });
-                    list = nil;
                 }
             }
         } while (!isSuccess && retryCount < 3);
@@ -256,7 +222,7 @@
                                   @"num": @DEFAULT_CHATMSG_NUM,
                                   @"f" : @"t",
                                   };
-        QIMVerboseLog(@"请求单人离线JSON消息 Body参数 ：%@", jsonDic);
+        QIMVerboseLog(@"请求单人离线JSON消息 Url : %@, Body参数 ：%@", destUrl, jsonDic);
         destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:jsonDic error:nil];
         ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
@@ -300,6 +266,7 @@
             } else {
                 QIMErrorLog(@"获取单人历史JSON记录失败");
             }
+            result = nil;
         } else {
             *flag = NO;
             if (error) {

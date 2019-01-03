@@ -246,7 +246,6 @@ typedef enum {
  */
 - (NSDictionary *)bulkInsertIphoneHistoryGroupJSONMsg:(NSArray *)list
                                        WihtMyNickName:(NSString *)myNickName
-                                  WihtSupportMsgTypes:(NSArray *)supportMsgTypeList
                                         WithReadMarkT:(long long)readMarkT
                                      WithDidReadState:(int)didReadState
                                           WihtMyRtxId:(NSString *)rtxId
@@ -256,14 +255,14 @@ typedef enum {
 /**
  插入群翻页JSON消息
  */
-- (NSArray *)bulkInsertIphoneMucJSONMsg:(NSArray *)list WihtMyNickName:(NSString *)myNickName WihtSupportMsgTypes:(NSArray *)supportMsgTypeList WithReadMarkT:(long long)readMarkT WithDidReadState:(int)didReadState WihtMyRtxId:(NSString *)rtxId;
+- (NSArray *)bulkInsertIphoneMucJSONMsg:(NSArray *)list WihtMyNickName:(NSString *)myNickName WithReadMarkT:(long long)readMarkT WithDidReadState:(int)didReadState WihtMyRtxId:(NSString *)rtxId;
 
 /**
  插入群聊离线XML消息
  */
-- (NSArray *)bulkInsertIphoneHistoryGroupMsg:(NSArray *)list WithXmppId:(NSString *)xmppId WihtMyNickName:(NSString *)myNickName WihtSupportMsgTypes:(NSArray *)supportMsgTypeList WithReadMarkT:(long long)readMarkT WithDidReadState:(int)didReadState WihtMyRtxId:(NSString *)rtxId;
+- (NSArray *)bulkInsertIphoneHistoryGroupMsg:(NSArray *)list WithXmppId:(NSString *)xmppId WihtMyNickName:(NSString *)myNickName WithReadMarkT:(long long)readMarkT WithDidReadState:(int)didReadState WihtMyRtxId:(NSString *)rtxId;
 
-- (NSArray *)bulkInsertHistoryGroupMsg:(NSArray *)list WithXmppId:(NSString *)xmppId WihtMyNickName:(NSString *)myNickName WihtSupportMsgTypes:(NSArray *)supportMsgTypeList WithReadMarkT:(long long)readMarkT WithDidReadState:(int)didReadState;
+- (NSArray *)bulkInsertHistoryGroupMsg:(NSArray *)list WithXmppId:(NSString *)xmppId WihtMyNickName:(NSString *)myNickName WithReadMarkT:(long long)readMarkT WithDidReadState:(int)didReadState;
 
 - (NSDictionary *)dictionaryWithJsonString:(NSString *)jsonString;
 
@@ -278,7 +277,6 @@ typedef enum {
 #pragma mark - 插入离线单人消息
 - (NSMutableDictionary *)bulkInsertHistoryChatJSONMsg:(NSArray *)list
                                                    to:(NSString *)meJid
-                                    supportedMsgTypes:(NSArray *)supportMsgTypeList
                                      WithDidReadState:(int)didReadState;
 
 - (NSString *)getC2BMessageFeedBackWithMsgId:(NSString *)msgId;
@@ -294,7 +292,6 @@ typedef enum {
 #pragma mark - 插入下拉翻页消息
 - (NSArray *)bulkInsertHistoryChatJSONMsg:(NSArray *)list
                                WithXmppId:(NSString *)xmppId
-                      WihtSupportMsgTypes:(NSArray *)supportMsgTypeList
                          WithDidReadState:(int)didReadState;
 
 // msg Key
@@ -336,6 +333,7 @@ typedef enum {
 - (NSArray *)getFullSessionListWithSingleChatType:(int)chatType;
 
 - (NSDictionary *)qimDb_getPublicNumberSession;
+- (NSArray *)qimDB_getNotReadSessionList;
 - (NSArray *)qimDB_getSessionListWithSingleChatType:(int)chatType;
 - (NSArray *)getSessionListXMPPIDWithSingleChatType:(int)singleChatType;
 - (NSArray *)qimDB_getNotReadMsgListForUserId:(NSString *)userId;
@@ -355,11 +353,9 @@ typedef enum {
 - (void)updateMsgsContent:(NSString *)content ByMsgId:(NSString *)msgId;
 // 通过消息Id 获取消息内容
 - (NSDictionary *)getMsgsByMsgId:(NSString *)msgId;
-// 通过消息类型 获取消息
-- (NSArray *)getMsgsByMsgType:(int)msgType;
-- (NSArray *)getMsgsByMsgType:(int)msgType ByXmppId:(NSString *)xmppId;
 
 // 通过UserId 获取会话信息
+- (NSDictionary *)getChatSessionWithUserId:(NSString *)userId WithRealJid:(NSString *)realJid;
 - (NSDictionary *)getChatSessionWithUserId:(NSString *)userId;
 
 // 总的未读消息数
@@ -386,6 +382,7 @@ typedef enum {
 - (long long) lastestSystemMessageTime;
 - (long long) lastestMessageTimeWithNotMessageState:(long long) messageState;
 - (NSString *) getLastMsgIdByJid:(NSString *)jid;
+- (NSString *) getLastMsgIdByJid:(NSString *)jid ByRealJid:(NSString *)realJid;
 - (long long)getMsgTimeWithMsgId:(NSString *)msgId;
 
 /****************** FriendSter Msg *******************/
@@ -588,5 +585,18 @@ typedef enum {
 - (int)getGroupPushStateWithGroupId:(NSString *)groupId;
 
 - (void)updateGroup:(NSString *)groupId WithPushState:(int)pushState;
+
+
+#pragma mark - 本地消息搜索
+
+- (NSArray *)qimDB_getLocalMediaByXmppId:(NSString *)xmppId ByReadJid:(NSString *)realJid;
+
+- (NSArray *)qimDB_getMsgsByKeyWord:(NSString *)keywords ByXmppId:(NSString *)xmppId ByReadJid:(NSString *)realJid;
+
+- (NSArray *)qimDB_getMsgsByMsgType:(NSArray *)msgTypes ByXmppId:(NSString *)xmppId ByReadJid:(NSString *)realJid;
+
+- (NSArray *)qimDB_getMsgsByMsgType:(NSArray *)msgTypes ByXmppId:(NSString *)xmppId;
+
+- (NSArray *)qimDB_getMsgsByMsgType:(int)msgType;
 
 @end

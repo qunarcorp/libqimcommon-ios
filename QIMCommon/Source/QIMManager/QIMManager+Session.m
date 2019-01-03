@@ -20,6 +20,11 @@
     return sessionList;
 }
 
+- (NSArray *)getNotReadSessionList {
+    NSArray *notReadList = [[IMDataManager sharedInstance] qimDB_getNotReadSessionList];
+    return notReadList;
+}
+
 - (NSArray *)getFullSessionList {
     NSArray *sessionList = [[IMDataManager sharedInstance] getFullSessionListWithSingleChatType:ChatType_SingleChat];
     return sessionList;
@@ -60,10 +65,33 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationSessionListRemove object:sid];
 }
 
-- (ChatType)openChatSessionByUserId:(NSString *)userId ByName:(NSString *)name {
+- (ChatType)getChatSessionTypeByXmppId:(NSString *)xmppId {
+    if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
+        
+    } else {
+        NSDictionary *virtualDic = [self getVirtualDic];
+        BOOL isConsult = [[virtualDic allKeys] containsObject:xmppId];
+        if (isConsult == YES) {
+            [self addConsultSessionById:xmppId ByRealJid:xmppId WithUserId:xmppId ByMsgId:nil WithOpen:YES WithLastUpdateTime:[[NSDate date] qim_timeIntervalSince1970InMilliSecond] WithChatType:ChatType_Consult];
+            return ChatType_Consult;
+        } else {
+            NSDictionary *chatInfo = [[IMDataManager sharedInstance] getChatSessionWithUserId:xmppId WithRealJid:xmppId];
+            if (chatInfo) {
+                return [[chatInfo objectForKey:@"ChatType"] integerValue];
+            } else {
+                [self addSessionByType:ChatType_SingleChat ById:xmppId ByMsgId:nil WithMsgTime:([NSDate date].timeIntervalSince1970 - self.serverTimeDiff) * 1000 WithNeedUpdate:YES];
+                return ChatType_SingleChat;
+            }
+        }
+    }
+    return ChatType_SingleChat;
+}
+
+- (ChatType)openChatSessionByUserId:(NSString *)userId {
     if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
         if ([userId hasPrefix:@"shop_"]) {
-            NSString *realJid = [self getRealJidForVirtual:userId];
+            NSString *realJid = @"";
+            //[self getRealJidForVirtual:userId];
             if (realJid) {
                 [self addConsultSessionById:userId ByRealJid:userId WithUserId:userId ByMsgId:nil WithOpen:YES WithLastUpdateTime:[[NSDate date] qim_timeIntervalSince1970InMilliSecond] WithChatType:ChatType_Consult];
                 return ChatType_Consult;
@@ -75,12 +103,11 @@
             return ChatType_SingleChat;
         }
     } else {
-        if ([[self getVirtualList] containsObject:[userId componentsSeparatedByString:@"@"].firstObject]) {
-            NSString *realJid = [self getRealJidForVirtual:[userId componentsSeparatedByString:@"@"].firstObject];
-            if (realJid) {
-                [self addConsultSessionById:userId ByRealJid:userId WithUserId:userId ByMsgId:nil WithOpen:YES WithLastUpdateTime:[[NSDate date] qim_timeIntervalSince1970InMilliSecond] WithChatType:ChatType_Consult];
-                return ChatType_Consult;
-            }
+        NSDictionary *virtualDic = [self getVirtualDic];
+        BOOL isConsult = [[virtualDic allKeys] containsObject:userId];
+        if (isConsult == YES) {
+            [self addConsultSessionById:userId ByRealJid:userId WithUserId:userId ByMsgId:nil WithOpen:YES WithLastUpdateTime:[[NSDate date] qim_timeIntervalSince1970InMilliSecond] WithChatType:ChatType_Consult];
+            return ChatType_Consult;
         } else {
             NSDictionary *sessionDic = [[IMDataManager sharedInstance] getChatSessionWithUserId:userId];
             if (sessionDic == nil) {
@@ -108,21 +135,9 @@
 }
 
 - (void)addConsultSessionById:(NSString *)sessionId ByRealJid:(NSString *)realJid WithUserId:(NSString *)userId ByMsgId:(NSString *)msgId WithOpen:(BOOL)open WithLastUpdateTime:(long long)lastUpdateTime WithChatType:(ChatType)chatType{
-    {
-        NSString *headerSrc = [[IMDataManager sharedInstance] getUserHeaderSrcByUserId:realJid];
-        if (headerSrc.length <= 0) {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-                [self updateUserCard:@[realJid]];
-            });
-        }
-    }
-    {
-        NSString *headerSrc = [[IMDataManager sharedInstance] getUserHeaderSrcByUserId:sessionId];
-        if (headerSrc.length <= 0) {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-                [self updateUserCard:@[sessionId]];
-            });
-        }
+    
+    if (msgId == nil) {
+        msgId = [[IMDataManager sharedInstance] getLastMsgIdByJid:sessionId ByRealJid:realJid];
     }
     
     long long lastMsgTime = lastUpdateTime;

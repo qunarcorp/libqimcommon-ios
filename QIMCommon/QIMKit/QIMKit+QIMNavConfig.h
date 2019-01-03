@@ -80,6 +80,11 @@
 - (long long)qimNav_AdInterval;   //两次广告的间隔之间
 
 /**
+ 获取本地已经缓存的导航配置
+ */
+- (NSArray *)qimNav_getLocalNavServerConfigs;
+
+/**
  跳过提示
  
  @return 返回跳过提示语
@@ -111,6 +116,15 @@
 - (BOOL)qimNav_RNUserCardView;  //展示RNUserCardView
 - (BOOL)qimNav_RNGroupListView;   //展示RN 群组列表
 - (BOOL)qimNav_RNPublicNumberListView;    //展示RN 公众号列表
+
+- (void)qimNav_setRNMineView:(BOOL)showFlag;      //设置展示RNMineView
+- (void)qimNav_setRNAboutView:(BOOL)showFlag;     //设置展示RNAboutView
+- (void)qimNav_setRNGroupCardView:(BOOL)showFlag; //设置展示RNGroupCardView
+- (void)qimNav_setRNContactView:(BOOL)showFlag;   //设置展示RNContactView
+- (void)qimNav_setRNSettingView:(BOOL)showFlag;   //设置展示RNSettingView
+- (void)qimNav_setRNUserCardView:(BOOL)showFlag;  //设置展示RNUserCardView
+- (void)qimNav_setRNGroupListView:(BOOL)showFlag;   //设置展示RN 群组列表
+- (void)qimNav_setRNPublicNumberListView:(BOOL)showFlag;    //设置展示RN 公众号列表
 
 //OPS
 - (NSString *)qimNav_OpsHost;

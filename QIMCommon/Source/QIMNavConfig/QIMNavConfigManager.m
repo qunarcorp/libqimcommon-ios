@@ -42,7 +42,7 @@
     
     NSString *_navUrl;
     BOOL _debug;
-    NSString *healthcheckUrl;
+    NSString *_healthcheckUrl;
     
     //Video
     NSString *_videoApiHost;
@@ -182,6 +182,10 @@
     return @[@"lilulucas.li", @"nigotuu7479"];
 }
 
+- (NSArray *)qimNav_getLocalNavServerConfigs {
+    return [NSMutableArray arrayWithArray:[[QIMUserCacheManager sharedInstance] userObjectForKey:@"QC_NavAllDicts"]];
+}
+
 - (NSString *)navUrl {
     NSString *appNavUrl = @"";
     NSDictionary *navUrlDict = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"QC_CurrentNavDict"];
@@ -263,6 +267,45 @@
         _qcHost = @"https://qcadmin.qunar.com";
     }
     return _qcHost;
+}
+
+- (NSString *)healthcheckUrl {
+    if (!_healthcheckUrl.length) {
+        _healthcheckUrl = @"http://qt.qunar.com/healthcheck.html";
+    }
+    return _healthcheckUrl;
+}
+
+- (void)setRNMineView:(BOOL)RNMineView {
+    _RNMineView = RNMineView;
+}
+
+- (void)setRNAboutView:(BOOL)RNAboutView {
+    _RNAboutView = RNAboutView;
+}
+
+- (void)setRNGroupCardView:(BOOL)RNGroupCardView {
+    _RNGroupCardView = RNGroupCardView;
+}
+
+- (void)setRNContactView:(BOOL)RNContactView {
+    _RNContactView = RNContactView;
+}
+
+- (void)setRNSettingView:(BOOL)RNSettingView {
+    _RNSettingView = RNSettingView;
+}
+
+- (void)setRNUserCardView:(BOOL)RNUserCardView {
+    _RNUserCardView = RNUserCardView;
+}
+
+- (void)setRNGroupListView:(BOOL)RNGroupListView {
+    _RNGroupListView = RNGroupListView;
+}
+
+- (void)setRNPublicNumberListView:(BOOL)RNPublicNumberListView {
+    _RNPublicNumberListView = RNPublicNumberListView;
 }
 
 - (void)setNavConfig:(NSDictionary *)navConfig {
@@ -418,17 +461,6 @@
     _RNGroupListView = YES;
     _RNPublicNumberListView = YES;
     _RNUserCardView = YES;
-    
-    /*
-    _RNContactView = NO;
-    _RNMineView = NO;
-    _RNSettingView = NO;
-    _RNAboutView = NO;
-    _RNGroupCardView = NO;
-    _RNGroupListView = NO;
-    _RNPublicNumberListView = NO;
-    _RNUserCardView = NO;
-    */
     NSDictionary *baseAddess = [navConfig objectForKey:@"baseaddess"];
     if (baseAddess.count) {
         _xmppHost = [baseAddess objectForKey:@"xmpp"];

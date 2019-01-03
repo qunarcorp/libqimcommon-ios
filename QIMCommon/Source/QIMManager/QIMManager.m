@@ -14,6 +14,7 @@
 #import "QIMManager+Collection.h"
 #import "QIMManager+Consult.h"
 #import "QIMManager+DB.h"
+#import "QIMManager+UserMedal.h"
 #import "QIMManager+Friend.h"
 #import "QIMManager+Group.h"
 #import "QIMManager+GroupMessage.h"
@@ -39,7 +40,6 @@
 
 #import "QIMFileManager.h"
 #import "QIMDESHelper.h"
-#import "QIMNSDateComparer.h"
 
 #import <SystemConfiguration/CaptiveNetwork.h>
 #import <AudioToolbox/AudioToolbox.h>
@@ -194,7 +194,10 @@ static QIMManager *__IMManager = nil;
 
 - (void)initAppCacheConfig {
     self.update_chat_card = dispatch_queue_create("update_chat_card", DISPATCH_QUEUE_SERIAL);
-    self.loginComplateQueue = dispatch_queue_create("loginComplateQueue", 0);
+    self.loginComplateQueue = [[NSOperationQueue alloc] init];
+    self.loginComplateQueue.maxConcurrentOperationCount = 1;
+    self.loginComplateQueue.name = @"loginComplateQueue";
+//    self.loginComplateQueue = dispatch_queue_create("loginComplateQueue", 0);
     self.update_group_member_queue = dispatch_queue_create("Update Group Member Info Queue", DISPATCH_QUEUE_SERIAL);
     self.load_group_offline_msg_queue = dispatch_queue_create("Load Group Offline Msg Queue", DISPATCH_QUEUE_SERIAL);
     self.load_user_state_queue = dispatch_queue_create("Load User State", DISPATCH_QUEUE_PRIORITY_DEFAULT);
@@ -344,13 +347,32 @@ static QIMManager *__IMManager = nil;
 }
 
 - (void)loginComplate {
+    if (!self.loginComplateQueue) {
+        self.loginComplateQueue = [[NSOperationQueue alloc] init];
+        [self.loginComplateQueue setMaxConcurrentOperationCount:1];
+        self.loginComplateQueue.name = @"loginComplateQueue";
+    }
+    QIMVerboseLog(@"self.loginComplateQueue State : %d", self.loginComplateQueue.isSuspended);
+    QIMVerboseLog(@"self.loginComplateQueue Opertions1 : %@", self.loginComplateQueue.operations);
+    [self.loginComplateQueue cancelAllOperations];
+    QIMVerboseLog(@"self.loginComplateQueue Opertions2 : %@", self.loginComplateQueue.operations);
+
+    NSInvocationOperation *operation = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(loginComplateOperation) object:nil];
+    [operation setCompletionBlock:^{
+        QIMVerboseLog(@"loginComplateOperation执行完事");
+    }];
+    [self.loginComplateQueue addOperation:operation];
+    QIMVerboseLog(@"self.loginComplateQueue Opertions3 : %@", self.loginComplateQueue.operations);
+}
+
+- (void)loginComplateOperation {
     [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationLoginState object:[NSNumber numberWithBool:YES]];
     [self updateAppWorkState:AppWorkState_Updating];
-    QIMVerboseLog(@"loginComplateQueue : %@", _loginComplateQueue);
-    if (!_loginComplateQueue) {
-        _loginComplateQueue = dispatch_queue_create("loginComplateQueue", DISPATCH_QUEUE_SERIAL);
-    }
-    dispatch_async(self.loginComplateQueue, ^{
+//    QIMVerboseLog(@"loginComplateQueue : %@", _loginComplateQueue);
+//    if (!_loginComplateQueue) {
+//        _loginComplateQueue = dispatch_queue_create("loginComplateQueue", DISPATCH_QUEUE_SERIAL);
+//    }
+//    dispatch_async(self.loginComplateQueue, ^{
 
         [[QIMWatchDog sharedInstance] start];
         self.needTryRelogin = YES;
@@ -475,7 +497,6 @@ static QIMManager *__IMManager = nil;
         
         // 更新未发送的消息状态为失败
         [[IMDataManager sharedInstance] updateMessageFromState:MessageState_Waiting ToState:MessageState_Faild];
-        
         QIMVerboseLog(@"开始同步服务端漫游的个人配置2");
         [[QIMWatchDog sharedInstance] start];
         [self getRemoteClientConfig];
@@ -524,7 +545,7 @@ static QIMManager *__IMManager = nil;
         if (checkConfigVersion != [[QIMNavConfigManager sharedInstance] checkConfigVersion]) {
             [self checkClientConfig];
         }
-        
+    
         QIMVerboseLog(@"开始获取加密会话密码箱2");
         dispatch_async(dispatch_get_main_queue(), ^{
             [[NSNotificationCenter defaultCenter] postNotificationName:@"kNotifyNotificationGetRemoteEncrypt" object:nil];
@@ -532,7 +553,7 @@ static QIMManager *__IMManager = nil;
         QIMVerboseLog(@"开始获取加密会话密码箱2结束");
         
         [[QIMWatchDog sharedInstance] start];
-        [self sendPushTokenWithMyToken:[[QIMUserCacheManager sharedInstance] userObjectForKey:@"myPushToken"] WithDeleteFlag:NO];
+        [self sendPushTokenWithMyToken:[[QIMAppInfo sharedInstance] pushToken] WithDeleteFlag:NO];
         QIMVerboseLog(@"注册Token1loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTime]);
         
         // 更新好友列表
@@ -575,7 +596,12 @@ static QIMManager *__IMManager = nil;
 
             [[QIMManager sharedInstance] getExploreNotReaderCount];
         }
-    });
+    
+    if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
+        QIMVerboseLog(@"登录之后请求热线账户列表");
+        [self getHotlineShopList];
+    }
+//    });
 }
 
 - (void)generateClientConfigUpgradeArrayWithType:(QIMClientConfigType)type WithArray:(id)valueArr {
@@ -1163,72 +1189,6 @@ static QIMManager *__IMManager = nil;
     }
 }
 
-- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
-    
-    _msg.message = string;
-}
-
-//xml解析数据
-- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict {
-    
-    if ([@"message" isEqualToString:elementName]) {
-        
-    } else if ([@"body" isEqualToString:elementName]) {
-        
-        _msg.messageType = [attributeDict[@"msgType"] intValue];
-        _msg.messageState = [attributeDict[@"maType"] intValue];
-        if (attributeDict[@"id"]) {
-            
-            _msg.messageId = attributeDict[@"id"];
-        }
-        
-    } else if ([@"delay" isEqualToString:elementName]) {
-        
-        NSMutableString *str = [NSMutableString stringWithString:attributeDict[@"stamp"]];
-        [str replaceCharactersInRange:NSMakeRange(10, 1) withString:@" "];
-        NSString *str2 = [str substringToIndex:19];
-        _msg.messageDate = [[[NSDateFormatter qim_defaultDateFormatter] dateFromString:str2] timeIntervalSince1970];
-    } else if ([@"msginfo" isEqualToString:elementName]) {
-        
-        _msg.messageType = [attributeDict[@"msgType"] intValue];
-        _msg.messageState = [attributeDict[@"maType"] intValue];
-        if (attributeDict[@"id"]) {
-            
-            _msg.messageId = attributeDict[@"id"];
-        }
-    }
-}
-
-//添加历史消息并添加时间
-- (void)parserDidEndDocument:(NSXMLParser *)parser {
-    
-    NSInteger index = _memberMessageArray.count;
-    if (index != 0) {
-        
-        Message *msg = _memberMessageArray[index - 1];
-        if (_msg.messageDate - msg.messageDate >= 2 * 60) {
-            
-            NSDate *date1 = [NSDate dateWithTimeIntervalSince1970:msg.messageDate];
-            NSDate *date2 = [NSDate dateWithTimeIntervalSince1970:_msg.messageDate];
-            BOOL isSameDay = [[QIMNSDateComparer instance] isSameDay:date1 date2:date2];
-            NSString *msgTime = nil;
-            if (isSameDay) {
-                
-                [_memberMessageArray addObject:msgTime = [[QIMNSDateComparer instance] getTimeStrByDate:date2]];
-            } else {
-                
-                [_memberMessageArray addObject:msgTime = [[QIMNSDateComparer instance] getDateTimeStrByDate:date2]];
-            }
-            
-        }
-    } else {
-        long long date = _msg.messageDate;
-        NSDate *time = [NSDate dateWithTimeIntervalSince1970:date];
-        [_memberMessageArray insertObject:[[QIMNSDateComparer instance] getDateTimeStrByDate:time] atIndex:0];
-    }
-    [_memberMessageArray addObject:_msg];
-}
-
 @end
 
 @implementation QIMManager (CommonConfig)
@@ -1484,7 +1444,7 @@ static QIMManager *__IMManager = nil;
     [bodyProperties setObject:title forKey:@"ver"];
     [bodyProperties setObject:@"ios" forKey:@"p"];
     NSInteger clientVersion = [[[QIMUserCacheManager sharedInstance] userObjectForKey:kCheckConfigVersion] integerValue];
-    [bodyProperties setObject:[NSString stringWithFormat:@"%lld", clientVersion] forKey:@"cv"];
+    [bodyProperties setObject:[NSString stringWithFormat:@"%lld", (clientVersion > 0) ? clientVersion : 0] forKey:@"cv"];
     
     [request setHTTPMethod:QIMHTTPMethodPOST];
     [request setHTTPBody:[[QIMJSONSerializer sharedInstance] serializeObject:bodyProperties error:nil]];

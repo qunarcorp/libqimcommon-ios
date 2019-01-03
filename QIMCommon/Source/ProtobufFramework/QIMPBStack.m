@@ -460,12 +460,14 @@ enum PlaType {
 - (void)goOnlineWithXmppStream:(QIMPBStream *)stream {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [self goOnLine];
-        if ([self delegate] && [[self delegate] respondsToSelector:@selector(loginComplate)]) {
-            [[self delegate] loginComplate];
-        }
-        
+        //主动推serverTime，再loginComplate
         if ([self.delegate respondsToSelector:@selector(configWithRemoteKey:WithSystemTime:)]) {
+            QIMVerboseLog(@"goOnlineWithXmppStream主动推了 remoteKey :%@, serviceTime : %lld", _pbXmppStream.remoteKey, _pbXmppStream.serviceTime);
             [self.delegate configWithRemoteKey:_pbXmppStream.remoteKey WithSystemTime:_pbXmppStream.serviceTime];
+        }
+        if ([self delegate] && [[self delegate] respondsToSelector:@selector(loginComplate)]) {
+            QIMVerboseLog(@"goOnlineWithXmppStream主动loginComplate");
+            [[self delegate] loginComplate];
         }
     });
 }
@@ -506,6 +508,7 @@ enum PlaType {
 }
 
 #pragma mark - Virtual User
+/*
 - (NSArray *)getVirtualList{
 //    <iq to='xuejie.bi@ejabhost1' id='console938df079' type='get'>
 //    <get_virtual_user xmlns='jabber:x:virtual_user' jid='it-rexian'/>
@@ -530,7 +533,9 @@ enum PlaType {
     }
     return nil;
 }
+*/
 
+/*
 - (NSString *)getRealJidForVirtual:(NSString *)virtualJid{
 //    <iq to='xuejie.bi@ejabhost1' id='console938df079' type='get'>
 //    <real_user_start_session xmlns='jabber:x:virtual_user' jid='it-rexian'/>
@@ -549,6 +554,7 @@ enum PlaType {
     }
     return nil;
 }
+*/
 
 - (NSString *)getMyVirtualJid{
 //    <iq to='xuejie.bi@ejabhost1' id='console938df079' type='get'>
@@ -1563,7 +1569,9 @@ enum PlaType {
 
 - (void)pbXmppStreamWillConnect:(QIMPBStream *)sender {
     QIMVerboseLog(@"pbXmppStreamWillConnect");
-    [[self delegate] beginToConnect];
+    if ([self.delegate respondsToSelector:@selector(beginToConnect)]) {
+        [self.delegate beginToConnect];
+    }
 }
 
 - (void)pbXmppStreamConnectDidTimeout:(QIMPBStream *)sender {
@@ -1586,8 +1594,8 @@ enum PlaType {
     
     [_pbXmppStream cancelAllIQMessage];
     
-    if ([[self delegate] respondsToSelector:@selector(connected)]) {
-        [[self delegate] connected];
+    if ([[self delegate] respondsToSelector:@selector(beenConnected)]) {
+        [[self delegate] beenConnected];
     }
     
     //    if (_connectTimer != NULL) {
@@ -1709,32 +1717,9 @@ enum PlaType {
 //        dispatch_release(_connectTimer);
         _connectTimer = NULL;
     }
-    [[self delegate] disconnectedEvent];
     
     if ([self delegate] && [[self delegate] respondsToSelector:@selector(onDisconnect)]) {
         [[self delegate] onDisconnect];
-    }
-    
-    //    if (_compression) {
-    //        [_compression deactivate];
-    //    }
-    
-    //
-    // 如果error 为空，强制认定是本地操作
-    QIMVerboseLog(@"pbXmppStreamDidDisconnect ErrCode : %d", error.code);
-    if (error) {
-        if ([[error domain] isEqualToString:@"com.qunar.qtalkfamily"]) {
-            QIMVerboseLog(@"pbXmppStreamDidDisconnect connectWithTimeout %@", @"com.qunar.qtalkfamily");
-            [self connectWithTimeout:10 withError:&error];
-        } else if (error.code == -9806) {
-            //Error Domain=GCDAsyncSocketErrorDomain Code=7 "Socket closed by remote peer"
-            //pbXmppStreamDidDisconnect Error Domain=kCFStreamErrorDomainSSL Code=-9806 "(null)" UserInfo={NSLocalizedRecoverySuggestion=Error code definition can be found in Apple's SecureTransport.h
-            QIMVerboseLog(@"碰到9806，重试");
-            [self connectWithTimeout:10 withError:&error];
-        } else {
-            QIMVerboseLog(@"cancelLogin");
-            [self cancelLogin];
-        }
     }
 }
 

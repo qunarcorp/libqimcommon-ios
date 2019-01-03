@@ -69,8 +69,16 @@
     return [QIMManager defaultUserHeaderImage];
 }
 
++ (NSString *)defaultUserHeaderImagePath {
+    return [QIMManager defaultUserHeaderImagePath];
+}
+
 + (UIImage *)defaultCommonTrdInfoImage {
     return [QIMManager defaultCommonTrdInfoImage];
+}
+
++ (NSString *)defaultCommonTrdInfoImagePath {
+    return [QIMManager defaultCommonTrdInfoImagePath];
 }
 
 - (NSDictionary *)getUserInfoByRTX:(NSString *)rtxId {

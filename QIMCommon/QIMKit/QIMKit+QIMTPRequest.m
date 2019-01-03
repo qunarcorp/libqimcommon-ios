@@ -11,16 +11,16 @@
 
 @implementation QIMKit (QIMTPRequest)
 
-- (void)sendTPRequestWithUrl:(NSString *)url withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
-    [[QIMManager sharedInstance] sendTPRequestWithUrl:url withSuccessCallBack:sCallback withFailedCallBack:fCallback];
+- (void)sendTPPOSTRequestWithUrl:(NSString *)url withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:url withSuccessCallBack:sCallback withFailedCallBack:fCallback];
 }
 
-- (void)sendTPRequestWithUrl:(NSString *)url withRequestBodyData:(NSData *)bodyData withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
-    [[QIMManager sharedInstance] sendTPRequestWithUrl:url withRequestBodyData:bodyData withSuccessCallBack:sCallback withFailedCallBack:fCallback];
+- (void)sendTPPOSTRequestWithUrl:(NSString *)url withRequestBodyData:(NSData *)bodyData withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:url withRequestBodyData:bodyData withSuccessCallBack:sCallback withFailedCallBack:fCallback];
 }
 
-- (void)sendTPRequestWithUrl:(NSString *)url withChatId:(NSString *)chatId withRealJid:(NSString *)realJid withChatType:(ChatType)chatType {
-    [[QIMManager sharedInstance] sendTPRequestWithUrl:url withChatId:chatId withRealJid:realJid withChatType:chatType];
+- (void)sendTPPOSTRequestWithUrl:(NSString *)url withChatId:(NSString *)chatId withRealJid:(NSString *)realJid withChatType:(ChatType)chatType {
+    [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:url withChatId:chatId withRealJid:realJid withChatType:chatType];
 }
 
 - (void)synchronizeDujiaWarningWithJid:(NSString *)dujiaJid {

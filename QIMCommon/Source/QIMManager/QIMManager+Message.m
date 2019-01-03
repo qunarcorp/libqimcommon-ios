@@ -805,7 +805,7 @@
 #pragma mark - MsgReadCount
 
 - (NSArray *)getMsgsForMsgType:(QIMMessageType)msgType {
-    NSArray *array = [[IMDataManager sharedInstance] getMsgsByMsgType:msgType];
+    NSArray *array = [[IMDataManager sharedInstance] qimDB_getMsgsByMsgType:msgType];
     NSMutableArray *list = [NSMutableArray array];
     for (NSDictionary *infoDic in array) {
         Message *msg = [Message new];
@@ -1699,14 +1699,14 @@
                             if (resultList.count > 0) {
                                 
                                 NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                                [[IMDataManager sharedInstance] bulkInsertIphoneMucJSONMsg:resultList WihtMyNickName:[self getMyNickName] WihtSupportMsgTypes:msgTypeList WithReadMarkT:[readMarkT longLongValue] WithDidReadState:MessageState_didRead WihtMyRtxId:[self getLastJid]];
+                                [[IMDataManager sharedInstance] bulkInsertIphoneMucJSONMsg:resultList WihtMyNickName:[self getMyNickName] WithReadMarkT:[readMarkT longLongValue] WithDidReadState:MessageState_didRead WihtMyRtxId:[self getLastJid]];
                             }
                         } else {
 #pragma mark - 这里开始拉取单人翻页消息
                             NSArray *result = [self getUserChatlogWithFrom:userId to:[self getLastJid] version:[[IMDataManager sharedInstance] getMinMsgTimeStampByXmppId:userId] count:limit direction:0];
                             if (result.count > 0) {
                                 NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                                NSArray *datas = [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:result WithXmppId:userId WihtSupportMsgTypes:msgTypeList WithDidReadState:MessageState_didRead];
+                                NSArray *datas = [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:result WithXmppId:userId WithDidReadState:MessageState_didRead];
                                 
                                 NSDictionary *infoDic = datas.lastObject;
                                 if (infoDic) {
@@ -1748,7 +1748,7 @@
                         readMarkT = [NSNumber numberWithLong:[date1 timeIntervalSince1970]];
                     if (resultList.count > 0) {
                         NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                        NSArray *datas = [[IMDataManager sharedInstance] bulkInsertIphoneMucJSONMsg:resultList WihtMyNickName:[self getMyNickName] WihtSupportMsgTypes:msgTypeList WithReadMarkT:[readMarkT longLongValue] WithDidReadState:MessageState_didRead WihtMyRtxId:[self getLastJid]];
+                        NSArray *datas = [[IMDataManager sharedInstance] bulkInsertIphoneMucJSONMsg:resultList WihtMyNickName:[self getMyNickName] WithReadMarkT:[readMarkT longLongValue] WithDidReadState:MessageState_didRead WihtMyRtxId:[self getLastJid]];
                         NSMutableArray *list = [NSMutableArray array];
                         for (NSDictionary *infoDic in datas) {
                             Message *msg = [Message new];
@@ -1783,7 +1783,7 @@
                     NSArray *result = [self getUserChatlogWithFrom:userId to:[self getLastJid] version:[[IMDataManager sharedInstance] getMinMsgTimeStampByXmppId:userId] count:limit direction:0];
                     if (result.count > 0) {
                         NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                        NSArray *datas = [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:result WithXmppId:userId WihtSupportMsgTypes:msgTypeList WithDidReadState:MessageState_didRead];
+                        NSArray *datas = [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:result WithXmppId:userId WithDidReadState:MessageState_didRead];
                         NSMutableArray *list = [NSMutableArray array];
                         NSString *channelInfo = nil;
                         NSString *buInfo = nil;
@@ -1870,7 +1870,7 @@
                     NSArray *result = [self getConsultServerlogWithFrom:userId virtualId:virtualId to:[self getLastJid] version:version count:(int)(limit - list.count) direction:MessageDirection_Received];
                     if (result.count > 0) {
                         NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                        [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:result to:[QIMManager getLastUserName] supportedMsgTypes:msgTypeList WithDidReadState:MessageState_didRead];
+                        [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:result to:[QIMManager getLastUserName] WithDidReadState:MessageState_didRead];
                     }
                 });
             }
@@ -1884,7 +1884,7 @@
                 
                 if (resultList.count > 0) {
                     NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                    [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:resultList to:[QIMManager getLastUserName] supportedMsgTypes:msgTypeList WithDidReadState:MessageState_didRead];
+                    [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:resultList to:[QIMManager getLastUserName] WithDidReadState:MessageState_didRead];
                     NSArray *datas = [[IMDataManager sharedInstance] qimDB_getMgsListBySessionId:virtualId WithRealJid:userId WithLimit:limit WihtOffset:offset];
                     NSMutableArray *list = [NSMutableArray array];
                     for (NSDictionary *infoDic in datas) {
@@ -2003,6 +2003,78 @@
 
 - (NSMutableArray *)searchLocalMessageByKeyword:(NSString *)keyWord XmppId:(NSString *)xmppid RealJid:(NSString *)realJid {
     return [[IMDataManager sharedInstance] qimDB_searchLocalMessageByKeyword:keyWord XmppId:xmppid RealJid:realJid];
+}
+
+#pragma mark - 本地消息搜索
+
+- (NSArray *)getLocalMediasByXmppId:(NSString *)xmppId ByRealJid:(NSString *)realJid {
+    NSArray *array = [[IMDataManager sharedInstance] qimDB_getLocalMediaByXmppId:xmppId ByReadJid:realJid];
+    NSMutableArray *list = [NSMutableArray arrayWithCapacity:2];
+    for (NSDictionary *msgInfoDic in array) {
+        Message *msg = [Message new];
+        [msg setMessageId:[msgInfoDic objectForKey:@"MsgId"]];
+        [msg setFrom:[msgInfoDic objectForKey:@"From"]];
+        [msg setTo:[msgInfoDic objectForKey:@"To"]];
+        [msg setMessage:[msgInfoDic objectForKey:@"Content"]];
+        NSString *extendInfo = [msgInfoDic objectForKey:@"ExtendInfo"];
+        [msg setExtendInformation:(extendInfo.length > 0) ? extendInfo : nil];
+        [msg setPlatform:[[msgInfoDic objectForKey:@"Platform"] intValue]];
+        [msg setMessageType:[[msgInfoDic objectForKey:@"MsgType"] intValue]];
+        [msg setMessageState:[[msgInfoDic objectForKey:@"MsgState"] intValue]];
+        [msg setMessageDirection:[[msgInfoDic objectForKey:@"MsgDirection"] intValue]];
+        [msg setMessageDate:[[msgInfoDic objectForKey:@"MsgDateTime"] longLongValue]];
+        [msg setXmppId:[msgInfoDic objectForKey:@"XmppId"]];
+        [list addObject:msg];
+    }
+    return list;
+}
+
+- (NSArray *)getMsgsForMsgType:(NSArray *)msgTypes ByXmppId:(NSString *)xmppId ByReadJid:(NSString *)realJid {
+    NSArray *array = [[IMDataManager sharedInstance] qimDB_getMsgsByMsgType:msgTypes ByXmppId:xmppId ByReadJid:realJid];
+    NSMutableArray *list = [NSMutableArray array];
+    for (NSDictionary *msgInfoDic in array) {
+        Message *msg = [Message new];
+        [msg setMessageId:[msgInfoDic objectForKey:@"MsgId"]];
+        [msg setFrom:[msgInfoDic objectForKey:@"From"]];
+        [msg setTo:[msgInfoDic objectForKey:@"To"]];
+        [msg setMessage:[msgInfoDic objectForKey:@"Content"]];
+        NSString *extendInfo = [msgInfoDic objectForKey:@"ExtendInfo"];
+        [msg setExtendInformation:(extendInfo.length > 0) ? extendInfo : nil];
+        [msg setPlatform:[[msgInfoDic objectForKey:@"Platform"] intValue]];
+        [msg setMessageType:[[msgInfoDic objectForKey:@"MsgType"] intValue]];
+        [msg setMessageState:[[msgInfoDic objectForKey:@"MsgState"] intValue]];
+        [msg setMessageDirection:[[msgInfoDic objectForKey:@"MsgDirection"] intValue]];
+        [msg setMessageDate:[[msgInfoDic objectForKey:@"MsgDateTime"] longLongValue]];
+        [msg setXmppId:[msgInfoDic objectForKey:@"XmppId"]];
+        [list addObject:msg];
+    }
+    return list;
+}
+
+- (NSArray *)getMsgsByKeyWord:(NSString *)keyWork ByXmppId:(NSString *)xmppId ByReadJid:(NSString *)realJid {
+    NSArray *array = [[IMDataManager sharedInstance] qimDB_getMsgsByKeyWord:keyWork ByXmppId:xmppId ByReadJid:realJid];
+    NSMutableArray *list = [NSMutableArray array];
+    for (NSDictionary *msgInfoDic in array) {
+        Message *msg = [Message new];
+        [msg setMessageId:[msgInfoDic objectForKey:@"MsgId"]];
+        [msg setFrom:[msgInfoDic objectForKey:@"From"]];
+        [msg setTo:[msgInfoDic objectForKey:@"To"]];
+        [msg setMessage:[msgInfoDic objectForKey:@"Content"]];
+        NSString *extendInfo = [msgInfoDic objectForKey:@"ExtendInfo"];
+        [msg setExtendInformation:(extendInfo.length > 0) ? extendInfo : nil];
+        [msg setPlatform:[[msgInfoDic objectForKey:@"Platform"] intValue]];
+        [msg setMessageType:[[msgInfoDic objectForKey:@"MsgType"] intValue]];
+        [msg setMessageState:[[msgInfoDic objectForKey:@"MsgState"] intValue]];
+        [msg setMessageDirection:[[msgInfoDic objectForKey:@"MsgDirection"] intValue]];
+        [msg setMessageDate:[[msgInfoDic objectForKey:@"MsgDateTime"] longLongValue]];
+        [msg setXmppId:[msgInfoDic objectForKey:@"XmppId"]];
+        [list addObject:msg];
+    }
+    return list;
+}
+
+- (NSArray *)getMsgsForMsgType:(NSArray *)msgTypes ByXmppId:(NSString *)xmppId {
+    return [self getMsgsForMsgType:msgTypes ByXmppId:xmppId ByReadJid:nil];
 }
 
 @end

@@ -16,6 +16,7 @@
 #import "QIMKit+QIMAppInfo.h"
 #import "QIMKit+QIMAppSetting.h"
 #import "QIMKit+QIMCalendar.h"
+#import "QIMKit+QIMUserMedal.h"
 #import "QIMKit+QIMTPRequest.h"
 #import "QIMKit+QIMMiddleVirtualAccountManager.h"
 #import "QIMKit+QIMClientConfig.h"

@@ -104,6 +104,10 @@
     return [[QIMNavConfigManager sharedInstance] adInterval];
 }
 
+- (NSArray *)qimNav_getLocalNavServerConfigs {
+    return [[QIMNavConfigManager sharedInstance] qimNav_getLocalNavServerConfigs];
+}
+
 - (NSString *)qimNav_AdSkipTips {
     return [[QIMNavConfigManager sharedInstance] adSkipTips];
 }
@@ -189,6 +193,38 @@
 
 - (BOOL)qimNav_RNPublicNumberListView {
     return [[QIMNavConfigManager sharedInstance] RNPublicNumberListView];
+}
+
+- (void)qimNav_setRNMineView:(BOOL)showFlag {
+    [[QIMNavConfigManager sharedInstance] setRNMineView:showFlag];
+}
+
+- (void)qimNav_setRNAboutView:(BOOL)showFlag {
+    [[QIMNavConfigManager sharedInstance] setRNAboutView:showFlag];
+}
+
+- (void)qimNav_setRNGroupCardView:(BOOL)showFlag {
+    [[QIMNavConfigManager sharedInstance] setRNGroupCardView:showFlag];
+}
+
+- (void)qimNav_setRNContactView:(BOOL)showFlag {
+    [[QIMNavConfigManager sharedInstance] setRNContactView:showFlag];
+}
+
+- (void)qimNav_setRNSettingView:(BOOL)showFlag {
+    [[QIMNavConfigManager sharedInstance] setRNSettingView:showFlag];
+}
+
+- (void)qimNav_setRNUserCardView:(BOOL)showFlag {
+    [[QIMNavConfigManager sharedInstance] setRNUserCardView:showFlag];
+}
+
+- (void)qimNav_setRNGroupListView:(BOOL)showFlag {
+    [[QIMNavConfigManager sharedInstance] setRNGroupListView:showFlag];
+}
+
+- (void)qimNav_setRNPublicNumberListView:(BOOL)showFlag {
+    [[QIMNavConfigManager sharedInstance] setRNPublicNumberListView:showFlag];
 }
 
 //OPS

@@ -356,4 +356,23 @@
     return [[QIMManager sharedInstance] searchLocalMessageByKeyword:keyWord XmppId:xmppid RealJid:realJid];
 }
 
+
+#pragma mark - 本地消息搜索
+
+- (NSArray *)getLocalMediasByXmppId:(NSString *)xmppId ByRealJid:(NSString *)realJid {
+    return [[QIMManager sharedInstance] getLocalMediasByXmppId:xmppId ByRealJid:realJid];
+}
+
+- (NSArray *)getMsgsForMsgType:(NSArray *)msgTypes ByXmppId:(NSString *)xmppId ByReadJid:(NSString *)realJid {
+    return [[QIMManager sharedInstance] getMsgsForMsgType:msgTypes ByXmppId:xmppId ByReadJid:realJid];
+}
+
+- (NSArray *)getMsgsByKeyWord:(NSString *)keyWork ByXmppId:(NSString *)xmppId ByReadJid:(NSString *)realJid {
+    return [[QIMManager sharedInstance] getMsgsByKeyWord:keyWork ByXmppId:xmppId ByReadJid:realJid];
+}
+
+- (NSArray *)getMsgsForMsgType:(NSArray *)msgTypes ByXmppId:(NSString *)xmppId {
+    return [[QIMManager sharedInstance] getMsgsForMsgType:msgTypes ByXmppId:xmppId];
+}
+
 @end

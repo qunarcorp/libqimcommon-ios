@@ -21,50 +21,50 @@ PODS:
   - CocoaLumberjack/Extensions (3.4.2):
     - CocoaLumberjack/Default
   - ProtocolBuffers (1.9.11)
-  - QIMCommonCategories (0.0.4)
-  - QIMDataBase (0.0.1)
-  - QIMKitVendor (0.0.1):
-    - QIMKitVendor/Audio (= 0.0.1)
-    - QIMKitVendor/Crashlytics (= 0.0.1)
-    - QIMKitVendor/DES (= 0.0.1)
-    - QIMKitVendor/DOG (= 0.0.1)
-    - QIMKitVendor/Fabric (= 0.0.1)
-    - QIMKitVendor/GCD (= 0.0.1)
-    - QIMKitVendor/HTTP (= 0.0.1)
-    - QIMKitVendor/JSON (= 0.0.1)
-    - QIMKitVendor/PinYin (= 0.0.1)
-    - QIMKitVendor/UUID (= 0.0.1)
-    - QIMKitVendor/ZBar (= 0.0.1)
-    - QIMKitVendor/Zip (= 0.0.1)
+  - QIMCommonCategories (1.0.0-beta)
+  - QIMDataBase (1.0.0-beta)
+  - QIMKitVendor (1.0.3-beta):
+    - QIMKitVendor/Audio (= 1.0.3-beta)
+    - QIMKitVendor/Crashlytics (= 1.0.3-beta)
+    - QIMKitVendor/DES (= 1.0.3-beta)
+    - QIMKitVendor/DOG (= 1.0.3-beta)
+    - QIMKitVendor/Fabric (= 1.0.3-beta)
+    - QIMKitVendor/GCD (= 1.0.3-beta)
+    - QIMKitVendor/HTTP (= 1.0.3-beta)
+    - QIMKitVendor/JSON (= 1.0.3-beta)
+    - QIMKitVendor/PinYin (= 1.0.3-beta)
+    - QIMKitVendor/UUID (= 1.0.3-beta)
+    - QIMKitVendor/ZBar (= 1.0.3-beta)
+    - QIMKitVendor/Zip (= 1.0.3-beta)
     - ZipArchive
-  - QIMKitVendor/Audio (0.0.1):
+  - QIMKitVendor/Audio (1.0.3-beta):
     - ZipArchive
-  - QIMKitVendor/Crashlytics (0.0.1):
+  - QIMKitVendor/Crashlytics (1.0.3-beta):
     - ZipArchive
-  - QIMKitVendor/DES (0.0.1):
+  - QIMKitVendor/DES (1.0.3-beta):
     - ZipArchive
-  - QIMKitVendor/DOG (0.0.1):
+  - QIMKitVendor/DOG (1.0.3-beta):
     - ZipArchive
-  - QIMKitVendor/Fabric (0.0.1):
+  - QIMKitVendor/Fabric (1.0.3-beta):
     - ZipArchive
-  - QIMKitVendor/GCD (0.0.1):
+  - QIMKitVendor/GCD (1.0.3-beta):
     - ZipArchive
-  - QIMKitVendor/HTTP (0.0.1):
+  - QIMKitVendor/HTTP (1.0.3-beta):
     - ASIHTTPRequest
     - ZipArchive
-  - QIMKitVendor/JSON (0.0.1):
+  - QIMKitVendor/JSON (1.0.3-beta):
     - ZipArchive
-  - QIMKitVendor/PinYin (0.0.1):
+  - QIMKitVendor/PinYin (1.0.3-beta):
     - ZipArchive
-  - QIMKitVendor/UUID (0.0.1):
+  - QIMKitVendor/UUID (1.0.3-beta):
     - UICKeyChainStore
     - ZipArchive
-  - QIMKitVendor/ZBar (0.0.1):
+  - QIMKitVendor/ZBar (1.0.3-beta):
     - ZipArchive
-  - QIMKitVendor/Zip (0.0.1):
+  - QIMKitVendor/Zip (1.0.3-beta):
     - ZipArchive
-  - QIMOpenSSL (0.0.2)
-  - QIMPublicRedefineHeader (0.0.1):
+  - QIMOpenSSL (1.0.1-beta)
+  - QIMPublicRedefineHeader (0.0.2-beta):
     - CocoaLumberjack
   - Reachability (3.2)
   - UICKeyChainStore (2.1.2)
@@ -78,11 +78,11 @@ DEPENDENCIES:
   - CocoaAsyncSocket
   - CocoaLumberjack
   - ProtocolBuffers
-  - QIMCommonCategories
-  - QIMDataBase
-  - QIMKitVendor
-  - QIMOpenSSL
-  - QIMPublicRedefineHeader
+  - QIMCommonCategories (~> 1.0.0-beta)
+  - QIMDataBase (~> 1.0.0-beta)
+  - QIMKitVendor (~> 1.0.3-beta)
+  - QIMOpenSSL (~> 1.0.1-beta)
+  - QIMPublicRedefineHeader (~> 0.0.2-beta)
   - UICKeyChainStore
   - YYCache
   - YYModel
@@ -112,17 +112,17 @@ SPEC CHECKSUMS:
   CocoaAsyncSocket: eafaa68a7e0ec99ead0a7b35015e0bf25d2c8987
   CocoaLumberjack: db7cc9e464771f12054c22ff6947c5a58d43a0fd
   ProtocolBuffers: d509225eb2ea43d9582a59e94348fcf86e2abd65
-  QIMCommonCategories: 7d32d70f412e070424c1bc4b9b0ae10d8bfa562a
-  QIMDataBase: dd0edd025da50d55a357691b04960cdefda5254a
-  QIMKitVendor: 917d890e2b2a0b6e9101c38f2f678a7242a5c828
-  QIMOpenSSL: 2219ae2128c7d81acef304f0225e19d8ea8d815f
-  QIMPublicRedefineHeader: 1be4e7811681a8246200c1825bfec6192354cee6
+  QIMCommonCategories: a118046c9eec6c7630ea025b780ada7a31b52724
+  QIMDataBase: b09add67a037a8c03377a594f8bb0309bf45a320
+  QIMKitVendor: ac97e39faf8b9a3a49d40241f4a04a7ca75f36e0
+  QIMOpenSSL: 8bce774be31ac5c91883c235001d8ae8e1177596
+  QIMPublicRedefineHeader: 9e97f3f1af4a34c5c27d994d3ba3db37bbca3930
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   UICKeyChainStore: 85db518bb1d294366d15ec9b92a416c4e670518f
   YYCache: 8105b6638f5e849296c71f331ff83891a4942952
   YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
   ZipArchive: e25a4373192673e3229ac8d6e9f64a3e5713c966
 
-PODFILE CHECKSUM: 6a9e59092b0ccc1368f6fe53210060a983ea92fa
+PODFILE CHECKSUM: fb29a2028d4016a7beb12ba94bd7373b59456859
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.6.0.beta.2

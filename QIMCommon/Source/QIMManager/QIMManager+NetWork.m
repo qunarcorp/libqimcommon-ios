@@ -48,11 +48,6 @@
 
 - (void)checkNetworkStatus{
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkNetworkStatus) object:nil];
-    if (self.needTryRelogin == NO) {
-        // 当被服务器踢掉后，不需要自动重连
-        QIMWarnLog(@"<Method: checkNetworkStatus, _needTryRelogin == NO>被服务器踢掉后，不需要自动重连");
-        return;
-    }
     QIMWarnLog(@" _needTryRelogin = %d", self.needTryRelogin);
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         if ([self checkNetworkCanUser]) {
@@ -61,7 +56,7 @@
             }
         }  else {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self performSelector:@selector(checkNetworkStatus) withObject:nil afterDelay:10];
+                [self performSelector:@selector(checkNetworkStatus) withObject:nil afterDelay:3];
             });
         }
     });

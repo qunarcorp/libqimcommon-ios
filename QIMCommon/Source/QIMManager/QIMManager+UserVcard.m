@@ -24,6 +24,11 @@
     return __defaultCommonTrdInfoImage;
 }
 
++ (NSString *)defaultCommonTrdInfoImagePath {
+    
+    return [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"Activity_default" ofType:@"png"];
+}
+
 + (NSData *)defaultUserHeaderImage {
      
     static NSData *__defaultUserHeaderImage = nil;
@@ -33,6 +38,10 @@
         __defaultUserHeaderImage = [NSData dataWithContentsOfFile:singleHeaderPath];
     });
     return __defaultUserHeaderImage;
+}
+
++ (NSString *)defaultUserHeaderImagePath {
+    return [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"QIMManDefaultHeader" ofType:@"png"];
 }
 
 #pragma mark - 用户备注

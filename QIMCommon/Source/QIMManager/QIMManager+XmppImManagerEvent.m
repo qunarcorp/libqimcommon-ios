@@ -11,12 +11,22 @@
 @implementation QIMManager (XmppImManagerEvent)
 
 - (void)registerEvent {
+    
+    //连接中
+    [[XmppImManager sharedInstance] addTarget:self method:@selector(beginToConnect) withXmppEvent:XmppEventConnecting];
+    
+    //已连接
     [[XmppImManager sharedInstance] addTarget:self method:@selector(beenConnected) withXmppEvent:XmppEventConnected];
     
+    //连接完成
     [[XmppImManager sharedInstance] addTarget:self method:@selector(loginComplate) withXmppEvent:XmppEvent_LoginComplate];
+    
+    //连接超时
+    [[XmppImManager sharedInstance] addTarget:self method:@selector(connectTimeOut) withXmppEvent:XmppEvent_ConnectTimeOut];
     
     [[XmppImManager sharedInstance] addTarget:self method:@selector(configForRemoteKeyAndSystemTime:) withXmppEvent:XmppEvent_Config_Key_Time];
     
+    //登录失败
     [[XmppImManager sharedInstance] addTarget:self method:@selector(loginFaild:) withXmppEvent:XmppEvent_LoginFaild];
     
     [[XmppImManager sharedInstance] addTarget:self method:@selector(registerComplate) withXmppEvent:XmppEvent_RegisterSuccess];
@@ -94,7 +104,6 @@
     [[XmppImManager sharedInstance] addTarget:self method:@selector(messageLogEvent:) withXmppEvent:XmppEvent_MessageLog];
     
     [[XmppImManager sharedInstance] addTarget:self method:@selector(userResourceNotify:) withXmppEvent:XmppEvent_UserResource];
-    [[XmppImManager sharedInstance] addTarget:self method:@selector(connectTimeOut) withXmppEvent:XmppEvent_ConnectTimeOut];
     [[XmppImManager sharedInstance] addTarget:self method:@selector(callVideoAudio:) withXmppEvent:XmppEvent_CallVideoAudio];
     [[XmppImManager sharedInstance] addTarget:self method:@selector(meetingAudioVideoConference:) withXmppEvent:XmppEvent_CallMeetingAudioVideoConference];
     
@@ -105,6 +114,18 @@
     [[XmppImManager sharedInstance] addTarget:self method:@selector(receiveEncryptMessage:) withXmppEvent:XmppEvent_ReceiveEncryptMessage];
     
     [[XmppImManager sharedInstance] addTarget:self method:@selector(receiveErrorMessage:) withXmppEvent:XmppEvent_MessageError];
+    
+    //登录之前同步一下消息时间戳
+    [[XmppImManager sharedInstance] addTarget:self method:@selector(updateOfflineTime:) withXmppEvent:XmppEvent_UpdateOfflineTime];
+}
+
+- (void)updateOfflineTime:(NSDictionary *)infoDic {
+    QIMVerboseLog(@"登录之前初始化数据库文件之后更新各种时间戳开始 : %@", infoDic);
+    [self updateLastMsgTime];
+    [self updateLastGroupMsgTime];
+    [self updateLastSystemMsgTime];
+    [self updateLastMaxMucReadMarkTime];
+    QIMVerboseLog(@"登录之前初始化数据库文件之后更新各种时间戳完成");
 }
 
 - (void)receiveErrorMessage:(NSDictionary *)infoDic {
@@ -428,6 +449,7 @@
         BOOL isCarbon = [[msgDic objectForKey:@"isCarbon"] boolValue];
         BOOL convertType = NO;
         BOOL needAutoReply = YES;
+        /*
         if (messageType == QIMMessageType_TransChatToCustomerService) {
             chatType = 5;
             if (isCarbon == NO) {
@@ -480,6 +502,7 @@
 //                [self customerConsultServicesayHelloWithUser:[realFrom componentsSeparatedByString:@"@"].firstObject WithVirtualId:[fromJid componentsSeparatedByString:@"@"].firstObject WithFromUser:[QIMManager getLastUserName]];
 //            }
         }
+        */
         
         NSString *sid = nil;
         if (isCarbon == YES) {
@@ -607,17 +630,15 @@
 
 - (void)connectTimeOut{
     [self socketDisconnect];
-    
 }
 
 - (void)socketDisconnect{
     
-    if (self.willCancelLogin == NO) {
-        QIMErrorLog(@"Socket已经断开通知");
-        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkNetworkStatus) object:nil];
-        [self checkNetworkStatus];
-    }
+    QIMErrorLog(@"Socket已经断开通知");
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkNetworkStatus) object:nil];
+    [self checkNetworkStatus];
     [self onDisconnect];
+    [self.loginComplateQueue cancelAllOperations];
 }
 
 - (void)serviceStreamEnd:(NSDictionary *)infoDic{
@@ -2086,8 +2107,14 @@
     });
 }
 
+- (void)beginToConnect {
+    QIMVerboseLog(@"准备开始连接");
+    [self updateAppWorkState:AppWorkState_Logining];
+}
+
 - (void)beenConnected {
-    self.remoteKey = @"";
+    QIMVerboseLog(@"已经连接上了");
+    [self updateAppWorkState:AppWorkState_Login];
 }
 
 - (void)loginFaild:(NSDictionary *)errDic {

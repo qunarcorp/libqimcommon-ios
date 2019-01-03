@@ -12,12 +12,10 @@
 @protocol QIMPBStackDelegate <NSObject>
 @required
 - (void) beginToConnect;
-- (void) disconnectedEvent;
-- (void) connected;
+- (void) beenConnected;
 - (void) loginComplate;
 - (void) loginFaildWithErrCode:(NSString *)errCode WithErrMsg:(NSString *)errMsg;
 - (void) logout;
-- (void) onFailed:(NSError *) error;
 - (void) onDisconnect;
 
 - (void) configWithRemoteKey:(NSString *)remoteKey WithSystemTime:(long long)systemTime;
@@ -266,8 +264,8 @@
 
 - (void)receiveChatTransferToUser:(NSString *)user ForMsgId:(NSString *)msgId;
 
-- (NSArray *)getVirtualList;
-- (NSString *)getRealJidForVirtual:(NSString *)virtualJid;
+//- (NSArray *)getVirtualList;
+//- (NSString *)getRealJidForVirtual:(NSString *)virtualJid;
 - (NSString *)getMyVirtualJid;
 
 #pragma mark - Roster

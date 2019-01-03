@@ -87,7 +87,7 @@
                     NSArray *result = [self getSystemMsgListWithDirection:0 WithUserId:userId WithFromHost:fromHost WithLimit:limit - list.count withTimeVersion:version toId:[QIMManager getLastUserName] toHost:fromHost];
                     if (result.count > 0) {
                         NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                        [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:result to:[QIMManager getLastUserName] supportedMsgTypes:msgTypeList WithDidReadState:MessageState_didRead];
+                        [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:result to:[QIMManager getLastUserName] WithDidReadState:MessageState_didRead];
                     }
                 });
             }
@@ -100,7 +100,7 @@
                 NSArray *resultList = [self getSystemMsgListWithDirection:0 WithUserId:userId WithFromHost:fromHost WithLimit:limit withTimeVersion:version toId:[QIMManager getLastUserName] toHost:fromHost];
                 if (resultList.count > 0) {
                     NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                    [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:resultList to:[QIMManager getLastUserName] supportedMsgTypes:msgTypeList WithDidReadState:MessageState_didRead];
+                    [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:resultList to:[QIMManager getLastUserName] WithDidReadState:MessageState_didRead];
                     NSArray *datas = [[IMDataManager sharedInstance] qimDB_getMgsListBySessionId:userId WithRealJid:nil WithLimit:(int)(resultList.count) WihtOffset:offset];
                     NSMutableArray *list = [NSMutableArray array];
                     for (NSDictionary *infoDic in datas) {
@@ -134,6 +134,18 @@
 
 #pragma mark -  获取Notice消息（下拉加载）
 - (NSArray *)getSystemMsgListWithDirection:(int)direction WithUserId:(NSString *)userId WithFromHost:(NSString *)fromHost WithLimit:(NSInteger)limit withTimeVersion:(long long)version toId:(NSString *)toId toHost:(NSString *)toHost {
+    
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:userId forKey:@"from"];
+    [params setObject:toId forKey:@"to"];
+    [params setObject:[NSString stringWithFormat:@"%d", direction] forKey:@"direction"];
+    [params setObject:@(version) forKey:@"time"];
+    [params setObject:[self getDomain] forKey:@"domain"];
+    [params setObject:@(limit) forKey:@"num"];
+    [params setObject:fromHost forKey:@"fhost"];
+    [params setObject:toHost forKey:@"thost"];
+    [params setObject:@"t" forKey:@"f"];
+    /*
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
     [params setObject:userId forKey:@"user"];
     [params setObject:@(version) forKey:@"time"];
@@ -141,6 +153,7 @@
     [params setObject:[self getDomain] forKey:@"host"];
     [params setObject:@(limit) forKey:@"num"];
     [params setObject:@"t" forKey:@"f"];
+    */
     NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:params error:nil];
     NSString *destUrl = [NSString stringWithFormat:@"%@/qtapi/get_system_msgs.qunar?v=%@&p=iOS&u=%@&k=%@&f=t", [[QIMNavConfigManager sharedInstance] javaurl], [[QIMAppInfo sharedInstance] AppBuildVersion], [QIMManager getLastUserName], self.remoteKey];
     NSURL *requestUrl = [NSURL URLWithString:destUrl];
@@ -214,7 +227,7 @@
         return;
     }
     NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-    NSMutableDictionary *msgList = [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:systemMsgs to:[self getLastJid] supportedMsgTypes:msgTypeList WithDidReadState:MessageState_didRead];
+    NSMutableDictionary *msgList = [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:systemMsgs to:[self getLastJid] WithDidReadState:MessageState_didRead];
     for (NSString *key in [msgList allKeys]) {
         NSDictionary *value = [msgList objectForKey:key];
         BOOL isConsult = [[value objectForKey:@"Consult"] boolValue];

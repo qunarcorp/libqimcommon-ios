@@ -57,14 +57,14 @@
 @property (nonatomic, readonly, assign) BOOL showmsgstat;
 
 //RN Ability
-@property (nonatomic, readonly, assign) BOOL RNMineView;      //展示RNMineView
-@property (nonatomic, readonly, assign) BOOL RNAboutView;     //展示RNAboutView
-@property (nonatomic, readonly, assign) BOOL RNGroupCardView; //展示RNGroupCardView
-@property (nonatomic, readonly, assign) BOOL RNContactView;   //展示RNContactView
-@property (nonatomic, readonly, assign) BOOL RNSettingView;   //展示RNSettingView
-@property (nonatomic, readonly, assign) BOOL RNUserCardView;  //展示RNUserCardView
-@property (nonatomic, readonly, assign) BOOL RNGroupListView;   //展示RN 群组列表
-@property (nonatomic, readonly, assign) BOOL RNPublicNumberListView;    //展示RN 公众号列表
+@property (nonatomic, assign) BOOL RNMineView;      //展示RNMineView
+@property (nonatomic, assign) BOOL RNAboutView;     //展示RNAboutView
+@property (nonatomic, assign) BOOL RNGroupCardView; //展示RNGroupCardView
+@property (nonatomic, assign) BOOL RNContactView;   //展示RNContactView
+@property (nonatomic, assign) BOOL RNSettingView;   //展示RNSettingView
+@property (nonatomic, assign) BOOL RNUserCardView;  //展示RNUserCardView
+@property (nonatomic, assign) BOOL RNGroupListView;   //展示RN 群组列表
+@property (nonatomic, assign) BOOL RNPublicNumberListView;    //展示RN 公众号列表
 
 //OPS
 @property (nonatomic, readonly, copy)  NSString *opsHost;
@@ -91,6 +91,8 @@
 //- (NSString *)getAdvertImageFilePath;
 
 - (NSArray *)qimNav_getDebugers;
+
+- (NSArray *)qimNav_getLocalNavServerConfigs;
 
 // 更新导航配置
 

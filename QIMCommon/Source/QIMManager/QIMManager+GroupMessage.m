@@ -176,7 +176,7 @@
         NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
         NSMutableArray <NSDictionary *>*atAllMsgList = [[NSMutableArray alloc] initWithCapacity:3];
         NSMutableArray <NSDictionary *>*normalMsgList = [[NSMutableArray alloc] initWithCapacity:3];
-        NSDictionary *tempGroupDic = [[IMDataManager sharedInstance] bulkInsertIphoneHistoryGroupJSONMsg:data WihtMyNickName:[self getMyNickName] WihtSupportMsgTypes:msgTypeList WithReadMarkT:0 WithDidReadState:MessageState_NotRead WihtMyRtxId:[[QIMManager sharedInstance] getLastJid] WithAtAllMsgList:&atAllMsgList WithNormaleAtMsgList:&normalMsgList];
+        NSDictionary *tempGroupDic = [[IMDataManager sharedInstance] bulkInsertIphoneHistoryGroupJSONMsg:data WihtMyNickName:[self getMyNickName] WithReadMarkT:0 WithDidReadState:MessageState_NotRead WihtMyRtxId:[[QIMManager sharedInstance] getLastJid] WithAtAllMsgList:&atAllMsgList WithNormaleAtMsgList:&normalMsgList];
         for (NSString *groupId in tempGroupDic) {
             if (groupId.length > 0) {
                 NSDictionary *groupMsgDic = [tempGroupDic objectForKey:groupId];

@@ -26,6 +26,7 @@
 #import "QIMManager+Request.h"
 #import "QIMManager+GroupMessage.h"
 #import "QIMManager+Helper.h"
+#import "QIMManager+UserMedal.h"
 #import "QIMManager+KeyChain.h"
 #import "QIMManager+Login.h"
 #import "QIMManager+Message.h"
@@ -43,7 +44,6 @@
 #import "QIMMessage.h"
 #import "QIMMessageManager.h"
 #import "QIMNavConfigManager.h"
-#import "QIMNSDateComparer.h"
 #import "QIMUserCacheManager.h"
 #import "QIMVoiceNoReadStateManager.h"
 
@@ -66,6 +66,7 @@
 #import "IMDataManager+QIMDBClientConfig.h"
 #import "IMDataManager+QIMDBQuickReply.h"
 #import "IMDataManager+QIMNote.h"
+#import "IMDataManager+QIMUserMedal.h"
 
 #import "XmppImManager.h"
 
@@ -77,7 +78,7 @@
 
 #pragma mark - Categories
 
-#import <QIMCommonCategories/QIMCommonCategories.h>
+#import "QIMCommonCategories.h"
 
 #import "ASIHTTPRequest.h"
 #import "YYModel.h"

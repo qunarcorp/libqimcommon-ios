@@ -34,8 +34,4 @@
     [[QIMManager sharedInstance] updateAppWorkState:appWorkState];
 }
 
-- (void)onDisconnect {
-    [[QIMManager sharedInstance] onDisconnect];
-}
-
 @end

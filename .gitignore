@@ -5,6 +5,8 @@
 ## Build generated
 build/
 DerivedData/
+QIMCommon/.DS_Store
+QIMCommon/PrivateCommon/.DS_Store
 
 ## Various settings
 *.pbxuser

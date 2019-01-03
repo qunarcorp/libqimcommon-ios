@@ -275,6 +275,25 @@
     }
 }
 
+- (void)beginToConnect {
+    
+    NSMutableArray *methods = [_eventMapping objectForKey:@(XmppEventConnecting)];
+    for (NSDictionary *info in methods) {
+        if (info) {
+            id obj = [info objectForKey:@"object"];
+            NSString *method = [info objectForKey:@"method"];
+            SEL sel = NSSelectorFromString(method);
+            
+            [obj performSelector:sel onThread:[NSThread mainThread] withObject:nil waitUntilDone:NO];
+        }
+    }
+}
+
+- (void)logout {
+    QIMVerboseLog(@"抛出通知 : ONXMPPConnecting");
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"ONXMPPConnecting" object:nil];
+}
+
 - (void)onDisconnect {
     _isLogin = NO;
     NSMutableArray *methods = [_eventMapping objectForKey:@(XmppEvent_Disconnect)];
@@ -289,7 +308,7 @@
     }
 }
 
-- (void)connectTimeOut{
+- (void)connectTimeOut {
     _isLogin = NO;
     NSMutableArray *methods = [_eventMapping objectForKey:@(XmppEvent_ConnectTimeOut)];
     for (NSDictionary *info in methods) {
@@ -332,11 +351,6 @@
             }
         }
     }
-    
-}
-
-- (void)onFailed:(NSError *)error {
-    
 }
 
 - (void)verifyFriendPresenceWithFrom:(NSString *)from WithTo:(NSString *)to WihtDirection:(int)direction WithResult:(NSString *)result WithReason:(NSString *)reason {
@@ -1388,26 +1402,6 @@
     }
 }
 
-- (void)beginToConnect {
-    
-}
-
-
-- (void)connected {
-    
-}
-
-
-- (void)disconnectedEvent {
-    
-}
-
-
-- (void)logout {
-    
-}
-
-
 @end
 
 #pragma mark - XmppImManager
@@ -1518,7 +1512,10 @@ static XmppImManager *_xmppImManager = nil;
 }
 
 - (void) loginwithName:(NSString *) userName password:(NSString *) pwd{
-    
+    QIMVerboseLog(@"XMPPIMManager Login updateOfflineTime Start");
+    [self updateOfflineTime];
+    QIMVerboseLog(@"XMPPIMManager Login updateOfflineTime Done");
+
     QIMVerboseLog(@"XMPPIMManager Login : <HostName : %@, Domain : %@, Port : %d, appVersion : %@, systemVersion : %@, deviceUUID : %@, loginType : %d, UserId : %@, pwd : %@>", [self hostName], [self domain], [self port], [self appVersion], [self systemVersion], [self deviceUUID], [self loginType], userName, pwd);
     [_pbXmppStack setHostName:[self hostName]];
     [_pbXmppStack setDomain:[self domain]];
@@ -1540,6 +1537,23 @@ static XmppImManager *_xmppImManager = nil;
     }
     NSError *error = nil;
     [_pbXmppStack connectWithTimeout:10 withError:&error];
+}
+
+- (void)updateOfflineTime {
+    NSMutableArray *methods = [_eventMapping objectForKey:@(XmppEvent_UpdateOfflineTime)];
+    NSString *message = @"我是登录之前来取时间戳的，nnd";
+    for (NSDictionary *info in methods) {
+        if (info) {
+            id obj = [info objectForKey:@"object"];
+            NSString *method = [info objectForKey:@"method"];
+            SEL sel = NSSelectorFromString(method);
+            
+            [obj performSelector:sel
+                        onThread:[NSThread mainThread]
+                      withObject:message
+                   waitUntilDone:NO];
+        }
+    }
 }
 
 - (void)cancelLogin{
@@ -1646,6 +1660,7 @@ static XmppImManager *_xmppImManager = nil;
             }
         } else {
             QIMVerboseLog(@"老版本XML消息");
+            msgDic = @{@"Msg":msgRaw};
         }
     }
     
@@ -1692,27 +1707,20 @@ static XmppImManager *_xmppImManager = nil;
     return [_pbXmppStack setReceiveMsgLimitWithMode:mode];
 }
 
+/*
 - (NSArray *)getVirtualList{
     return [_pbXmppStack getVirtualList];
 }
+*/
 
-- (NSString *)getRealJidForVirtual:(NSString *)virtualJid{
-    return [_pbXmppStack getRealJidForVirtual:virtualJid];
-}
+//- (NSString *)getRealJidForVirtual:(NSString *)virtualJid{
+//    return [_pbXmppStack getRealJidForVirtual:virtualJid];
+//}
 
 #pragma mark - 好友列表
 
 - (NSMutableArray *)chatSessionList {
     return nil;
-}
-
-- (void)beginToConnect {
-    QIMVerboseLog(@"抛出通知 : ONXMPPConnecting");
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"ONXMPPConnecting" object:nil];
-}
-
-- (void)disconnectedEvent {
-    //    [[NSNotificationCenter defaultCenter] postNotificationName:@"ONXMPPDisconnected" object:nil];
 }
 
 - (NSMutableDictionary *)rosterList{

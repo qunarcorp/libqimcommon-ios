@@ -466,22 +466,21 @@
     return [[IMDataManager sharedInstance] checkMsgId:msgId];
 }
 
-- (NSArray *)bulkInsertIphoneMucJSONMsg:(NSArray *)list WihtMyNickName:(NSString *)myNickName WihtSupportMsgTypes:(NSArray *)supportMsgTypeList WithReadMarkT:(long long)readMarkT WithDidReadState:(int)didReadState WihtMyRtxId:(NSString *)rtxId {
+- (NSArray *)bulkInsertIphoneMucJSONMsg:(NSArray *)list WihtMyNickName:(NSString *)myNickName WithReadMarkT:(long long)readMarkT WithDidReadState:(int)didReadState WihtMyRtxId:(NSString *)rtxId {
     return [[IMDataManager sharedInstance] bulkInsertIphoneMucJSONMsg:list
                                                        WihtMyNickName:myNickName
-                                                  WihtSupportMsgTypes:supportMsgTypeList
                                                         WithReadMarkT:readMarkT
                                                      WithDidReadState:didReadState
                                                           WihtMyRtxId:rtxId];
 
 }
 
-- (NSArray *)bulkInsertIphoneHistoryGroupMsg:(NSArray *)list WithXmppId:(NSString *)xmppId WihtMyNickName:(NSString *)myNickName WihtSupportMsgTypes:(NSArray *)supportMsgTypeList WithReadMarkT:(long long)readMarkT WithDidReadState:(int)didReadState WihtMyRtxId:(NSString *)rtxId {
-    return [[IMDataManager sharedInstance] bulkInsertIphoneHistoryGroupMsg:list WithXmppId:xmppId WihtMyNickName:myNickName WihtSupportMsgTypes:supportMsgTypeList WithReadMarkT:readMarkT WithDidReadState:didReadState WihtMyRtxId:rtxId];
+- (NSArray *)bulkInsertIphoneHistoryGroupMsg:(NSArray *)list WithXmppId:(NSString *)xmppId WihtMyNickName:(NSString *)myNickName WithReadMarkT:(long long)readMarkT WithDidReadState:(int)didReadState WihtMyRtxId:(NSString *)rtxId {
+    return [[IMDataManager sharedInstance] bulkInsertIphoneHistoryGroupMsg:list WithXmppId:xmppId WihtMyNickName:myNickName WithReadMarkT:readMarkT WithDidReadState:didReadState WihtMyRtxId:rtxId];
 }
 
-- (NSArray *)bulkInsertHistoryGroupMsg:(NSArray *)list WithXmppId:(NSString *)xmppId WihtMyNickName:(NSString *)myNickName WihtSupportMsgTypes:(NSArray *)supportMsgTypeList WithReadMarkT:(long long)readMarkT WithDidReadState:(int)didReadState {
-    return [[IMDataManager sharedInstance] bulkInsertHistoryGroupMsg:list WithXmppId:xmppId WihtMyNickName:myNickName WihtSupportMsgTypes:supportMsgTypeList WithReadMarkT:readMarkT WithDidReadState:didReadState];
+- (NSArray *)bulkInsertHistoryGroupMsg:(NSArray *)list WithXmppId:(NSString *)xmppId WihtMyNickName:(NSString *)myNickName WithReadMarkT:(long long)readMarkT WithDidReadState:(int)didReadState {
+    return [[IMDataManager sharedInstance] bulkInsertHistoryGroupMsg:list WithXmppId:xmppId WihtMyNickName:myNickName WithReadMarkT:readMarkT WithDidReadState:didReadState];
 }
 
 - (NSDictionary *)dictionaryWithJsonString:(NSString *)jsonString {
@@ -490,11 +489,9 @@
 
 - (NSMutableDictionary *)bulkInsertHistoryChatJSONMsg:(NSArray *)list
                                                    to:(NSString *)meJid
-                                    supportedMsgTypes:(NSArray *)supportMsgTypeList
                                      WithDidReadState:(int)didReadState {
     return [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:list
                                                                     to:meJid
-                                                     supportedMsgTypes:supportMsgTypeList
                                                       WithDidReadState:didReadState];
 }
 
@@ -504,11 +501,9 @@
 
 - (NSArray *)bulkInsertHistoryChatJSONMsg:(NSArray *)list
                                WithXmppId:(NSString *)xmppId
-                      WihtSupportMsgTypes:(NSArray *)supportMsgTypeList
                          WithDidReadState:(int)didReadState {
     return [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:list
                                                             WithXmppId:xmppId
-                                                   WihtSupportMsgTypes:supportMsgTypeList
                                                       WithDidReadState:didReadState];
 }
 
@@ -614,14 +609,6 @@
 
 - (NSDictionary *)getMsgsByMsgId:(NSString *)msgId {
     return [[IMDataManager sharedInstance] getMsgsByMsgId:msgId];
-}
-
-- (NSArray *)getMsgsByMsgType:(int)msgType {
-    return [[IMDataManager sharedInstance] getMsgsByMsgType:msgType];
-}
-
-- (NSArray *)getMsgsByMsgType:(int)msgType ByXmppId:(NSString *)xmppId {
-    return [[IMDataManager sharedInstance] getMsgsByMsgType:msgType ByXmppId:xmppId];
 }
 
 - (NSDictionary *)getChatSessionWithUserId:(NSString *)userId {

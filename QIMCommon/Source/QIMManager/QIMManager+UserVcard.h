@@ -122,6 +122,8 @@
  */
 + (NSData *)defaultUserHeaderImage;
 
++ (NSString *)defaultUserHeaderImagePath;
+
 /**
  获取用户头像本地路径
 
@@ -144,6 +146,8 @@
  @return 用户头像
  */
 + (UIImage *)defaultCommonTrdInfoImage ;
+
++ (NSString *)defaultCommonTrdInfoImagePath;
 
 /**
  根据用户rtxId获取用户名片信息

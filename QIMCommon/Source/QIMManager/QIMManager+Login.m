@@ -64,12 +64,6 @@
     [[QIMUserCacheManager sharedInstance] setUserObject:[userName lowercaseString] forKey:kLastUserId];
     [[QIMUserCacheManager sharedInstance] setUserObject:pwd forKey:kTempPassword];
     QIMVerboseLog(@"登陆之前当前CacheName : %@", [[QIMUserCacheManager sharedInstance] cacheName]);
-    QIMVerboseLog(@"登录之前初始化数据库文件之后更新各种时间戳开始");
-    [self updateLastMsgTime];
-    [self updateLastGroupMsgTime];
-    [self updateLastSystemMsgTime];
-    [self updateLastMaxMucReadMarkTime];
-    QIMVerboseLog(@"登录之前初始化数据库文件之后更新各种时间戳完成");
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationSessionListUpdate object:@"ForceRefresh"];
     });

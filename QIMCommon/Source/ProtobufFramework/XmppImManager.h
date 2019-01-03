@@ -11,6 +11,7 @@
 
 enum XmppEvent {
     XmppEventConnected = 10,
+    XmppEventConnecting = 11,
     XmppEvent_LoginComplate = 200,
     
     XmppEvent_LoginFaild,
@@ -97,6 +98,7 @@ enum XmppEvent {
     XmppEvent_ReceiveConsultMessage,
     XmppEvent_ReceiveEncryptMessage,
     XmppEvent_MessageError,
+    XmppEvent_UpdateOfflineTime,
 };
 
 enum {
@@ -203,9 +205,9 @@ enum XmppLoginType {
 
 - (BOOL)setReceiveMsgLimitWithMode:(int)mode;
 
-- (NSArray *)getVirtualList;
+//- (NSArray *)getVirtualList;
 
-- (NSString *)getRealJidForVirtual:(NSString *)virtualJid;
+//- (NSString *)getRealJidForVirtual:(NSString *)virtualJid;
 
 - (NSString *)getMyVirtualJid;
 
