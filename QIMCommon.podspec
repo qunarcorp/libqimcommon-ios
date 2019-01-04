@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "QIMCommon"
-  s.version      = "0.0.4-beta"
+  s.version      = "0.0.5-beta"
   s.summary      = "Qunar chat App 6.0+ version QIMCommon"
   s.description  = <<-DESC
                    Qunar QIMCommon解决方案
@@ -24,22 +24,14 @@ Pod::Spec.new do |s|
 
     pc.public_header_files = "QIMCommon/QIMKit/**/*.{h}", "QIMCommon/NoArc/**/*.{h}"
 
-    pc.source_files = "QIMCommon/3rdPart&tools/*.{h,m,c}", "QIMCommon/Source/**/*.{h,m,c}", "QIMCommon/QIMKit/**/*.{h,m,c}", "QIMCommon/NoArc/**/*.{h,m}"
+    pc.source_files = ""QIMCommon/Source/**/*.{h,m,c}", "QIMCommon/QIMKit/**/*.{h,m,c}", "QIMCommon/NoArc/**/*.{h,m}"
     pc.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => 'DEBUGLOG=1'}
 
     pc.requires_arc = false  
-    pc.requires_arc = ['QIMCommon/3rdPart&tools/*','QIMCommon/Source/**/*','QIMCommon/QIMSDKUI/**/*.{h,m,c}']
+    pc.requires_arc = ['QIMCommon/Source/**/*', "QIMCommon/QIMKit/**/*.{h,m,c}"]
 
   end
 
-  s.subspec 'PrivateCommon' do |sc|
-
-    sc.source_files = "QIMCommon/PrivateCommon/**/*.{h,m,c}"
-    sc.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => 'DEBUGLOG=1'}
-    sc.public_header_files = "QIMCommon/PrivateCommon/**/*.{h}"
-
-  end
-  
     s.dependency 'QIMOpenSSL', '~> 1.0.1-beta'
     s.dependency 'QIMKitVendor', '~> 1.1.0-beta'
     s.dependency 'QIMDataBase', '~> 1.0.0-beta'
