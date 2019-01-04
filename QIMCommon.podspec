@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "QIMCommon"
-  s.version      = "1.0.0-beta"
+  s.version      = "1.1.0-beta"
   s.summary      = "Qunar chat App 6.0+ version QIMCommon"
   s.description  = <<-DESC
                    Qunar QIMCommon解决方案
@@ -21,6 +21,7 @@ Pod::Spec.new do |s|
   s.platform     = :ios, "9.0"
 
   $lib = ENV['use_lib']
+  $debug = ENV['debug']
   if $lib
     
     puts '---------QIMCommonSDK二进制-------'
@@ -40,10 +41,19 @@ Pod::Spec.new do |s|
     s.requires_arc = ['QIMCommon/Source/**/*', "QIMCommon/QIMKit/**/*.{h,m,c}"]
 
   end
-  s.dependency 'QIMOpenSSL', '~> 1.0.1-beta'
-  s.dependency 'QIMKitVendor', '~> 1.1.0-beta'
-  s.dependency 'QIMDataBase', '~> 1.0.0-beta'
-  s.dependency 'QIMPublicRedefineHeader', '~> 0.0.2-beta'
+  
+  if $debug
+    puts 'debug QIMCommon依赖第三方库'
+
+  else
+  
+    puts '线上release QIMCommon依赖第三方库'
+    s.dependency 'QIMOpenSSL', '~> 1.0.1-beta'
+    s.dependency 'QIMKitVendor', '~> 1.1.0-beta'
+    s.dependency 'QIMDataBase', '~> 1.0.0-beta'
+    s.dependency 'QIMPublicRedefineHeader', '~> 0.0.2-beta'
+  end
+  
   s.dependency 'ASIHTTPRequest'
   s.dependency 'YYCache'
   s.dependency 'YYModel'
