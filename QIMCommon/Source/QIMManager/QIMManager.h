@@ -351,7 +351,7 @@
 
 - (void)setNotSendText:(NSString *)text inputItems:(NSArray *)inputItems ForJid:(NSString *)jid;
 
-- (NSDictionary *)getQChatToken;
+- (NSDictionary *)getQChatTokenWithBusinessLineName:(NSString *)businessLineName;
 
 - (NSDictionary *)getQVTForQChat;
 

@@ -1629,11 +1629,11 @@ static QIMManager *__IMManager = nil;
     }
 }
 
-- (NSDictionary *)getQChatToken {
+- (NSDictionary *)getQChatTokenWithBusinessLineName:(NSString *)businessLineName {
     
     NSString *desturl = @"https://qcweb.qunar.com/api/http_gettk";
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:desturl]];
-    NSDictionary *params = @{@"macCode": [[QIMAppInfo sharedInstance] macAddress], @"plat": @"app"};
+    NSDictionary *params = @{@"macCode": [[QIMAppInfo sharedInstance] macAddress], @"plat": (businessLineName.length > 0) ? businessLineName : @"app"};
     NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:params error:nil];
     [request addRequestHeader:@"content-type" value:@"application/json"];
     [request appendPostData:data];

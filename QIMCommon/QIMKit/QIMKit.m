@@ -250,8 +250,8 @@ static QIMKit *__global_QIMKit = nil;
     [[QIMManager sharedInstance] setNotSendText:text inputItems:inputItems ForJid:jid];
 }
 
-- (NSDictionary *)getQChatToken {
-    return [[QIMManager sharedInstance] getQChatToken];
+- (NSDictionary *)getQChatTokenWithBusinessLineName:(NSString *)businessLineName {
+    return [[QIMManager sharedInstance] getQChatTokenWithBusinessLineName:businessLineName];
 }
 
 - (NSDictionary *)getQVTForQChat {
