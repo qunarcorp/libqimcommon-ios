@@ -36,7 +36,16 @@
     QIMVerboseLog(@"强制塞本地单人消息时间戳到为 kGetSingleHistoryMsgError : %f完成", self.lastSingleMsgTime);
     
     QIMVerboseLog(@"强制塞本地单人消息消息时间戳完成之后再取一下本地错误时间戳 : %lld", [[[QIMUserCacheManager sharedInstance] userObjectForKey:kGetSingleHistoryMsgError] longLongValue]);
-    self.lastSingleReadFlagMsgTime = self.lastSingleMsgTime;
+    
+    long long defaultTime2 = ([[NSDate date] timeIntervalSince1970] - self.serverTimeDiff - 3600 * 24 * 2) * 1000;
+    long long errorTime2 = [[[QIMUserCacheManager sharedInstance] userObjectForKey:kGetSingleReadFlagError] longLongValue];
+    if (errorTime2 > 0) {
+        self.lastSingleReadFlagMsgTime = errorTime2;
+        QIMVerboseLog(@"本地单人消息已读z未读状态错误时间戳 : %lld", errorTime2);
+    } else {
+        self.lastSingleReadFlagMsgTime = self.lastSingleMsgTime;
+    }
+    
     QIMVerboseLog(@"最终获取到的本地单人最后消息时间戳为 : %lf", self.lastSingleMsgTime);
     QIMVerboseLog(@"最终获取到的本地单人已读未读最后消息时间戳为 : %lf", self.lastSingleReadFlagMsgTime);
 }
@@ -78,12 +87,20 @@
                 NSArray *data = [result objectForKey:@"data"];
 #warning 这里更新本地数据库本人已发送的消息状态
                 [[IMDataManager sharedInstance] bulkUpdateMessageReadStateWithMsg:data];
+                QIMVerboseLog(@"移除已读未读状态时间戳");
+                [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:kGetSingleReadFlagError];
             } else {
                 if (errcode == 5000) {
                     [self updateRemoteLoginKey];
                 }
                 QIMErrorLog(@"请求消息阅读状态失败，失败原因: %@", [result objectForKey:@"errmsg"]);
+                QIMVerboseLog(@"重新设置已读未读状态时间戳");
+                [[QIMUserCacheManager sharedInstance] setUserObject:@(self.lastSingleReadFlagMsgTime) forKey:kGetSingleReadFlagError];
             }
+        } else {
+            QIMErrorLog(@"请求消息阅读状态失败了");
+            QIMVerboseLog(@"重新设置已读未读状态时间戳");
+            [[QIMUserCacheManager sharedInstance] setUserObject:@(self.lastSingleReadFlagMsgTime) forKey:kGetSingleReadFlagError];
         }
     } failure:^(NSError *error) {
         

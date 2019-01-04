@@ -118,35 +118,36 @@
             NSData *responseData = [request responseData];
             result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         } else {
+            getMucHistorySuccess == NO;
             QIMErrorLog(@"获取群历史记录失败了了了 : %@, [request responseStatusCode] : %d", error, [request responseStatusCode]);
         }
-        
-        int errCode = [[result objectForKey:@"errcode"] intValue];
-        if (errCode == 0) {
-            NSArray *data = [result objectForKey:@"data"];
-            QIMVerboseLog(@"获取群历史记录成功。 : %lu", (unsigned long)data.count);
-            if (data.count >= DEFAULT_GROUPMSG_NUM) {
-                self.latestGroupMessageFlag = YES;
+        if (result.count > 0) {
+            int errCode = [[result objectForKey:@"errcode"] intValue];
+            if (errCode == 0) {
+                NSArray *data = [result objectForKey:@"data"];
+                QIMVerboseLog(@"获取群历史记录成功。 : %lu", (unsigned long)data.count);
+                if (data.count >= DEFAULT_GROUPMSG_NUM) {
+                    self.latestGroupMessageFlag = YES;
+                } else {
+                    self.latestGroupMessageFlag = NO;
+                }
+                QIMVerboseLog(@"是否还要继续拉取群离线消息 : %d", self.latestGroupMessageFlag);
+                [self dealWithGroupMsg:data];
+                getMucHistorySuccess = YES;
             } else {
-                self.latestGroupMessageFlag = NO;
+                if (errCode == 5000) {
+                    [self updateRemoteLoginKey];
+                }
+                QIMErrorLog(@"获取群历史记录失败,ErrMsg:%@", result);
             }
-            QIMVerboseLog(@"是否还要继续拉取群离线消息 : %d", self.latestGroupMessageFlag);
-            [self dealWithGroupMsg:data];
-            getMucHistorySuccess = YES;
         } else {
-            if (errCode == 5000) {
-                [self updateRemoteLoginKey];
-            }
-            QIMErrorLog(@"获取群历史记录失败,ErrMsg:%@", result);
+            getMucHistorySuccess == NO;
+            QIMErrorLog(@"获取群历史记录失败了了了, 没有result");
         }
+
         if (getMucHistorySuccess == NO) {
-            if (self.lastGroupMsgTime) {
-                QIMWarnLog(@"set本地群最后消息时间戳为 : %lf", self.lastGroupMsgTime);
-                [[QIMUserCacheManager sharedInstance] setUserObject:@(self.lastGroupMsgTime) forKey:kGetGroupHistoryMsgError];
-            } else {
-                QIMWarnLog(@"remove本地群最后消息时间戳");
-                [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:kGetGroupHistoryMsgError];
-            }
+            QIMWarnLog(@"拉历史失败之后set本地群最后消息时间戳为 : %lf", self.lastGroupMsgTime);
+            [[QIMUserCacheManager sharedInstance] setUserObject:@(self.lastGroupMsgTime) forKey:kGetGroupHistoryMsgError];
         } else {
             QIMVerboseLog(@"remove本地群最后消息时间戳");
             [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:kGetGroupHistoryMsgError];
@@ -317,13 +318,10 @@
         __block NSDictionary *result = nil;
         [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
              QIMVerboseLog(@"获取群阅读指针结果 : %@", response);
-             if (response.code != 200) {
-                 result;
-             }
              result = [[QIMJSONSerializer sharedInstance] deserializeObject:response.data error:nil];
              BOOL errcode = [[result objectForKey:@"ret"] boolValue];
              NSString *errmsg = [result objectForKey:@"errmsg"];
-             if (errcode != 0) {
+             if (errcode != 0 && result.count > 0 && response.code == 200) {
                  NSMutableArray *mucData = [result objectForKey:@"data"];
              
                  long long maxMucReadMarkTime = [[IMDataManager sharedInstance] qimDB_bulkUpdateGroupMessageReadFlag:mucData];

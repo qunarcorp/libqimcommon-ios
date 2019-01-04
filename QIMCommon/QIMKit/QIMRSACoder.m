@@ -404,35 +404,38 @@ char* bio_read_publicKey(const char* data, const char *filepath, int *len)
         path = [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:fileName ofType:@"pem"];
     }
     QIMVerboseLog(@"EncryptRSA FileName : %@, Path : %@", fileName, path);
-    RSA *rsa = [self rsaWithPublickeyFile:path];
-    
-    int len = RSA_size(rsa);
-    
-    NSInteger flen = len - 11;
-    
-    
-    char *encData = (char*)malloc(flen);
-    bzero(encData, flen);
-    
-    status = RSA_public_encrypt(length,
-                                (unsigned char*)input,
-                                (unsigned char*)encData,
-                                rsa,
-                                RSA_PKCS1_PADDING);
-    
-    if (status != -1)
-    {
-        NSData *returnData = [NSData dataWithBytes:encData length:status];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
+        RSA *rsa = [self rsaWithPublickeyFile:path];
+        
+        int len = RSA_size(rsa);
+        
+        NSInteger flen = len - 11;
+        
+        
+        char *encData = (char*)malloc(flen);
+        bzero(encData, flen);
+        
+        status = RSA_public_encrypt(length,
+                                    (unsigned char*)input,
+                                    (unsigned char*)encData,
+                                    rsa,
+                                    RSA_PKCS1_PADDING);
+        
+        if (status != -1)
+        {
+            NSData *returnData = [NSData dataWithBytes:encData length:status];
+            free(encData);
+            encData = NULL;
+            
+            NSString *ret = [returnData base64EncodedStringWithOptions:0];
+            return ret;
+        }
+        
         free(encData);
         encData = NULL;
         
-        NSString *ret = [returnData base64EncodedStringWithOptions:0];
-        return ret;
+        return nil;
     }
-    
-    free(encData);
-    encData = NULL;
-    
     return nil;
 }
 
@@ -453,35 +456,38 @@ char* bio_read_publicKey(const char* data, const char *filepath, int *len)
         path = [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:fileName ofType:@"pem"];
     }
     QIMVerboseLog(@"EncryptRSA FileName : %@, Path : %@", fileName, path);
-    RSA *rsa = [self rsaWithPublickeyFile:path];
-    
-    int len = RSA_size(rsa);
-    
-    NSInteger flen = len - 11;
-    
-    
-    char *encData = (char*)malloc(flen);
-    bzero(encData, flen);
-    
-    status = RSA_public_encrypt(length,
-                                (unsigned char*)input,
-                                (unsigned char*)encData,
-                                rsa,
-                                RSA_PKCS1_PADDING);
-    
-    if (status != -1)
-    {
-        NSData *returnData = [NSData dataWithBytes:encData length:status];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
+        RSA *rsa = [self rsaWithPublickeyFile:path];
+        
+        int len = RSA_size(rsa);
+        
+        NSInteger flen = len - 11;
+        
+        
+        char *encData = (char*)malloc(flen);
+        bzero(encData, flen);
+        
+        status = RSA_public_encrypt(length,
+                                    (unsigned char*)input,
+                                    (unsigned char*)encData,
+                                    rsa,
+                                    RSA_PKCS1_PADDING);
+        
+        if (status != -1)
+        {
+            NSData *returnData = [NSData dataWithBytes:encData length:status];
+            free(encData);
+            encData = NULL;
+            
+            NSString *ret = [returnData base64EncodedStringWithOptions:0];
+            return ret;
+        }
+        
         free(encData);
         encData = NULL;
         
-        NSString *ret = [returnData base64EncodedStringWithOptions:0];
-        return ret;
+        return nil;
     }
-    
-    free(encData);
-    encData = NULL;
-    
     return nil;
 }
 

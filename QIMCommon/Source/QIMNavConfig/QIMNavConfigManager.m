@@ -804,10 +804,11 @@
 
 - (NSString *)qimNav_getRSACertificateCachePath {
     NSString *certificateCache = [UserCachesPath stringByAppendingString:@"CertificateCache/"];
-    if ([[NSFileManager defaultManager] fileExistsAtPath:certificateCache] == NO) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:certificateCache withIntermediateDirectories:YES attributes:nil error:nil];
+    NSString *certificateDirectoryPath = [certificateCache stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/", self.xmppHost]];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:certificateDirectoryPath] == NO) {
+        [[NSFileManager defaultManager] createDirectoryAtPath:certificateDirectoryPath withIntermediateDirectories:YES attributes:nil error:nil];
     }
-    return certificateCache;
+    return certificateDirectoryPath;
 }
 
 - (NSString *)qimNav_getRSACodePublicKeyPathWithFileName:(NSString *)fileName {
