@@ -2,8 +2,8 @@
 Pod::Spec.new do |s|
 
   s.name         = "QIMCommon"
-  s.version      = "1.1.0-beta"
-  s.summary      = "Qunar chat App 6.0+ version QIMCommon"
+  s.version      = "1.1.1-beta"
+  s.summary      = "Qunar chat App 9.0+ version QIMCommon"
   s.description  = <<-DESC
                    Qunar QIMCommon解决方案
 
@@ -44,6 +44,7 @@ Pod::Spec.new do |s|
   
   if $debug
     puts 'debug QIMCommon依赖第三方库'
+    s.dependency 'QIMOpenSSL', '~> 1.0.1-beta'
 
   else
   
