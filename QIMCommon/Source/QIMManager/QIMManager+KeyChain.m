@@ -63,6 +63,10 @@
     [QIMUUIDTools setUUIDToolsFriendList:friendListStr];
 }
 
++ (void)updateRequestFileURL {
+    [QIMUUIDTools setRequestFileURL:[[[QIMNavConfigManager sharedInstance] innerFileHttpHost] dataUsingEncoding:NSUTF8StringEncoding]];
+}
+
 + (void)updateRequestURL {
     [QIMUUIDTools setRequestURL:[[[QIMNavConfigManager sharedInstance] httpHost] dataUsingEncoding:NSUTF8StringEncoding]];
 }

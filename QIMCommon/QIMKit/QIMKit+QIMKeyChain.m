@@ -22,6 +22,10 @@
     [QIMManager updateFriendListToKeyChain];
 }
 
++ (void)updateRequestFileURL {
+    [QIMManager updateRequestFileURL];
+}
+
 + (void)updateRequestURL {
     [QIMManager updateRequestURL];
 }

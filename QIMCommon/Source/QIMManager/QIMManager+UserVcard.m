@@ -599,25 +599,12 @@
 
 - (void)updateMyCard {
     
-    int size = 90;
-    /*
-    NSArray *list = [self updateUserCard:@[[self getLastJid]]];
-    QIMVerboseLog(@"更新我的名片 : %@", list);
-    if (list.count > 0) {
-        NSDictionary *cardDic = [list objectAtIndex:0];
-        if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
-            NSString *type = [cardDic objectForKey:@"type"];
-            if ([type isEqualToString:@"merchant"]) {
-                [self setIsMerchant:YES];
-            } else {
-                [self setIsMerchant:NO];
-            }
-        }
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMyHeaderImgaeUpdateSuccess object:nil];
-        });
-    }
-    */
+    [self updateUserCard:@[[self getLastJid]]];
+    NSString *headerSrc = [[QIMManager sharedInstance] getUserBigHeaderImageUrlWithUserId:[self getLastJid]];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMyHeaderImgaeUpdateSuccess object:@{@"ok":@(YES), @"headerUrl":(headerSrc.length > 0) ? headerSrc : @""}];
+    });
 }
 
 - (void)updateMyPhoto:(NSData *)photoData {
