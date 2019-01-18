@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "QIMCommon"
-  s.version      = "1.1.10-gbeta"
+  s.version      = "1.0.0"
   s.summary      = "Qunar chat App 9.0+ version QIMCommon"
   s.description  = <<-DESC
                    Qunar QIMCommon解决方案
@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
   s.license      = "Copyright 2018 im.qunar.com"
   s.author        = { "Qunar IM" => "qtalk@qunar.com" }
 
-  s.source       = { :git => "", :tag=> s.version.to_s}
+  s.source       = { :git => "https://github.com/qunarcorp/libqimcommon-ios.git", :tag=> s.version.to_s}
 
   s.ios.deployment_target   = '9.0'
 
@@ -39,15 +39,15 @@ Pod::Spec.new do |s|
   
   if $debug
     puts 'debug QIMCommon依赖第三方库'
-    s.dependency 'QIMOpenSSL', '~> 1.beta'
+    s.dependency 'QIMOpenSSL'
 
   else
   
     puts '线上release QIMCommon依赖第三方库'
-    s.dependency 'QIMOpenSSL', '~> 1.beta'
-    s.dependency 'QIMKitVendor', '~> 1.beta'
-    s.dependency 'QIMDataBase', '~> 1.beta'
-    s.dependency 'QIMPublicRedefineHeader', '~> 0.beta'
+    s.dependency 'QIMOpenSSL'
+    s.dependency 'QIMKitVendor'
+    s.dependency 'QIMDataBase'
+    s.dependency 'QIMPublicRedefineHeader'
   end
   
   s.dependency 'ASIHTTPRequest'
