@@ -1685,7 +1685,7 @@ static IMDataManager *__global_data_manager = nil;
     if (groupId.length <= 0) {
         return nil;
     }
-    [[QIMWatchDog sharedInstance] start];
+    CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
     __block NSMutableDictionary *groupCardDic = nil;
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
         NSString *sql = @"Select GroupId, Name, Introduce, HeaderSrc, Topic, LastUpdateTime From IM_Group Where GroupId = :GroupId;";
@@ -1710,7 +1710,7 @@ static IMDataManager *__global_data_manager = nil;
             [IMDataManager safeSaveForDic:groupCardDic setObject:lastUpdateTime forKey:@"LastUpdateTime"];
         }
     }];
-    QIMVerboseLog(@"数据库取群名片耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTime]);
+    QIMVerboseLog(@"数据库取群名片耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]);
     return [groupCardDic autorelease];
 }
 
@@ -2298,7 +2298,7 @@ static IMDataManager *__global_data_manager = nil;
 }
 
 - (long long) lastestGroupMessageTime {
-    [[QIMWatchDog sharedInstance] start];
+    CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
     __block long long maxRemoteTimeStamp = 0;
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
         NSString *newSql = @"select LastUpdateTime from IM_Message Where ChatType = 1 And (State == 2 Or State == 16) ORDER by LastUpdateTime desc limit(1);";
@@ -2314,7 +2314,7 @@ static IMDataManager *__global_data_manager = nil;
             }
         }
     }];
-    QIMVerboseLog(@"取个群时间戳这么长时间 : %llf", [[QIMWatchDog sharedInstance] escapedTime]);
+    QIMVerboseLog(@"取个群时间戳这么长时间 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]);
     return maxRemoteTimeStamp;
 }
 
@@ -3528,7 +3528,7 @@ static IMDataManager *__global_data_manager = nil;
     if (msgList.count <= 0) {
         return;
     }
-    [[QIMWatchDog sharedInstance] start];
+    CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
         
         NSString *sql = @"insert or IGNORE into IM_Message(MsgId, XmppId, \"From\", \"To\", Content, Platform, Type, State, Direction,LastUpdateTime,ReadedTag,MessageRaw,RealJid, ChatType, ExtendInfo) values(:MsgId, :XmppId, :From, :To, :Content, :Platform, :Type, :State, :Direction, :LastUpdateTime, :ReadedTag,:MessageRaw,:RealJid, :ChatType, :ExtendInfo);";
@@ -3573,12 +3573,13 @@ static IMDataManager *__global_data_manager = nil;
         [params release];
         
     }];
-    QIMVerboseLog(@"插入%ld条消息， 耗时 : %lf", msgList.count, [[QIMWatchDog sharedInstance] escapedTime]);
+    QIMVerboseLog(@"插入%ld条消息， 耗时 : %lf", msgList.count, [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]);
 }
 
 // msg Key
 - (void)bulkInsertMessage:(NSArray *)msgList WihtSessionId:(NSString *)sessionId{
     
+    CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
     [[self dbInstance] usingTransaction:^(Database *database) {
         
         NSString *sql = @"insert or IGNORE into IM_Message(MsgId, XmppId, \"From\", \"To\", Content, Platform, Type, State, Direction,LastUpdateTime,ReadedTag,MessageRaw, RealJid, ExtendInfo) values(:MsgId, :XmppId, :From, :To, :Content, :Platform, :Type, :State, :Direction, :LastUpdateTime, :ReadedTag,:MessageRaw, :RealJid, :ExtendInfo);";
@@ -3621,7 +3622,7 @@ static IMDataManager *__global_data_manager = nil;
         [database executeBulkInsert:sql withParameters:params];
         [params release];
     }];
-    QIMVerboseLog(@"插入会话%@ %ld条消息， 耗时 : %lf",sessionId, msgList.count, [[QIMWatchDog sharedInstance] escapedTime]);
+    QIMVerboseLog(@"插入会话%@ %ld条消息， 耗时 : %lf",sessionId, msgList.count, [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]);
 }
 
 - (void)updateMsgState:(int)msgState WithMsgId:(NSString *)msgId{
@@ -4134,7 +4135,7 @@ static IMDataManager *__global_data_manager = nil;
 
 - (NSArray *)qimDB_getNotReadMsgListForUserId:(NSString *)userId {
     __block NSMutableArray *result = nil;
-    [[QIMWatchDog sharedInstance] start];
+    CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
         NSString *sql = @"Select MsgId From IM_Message Where XmppId = :XmppId And State <= :State And Direction = :MsgDirection;";
         NSMutableArray *param = [[NSMutableArray alloc] init];
@@ -4156,7 +4157,7 @@ static IMDataManager *__global_data_manager = nil;
             }
         }
     }];
-    QIMVerboseLog(@"查未读消息MsgIds耗时: %llf", [[QIMWatchDog sharedInstance] escapedTime]);
+    QIMVerboseLog(@"查未读消息MsgIds耗时: %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]);
     return [result autorelease];
 }
 
@@ -4291,7 +4292,7 @@ static IMDataManager *__global_data_manager = nil;
 }
 
 - (NSArray *)qimDB_getMgsListBySessionId:(NSString *)sesId WithRealJid:(NSString *)realJid WithLimit:(int)limit WihtOffset:(int)offset{
-    [[QIMWatchDog sharedInstance] start];
+    CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
     if (sesId == nil) {
         return nil;
     }
@@ -4363,7 +4364,7 @@ static IMDataManager *__global_data_manager = nil;
         [tempList release];
 //        [replyMsgDic release];
     }];
-    QIMVerboseLog(@"sql取消息耗时。: %llf", [[QIMWatchDog sharedInstance] escapedTime]);
+    QIMVerboseLog(@"sql取消息耗时。: %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]);
     return [result autorelease];
 }
 
@@ -4636,7 +4637,7 @@ static IMDataManager *__global_data_manager = nil;
 
 - (NSInteger)getNotReaderMsgCountByDidReadState:(int)didReadState WidthReceiveDirection:(int)receiveDirection{
     __block NSInteger count = 0;
-//    [[QIMWatchDog sharedInstance] start];
+    CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
         NSString *sql = @"SELECT COUNT(*) FROM IM_Message Where State < :State And Direction = :Direction And Type != 101;";
         DataReader *reader = [database executeReader:sql withParameters:@[@(didReadState),@(receiveDirection)]];
@@ -4644,13 +4645,13 @@ static IMDataManager *__global_data_manager = nil;
             count = [[reader objectForColumnIndex:0] integerValue];
         }
     }];
-//    QIMVerboseLog(@"获取未读数耗时 :%lf", [[QIMWatchDog sharedInstance] escapedTime]);
+    QIMVerboseLog(@"获取未读数耗时 :%lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]);
     return count;
 }
 
 - (NSInteger)getNotReaderMsgCountByJid:(NSString *)jid ByDidReadState:(int)didReadState WidthReceiveDirection:(int)receiveDirection{
     __block NSInteger count = 0;
-//    [[QIMWatchDog sharedInstance] start];
+    CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
         NSString *sql = @"SELECT COUNT(*) FROM IM_Message Where XmppId = :XmppId And State < :State And Direction=:Direction;";
         DataReader *reader = [database executeReader:sql withParameters:@[jid ? jid : @"",@(didReadState),@(receiveDirection)]];
@@ -4658,7 +4659,7 @@ static IMDataManager *__global_data_manager = nil;
             count = [[reader objectForColumnIndex:0] integerValue];
         }
     }];
-//    QIMVerboseLog(@"获取不提醒未读数耗时 :%lf", [[QIMWatchDog sharedInstance] escapedTime]);
+    QIMVerboseLog(@"获取不提醒未读数耗时 :%lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]);
     return count;
 }
 
@@ -4906,7 +4907,7 @@ static IMDataManager *__global_data_manager = nil;
 }
 
 - (long long) lastestMessageTime {
-    [[QIMWatchDog sharedInstance] start];
+    CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
     __block long long maxRemoteTime = 0;
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
         NSString *newSql = @"select LastUpdateTime from IM_Message Where ChatType=0 And (State == 2 OR State == 16 Or State == 15) ORDER by LastUpdateTime desc limit(1);";
@@ -4923,7 +4924,7 @@ static IMDataManager *__global_data_manager = nil;
             }
         }
     }];
-    QIMVerboseLog(@"取个时间戳这么长时间 : %llf", [[QIMWatchDog sharedInstance] escapedTime]);
+    QIMVerboseLog(@"取个时间戳这么长时间 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]);
     return maxRemoteTime;
 }
 

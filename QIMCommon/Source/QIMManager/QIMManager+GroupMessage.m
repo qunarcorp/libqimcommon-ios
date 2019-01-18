@@ -289,9 +289,7 @@
     }
     __block BOOL getMucReadMarkSuccess = NO;
     NSString *jid = [QIMManager getLastUserName];
-    if ([jid length] > 0) {
-        [[QIMWatchDog sharedInstance] start];
-        
+    if ([jid length] > 0) {        
         NSString *destUrl = [NSString stringWithFormat:@"%@/qtapi/get_muc_readmark1.qunar?server=%@&c=qtalk&u=%@&k=%@&p=iOS&v=%@",
                              [[QIMNavConfigManager sharedInstance] javaurl],
                              [[XmppImManager sharedInstance] domain],
