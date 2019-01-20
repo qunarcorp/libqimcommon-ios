@@ -433,13 +433,13 @@ static QIMManager *__IMManager = nil;
         QIMVerboseLog(@"开始获取单人历史记录2");
         CFAbsoluteTime startTime1 = [[QIMWatchDog sharedInstance] startTime];
         [self updateOfflineMessagesV2];
-        QIMVerboseLog(@"获取单人历史记录2loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime1]);
+        QIMVerboseLog(@"获取单人历史记录2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime1]);
         QIMVerboseLog(@"获取单人历史记录结束2");
 
         QIMVerboseLog(@"开始获取消息已读状态2");
         CFAbsoluteTime startTime2 = [[QIMWatchDog sharedInstance] startTime];
         [self getReadFlag];
-        QIMVerboseLog(@"获取消息已读状态2loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime2]);
+        QIMVerboseLog(@"获取消息已读状态2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime2]);
         QIMVerboseLog(@"获取消息已读状态结束2");
 
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -451,7 +451,7 @@ static QIMManager *__IMManager = nil;
         QIMVerboseLog(@"开始获取群历史记录2");
         CFAbsoluteTime startTime3 = [[QIMWatchDog sharedInstance] startTime];
         [self updateOfflineGroupMessages];
-        QIMVerboseLog(@"获取群历史记录2loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime3]);
+        QIMVerboseLog(@"获取群历史记录2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime3]);
         QIMVerboseLog(@"获取群历史记录结束2");
 
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -469,7 +469,7 @@ static QIMManager *__IMManager = nil;
         QIMVerboseLog(@"开始获取群阅读指针2");
         CFAbsoluteTime startTime4 = [[QIMWatchDog sharedInstance] startTime];
         [self updateMucReadMark];
-        QIMVerboseLog(@"获取群阅读指针2loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime4]);
+    QIMVerboseLog(@"获取群阅读指针2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime4]);
         QIMVerboseLog(@"获取群阅读指针结束2");
         dispatch_async(dispatch_get_main_queue(), ^{
             QIMVerboseLog(@"获取阅读指针之后再次强制刷新列表页");
@@ -481,7 +481,7 @@ static QIMManager *__IMManager = nil;
         QIMVerboseLog(@"开始获取系统历史记录2");
         CFAbsoluteTime startTime5 = [[QIMWatchDog sharedInstance] startTime];
         [self updateOfflineSystemNoticeMessages];
-        QIMVerboseLog(@"获取系统历史记录2loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime5]);
+        QIMVerboseLog(@"获取系统历史记录2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime5]);
         QIMVerboseLog(@"获取系统历史记录结束2");
         
         // 更新未发送的消息状态为失败
@@ -489,44 +489,44 @@ static QIMManager *__IMManager = nil;
         QIMVerboseLog(@"开始同步服务端漫游的个人配置2");
         CFAbsoluteTime startTime6 = [[QIMWatchDog sharedInstance] startTime];
         [self getRemoteClientConfig];
-        QIMVerboseLog(@"同步服务端漫游的个人配置2loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime6]);
+        QIMVerboseLog(@"同步服务端漫游的个人配置2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime6]);
         QIMVerboseLog(@"同步服务端漫游的个人配置完成2");
         
         if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
             QIMVerboseLog(@"开始获取我的关联账户2");
             CFAbsoluteTime startTime7 = [[QIMWatchDog sharedInstance] startTime];
             [self getRemoteCollectionAccountList];
-            QIMVerboseLog(@"获取我的关联账户2loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime7]);
+            QIMVerboseLog(@"获取我的关联账户2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime7]);
             
             QIMVerboseLog(@"开始同步公众号列表2");
             CFAbsoluteTime startTime8 = [[QIMWatchDog sharedInstance] startTime];
             [self updatePublicNumberList];
-            QIMVerboseLog(@"同步公众号列表2loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime8]);
+            QIMVerboseLog(@"同步公众号列表2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime8]);
             QIMVerboseLog(@"同步公众号列表完成2");
         }
         
         QIMVerboseLog(@"开始Check组织架构2");
         CFAbsoluteTime startTime9 = [[QIMWatchDog sharedInstance] startTime];
         [self checkRosterListWithForceUpdate:NO];
-        QIMVerboseLog(@"Check组织架构2loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime9]);
+        QIMVerboseLog(@"Check组织架构2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime9]);
         QIMVerboseLog(@"Check组织架构结束2");
     
         QIMVerboseLog(@"开始请求增量群列表");
         CFAbsoluteTime startTime10 = [[QIMWatchDog sharedInstance] startTime];
         [self quickJoinAllGroup];
-        QIMVerboseLog(@"快速入群完成2loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime10]);
+        QIMVerboseLog(@"快速入群完成2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime10]);
         QIMVerboseLog(@"快速入群完成2");
             
         QIMVerboseLog(@"开始TCP发送已送达消息状态2");
         CFAbsoluteTime startTime11 = [[QIMWatchDog sharedInstance] startTime];
         [self sendRecevieMessageState];
-        QIMVerboseLog(@"TCP发送已送达消息状态2loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime11]);
+        QIMVerboseLog(@"TCP发送已送达消息状态2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime11]);
         QIMVerboseLog(@"TCP发送已送达消息状态结束2");
         
         QIMVerboseLog(@"开始同步消息推送设置2");
         CFAbsoluteTime startTime12 = [[QIMWatchDog sharedInstance] startTime];
         [self getMsgNotifyRemoteSettings];
-        QIMVerboseLog(@"同步消息推送设置2loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime12]);
+        QIMVerboseLog(@"同步消息推送设置2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime12]);
         QIMVerboseLog(@"同步同步消息推送设置2");
             
         //24 小时拿一次
@@ -543,16 +543,16 @@ static QIMManager *__IMManager = nil;
         
         CFAbsoluteTime startTime13 = [[QIMWatchDog sharedInstance] startTime];
         [self sendPushTokenWithMyToken:[[QIMAppInfo sharedInstance] pushToken] WithDeleteFlag:NO];
-        QIMVerboseLog(@"注册Token1loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime13]);
+        QIMVerboseLog(@"注册Token1loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime13]);
         
         // 更新好友列表
         CFAbsoluteTime startTime14 = [[QIMWatchDog sharedInstance] startTime];
         [self updateFriendList];
-        QIMVerboseLog(@"更新好友列表loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime14]);
+    QIMVerboseLog(@"更新好友列表loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime14]);
         
         CFAbsoluteTime startTime15 = [[QIMWatchDog sharedInstance] startTime];
         [self updateFriendInviteList];
-        QIMVerboseLog(@"邀请好友申请loginComplate耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime15]);
+    QIMVerboseLog(@"邀请好友申请loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime15]);
         
         if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
             QIMVerboseLog(@"客服获取快捷回复");

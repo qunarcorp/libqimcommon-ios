@@ -241,6 +241,9 @@
                                   };
         QIMVerboseLog(@"请求单人离线JSON消息 Url : %@, Body参数 ：%@", destUrl, jsonDic);
         destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        
+        CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
+        
         NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:jsonDic error:nil];
         ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
         [request setUseCookiePersistence:NO];
@@ -253,6 +256,7 @@
         [request appendPostData:data];
         
         [request startSynchronous];
+        QIMVerboseLog(@"获取单人历史记录Url: %@,Body 参数 : %@ loginComplate耗时 : %llf", destUrl, jsonDic, [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]);
         NSError *error = [request error];
         if ([request responseStatusCode] == 200 && !error) {
             NSData *responseData = [request responseData];

@@ -93,6 +93,9 @@
         }
         long long lastMsgTime = self.lastGroupMsgTime;
         destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        
+        CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
+        
         NSMutableDictionary *params = [NSMutableDictionary dictionary];
         [params setQIMSafeObject:@(lastMsgTime) forKey:@"time"];
         [params setQIMSafeObject:jid forKey:@"user"];
@@ -112,6 +115,9 @@
         [request setRequestHeaders:cookieProperties];
         [request appendPostData:data];
         [request startSynchronous];
+        
+        QIMVerboseLog(@"获取群历史记录Url : %@, Body参数: %@ loginComplate耗时 : %llf", destUrl, params, [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]);
+        
         NSError *error = [request error];
         NSDictionary *result = nil;
         if ([request responseStatusCode] == 200 && !error) {

@@ -721,6 +721,9 @@
                 [[IMDataManager sharedInstance] bulkUpdateUserBackInfo:userBackInfo WithXmppId:userId];
                 
                 userWorkInfo = [NSDictionary dictionaryWithDictionary:data];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kUpdateUserLeaderCard object:@{@"UserId":userId, @"userLead":workInfo}];
+                });
             }
         }
     } else {

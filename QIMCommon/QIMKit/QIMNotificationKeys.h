@@ -155,6 +155,8 @@
 #define kGroupCardChanged                   @"kGroupCardChanged"
 #define kUpdateUserCard                     @"kUpdateUserCard"
 
+#define kUpdateUserLeaderCard               @"kUpdateUserLeaderCard"
+
 #define kUpdateUserMedal                    @"kUpdateUserMedal"
 
 #define kRightCardRemindNotification        @"kRightCardRemindNotification"
