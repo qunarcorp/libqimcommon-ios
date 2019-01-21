@@ -40,7 +40,6 @@
     
     [[XmppImManager sharedInstance] addTarget:self method:@selector(receiveSystemMsg:) withXmppEvent:XmppEvent_SystemMessageIn];
     
-    [[XmppImManager sharedInstance] addTarget:self method:@selector(receiveImage:) withXmppEvent:XmppEvent_ImageIn];
     [[XmppImManager sharedInstance] addTarget:self method:@selector(receiveShareLocationMsg:) withXmppEvent:XmppEvent_ShareLocation];
     [[XmppImManager sharedInstance] addTarget:self method:@selector(receiveGroupImage:) withXmppEvent:XmppEvent_GroupImageIn];
     
@@ -1584,50 +1583,6 @@
                 }
             });
         }
-    });
-}
-
-- (void)receiveImage:(NSDictionary *)msgDic {
-    if (msgDic == nil) {
-        return;
-    }
-    dispatch_async(self.receive_msg_queue, ^{
-        NSString *sid = [NSString stringWithFormat:@"%@@%@", [msgDic objectForKey:@"fromId"], [msgDic objectForKey:@"domain"]];
-        NSString *msg = [msgDic objectForKey:@"msg"];
-        long long msgDate = [[msgDic objectForKey:@"stamp"] timeIntervalSince1970] * 1000;
-        NSString *msgid = [msgDic objectForKey:@"msgId"];
-        NSString *msgRaw = [msgDic objectForKey:@"msgRaw"];
-        NSString *autoReply = [msgDic objectForKey:@"autoReply"];
-        if ([[IMDataManager sharedInstance] checkMsgId:msgid]) {
-            return;
-        }
-        [self checkMsgTimeWithJid:sid WithMsgDate:msgDate WithGroup:NO];
-        
-        Message *mesg = [Message new];
-        [mesg setFrom:sid];
-        [mesg setMessageId:msgid];
-        [mesg setMessageType:QIMMessageType_Text];
-        [mesg setMessageDirection:MessageDirection_Received];
-        [mesg setMessage:msg];
-        [mesg setChatType:ChatType_SingleChat];
-        [mesg setMessageDate:msgDate];
-        [mesg setMsgRaw:msgRaw];
-        // 消息落地
-        if (![autoReply isEqualToString:@"true"]) {
-            [self saveMsg:mesg ByJid:sid];
-        }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationMessageUpdate object:sid userInfo:@{@"message": mesg}];
-            [self addSessionByType:ChatType_SingleChat ById:sid ByMsgId:mesg.messageId WithMsgTime:mesg.messageDate WithNeedUpdate:YES];
-            
-            if (![sid isEqualToString:self.currentSessionUserId] && mesg.messageDirection == MessageDirection_Received) {
-                [self increasedNotReadMsgCountByJid:sid];
-                [self updateNotReadCountCacheByJid:sid];
-                [self playSound];
-            }
-        });
-        
     });
 }
 

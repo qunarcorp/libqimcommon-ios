@@ -34,7 +34,6 @@ enum XmppEvent {
     XmppEvent_MessageIn,
     XmppeventGroupMessageIn,
     
-    XmppEvent_ImageIn,
     XmppEvent_GroupImageIn,
     
     XmppEvent_FileIn,

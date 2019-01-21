@@ -583,36 +583,7 @@
     if (destId == nil || domain == nil) {
         return;
     }
-    if (msgType == QIMMessageType_Image) {
-        NSMutableArray *methods = [_eventMapping objectForKey:@(XmppEvent_ImageIn)];
-        NSDictionary *message = @{@"fromId": destId,
-                                  @"domain": domain,
-                                  @"msg": msg ? msg : @"",
-                                  @"stamp": date ? date : [NSDate date],
-                                  @"direction": @(direction),
-                                  @"msgId": msgId,
-                                  @"payformType": @(payformType),
-                                  @"msgType": @(msgType),
-                                  @"extendInfo": extendInfo ? extendInfo : @"",
-                                  @"chatId": chatId ? chatId : @"",
-                                  @"msgRaw": msgRaw ? msgRaw : @""
-                                  };
-        
-        for (NSDictionary *info in methods) {
-            if (info) {
-                id obj = [info objectForKey:@"object"];
-                NSString *method = [info objectForKey:@"method"];
-                SEL sel = NSSelectorFromString(method);
-                
-                [obj performSelector:sel
-                            onThread:[NSThread mainThread]
-                          withObject:message
-                       waitUntilDone:NO];
-            }
-        }
-    } else if (msgType == QIMMessageType_Voice) {
-        //add by dan.zheng 15/4/28  changed 15/4/30 changed 15/4/30 增加@"msgtype"  : @"msgVoice"字段来分辨是否voice格式
-        //        NSXMLElement *body = (NSXMLElement *) originalMsg;
+    if (msgType == QIMMessageType_Voice) {
         NSDictionary *message = @{@"fromId": destId,
                                   @"domain": domain,
                                   @"msg": msg ? msg : @"",
