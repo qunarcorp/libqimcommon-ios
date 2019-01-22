@@ -1414,7 +1414,7 @@ static QIMManager *__IMManager = nil;
 
 - (void)checkClientConfig {
     
-    NSString *title = [[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat ? @"qchat" : @"qtalk";
+    NSString *title = [[QIMAppInfo sharedInstance] appName];
     
     NSString *url = [NSString stringWithFormat:@"%@/config/check_config.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     NSURL *requestUrl = [NSURL URLWithString:url];

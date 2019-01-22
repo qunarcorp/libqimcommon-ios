@@ -14,6 +14,10 @@
     
 + (QIMProjectType)getQIMProjectType;
 
++ (void)setQIMProjectTitleName:(NSString *)appName;
+
++ (NSString *)getQIMProjectTitleName;
+
 /**
  获取推送的Token
 

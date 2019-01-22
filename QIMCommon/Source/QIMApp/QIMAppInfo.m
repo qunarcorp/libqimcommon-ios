@@ -37,6 +37,13 @@ static QIMAppInfo *__globalAppInfo = nil;
     return __globalAppInfo;
 }
 
+- (NSString *)appName {
+    if (_appName == nil) {
+        _appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+    }
+    return _appName;
+}
+
 - (NSString *)pushToken {
     
     return _pushToken;

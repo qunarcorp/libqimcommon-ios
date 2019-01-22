@@ -13,6 +13,7 @@
 
 @property (nonatomic, copy) NSString *pushToken;
 @property (nonatomic, assign) QIMProjectType appType;
+@property (nonatomic, copy) NSString *appName;
 
 + (id)sharedInstance;
 

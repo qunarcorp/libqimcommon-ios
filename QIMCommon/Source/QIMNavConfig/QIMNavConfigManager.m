@@ -207,11 +207,7 @@
     if (navUrlDict) {
         appNavTitle = navUrlDict[QIMNavNameKey];
     } else {
-        if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
-            appNavTitle = @"QTalk导航";
-        } else {
-            appNavTitle = @"QChat导航";
-        }
+        appNavTitle = [NSString stringWithFormat:@"%@导航", [[QIMAppInfo sharedInstance] appName]];
     }
     return appNavTitle;
 }
@@ -722,7 +718,7 @@
         NSString *user = [[[QIMUserCacheManager sharedInstance] userObjectForKey:@"kLastUserId"] lowercaseString];
         NSURL *url = [NSURL URLWithString:[self navUrl]];
         NSString *host = [url host];
-        NSString *advertConfigUrl = [NSString stringWithFormat:@"https://qt.qunar.com/advert/%@/advert.php?v=%@&p=%@&u=%@&debug=%@&ver=%d&nav=%@&mv=%@",[[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat ? @"qchat" : @"qtalk", appVersion, @"iphone",[user?user:@"unknow" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],[self debug]?@"true":@"false",oldVersion, host ? host : @"unkown",@"v2"];
+        NSString *advertConfigUrl = [NSString stringWithFormat:@"https://qt.qunar.com/advert/%@/advert.php?v=%@&p=%@&u=%@&debug=%@&ver=%d&nav=%@&mv=%@", [[QIMAppInfo sharedInstance] appName], appVersion, @"iphone",[user?user:@"unknow" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],[self debug]?@"true":@"false",oldVersion, host ? host : @"unkown",@"v2"];
         
         QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:advertConfigUrl]];
         request.shouldASynchronous = YES;

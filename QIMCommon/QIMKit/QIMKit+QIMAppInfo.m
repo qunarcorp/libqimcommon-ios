@@ -18,7 +18,15 @@
 + (QIMProjectType)getQIMProjectType {
     return [[QIMAppInfo sharedInstance] appType];
 }
-    
+
++ (void)setQIMProjectTitleName:(NSString *)appName {
+    [[QIMAppInfo sharedInstance] setAppName:appName];
+}
+
++ (NSString *)getQIMProjectTitleName {
+    return [[QIMAppInfo sharedInstance] appName];
+}
+
 - (NSString *)getPushToken {
     return [[QIMAppInfo sharedInstance] pushToken];
 }
