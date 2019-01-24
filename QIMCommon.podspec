@@ -47,7 +47,6 @@ Pod::Spec.new do |s|
     s.dependency 'QIMOpenSSL'
     s.dependency 'QIMKitVendor'
     s.dependency 'QIMDataBase'
-    s.dependency 'QIMPublicRedefineHeader'
   end
   
   s.dependency 'ASIHTTPRequest'
