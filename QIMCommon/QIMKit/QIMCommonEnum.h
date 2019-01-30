@@ -310,6 +310,7 @@ typedef enum : NSUInteger {
     QIMCategoryNotifyMsgTypeGlobalNotification = 98,    //全局通知
     QIMCategoryNotifyMsgTypeDesignatedNotification = 99, //指定通知
     QIMCategoryNotifyMsgTypeTickUser = 100,             //踢
+    QIMCategoryNotifyMsgTypeTickUserWorkWorldNotice = 12, //驼圈
 } QIMCategoryNotifyMsgType;
 
 typedef enum : NSUInteger {

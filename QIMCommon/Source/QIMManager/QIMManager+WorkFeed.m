@@ -487,23 +487,32 @@
             BOOL isDeleteFlag = [[data objectForKey:@"isDelete"] boolValue];
             if (isDeleteFlag == YES) {
                 NSString *commentUUID = [data objectForKey:@"commentUUID"];
-                [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:@[data]];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (callback) {
-                        callback(YES);
-                    }
-                });
+                if (commentUUID.length > 0) {
+                    NSDictionary *deleteCommentDic = @{@"uuid":commentUUID};
+                    [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:@[deleteCommentDic]];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (callback) {
+                            callback(YES);
+                        }
+                    });
+                } else {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (callback) {
+                            callback(NO);
+                        }
+                    });
+                }
             } else {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (callback) {
-                        callback(YES);
+                        callback(NO);
                     }
                 });
             }
         } else {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (callback) {
-                    callback(YES);
+                    callback(NO);
                 }
             });
         }

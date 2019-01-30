@@ -171,6 +171,7 @@ enum PlaType {
             [_pbXmppStream setHostPort:port];
             
             if ([_pbXmppStream isConnected]) {
+                QIMVerboseLog(@"当前链接仍然在连接状态");
                 NSError *error = nil;
                 if (![_pbXmppStream isAuthenticated]) {
                     NSString *resource = [NSString stringWithFormat:@"V[%@]_P[%@]_D[%@]_S[%@]_ID[%@]_PB", self.appVersion ? self.appVersion : @"unknow", self.platform, self.deviceName, self.systemVersion, [QIMPBStream generateUUID]];
@@ -180,13 +181,15 @@ enum PlaType {
                     [_pbXmppStream setDeviceUUID:[self deviceUUID]];
                     [_pbXmppStream authenticateWithPassword:[self password] error:&error];
                 } else {
-                    QIMVerboseLog(@"当前链接已验证过了");
+                    QIMVerboseLog(@"当前链接已验证过了，获取一次离线历史");
+                    [self goOnLine];
                     if ([self delegate] && [[self delegate] respondsToSelector:@selector(loginComplate)]) {
                         [[self delegate] loginComplate];
                     }
                 }
                 result = YES;
             } else {
+                QIMVerboseLog(@"当前链接已失效或不存在，重新验证");
                 NSString *resource = [NSString stringWithFormat:@"V[%@]_P[%@]_D[%@]_S[%@]_ID[%@]_PB", self.appVersion ? self.appVersion : @"unknow", self.platform, self.deviceName, self.systemVersion, [QIMPBStream generateUUID]];
                 NSString *selfUrl = [NSString stringWithFormat:@"%@@%@/%@", [self userId], [self domain], resource];
                 [_pbXmppStream setMyJID:[QIMXMPPJID jidWithString:selfUrl]];

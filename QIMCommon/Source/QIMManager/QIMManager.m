@@ -917,7 +917,7 @@ static QIMManager *__IMManager = nil;
             return nil;
         }
         NSString *destUrl = [NSString stringWithFormat:@"%@/getdeps?u=%@&k=%@&p=iphone&v=%@&d=%@", [[QIMNavConfigManager sharedInstance] httpHost], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion], [[XmppImManager sharedInstance] domain]];
-        
+        QIMVerboseLog(@"拉取树形组织架构图 : %@", destUrl);
         NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
         ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
         [request setShouldCompressRequestBody:YES];

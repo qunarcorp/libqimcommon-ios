@@ -344,6 +344,23 @@
 //            [[QTalkNotifyManager shareNotifyManager] showChatNotifyWithMessage:notifyMsg];
         }
             break;
+        case QIMCategoryNotifyMsgTypeTickUserWorkWorldNotice: {
+            NSString *onlineListStr = [msgDic objectForKey:@"bodyValue"];
+            NSDictionary *onlineDict = [[QIMJSONSerializer sharedInstance] deserializeObject:onlineListStr error:nil];
+            [[IMDataManager sharedInstance] qimDB_bulkinsertNoticeMessage:@[onlineDict]];
+            NSInteger eventType = [[onlineDict objectForKey:@"eventType"] integerValue];
+            if (eventType == QIMWorkFeedNotifyTypeComment) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kPBPresenceCategoryNotifyWorkNoticeMessage object:nil];
+                });
+            } else if (eventType == QIMWorkFeedNotifyTypePOST) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotify_RN_QTALK_SUGGEST_WorkFeed_UPDATE object:[self getLastWorkOnlineMomentWithDic:onlineDict]];
+                });
+            }
+            QIMVerboseLog(@"onlineDict : %@", onlineDict);
+        }
+            break;
         default: {
             QIMVerboseLog(@"遇到不认识的categoryType : %@", msgDic);
         }

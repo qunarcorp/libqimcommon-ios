@@ -158,6 +158,8 @@
     //
     // 清掉保存的发消息的用户信息
     QIMWarnLog(@"清除保存的发消息的用户信息");
+    [self.friendDescDic removeAllObjects];
+    self.friendDescDic = nil;
     [QIMUUIDTools setRequestFileURL:nil];
     [QIMUUIDTools setRequestURL:nil];
     [QIMUUIDTools setRequestDomain:nil];

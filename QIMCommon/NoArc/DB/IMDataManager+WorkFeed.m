@@ -301,7 +301,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
         NSString *sql = @"delete from IM_Work_Comment where commentUUID = :commentUUID;";
         NSMutableArray *paramList = [[NSMutableArray alloc] init];
         for (NSDictionary *commentDic in comments) {
-            NSString *uuid = [commentDic objectForKey:@"commentUUID"];
+            NSString *uuid = [commentDic objectForKey:@"uuid"];
             NSNumber *isDelete = [commentDic objectForKey:@"isDelete"];
             if ([isDelete boolValue] == YES) {
                 NSMutableArray *param = [[NSMutableArray alloc] init];
