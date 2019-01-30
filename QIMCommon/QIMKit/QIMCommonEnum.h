@@ -312,6 +312,17 @@ typedef enum : NSUInteger {
     QIMCategoryNotifyMsgTypeTickUser = 100,             //踢
 } QIMCategoryNotifyMsgType;
 
+typedef enum : NSUInteger {
+    QIMWorkFeedTypeMoment = 1,  //帖子
+    QIMWorkFeedTypeComment = 2, //评论
+} QIMWorkFeedType;
+
+typedef enum : NSUInteger {
+    QIMWorkFeedNotifyTypePOST = 0,
+    QIMWorkFeedNotifyTypeComment = 1,
+    QIMWorkFeedNotifyTypeLike = 2,
+} QIMWorkFeedNotifyType;
+
 static const NSString *QIMNavNameKey = @"title";
 static const NSString *QIMNavUrlKey = @"NavUrl";
 
@@ -321,5 +332,14 @@ typedef void(^QIMKitGetTripAreaAvailableRoomBlock)(NSArray *availableRooms);
 typedef void(^QIMKitGetTripMemberCheckBlock)(BOOL isConform);   //isConform 冲突
 typedef void(^QIMKitCreateTripBlock)(BOOL success);
 typedef void(^QIMCloseSessionBlock)(NSString *closeMsg);
+
+typedef void(^QIMKitLikeMomentSuccessedBlock)(NSDictionary *responseDic);
+typedef void(^QIMKitWorkCommentBlock)(NSArray *comments);
+typedef void(^QIMKitWorkCommentDeleteSuccessBlock)(BOOL success);
+typedef void(^QIMKitLikeContentSuccessedBlock)(NSDictionary *responseDic);
+typedef void(^QIMKitGetMomentNewSuccessedBlock)(NSArray *moments);
+typedef void(^QIMKitGetMomentHistorySuccessedBlock)(NSArray *moments);
+typedef void(^QIMKitgetAnonymouseSuccessedBlock)(NSDictionary *anonymousDic);
+typedef void(^QIMKitgetMomentDetailSuccessedBlock)(NSDictionary *momentDic);
 
 #endif /* QIMCommonEnum_h */

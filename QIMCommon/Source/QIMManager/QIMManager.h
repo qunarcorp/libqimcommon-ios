@@ -6,6 +6,7 @@
 #import "IMDataManager+QIMDBClientConfig.h"
 #import "IMDataManager+QIMDBQuickReply.h"
 #import "IMDataManager+QIMNote.h"
+#import "IMDataManager+WorkFeed.h"
 #import "IMDataManager+QIMUserMedal.h"
 
 #define DEFAULT_MSG_NUM 450
@@ -150,6 +151,7 @@
 @property (nonatomic, assign) NSTimeInterval lastGroupMsgTime;      //拉取群组消息时间戳
 @property (nonatomic, assign) NSTimeInterval lastSystemMsgTime;     //拉取HeadLine消息时间戳
 @property (nonatomic, assign) NSTimeInterval lastMaxMucReadMarkTime;   //拉取群阅读指针时间戳
+@property (nonatomic, assign) NSTimeInterval lastWorkFeedMsgMsgTime;     //拉取驼圈消息时间戳
 
 @property (nonatomic, strong) NSMutableDictionary *groupVCardDict;  //群聊名片缓存Dict
 @property (nonatomic, strong) NSMutableDictionary *userVCardDict;   //用户名片缓存Dict

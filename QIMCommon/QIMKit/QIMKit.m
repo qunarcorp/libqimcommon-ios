@@ -37,18 +37,18 @@ static QIMKit *__global_QIMKit = nil;
     [QIMManager sharedInstance];
     [AvoidCrash makeAllEffective];
     NSArray *noneSelClassStrings = @[
-                                     @"NSNull",
-                                     @"NSNumber",
-                                     @"NSString",
-                                     @"NSMutableString",
-                                     @"NSDictionary",
-                                     @"NSMutableDictionary",
-                                     @"NSArray",
-                                     @"NSMutableArray"
+                                     @"NSNull"
+//                                     @"NSNumber",
+//                                     @"NSString",
+//                                     @"NSMutableString",
+//                                     @"NSDictionary",
+//                                     @"NSMutableDictionary",
+//                                     @"NSArray",
+//                                     @"NSMutableArray"
                                      ];
     [AvoidCrash setupNoneSelClassStringsArr:noneSelClassStrings];
     [AvoidCrash avoidCrashExchangeMethodIfDealWithNoneSel:YES];
-    //监听通知:AvoidCrashNotification, 获取AvoidCrash捕获的崩溃日志的详细信息
+//    //监听通知:AvoidCrashNotification, 获取AvoidCrash捕获的崩溃日志的详细信息
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealwithCrashMessage:) name:AvoidCrashNotification object:nil];
 }
 

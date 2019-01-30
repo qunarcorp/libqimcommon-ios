@@ -581,6 +581,13 @@ static QIMManager *__IMManager = nil;
         }
         
         if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
+            
+            QIMVerboseLog(@"登录之后请求一下驼圈入口开关");
+            [self getCricleCamelEntrance];
+            
+            QIMVerboseLog(@"登录之后请求一下驼圈未读消息");
+            [self getupdateRemoteWorkNoticeMsgs];
+            
             QIMVerboseLog(@"登录之后请求一下骆驼帮未读数");
 
             [[QIMManager sharedInstance] getExploreNotReaderCount];

@@ -244,6 +244,7 @@ done:
                          [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
                          [[QIMManager sharedInstance] myRemotelogginKey],
                          [[QIMAppInfo sharedInstance] AppBuildVersion],key,size];
+    NSLog(@"上传图片destUrl : %@", destUrl);
     NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
     ASIFormDataRequest *formRequest = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
     [formRequest setResponseEncoding:NSISOLatin1StringEncoding];
@@ -254,10 +255,13 @@ done:
     [formRequest startSynchronous];
     if ([formRequest responseStatusCode] == 200) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:formRequest.responseData error:nil];
+        NSLog(@"上传图片返回结果 : %@", result);
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
         if (ret) {
             NSString *resultUrl = [result objectForKey:@"data"];
             if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl) {
+                return resultUrl;
+                /*
                 NSURL *url = [NSURL URLWithString:resultUrl];
                 resultUrl = [url path];
                 NSUInteger loc = [resultUrl rangeOfString:@"/"].location + 1;
@@ -266,6 +270,7 @@ done:
                     resultUrl = [[resultUrl substringFromIndex:1] stringByAppendingFormat:@"?file=file/%@&FileName=file/%@",fileName,fileName];
                     return resultUrl;
                 }
+                */
             }
         }
     }
@@ -274,6 +279,10 @@ done:
 
 + (NSString *) updateLoadFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WihtPathExtension:(NSString *)extension{
     NSString *fileKey = [self getFileDataMD5WithPath:fileData];
+    NSString *fileExt = [self getFileExt:fileData];
+    if (fileExt.length <= 0) {
+        extension = fileExt;
+    }
     NSString *httpUrl = [self checkFileKey:fileKey WithFileLength:fileData.length WihtPathExtension:extension];
     if (httpUrl == nil) {
         return [QIMHttpApi updateLoadImage:fileData

@@ -124,6 +124,7 @@
     [self updateLastGroupMsgTime];
     [self updateLastSystemMsgTime];
     [self updateLastMaxMucReadMarkTime];
+    [self updateLastWorkFeedMsgTime];
     QIMVerboseLog(@"登录之前初始化数据库文件之后更新各种时间戳完成");
 }
 

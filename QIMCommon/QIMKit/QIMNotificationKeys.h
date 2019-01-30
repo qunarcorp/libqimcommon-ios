@@ -143,6 +143,8 @@
 
 #define kGetSystemHistoryMsgError           @"kGetSystemHistoryMsgError"
 
+#define kGetWorkFeedHistoryMessageListError @"kGetWorkFeedHistoryMessageListError"
+
 #define kGetGroupVersionError               @"kGetGroupVersionError"
 
 #define kUsersVCardInfo                     @"kUsersVCardInfo"
@@ -284,5 +286,25 @@
 #define kNotify_RN_QTALK_SUGGEST_BUNDLE_UPDATE @"kNotify_RN_QTALK_SUGGEST_BUNDLE_UPDATE"
 #define kNotify_RN_QTALK_SUGGEST_USER_SELECT @"kNotify_RN_QTALK_SUGGEST_USER_SELECT"
 #define kNotify_RN_QTALK_SUGGEST_OPEN_QRCODE @"kNotify_RN_QTALK_SUGGEST_OPEN_QRCODE"
+#define kNotify_RN_QTALK_SUGGEST_WorkFeed_UPDATE @"kNotify_RN_QTALK_SUGGEST_WorkFeed_UPDATE"
+#define kNotify_RN_QTALK_SUGGEST_WorkFeed_Entrance @"kNotify_RN_QTALK_SUGGEST_WorkFeed_Entrance"
+
+#pragma mark - 工作圈通知
+
+#define kNotifyReloadWorkFeed    @"kNotifyReloadWorkFeed"
+
+#define kNotifyReloadWorkFeedDetail    @"kNotifyReloadWorkFeedDetail"
+
+#define kNotifyReloadWorkFeedLike      @"kNotifyReloadWorkFeedLike"
+
+#define kNotifyReloadWorkFeedCommentNum      @"kNotifyReloadWorkFeedCommentNum"
+
+#define kNotifyReloadWorkComment @"kNotifyReloadWorkComment"
+
+//驼圈全局通知
+#define kPBPresenceCategoryNotifyWorkNoticeMessage  @"kPBPresenceCategoryNotifyWorkNoticeMessage"
+
+//驼圈
+#define kPBPresenceCategoryNotifyWorkNoticeLastMessage  @"kPBPresenceCategoryNotifyWorkNoticeLastMessage"
 
 #endif /* QIMNotificationKeys_h */
