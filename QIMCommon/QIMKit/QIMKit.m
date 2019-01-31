@@ -37,14 +37,14 @@ static QIMKit *__global_QIMKit = nil;
     [QIMManager sharedInstance];
     [AvoidCrash makeAllEffective];
     NSArray *noneSelClassStrings = @[
-                                     @"NSNull"
-//                                     @"NSNumber",
-//                                     @"NSString",
-//                                     @"NSMutableString",
-//                                     @"NSDictionary",
-//                                     @"NSMutableDictionary",
-//                                     @"NSArray",
-//                                     @"NSMutableArray"
+                                     @"NSNull",
+                                     @"NSNumber",
+                                     @"NSString",
+                                     @"NSMutableString",
+                                     @"NSDictionary",
+                                     @"NSMutableDictionary",
+                                     @"NSArray",
+                                     @"NSMutableArray"
                                      ];
     [AvoidCrash setupNoneSelClassStringsArr:noneSelClassStrings];
     [AvoidCrash avoidCrashExchangeMethodIfDealWithNoneSel:YES];

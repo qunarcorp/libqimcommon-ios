@@ -722,6 +722,70 @@ static IMDataManager *__global_data_manager = nil;
               primary key (XmppId,Type));" withParameters:nil];
     
     result = [database executeNonQuery:@"CREATE INDEX IF NOT EXISTS IM_USER_MEDAL_XMPPID ON IM_User_Medal (XmppId);" withParameters:nil];
+    
+    
+    //创建工作圈表
+    result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
+              id                    INTEGER,\
+              uuid                  TEXT PRIMARY KEY,\
+              owner                 TEXT,\
+              ownerHost             TEXT,\
+              isAnonymous           INTEGER DEFAULT 0,\
+              anonymousName         TEXT,\
+              anonymousPhoto        TEXT,\
+              createTime            INTEGER,\
+              updateTime            INTEGER,\
+              content               INTEGER,\
+              atList                TEXT,\
+              isDelete              INTEGER DEFAULT 0,\
+              isLike                INTEGER DEFAULT 0,\
+              likeNum               INTEGER,\
+              commentsNum           INTEGER,\
+              review_status         INTEGER);" withParameters:nil];
+    
+    
+    //创建工作圈评论表
+    result = [database executeNonQuery:@"create table IM_Work_Comment (\
+              anonymousName         TEXT,\
+              anonymousPhoto        TEXT,\
+              commentUUID           TEXT PRIMARY KEY,\
+              content               TEXT,\
+              createTime            INTEGER,\
+              fromHost              TEXT,\
+              fromUser              TEXT,\
+              id                    INTEGER,\
+              isAnonymous           INTEGER,\
+              isDelete              INTEGER,\
+              isLike                INTEGER,\
+              likeNum               INTEGER,\
+              parentCommentUUID     TEXT,\
+              postUUID              TEXT,\
+              reviewStatus          INTEGER,\
+              toAnonymousName       TEXT,\
+              toAnonymousPhoto      TEXT,\
+              toHost                TEXT,\
+              toUser                TEXT,\
+              toisAnonymous         INTEGER,\
+              updateTime            INTEGER);" withParameters:nil];
+    
+    //创建工作圈通知消息表
+    result = [database executeNonQuery:@"create table IM_Work_NoticeMessage (\
+              userFrom              TEXT,\
+              readState             INTEGER,\
+              postUUID              TEXT,\
+              fromIsAnonymous       INTEGER,\
+              toIsAnonymous         INTEGER,\
+              toAnonymousName       TEXT,\
+              toAnonymousPhoto      TEXT,\
+              eventType             INTEGER,\
+              fromAnonymousPhoto    TEXT,\
+              userTo                TEXT,\
+              uuid                  TEXT PRIMARY KEY,\
+              content               TEXT,\
+              userToHost            TEXT,\
+              createTime            INTEGER,\
+              userFromHost          TEXT,\
+              fromAnonymousName     TEXT);" withParameters:nil];
     return result;
 }
 
