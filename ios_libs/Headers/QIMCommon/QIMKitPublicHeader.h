@@ -26,6 +26,7 @@
 #import "QIMKit+QIMDBDataManager.h"
 #import "QIMKit+QIMEncryptChat.h"
 #import "QIMKit+QIMFileManager.h"
+#import "QIMKit+QIMWorkFeed.h"
 #import "QIMKit+QIMFriend.h"
 #import "QIMKit+QIMGroup.h"
 #import "QIMKit+QIMGroupMessage.h"
