@@ -20,12 +20,55 @@ Startalk私有云是一种去中心化的部署方式，
 
 每个公司都是一个单独的节点，每个节点独立运营，数据只保存在节点中
 
-QIMCommon介绍
-=====
+## 介绍
 
+QIMCommon是一套高性能的IM组件
+
+## 集成环境
+* 编译版本 : iOS SDK 9.0 及以上。
+* 操作系统 : iOS 9.0 及以上。
+
+## 集成说明
+
+### Cocoapods 集成
+
+我们建议你通过 [Cocoapods](https://cocoapods.org/) 来进行 `QIMCommon` 的集成,在 `Podfile` 中加入以下内容:
+
+```shell
+source 'https://github.com/qunarcorp/libqimkit-ios-cook.git'
+pod 'QIMCommon'
+```
+
+### 手动集成（不推荐！！！）
+
+1. 下载QIMCommon文件夹内的所有内容
+2. 将QIMCommon内的源文件，资源文件, 静态库添加（拖放）到你的工程
+4. 链接以下系统依赖项
+    * Foundation
+    * CoreTelephony
+    * AVFoundation
+    * SystemConfiguration
+    * AudioToolbox
+    * UserNotifications
+    * QuartzCore
+    * CoreGraphics
+    * Security
+5. 链接以下第三方库
+    * ASIHTTPRequest
+    * YYCache
+    * YYModel
+    * ProtocolBuffers
+    * CocoaAsyncSocket
+    * UICKeyChainStore
+    * AvoidCrash
+6. 链接QIMSDK依赖项
+    * QIMOpenSSL
+    * QIMKitVendor
+    * QIMDataBase
+    
 ## 历史版本:
 你可以在当前仓库的 Release 进行QIMCommon历史版本下载。
-
+    
 ## 问题反馈
 
 -   qchat@qunar.com（邮件）
