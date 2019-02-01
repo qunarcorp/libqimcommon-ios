@@ -674,16 +674,16 @@
 }
 
 - (NSDictionary *)getLastWorkOnlineMomentWithDic:(NSDictionary *)dic {
-    NSLog(@"getLastWorkMomentWithDic : %@", dic);
+    NSLog(@"getLastWorkOnlineMomentWithDic : %@", dic);
     NSMutableDictionary *momentDic = [[NSMutableDictionary alloc] init];
     NSString *userId = [NSString stringWithFormat:@"%@@%@", [dic objectForKey:@"owner"], [dic objectForKey:@"ownerHost"]];
     NSString *userName = [[QIMManager sharedInstance] getUserMarkupNameWithUserId:userId];
     NSString *photoUrl = nil;
     
-    BOOL fromIsAnonymous = [[dic objectForKey:@"isAnonymous"] boolValue];
+    BOOL fromIsAnonymous = [[dic objectForKey:@"isAnyonous"] boolValue];
     if (fromIsAnonymous == YES) {
-        userName = [dic objectForKey:@"anonymousName"];
-        photoUrl = [dic objectForKey:@"anonymousPhoto"];
+        userName = [dic objectForKey:@"anyonousName"];
+        photoUrl = [dic objectForKey:@"anyonousPhoto"];
         if (![photoUrl qim_hasPrefixHttpHeader] && photoUrl.length > 0) {
             photoUrl = [NSString stringWithFormat:@"%@/%@", [[QIMNavConfigManager sharedInstance] innerFileHttpHost], photoUrl];
         }
@@ -703,7 +703,7 @@
     [momentDic setQIMSafeObject:(content.length > 0) ? content : @"分享图片" forKey:@"content"];
     [momentDic setQIMSafeObject:userName forKey:@"name"];
     [momentDic setQIMSafeObject:(photoUrl.length > 0) ? photoUrl : [QIMManager defaultUserHeaderImagePath] forKey:@"photo"];
-    QIMVerboseLog(@"RN getLastWorkMoment : %@", momentDic);
+    QIMVerboseLog(@"RN getLastWorkOnlineMomentWithDic : %@", momentDic);
     return momentDic;
 }
 
