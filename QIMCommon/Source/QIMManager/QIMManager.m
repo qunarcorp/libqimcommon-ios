@@ -531,9 +531,9 @@ static QIMManager *__IMManager = nil;
             
         //24 小时拿一次
         long long checkConfigVersion = [[[QIMUserCacheManager sharedInstance] userObjectForKey:kCheckConfigVersion] longLongValue];
-        if (checkConfigVersion != [[QIMNavConfigManager sharedInstance] checkConfigVersion]) {
+//        if (checkConfigVersion != [[QIMNavConfigManager sharedInstance] checkConfigVersion]) {
             [self checkClientConfig];
-        }
+//        }
     
         QIMVerboseLog(@"开始获取加密会话密码箱2");
         dispatch_async(dispatch_get_main_queue(), ^{

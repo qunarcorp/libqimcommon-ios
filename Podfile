@@ -1,7 +1,7 @@
 # Uncomment the next line to define a global platform for your project
 platform :ios, '9.0'
 source 'git@github.com:CocoaPods/Specs.git'
-source 'git@gitlab.corp.qunar.com:qchat/libQIMKit-iOS-Cook.git'
+source 'git@github.com:qunarcorp/libqimkit-ios-cook.git'
 
 
 target 'QIMCommon' do
@@ -10,11 +10,17 @@ target 'QIMCommon' do
 
   # Pods for QIMCommon
   
-    pod 'QIMKitVendor', '~> 1.1.4-beta'
-    pod 'QIMCommonCategories', '~> 1.0.0-beta'
-    pod 'QIMDataBase', '~> 1.0.0-beta'
-    pod 'QIMPublicRedefineHeader', '~> 0.0.2-beta'
-    pod 'QIMOpenSSL', '~> 1.0.1-beta'
+#    pod 'QIMKitVendor', '~> 1.1.4-beta'
+#    pod 'QIMCommonCategories', '~> 1.0.0-beta'
+#    pod 'QIMDataBase', '~> 1.0.0-beta'
+#    pod 'QIMPublicRedefineHeader', '~> 0.0.2-beta'
+#    pod 'QIMOpenSSL', '~> 1.0.1-beta'
+
+
+ pod 'QIMKitVendor'
+    pod 'QIMCommonCategories'
+    pod 'QIMDataBase'
+    pod 'QIMOpenSSL'
 
     pod 'ASIHTTPRequest'
     pod 'YYCache'
