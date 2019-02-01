@@ -25,6 +25,11 @@
 + (void)updateFriendListToKeyChain;
 
 /**
+ RequestFileURL数据写入KeyChain
+ */
++ (void)updateRequestFileURL;
+
+/**
  RequestURL数据写入KeyChain
  */
 + (void)updateRequestURL;
