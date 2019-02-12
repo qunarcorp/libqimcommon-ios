@@ -380,7 +380,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
 - (NSArray *)qimDB_getWorkCommentsWithMomentId:(NSString *)momentId WihtLimit:(int)limit WithOffset:(int)offset {
     __block NSMutableArray *result = nil;
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
-        NSString *sql = [NSString stringWithFormat:@"select anonymousName, anonymousPhoto, commentUUID, content, createTime, fromHost, fromUser, id, isAnonymous, isDelete, isLike, likeNum, parentCommentUUID, postUUID, reviewStatus, toAnonymousName, toAnonymousPhoto, toHost, toUser, toisAnonymous, updateTime from IM_Work_Comment where postUUID='%@' order by createTime desc limit %d offset %d;", momentId, limit, offset];
+        NSString *sql = [NSString stringWithFormat:@"select anonymousName, anonymousPhoto, commentUUID, content, createTime, fromHost, fromUser, id, isAnonymous, isDelete, isLike, likeNum, parentCommentUUID, postUUID, reviewStatus, toAnonymousName, toAnonymousPhoto, toHost, toUser, toisAnonymous, updateTime from IM_Work_Comment where postUUID='%@' and isDelete=0 order by createTime desc limit %d offset %d;", momentId, limit, offset];
         NSLog(@"sql : %@", sql);
         DataReader *reader = [database executeReader:sql withParameters:nil];
         NSMutableArray *tempList = nil;
@@ -422,8 +422,6 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             [IMDataManager safeSaveForDic:msgDic setObject:rid forKey:@"rid"];
             
             [IMDataManager safeSaveForDic:msgDic setObject:isAnonymous forKey:@"isAnonymous"];
-            [IMDataManager safeSaveForDic:msgDic setObject:isDelete forKey:@"isDelete"];
-            [IMDataManager safeSaveForDic:msgDic setObject:isLike forKey:@"isLike"];
             [IMDataManager safeSaveForDic:msgDic setObject:isDelete forKey:@"isDelete"];
             [IMDataManager safeSaveForDic:msgDic setObject:isLike forKey:@"isLike"];
             [IMDataManager safeSaveForDic:msgDic setObject:likeNum forKey:@"likeNum"];
