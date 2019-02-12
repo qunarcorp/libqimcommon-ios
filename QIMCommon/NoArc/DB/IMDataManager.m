@@ -725,7 +725,7 @@ static IMDataManager *__global_data_manager = nil;
     
     
     //创建工作圈表
-    result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
+    result = [database executeNonQuery:@"CREATE TABLE IF NOT EXISTS IM_Work_World (\
               id                    INTEGER,\
               uuid                  TEXT PRIMARY KEY,\
               owner                 TEXT,\
@@ -745,7 +745,7 @@ static IMDataManager *__global_data_manager = nil;
     
     
     //创建工作圈评论表
-    result = [database executeNonQuery:@"create table IM_Work_Comment (\
+    result = [database executeNonQuery:@"create table IF NOT EXISTS IM_Work_Comment (\
               anonymousName         TEXT,\
               anonymousPhoto        TEXT,\
               commentUUID           TEXT PRIMARY KEY,\
@@ -769,7 +769,7 @@ static IMDataManager *__global_data_manager = nil;
               updateTime            INTEGER);" withParameters:nil];
     
     //创建工作圈通知消息表
-    result = [database executeNonQuery:@"create table IM_Work_NoticeMessage (\
+    result = [database executeNonQuery:@"create table IF NOT EXISTS IM_Work_NoticeMessage (\
               userFrom              TEXT,\
               readState             INTEGER,\
               postUUID              TEXT,\

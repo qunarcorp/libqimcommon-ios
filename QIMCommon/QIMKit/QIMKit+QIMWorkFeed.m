@@ -19,8 +19,8 @@
     [[QIMManager sharedInstance] getRemoteMomentDetailWithMomentUUId:momentId withCallback:callback];
 }
 
-- (void)getAnonyMouseDicWithCallBack:(QIMKitgetAnonymouseSuccessedBlock)callback {
-    [[QIMManager sharedInstance] getAnonyMouseDicWithCallBack:callback];
+- (void)getAnonyMouseDicWithMomentId:(NSString *)momentId WithCallBack:(QIMKitgetAnonymouseSuccessedBlock)callback {
+    [[QIMManager sharedInstance] getAnonyMouseDicWithMomentId:momentId WithCallBack:callback];
 }
 
 - (void)pushNewMomentWithMomentDic:(NSDictionary *)momentDic {

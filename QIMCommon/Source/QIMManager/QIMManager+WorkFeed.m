@@ -67,9 +67,10 @@
     }];
 }
 
-- (void)getAnonyMouseDicWithCallBack:(QIMKitgetAnonymouseSuccessedBlock)callback {
+- (void)getAnonyMouseDicWithMomentId:(NSString *)momentId WithCallBack:(QIMKitgetAnonymouseSuccessedBlock)callback {
     NSString *destUrl = [NSString stringWithFormat:@"%@/cricle_camel/anonymouse/getAnonymouse", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
-    NSDictionary *anonyDic = @{@"user" : [QIMManager getLastUserName], @"postId": @""};
+    NSDictionary *anonyDic = @{@"user" : [QIMManager getLastUserName], @"postId": momentId ? momentId : [QIMUUIDTools UUID]};
+    QIMVerboseLog(@"获取匿名Body : %@", [[QIMJSONSerializer sharedInstance] serializeObject:anonyDic]);
     NSData *momentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:anonyDic error:nil];
     
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
@@ -574,6 +575,10 @@
                     dispatch_async(dispatch_get_main_queue(), ^{
                         //发送驼圈离线消息通知
                         [[NSNotificationCenter defaultCenter] postNotificationName:kPBPresenceCategoryNotifyWorkNoticeMessage object:nil];
+                        //发送驼圈离线消息小红点通知
+                        NSInteger notReadMessageCount = [[QIMManager sharedInstance] getWorkNoticeMessagesCount];
+                        QIMVerboseLog(@"发送驼圈离线消息小红点通知数: %ld", notReadMessageCount);
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kExploreNotReadCountChange object:@(notReadMessageCount)];
                     });
                 }
             }
