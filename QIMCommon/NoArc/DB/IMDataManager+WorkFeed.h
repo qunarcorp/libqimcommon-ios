@@ -28,7 +28,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Comment
 
+- (void)qimDB_bulkDeleteCommentsWithPostId:(NSString *)postUUID withcurCommentCreateTime:(long long)createTime;
+
+- (long long)qimDB_getCommentCreateTimeWithCurCommentId:(NSInteger)commentId;
+
 - (void)qimDB_bulkDeleteComments:(NSArray *)comments;
+
+- (void)qimDB_bulkDeleteCommentsWithPostId:(NSString *)postUUID;
 
 - (void)qimDB_bulkinsertComments:(NSArray *)comments;
 

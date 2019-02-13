@@ -12,7 +12,7 @@
 
 - (void)initDBWithUserXmppId:(NSString *)userJid {
 
-    NSString *dbPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%@/", userJid, UserPath]];
+    NSString *dbPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%@/", [userJid lowercaseString], UserPath]];
     if (![[NSFileManager defaultManager] fileExistsAtPath:dbPath]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:dbPath withIntermediateDirectories:YES attributes:nil error:nil];
     }
@@ -25,7 +25,7 @@
 }
 
 - (void)initDB {
-    NSString *dbPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%@/", [self getLastJid], UserPath]];
+    NSString *dbPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%@/", [[self getLastJid] lowercaseString], UserPath]];
     if (![[NSFileManager defaultManager] fileExistsAtPath:dbPath]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:dbPath withIntermediateDirectories:YES attributes:nil error:nil];
     }
@@ -42,7 +42,7 @@
     [[IMDataManager sharedInstance] closeDataBase];
     NSString *workingPath = nil;
     {
-        NSString *dbPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%@/", [self getLastJid], UserPath]];
+        NSString *dbPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@%@/", [[self getLastJid] lowercaseString], UserPath]];
         //UrlWithString 会报CFURLSetResourcePropertyForKey failed because it was passed an URL which has no scheme 错误，使用fileURLWithPath正常
         [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:[dbPath stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
         dbPath = [dbPath stringByAppendingPathComponent:@"data.dat"];

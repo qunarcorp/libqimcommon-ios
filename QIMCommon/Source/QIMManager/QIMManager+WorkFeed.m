@@ -395,7 +395,7 @@
                 [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:deteleComments];
             }
             NSArray *newComment = [data objectForKey:@"newComment"];
-            if ([newComment isKindOfClass:[NSArray class]]) {
+            if ([newComment isKindOfClass:[NSArray class]] && newComment.count > 0) {
                 [[IMDataManager sharedInstance] qimDB_bulkinsertComments:newComment];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     NSInteger likeNum = [[data objectForKey:@"postLikeNum"] integerValue];
@@ -407,6 +407,13 @@
                     [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedCommentNum object:postCommentData];
                     if (callback) {
                         callback(newComment);
+                    }
+                });
+            } else {
+                [[IMDataManager sharedInstance] qimDB_bulkDeleteCommentsWithPostId:momentId];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(@[]);
                     }
                 });
             }
@@ -450,11 +457,21 @@
                 [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:deteleComments];
             }
             NSArray *newComment = [data objectForKey:@"newComment"];
-            if ([newComment isKindOfClass:[NSArray class]]) {
+            if ([newComment isKindOfClass:[NSArray class]] && newComment.count > 0) {
+                //插入历史20条
                 [[IMDataManager sharedInstance] qimDB_bulkinsertComments:newComment];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (callback) {
                         callback(newComment);
+                    }
+                });
+            } else {
+                //返回空，删除之前的历史
+                long long commentCreateTime = [[IMDataManager sharedInstance] qimDB_getCommentCreateTimeWithCurCommentId:commentRId];
+                [[IMDataManager sharedInstance] qimDB_bulkDeleteCommentsWithPostId:momentId withcurCommentCreateTime:commentCreateTime];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(@[]);
                     }
                 });
             }
@@ -489,7 +506,7 @@
             if (isDeleteFlag == YES) {
                 NSString *commentUUID = [data objectForKey:@"commentUUID"];
                 if (commentUUID.length > 0) {
-                    NSDictionary *deleteCommentDic = @{@"uuid":commentUUID};
+                    NSDictionary *deleteCommentDic = @{@"uuid":commentUUID, @"isDelete":@(YES)};
                     [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:@[deleteCommentDic]];
                     dispatch_async(dispatch_get_main_queue(), ^{
                         if (callback) {
@@ -846,7 +863,7 @@
     } else {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
             [[QIMManager sharedInstance] getRemoteCommentsHistoryWithLastCommentId:lastCommentRId withMomentId:momentId withCommentCallBack:^(NSArray *comments) {
-                if (comments.count > 0) {
+                if (comments) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         complete(comments);
                     });

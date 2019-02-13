@@ -293,6 +293,29 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
 
 #pragma mark - Comment
 
+- (void)qimDB_bulkDeleteCommentsWithPostId:(NSString *)postUUID withcurCommentCreateTime:(long long)createTime {
+    if (postUUID.length <= 0) {
+        return;
+    }
+    [[self dbInstance] syncUsingTransaction:^(Database *database) {
+        NSString *sql = [NSString stringWithFormat:@"delete from IM_Work_Comment where postUUID = '%@' and createTime < %lld;", postUUID, createTime];
+        [database executeBulkInsert:sql withParameters:nil];
+    }];
+}
+
+- (long long)qimDB_getCommentCreateTimeWithCurCommentId:(NSInteger)rCommentId {
+
+    __block long long curCommentCreateTime = 0;
+    [[self dbInstance] syncUsingTransaction:^(Database *database) {
+        NSString *sql = [NSString stringWithFormat:@"select createTime from IM_Work_Comment where id = %ld;", rCommentId];
+        DataReader *reader = [database executeReader:sql withParameters:nil];
+        if ([reader read]) {
+            curCommentCreateTime = [[reader objectForColumnIndex:0] longLongValue];
+        }
+    }];
+    return curCommentCreateTime;
+}
+
 - (void)qimDB_bulkDeleteComments:(NSArray *)comments {
     if (comments.count <= 0) {
         return;
@@ -312,6 +335,16 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
         [database executeBulkInsert:sql withParameters:paramList];
         [paramList release];
         paramList = nil;
+    }];
+}
+
+- (void)qimDB_bulkDeleteCommentsWithPostId:(NSString *)postUUID {
+    if (postUUID.length <= 0) {
+        return;
+    }
+    [[self dbInstance] syncUsingTransaction:^(Database *database) {
+        NSString *sql = [NSString stringWithFormat:@"delete from IM_Work_Comment where postUUID = '%@';", postUUID];
+        [database executeBulkInsert:sql withParameters:nil];
     }];
 }
 

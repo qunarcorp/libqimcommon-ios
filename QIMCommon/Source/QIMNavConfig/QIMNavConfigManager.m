@@ -145,7 +145,6 @@
             _port = @"5223";
             _protobufPort = @"5202";
             _adShown = NO;
-            _hashHosts = @"https://qt.qunar.com/package/static/qtalk/navhash";
             _healthcheckUrl = @"http://qt.qunar.com/healthcheck.html";
         }
     }
