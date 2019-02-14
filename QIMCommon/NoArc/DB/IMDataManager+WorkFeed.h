@@ -22,9 +22,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSArray *)qimDB_getWorkMomentWithXmppId:(NSString *)xmppId WihtLimit:(int)limit WithOffset:(int)offset;
 
-- (void)deleteMomentWithRId:(NSInteger)rId;
+- (void)qimDB_deleteMomentWithRId:(NSInteger)rId;
 
-- (void)updateMomentLike:(NSArray *)likeMoments;
+- (void)qimDB_updateMomentLike:(NSArray *)likeMoments;
+
+- (void)qimDB_updateMomentWithLikeNum:(NSInteger)likeMomentNum WithCommentNum:(NSInteger)commentNum withPostId:(NSString *)postId;
 
 #pragma mark - Comment
 

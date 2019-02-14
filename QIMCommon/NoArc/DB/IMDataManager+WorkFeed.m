@@ -259,7 +259,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     return [result autorelease];
 }
 
-- (void)deleteMomentWithRId:(NSInteger)rId {
+- (void)qimDB_deleteMomentWithRId:(NSInteger)rId {
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
         NSString *sql = @"delete from IM_Work_World where id = :id";
         DataReader *reader = [database executeReader:sql withParameters:@[@(rId)]];
@@ -269,7 +269,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     }];
 }
 
-- (void)updateMomentLike:(NSArray *)likeMoments {
+- (void)qimDB_updateMomentLike:(NSArray *)likeMoments {
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
         NSString *sql = @"Update IM_Work_World Set isLike = :isLike, likeNum = :likeNum Where uuid = :uuid;";
         NSMutableArray *params = [[NSMutableArray alloc] init];
@@ -288,6 +288,16 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
         }
         [database executeBulkInsert:sql withParameters:params];
         [params release];
+    }];
+}
+
+- (void)qimDB_updateMomentWithLikeNum:(NSInteger)likeMomentNum WithCommentNum:(NSInteger)commentNum withPostId:(NSString *)postId {
+    if (postId.length <= 0) {
+        return;
+    }
+    [[self dbInstance] syncUsingTransaction:^(Database *database) {
+        NSString *sql = [NSString stringWithFormat:@"update IM_Work_World set likeNum = %ld, commentsNum = %ld where uuid = '%@'", likeMomentNum, commentNum, postId];
+        [database executeNonQuery:sql withParameters:nil];
     }];
 }
 

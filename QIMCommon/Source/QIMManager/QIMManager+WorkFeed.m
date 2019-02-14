@@ -42,21 +42,26 @@
     
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSDictionary *momentDic = [result objectForKey:@"data"];
-        if ([momentDic isKindOfClass:[NSDictionary class]]) {
-            [[IMDataManager sharedInstance] qimDB_bulkinsertMoments:@[momentDic]];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(momentDic);
-                }
-                [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedDetail object:momentDic];
-            });
-        } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(nil);
-                }
-            });
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            
+            NSDictionary *momentDic = [result objectForKey:@"data"];
+            if ([momentDic isKindOfClass:[NSDictionary class]]) {
+                [[IMDataManager sharedInstance] qimDB_bulkinsertMoments:@[momentDic]];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(momentDic);
+                    }
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedDetail object:momentDic];
+                });
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(nil);
+                    }
+                });
+            }
         }
     } withFailedCallBack:^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -75,19 +80,23 @@
     
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSDictionary *anonymousDic = [result objectForKey:@"data"];
-        if ([anonymousDic isKindOfClass:[NSDictionary class]]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(anonymousDic);
-                }
-            });
-        } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(nil);
-                }
-            });
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *anonymousDic = [result objectForKey:@"data"];
+            if ([anonymousDic isKindOfClass:[NSDictionary class]]) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(anonymousDic);
+                    }
+                });
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(nil);
+                    }
+                });
+            }
         }
     } withFailedCallBack:^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -105,18 +114,22 @@
     QIMVerboseLog(@"pushNewMomentWithMomentDic Body : %@", momentBodyStr);
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSDictionary *moments = [result objectForKey:@"data"];
-        if ([moments isKindOfClass:[NSDictionary class]]) {
-            NSArray *deletePosts = [moments objectForKey:@"deletePost"];
-            NSArray *newPosts = [moments objectForKey:@"newPost"];
-            if ([deletePosts isKindOfClass:[NSArray class]]) {
-                [[IMDataManager sharedInstance] qimDB_bulkdeleteMoments:deletePosts];
-            }
-            if ([newPosts isKindOfClass:[NSArray class]]) {
-                [[IMDataManager sharedInstance] qimDB_bulkinsertMoments:newPosts];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeed object:newPosts];
-                });
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *moments = [result objectForKey:@"data"];
+            if ([moments isKindOfClass:[NSDictionary class]]) {
+                NSArray *deletePosts = [moments objectForKey:@"deletePost"];
+                NSArray *newPosts = [moments objectForKey:@"newPost"];
+                if ([deletePosts isKindOfClass:[NSArray class]]) {
+                    [[IMDataManager sharedInstance] qimDB_bulkdeleteMoments:deletePosts];
+                }
+                if ([newPosts isKindOfClass:[NSArray class]]) {
+                    [[IMDataManager sharedInstance] qimDB_bulkinsertMoments:newPosts];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeed object:newPosts];
+                    });
+                }
             }
         }
     } withFailedCallBack:^(NSError *error) {
@@ -137,20 +150,30 @@
     NSData *momentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSDictionary *moments = [result objectForKey:@"data"];
-        if ([moments isKindOfClass:[NSDictionary class]]) {
-            NSArray *deletePosts = [moments objectForKey:@"deletePost"];
-            NSArray *newPosts = [moments objectForKey:@"newPost"];
-            if ([deletePosts isKindOfClass:[NSArray class]]) {
-                [[IMDataManager sharedInstance] qimDB_bulkdeleteMoments:deletePosts];
-            }
-            if ([newPosts isKindOfClass:[NSArray class]]) {
-                [[IMDataManager sharedInstance] qimDB_bulkinsertMoments:newPosts];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (callback) {
-                        callback(newPosts);
-                    }
-                });
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *moments = [result objectForKey:@"data"];
+            if ([moments isKindOfClass:[NSDictionary class]]) {
+                NSArray *deletePosts = [moments objectForKey:@"deletePost"];
+                NSArray *newPosts = [moments objectForKey:@"newPost"];
+                if ([deletePosts isKindOfClass:[NSArray class]]) {
+                    [[IMDataManager sharedInstance] qimDB_bulkdeleteMoments:deletePosts];
+                }
+                if ([newPosts isKindOfClass:[NSArray class]]) {
+                    [[IMDataManager sharedInstance] qimDB_bulkinsertMoments:newPosts];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (callback) {
+                            callback(newPosts);
+                        }
+                    });
+                } else {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (callback) {
+                            callback(nil);
+                        }
+                    });
+                }
             } else {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (callback) {
@@ -158,12 +181,6 @@
                     }
                 });
             }
-        } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(nil);
-                }
-            });
         }
     } withFailedCallBack:^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -183,12 +200,16 @@
     NSData *momentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSDictionary *data = [result objectForKey:@"data"];
-        if ([data isKindOfClass:[NSDictionary class]]) {
-            BOOL isDeleteFlag = [[data objectForKey:@"isDelete"] boolValue];
-            if (isDeleteFlag == YES) {
-                NSInteger rId = [[data objectForKey:@"id"] integerValue];
-                [[IMDataManager sharedInstance] deleteMomentWithRId:rId];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [result objectForKey:@"data"];
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                BOOL isDeleteFlag = [[data objectForKey:@"isDelete"] boolValue];
+                if (isDeleteFlag == YES) {
+                    NSInteger rId = [[data objectForKey:@"id"] integerValue];
+                    [[IMDataManager sharedInstance] qimDB_deleteMomentWithRId:rId];
+                }
             }
         }
     } withFailedCallBack:^(NSError *error) {
@@ -214,25 +235,29 @@
     __weak __typeof(self) weakSelf = self;
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSDictionary *data = [result objectForKey:@"data"];
-        __typeof(self) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
-        if ([data isKindOfClass:[NSDictionary class]]) {
-            [[IMDataManager sharedInstance] updateMomentLike:@[data]];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(data);
-                }
-                [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedLike object:data];
-            });
-        } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(nil);
-                }
-            });
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [result objectForKey:@"data"];
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                [[IMDataManager sharedInstance] qimDB_updateMomentLike:@[data]];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(data);
+                    }
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedLike object:data];
+                });
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(nil);
+                    }
+                });
+            }
         }
     } withFailedCallBack:^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -264,24 +289,28 @@
     __weak __typeof(self) weakSelf = self;
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSDictionary *data = [result objectForKey:@"data"];
-        __typeof(self) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
-        if ([data isKindOfClass:[NSDictionary class]]) {
-            [[IMDataManager sharedInstance] updateMomentLike:@[data]];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(data);
-                }
-            });
-        } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(nil);
-                }
-            });
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [result objectForKey:@"data"];
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                [[IMDataManager sharedInstance] qimDB_updateMomentLike:@[data]];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(data);
+                    }
+                });
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(nil);
+                    }
+                });
+            }
         }
     } withFailedCallBack:^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -301,32 +330,46 @@
     __weak __typeof(self) weakSelf = self;
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:commentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSDictionary *data = [result objectForKey:@"data"];
-        __typeof(self) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
-        if ([data isKindOfClass:[NSDictionary class]]) {
-            NSArray *deleteComments = [data objectForKey:@"deleteComments"];
-            if ([deleteComments isKindOfClass:[NSArray class]]) {
-                [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:deleteComments];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [result objectForKey:@"data"];
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
             }
-            NSArray *newComment = [data objectForKey:@"newComment"];
-            if ([newComment isKindOfClass:[NSArray class]]) {
-                [[IMDataManager sharedInstance] qimDB_bulkinsertComments:newComment];
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                
+                NSInteger likeNum = [[data objectForKey:@"postLikeNum"] integerValue];
+                NSInteger postCommentNum = [[data objectForKey:@"postCommentNum"] integerValue];
+                NSDictionary *postCommentData = @{@"postId":[commentDic objectForKey:@"postUUID"], @"postCommentNum":@(postCommentNum)};
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkComment object:nil];
-                    NSInteger likeNum = [[data objectForKey:@"postLikeNum"] integerValue];
-                    BOOL isPostLike = [[data objectForKey:@"isPostLike"] boolValue];
-                    NSDictionary *likeData = @{@"postId":[commentDic objectForKey:@"postUUID"], @"likeNum":@(likeNum), @"isLike":@(isPostLike)};
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedLike object:likeData];
-                    NSInteger postCommentNum = [[data objectForKey:@"postCommentNum"] integerValue];
-                    NSDictionary *postCommentData = @{@"postId":[commentDic objectForKey:@"postUUID"], @"postCommentNum":@(postCommentNum)};
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedCommentNum object:postCommentData];
+                   [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedCommentNum object:postCommentData];
                 });
-            }
-        } else {
+                [[IMDataManager sharedInstance] qimDB_updateMomentWithLikeNum:likeNum WithCommentNum:postCommentNum withPostId:[commentDic objectForKey:@"postUUID"]];
+                
+                NSArray *deleteComments = [data objectForKey:@"deleteComments"];
+                if ([deleteComments isKindOfClass:[NSArray class]]) {
+                    [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:deleteComments];
+                }
+                NSArray *newComment = [data objectForKey:@"newComment"];
+                if ([newComment isKindOfClass:[NSArray class]]) {
+                    [[IMDataManager sharedInstance] qimDB_bulkinsertComments:newComment];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkComment object:nil];
+                        NSInteger likeNum = [[data objectForKey:@"postLikeNum"] integerValue];
+                        BOOL isPostLike = [[data objectForKey:@"isPostLike"] boolValue];
+                        NSDictionary *likeData = @{@"postId":[commentDic objectForKey:@"postUUID"], @"likeNum":@(likeNum), @"isLike":@(isPostLike)};
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedLike object:likeData];
+                        NSInteger postCommentNum = [[data objectForKey:@"postCommentNum"] integerValue];
+                        NSDictionary *postCommentData = @{@"postId":[commentDic objectForKey:@"postUUID"], @"postCommentNum":@(postCommentNum)};
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedCommentNum object:postCommentData];
+                        [[IMDataManager sharedInstance] qimDB_updateMomentWithLikeNum:likeNum WithCommentNum:postCommentNum withPostId:[commentDic objectForKey:@"postUUID"]];
+                    });
+                }
+            } else {
 
+            }
         }
     } withFailedCallBack:^(NSError *error) {
 
@@ -345,23 +388,27 @@
 
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:hotCommentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSData *data = [result objectForKey:@"data"];
-        __typeof(self) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
-        if ([data isKindOfClass:[NSArray class]]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(data);
-                }
-            });
-        } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(nil);
-                }
-            });
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSData *data = [result objectForKey:@"data"];
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            if ([data isKindOfClass:[NSArray class]]) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(data);
+                    }
+                });
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(nil);
+                    }
+                });
+            }
         }
     } withFailedCallBack:^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -384,45 +431,50 @@
     
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:hotCommentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSDictionary *data = [result objectForKey:@"data"];
-        __typeof(self) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
-        if ([data isKindOfClass:[NSDictionary class]]) {
-            NSArray *deteleComments = [data objectForKey:@"deleteComments"];
-            if ([deteleComments isKindOfClass:[NSArray class]]) {
-                [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:deteleComments];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [result objectForKey:@"data"];
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
             }
-            NSArray *newComment = [data objectForKey:@"newComment"];
-            if ([newComment isKindOfClass:[NSArray class]] && newComment.count > 0) {
-                [[IMDataManager sharedInstance] qimDB_bulkinsertComments:newComment];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    NSInteger likeNum = [[data objectForKey:@"postLikeNum"] integerValue];
-                    BOOL isPostLike = [[data objectForKey:@"isPostLike"] boolValue];
-                    NSDictionary *likeData = @{@"postId":momentId, @"likeNum":@(likeNum), @"isLike":@(isPostLike)};
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedLike object:likeData];
-                    NSInteger postCommentNum = [[data objectForKey:@"postCommentNum"] integerValue];
-                    NSDictionary *postCommentData = @{@"postId":momentId, @"postCommentNum":@(postCommentNum)};
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedCommentNum object:postCommentData];
-                    if (callback) {
-                        callback(newComment);
-                    }
-                });
-            } else {
-                [[IMDataManager sharedInstance] qimDB_bulkDeleteCommentsWithPostId:momentId];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (callback) {
-                        callback(@[]);
-                    }
-                });
-            }
-        } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(nil);
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                NSArray *deteleComments = [data objectForKey:@"deleteComments"];
+                if ([deteleComments isKindOfClass:[NSArray class]]) {
+                    [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:deteleComments];
                 }
-            });
+                NSArray *newComment = [data objectForKey:@"newComment"];
+                if ([newComment isKindOfClass:[NSArray class]] && newComment.count > 0) {
+                    [[IMDataManager sharedInstance] qimDB_bulkinsertComments:newComment];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        NSInteger likeNum = [[data objectForKey:@"postLikeNum"] integerValue];
+                        BOOL isPostLike = [[data objectForKey:@"isPostLike"] boolValue];
+                        NSDictionary *likeData = @{@"postId":momentId, @"likeNum":@(likeNum), @"isLike":@(isPostLike)};
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedLike object:likeData];
+                        NSInteger postCommentNum = [[data objectForKey:@"postCommentNum"] integerValue];
+                        NSDictionary *postCommentData = @{@"postId":momentId, @"postCommentNum":@(postCommentNum)};
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedCommentNum object:postCommentData];
+                        [[IMDataManager sharedInstance] qimDB_updateMomentWithLikeNum:likeNum WithCommentNum:postCommentNum withPostId:momentId];
+                        if (callback) {
+                            callback(newComment);
+                        }
+                    });
+                } else {
+                    [[IMDataManager sharedInstance] qimDB_bulkDeleteCommentsWithPostId:momentId];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (callback) {
+                            callback(@[]);
+                        }
+                    });
+                }
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(nil);
+                    }
+                });
+            }
         }
     } withFailedCallBack:^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -446,41 +498,46 @@
     
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:hotCommentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSDictionary *data = [result objectForKey:@"data"];
-        __typeof(self) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
-        if ([data isKindOfClass:[NSDictionary class]]) {
-            NSArray *deteleComments = [data objectForKey:@"deleteComments"];
-            if ([deteleComments isKindOfClass:[NSArray class]]) {
-                [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:deteleComments];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            
+            NSDictionary *data = [result objectForKey:@"data"];
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
             }
-            NSArray *newComment = [data objectForKey:@"newComment"];
-            if ([newComment isKindOfClass:[NSArray class]] && newComment.count > 0) {
-                //插入历史20条
-                [[IMDataManager sharedInstance] qimDB_bulkinsertComments:newComment];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (callback) {
-                        callback(newComment);
-                    }
-                });
-            } else {
-                //返回空，删除之前的历史
-                long long commentCreateTime = [[IMDataManager sharedInstance] qimDB_getCommentCreateTimeWithCurCommentId:commentRId];
-                [[IMDataManager sharedInstance] qimDB_bulkDeleteCommentsWithPostId:momentId withcurCommentCreateTime:commentCreateTime];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (callback) {
-                        callback(@[]);
-                    }
-                });
-            }
-        } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(nil);
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                NSArray *deteleComments = [data objectForKey:@"deleteComments"];
+                if ([deteleComments isKindOfClass:[NSArray class]]) {
+                    [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:deteleComments];
                 }
-            });
+                NSArray *newComment = [data objectForKey:@"newComment"];
+                if ([newComment isKindOfClass:[NSArray class]] && newComment.count > 0) {
+                    //插入历史20条
+                    [[IMDataManager sharedInstance] qimDB_bulkinsertComments:newComment];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (callback) {
+                            callback(newComment);
+                        }
+                    });
+                } else {
+                    //返回空，删除之前的历史
+                    long long commentCreateTime = [[IMDataManager sharedInstance] qimDB_getCommentCreateTimeWithCurCommentId:commentRId];
+                    [[IMDataManager sharedInstance] qimDB_bulkDeleteCommentsWithPostId:momentId withcurCommentCreateTime:commentCreateTime];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (callback) {
+                            callback(@[]);
+                        }
+                    });
+                }
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(nil);
+                    }
+                });
+            }
         }
     } withFailedCallBack:^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -500,19 +557,38 @@
     NSData *momentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSDictionary *data = [result objectForKey:@"data"];
-        if ([data isKindOfClass:[NSDictionary class]]) {
-            BOOL isDeleteFlag = [[data objectForKey:@"isDelete"] boolValue];
-            if (isDeleteFlag == YES) {
-                NSString *commentUUID = [data objectForKey:@"commentUUID"];
-                if (commentUUID.length > 0) {
-                    NSDictionary *deleteCommentDic = @{@"uuid":commentUUID, @"isDelete":@(YES)};
-                    [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:@[deleteCommentDic]];
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        if (callback) {
-                            callback(YES);
-                        }
-                    });
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [result objectForKey:@"data"];
+            if ([data isKindOfClass:[NSDictionary class]]) {
+            
+                NSInteger postCommentNum = [[data objectForKey:@"postCommentNum"] integerValue];
+                NSInteger likeNum = [[data objectForKey:@"postLikeNum"] integerValue];
+                [[IMDataManager sharedInstance] qimDB_updateMomentWithLikeNum:likeNum WithCommentNum:postCommentNum withPostId:postUUId];
+                NSDictionary *postCommentData = @{@"postId":postUUId, @"postCommentNum":@(postCommentNum)};
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyReloadWorkFeedCommentNum object:postCommentData];
+                });
+                
+                BOOL isDeleteFlag = [[data objectForKey:@"isDelete"] boolValue];
+                if (isDeleteFlag == YES) {
+                    NSString *commentUUID = [data objectForKey:@"commentUUID"];
+                    if (commentUUID.length > 0) {
+                        NSDictionary *deleteCommentDic = @{@"uuid":commentUUID, @"isDelete":@(YES)};
+                        [[IMDataManager sharedInstance] qimDB_bulkDeleteComments:@[deleteCommentDic]];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            if (callback) {
+                                callback(YES);
+                            }
+                        });
+                    } else {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            if (callback) {
+                                callback(NO);
+                            }
+                        });
+                    }
                 } else {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         if (callback) {
@@ -527,12 +603,6 @@
                     }
                 });
             }
-        } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (callback) {
-                    callback(NO);
-                }
-            });
         }
     } withFailedCallBack:^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -629,7 +699,8 @@
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:noticeReadStateData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
-        if (ret) {
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
             QIMVerboseLog(@"设置已读成功");
         } else {
             QIMVerboseLog(@"设置已读失败");
@@ -654,30 +725,34 @@
     NSData *momentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        NSDictionary *moments = [result objectForKey:@"data"];
-        if ([moments isKindOfClass:[NSDictionary class]]) {
-            NSArray *deletePosts = [moments objectForKey:@"deletePost"];
-            NSArray *newPosts = [moments objectForKey:@"newPost"];
-            if ([deletePosts isKindOfClass:[NSArray class]]) {
-                [[IMDataManager sharedInstance] qimDB_bulkdeleteMoments:deletePosts];
-            }
-            if ([newPosts isKindOfClass:[NSArray class]]) {
-                if (newPosts.count > 0) {
-                    NSDictionary *lastMomentDic = [newPosts firstObject];
-                    NSDictionary *momoentDic = [self getLastWorkMomentWithDic:lastMomentDic];
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kNotify_RN_QTALK_SUGGEST_WorkFeed_UPDATE object:momoentDic];
-                    });
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *moments = [result objectForKey:@"data"];
+            if ([moments isKindOfClass:[NSDictionary class]]) {
+                NSArray *deletePosts = [moments objectForKey:@"deletePost"];
+                NSArray *newPosts = [moments objectForKey:@"newPost"];
+                if ([deletePosts isKindOfClass:[NSArray class]]) {
+                    [[IMDataManager sharedInstance] qimDB_bulkdeleteMoments:deletePosts];
+                }
+                if ([newPosts isKindOfClass:[NSArray class]]) {
+                    if (newPosts.count > 0) {
+                        NSDictionary *lastMomentDic = [newPosts firstObject];
+                        NSDictionary *momoentDic = [self getLastWorkMomentWithDic:lastMomentDic];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kNotify_RN_QTALK_SUGGEST_WorkFeed_UPDATE object:momoentDic];
+                        });
+                    } else {
+                        NSDictionary *localLastMomentDic = [self getLastWorkMoment];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kNotify_RN_QTALK_SUGGEST_WorkFeed_UPDATE object:localLastMomentDic];
+                        });
+                    }
                 } else {
-                    NSDictionary *localLastMomentDic = [self getLastWorkMoment];
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kNotify_RN_QTALK_SUGGEST_WorkFeed_UPDATE object:localLastMomentDic];
-                    });
+      
                 }
             } else {
-  
             }
-        } else {
         }
     } withFailedCallBack:^(NSError *error) {
 
