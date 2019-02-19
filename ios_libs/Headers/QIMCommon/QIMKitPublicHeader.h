@@ -47,6 +47,7 @@
 #import "QIMKit+QIMSingleMessage.h"
 #import "QIMKit+QIMSystemMessage.h"
 #import "QIMKit+QIMUserVcard.h"
+#import "QIMKit+QIMPublicNavUserManager.h"
 #import "QIMKit+QIMUserCacheManager.h"
 #import "QIMMessage.h"
 
