@@ -343,7 +343,4 @@ typedef void(^QIMKitGetMomentHistorySuccessedBlock)(NSArray *moments);
 typedef void(^QIMKitgetAnonymouseSuccessedBlock)(NSDictionary *anonymousDic);
 typedef void(^QIMKitgetMomentDetailSuccessedBlock)(NSDictionary *momentDic);
 
-
-typedef void(^QIMKitgetPublicCompanySuccessedBlock)(NSArray *companies);
-
 #endif /* QIMCommonEnum_h */
