@@ -1893,15 +1893,14 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
 
 - (BOOL)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag {
     if ([QIMManager getLastUserName].length > 0) {
-        NSString *myKey = [[QIMManager sharedInstance] remoteKey];
-        if (!myKey) {
-            myKey = [self updateRemoteLoginKey];
+        if (self.remoteKey.length <= 0) {
+            [self updateRemoteLoginKey];
         }
-        if (myKey.length > 0) {
+        if (self.remoteKey.length > 0) {
             BOOL result = [self sendServer:myToken
                               withUsername:[self getLastJid]
                                 withParamU:[self getLastJid]
-                                withParamK:myKey
+                                withParamK:self.remoteKey
                                 WithDelete:deleteFlag];
             
             if (result) {

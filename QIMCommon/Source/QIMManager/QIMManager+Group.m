@@ -342,7 +342,7 @@
         
         NSString *destUrl = [NSString stringWithFormat:@"%@/domain/get_muc_vcard?u=%@&k=%@&platform=iphone&version=%@", [[QIMNavConfigManager sharedInstance] httpHost], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
         
-        if (!self.remoteKey || self.remoteKey.length <= 0) {
+        if (self.remoteKey.length <= 0) {
             [self updateRemoteLoginKey];
         }
         NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];

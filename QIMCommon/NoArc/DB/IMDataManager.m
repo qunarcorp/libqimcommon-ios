@@ -3998,7 +3998,7 @@ static IMDataManager *__global_data_manager = nil;
         BOOL added = NO;
         result = [[NSMutableArray alloc] initWithCapacity:50];
         while ([reader read]) {
-            
+         
             NSString *xmppId = [reader objectForColumnIndex:0];
             NSString *realJid = [reader objectForColumnIndex:1];
             NSString *userId = [reader objectForColumnIndex:2];

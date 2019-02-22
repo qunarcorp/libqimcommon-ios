@@ -143,7 +143,7 @@
         QIMVerboseLog(@"单人历史记录拉第%d批次", count);
         int retryCount = 0;
         do {
-            if (!self.remoteKey) {
+            if (self.remoteKey.length <= 0) {
                 [self updateRemoteLoginKey];
             }
             if (self.lastSingleMsgTime <= 0) {

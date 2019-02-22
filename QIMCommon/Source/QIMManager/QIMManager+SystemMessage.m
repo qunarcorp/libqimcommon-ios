@@ -43,7 +43,7 @@
 
 - (void)updateOfflineSystemNoticeMessages {
 
-    if (!self.remoteKey) {
+    if (self.remoteKey.length <= 0) {
         [self updateRemoteLoginKey];
     }
     NSString *from = @"SystemMessage";
