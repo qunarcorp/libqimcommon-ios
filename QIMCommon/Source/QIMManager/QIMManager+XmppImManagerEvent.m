@@ -565,7 +565,7 @@
         [mesg setMessageDate:msgDate];
         [mesg setMsgRaw:msgRaw];
         [mesg setRealJid:realFrom];
-        [mesg setChatType:ChatType_SingleChat];
+        [mesg setChatType:chatType];
         // 消息落地
         [self saveMsg:mesg ByJid:fromJid];
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -778,7 +778,6 @@
         }
         [self removeSessionById:groupId];
         [[IMDataManager sharedInstance] deleteGroup:groupId];
-        [[IMDataManager sharedInstance] removeRecentContact:groupId];
         [[IMDataManager sharedInstance] deleteMessageWithXmppId:groupId];
         NSMutableDictionary *userInfoDic = [NSMutableDictionary dictionary];
         if (reason.length > 0) {
@@ -841,7 +840,6 @@
     if ([memberJid isEqualToString:[self getLastJid]]) {
         [[IMDataManager sharedInstance] deleteGroup:groupId];
         [self removeSessionById:groupId];
-        [[IMDataManager sharedInstance] removeRecentContact:groupId];
         [[IMDataManager sharedInstance] deleteGroupMemberWithGroupId:groupId];
         [[IMDataManager sharedInstance] deleteMessageWithXmppId:groupId];
     }
@@ -908,46 +906,6 @@
         default:
             break;
     }
-}
-
-- (void)receiveTransferChat:(NSDictionary *)infoDic {
-    dispatch_async(self.receive_msg_queue, ^{
-        NSString *transFrom = [infoDic objectForKey:@"From"];
-        NSString *msgId = [infoDic objectForKey:@"MsgId"];
-        long long msgDate = ([[NSDate date] timeIntervalSince1970] - self.serverTimeDiff) * 1000;
-        NSString *autoReply = [infoDic objectForKey:@"autoReply"];
-        BOOL flag = [[IMDataManager sharedInstance] checkMsgId:msgId];
-        if (flag) {
-            return;
-        }
-        
-        [self checkMsgTimeWithJid:transFrom WithMsgDate:msgDate WithGroup:NO];
-        
-        Message *mesg = [Message new];
-        [mesg setMessageId:msgId];
-        [mesg setFrom:transFrom];
-        [mesg setMessageType:QIMMessageType_GroupNotify];
-        [mesg setMessageDirection:MessageDirection_Received];
-        [mesg setMessage:@"该会话已转移成功。"];
-        [mesg setMessageDate:msgDate];
-        [mesg setChatType:ChatType_SingleChat];
-        
-        // 消息落地
-        if (![autoReply isEqualToString:@"true"]) {
-            [self saveMsg:mesg ByJid:transFrom];
-        }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationMessageUpdate object:transFrom userInfo:@{@"message": mesg}];
-            [self addSessionByType:ChatType_SingleChat ById:transFrom ByMsgId:msgId WithMsgTime:mesg.messageDate WithNeedUpdate:YES];
-            if (![transFrom isEqualToString:self.currentSessionUserId] && mesg.messageDirection == MessageDirection_Received) {
-                //                [self setNotReaderMsgCount:[self getNotReadMsgCountByJid:sid] + 1 ForJid:sid];
-                [self increasedNotReadMsgCountByJid:transFrom];
-                [self updateNotReadCountCacheByJid:transFrom];
-                [self playSound];
-            }
-        });
-    });
 }
 
 #pragma mark - App Config
@@ -1061,7 +1019,6 @@
                     if (![newGroupIds containsObject:groupId]) {
                         [[IMDataManager sharedInstance] deleteGroup:groupId];
                         [self removeSessionById:groupId];
-                        [[IMDataManager sharedInstance] removeRecentContact:groupId];
                         [[IMDataManager sharedInstance] deleteGroupMemberWithGroupId:groupId];
                     }
                 }

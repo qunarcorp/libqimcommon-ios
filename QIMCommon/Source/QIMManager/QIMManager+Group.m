@@ -703,7 +703,6 @@
         if (![[groupList valueForKey:@"groupId"] containsObject:groupName]) {
             [[IMDataManager sharedInstance] deleteGroup:groupName];
             [self removeSessionById:groupName];
-            [[IMDataManager sharedInstance] removeRecentContact:groupName];
             [[IMDataManager sharedInstance] deleteGroupMemberWithGroupId:groupName];
         }
     }
@@ -798,7 +797,6 @@
                                 [strongSelf removeStickWithCombineJid:combineGroupId WithChatType:ChatType_GroupChat];
                                 [[IMDataManager sharedInstance] deleteGroup:groupId];
                                 [strongSelf removeSessionById:groupId];
-                                [[IMDataManager sharedInstance] removeRecentContact:groupId];
                                 [[IMDataManager sharedInstance] deleteGroupMemberWithGroupId:groupId];
                             }
                         }

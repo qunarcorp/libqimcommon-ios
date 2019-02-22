@@ -655,21 +655,6 @@
     return [[IMDataManager sharedInstance] searchMsgIdWithKey:key ByXmppId:xmppId];
 }
 
-// ******************** 最近联系人 **************************** //
-
-- (NSArray *)getRecentContacts {
-    return [[IMDataManager sharedInstance] getRecentContacts];
-}
-
-- (void)insertRecentContact:(NSDictionary *)contact {
-    [[IMDataManager sharedInstance] insertRecentContact:contact];
-}
-
-- (void)removeRecentContact:(NSString *)xmppId {
-    [[IMDataManager sharedInstance] removeRecentContact:xmppId];
-}
-
-
 #pragma mark - 消息数据方法
 - (NSArray *) existsMessageUsers {
     return [[IMDataManager sharedInstance] existsMessageUsers];

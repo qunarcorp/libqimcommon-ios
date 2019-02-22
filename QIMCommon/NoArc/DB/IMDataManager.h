@@ -370,11 +370,6 @@ typedef enum {
 // 搜索
 - (NSArray *)searchMsgHistoryWithKey:(NSString *)key;
 - (NSArray *)searchMsgIdWithKey:(NSString *)key ByXmppId:(NSString *)xmppId;
-// ******************** 最近联系人 **************************** //
-- (NSArray *)getRecentContacts;
-- (void)insertRecentContact:(NSDictionary *)contact;
-- (void)removeRecentContact:(NSString *)xmppId;
-
 
 #pragma mark - 消息数据方法
 - (NSArray *) existsMessageUsers;

@@ -786,6 +786,14 @@ static IMDataManager *__global_data_manager = nil;
               createTime            INTEGER,\
               userFromHost          TEXT,\
               fromAnonymousName     TEXT);" withParameters:nil];
+    //创建一个缓存表
+    result = [database executeNonQuery:@"CREATE TABLE IM_Cache_Data(\
+              key           TEXT,\
+              type          INTEGER,\
+              value         TEXT,\
+              valueInt      INTEGER DEFAULT 0,\
+              primary key(key , type));" withParameters:nil];
+    
     return result;
 }
 
@@ -3992,42 +4000,7 @@ static IMDataManager *__global_data_manager = nil;
             [IMDataManager safeSaveForDic:dic setObject:@(PublicNumberChat) forKey:@"ChatType"];
             pMaxLastTime = [pReader objectForColumnIndex:4];
         }
-        /*
-        NSString *sql = @"select *from IM_SessionList ORDER by LastUpdateTime Desc";
-        DataReader *reader = [database executeReader:sql withParameters:nil];
-        BOOL added = NO;
-        result = [[NSMutableArray alloc] initWithCapacity:50];
-        while ([reader read]) {
-         
-            NSString *xmppId = [reader objectForColumnIndex:0];
-            NSString *realJid = [reader objectForColumnIndex:1];
-            NSString *userId = [reader objectForColumnIndex:2];
-            NSString *lastMsgId = [reader objectForColumnIndex:3];
-            NSNumber *msgDateTime = [reader objectForColumnIndex:4];
-            NSNumber *chatType = [reader objectForColumnIndex:5];
-            if (added == NO && msgDateTime && msgDateTime.longLongValue < pMaxLastTime.longLongValue) {
-                added = YES;
-                [result addObject:dic];
-            } else {
-                NSMutableDictionary *sessionDic = [[NSMutableDictionary alloc] init];
-                [IMDataManager safeSaveForDic:sessionDic setObject:xmppId forKey:@"XmppId"];
-                [IMDataManager safeSaveForDic:sessionDic setObject:userId forKey:@"UserId"];
-                [IMDataManager safeSaveForDic:sessionDic setObject:lastMsgId forKey:@"LastMsgId"];
-                [IMDataManager safeSaveForDic:sessionDic setObject:msgDateTime forKey:@"MsgDateTime"];
-                [IMDataManager safeSaveForDic:sessionDic setObject:chatType forKey:@"ChatType"];
-                [IMDataManager safeSaveForDic:sessionDic setObject:realJid forKey:@"RealJid"];
-                [result addObject:sessionDic];
-                [sessionDic release];
-            }
-        }
-        long long endTime = [[NSDate date] timeIntervalSince1970] * 1000;
-        CFAbsoluteTime end = CFAbsoluteTimeGetCurrent();
-        QIMVerboseLog(@"生成%ld条会话列表 耗时 = %f s", result.count, end - start); //s
-        */
-//        NSString *sql = [NSString stringWithFormat:@"select a.XmppId, a.UserId, case a.ChatType WHEN %d THEN (select name from IM_User where IM_User.XmppId = a.XmppId) ELSE (select name from IM_Group where IM_Group.GroupId = a.XmppId) end as Name, case a.ChatType When %d THEN (Select HeaderSrc From IM_User WHERE UserId = a.UserId) ELSE (SELECT HeaderSrc From IM_Group WHERE GroupId=a.XmppId) END as HeaderSrc, b.MsgId, b.Content, b.Type, b.State, b.Direction,CASE b.LastUpdateTime  When NULL THEN a.LastUpdateTime ELSE b.LastUpdateTime END as orderTime, a.ChatType, case a.ChatType When %d THEN '' ELSE b.[From] END as NickName, 0 as NotReadCount,a.RealJid from IM_SessionList as a left join IM_Message as b on a.XmppId = b.XmppId and b.MsgId = (SELECT MsgId FROM IM_Message WHERE XmppId = a.XmppId  AND (case When a.ChatType = %d or a.ChatType = %d THEN RealJid = a.RealJid ELSE RealJid is null END) Order by LastUpdateTime DESC LIMIT 1) order by OrderTime desc;", singleChatType, singleChatType,singleChatType, ConsultChat, ConsultServerChat];
-        
         NSString *sql = [NSString stringWithFormat:@"select a.XmppId, a.UserId, case a.ChatType WHEN %d THEN (select name from IM_User where IM_User.XmppId = a.XmppId) ELSE (select name from IM_Group where IM_Group.GroupId = a.XmppId) end as Name, case a.ChatType When %d THEN (Select HeaderSrc From IM_User WHERE UserId = a.UserId) ELSE (SELECT HeaderSrc From IM_Group WHERE GroupId=a.XmppId) END as HeaderSrc, b.MsgId, b.Content, b.Type, b.State, b.Direction, a.ChatType, a.RealJid, a.LastUpdateTime, (case when (select count(*) from IM_Client_Config where DeleteFlag =0 and ConfigKey ='kStickJidDic' and ConfigSubKey=(a.XmppId ||'<>'||a.RealJid))=1 Then 1 ELSE 0 END) as StickState, (case when (select count(*) from IM_Client_Config where ConfigKey='kNoticeStickJidDic'and DeleteFlag=0 and ConfigSubKey=a.XmppId)=1 Then 1 ELSE 0 END) as Reminded, (case when (select count(*) from IM_Client_Config where ConfigKey='kMarkupNames' and DeleteFlag=0 and ConfigSubKey=a.XmppId)=1 Then (select ConfigValue from IM_Client_Config where ConfigKey='kMarkupNames' and DeleteFlag=0 and ConfigSubKey=a.XmppId) ELSE NULL END) as MarkupName, b.'From' from IM_SessionList as a left join IM_Message as b on a.LastMessageId = b.MsgId order by StickState desc, a.LastUpdateTime desc;", singleChatType, singleChatType];
-//        NSString *sql = [NSString stringWithFormat:@"select a.XmppId, a.UserId, case a.ChatType WHEN %d THEN (select name from IM_User where IM_User.XmppId = a.XmppId) ELSE (select Name from IM_Group where IM_Group.GroupId = a.XmppId) end as Name, case a.ChatType When %d THEN (Select HeaderSrc From IM_User WHERE IM_User.XmppId = a.XmppId) ELSE (SELECT HeaderSrc From IM_Group WHERE GroupId=a.XmppId) END as HeaderSrc, a.LastMessageId, a.ChatType, a.RealJid, a.LastUpdateTime from IM_SessionList as a Order by LastUpdateTime DESC;", singleChatType, singleChatType];
         DataReader *reader = [database executeReader:sql withParameters:nil];
         
         result = [[NSMutableArray alloc] init];
@@ -4077,7 +4050,7 @@ static IMDataManager *__global_data_manager = nil;
         }
         long long endTime = [[NSDate date] timeIntervalSince1970] * 1000;
         CFAbsoluteTime end = CFAbsoluteTimeGetCurrent();
-        QIMVerboseLog(@"生成%ld条会话列表 耗时 = %f s", result.count, end - start); //s
+        QIMVerboseLog(@"生成%ld条会话列表 耗时 = %f s", result.count, end - start);
     }];
     return [result autorelease];
 }
@@ -4852,54 +4825,6 @@ static IMDataManager *__global_data_manager = nil;
     }];
     return result;
 }
-
-// ******************** 最近联系人 **************************** //
-- (NSArray *)getRecentContacts{
-    __block NSMutableArray *contactList = nil;
-    [[self dbInstance] syncUsingTransaction:^(Database *database) {
-        NSString *sql = @"SELECT a.XmppId, a.Type, case a.Type When 0 THEN (Select Name From IM_User WHERE XmppId = a.XmppId) ELSE (SELECT Name From IM_Group WHERE GroupId = a.XmppId) END as Name, case a.Type When 0 THEN (Select HeaderSrc From IM_User WHERE XmppId = a.XmppId) ELSE (SELECT HeaderSrc From IM_Group WHERE GroupId=a.XmppId) END as HeaderSrc FROM IM_Recent_Contacts a ORDER BY LastUpdateTime DESC;";
-        DataReader *reader = [database executeReader:sql withParameters:nil];
-        while ([reader read]) {
-            if (contactList == nil) {
-                contactList = [[NSMutableArray alloc] init];
-            }
-            NSString *xmppId = [reader objectForColumnIndex:0];
-            NSNumber *type = [reader objectForColumnIndex:1];
-            NSString *Name = [reader objectForColumnIndex:2];
-            NSString *HeaderSrc = [reader objectForColumnIndex:3];
-            NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
-            [IMDataManager safeSaveForDic:dic setObject:xmppId forKey:@"XmppId"];
-            [IMDataManager safeSaveForDic:dic setObject:type forKey:@"ChatType"];
-            [IMDataManager safeSaveForDic:dic setObject:Name forKey:@"Name"];
-            [IMDataManager safeSaveForDic:dic setObject:HeaderSrc forKey:@"HeaderSrc"];
-            [contactList addObject:dic];
-            [dic release];
-        }
-    }];
-    return [contactList autorelease];
-}
-
-- (void)insertRecentContact:(NSDictionary *)contact{
-    [[self dbInstance] syncUsingTransaction:^(Database *database) {
-        NSString *sql = @"INSERT OR REPLACE INTO IM_RECENT_CONTACTS(XmppId,Type,LastUpdateTime) VALUES(:XmppId,:Type,:LastUpdateTime); ";
-        NSString *xmppId = [contact objectForKey:@"XmppId"];
-        NSNumber *type = [contact objectForKey:@"ChatType"];
-        NSNumber *lastUpdateTime = @([[NSDate date] timeIntervalSince1970]);
-        NSMutableArray *param = [NSMutableArray array];
-        [param addObject:xmppId];
-        [param addObject:type];
-        [param addObject:lastUpdateTime];
-        [database executeNonQuery:sql withParameters:param];
-    }];
-}
-
-- (void)removeRecentContact:(NSString *)xmppId{
-    [[self dbInstance] syncUsingTransaction:^(Database *database) {
-        NSString *sql = @"Delete From IM_RECENT_CONTACTS Where XmppId=:XmppId;";
-        [database executeNonQuery:sql withParameters:@[xmppId]];
-    }];
-}
-
 
 #pragma mark - 消息数据方法
 
