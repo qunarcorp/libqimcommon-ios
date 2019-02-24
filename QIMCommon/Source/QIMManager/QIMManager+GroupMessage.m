@@ -60,7 +60,8 @@
             retryCount ++;
             getMucHistotySuccess = [self getMucHistoryV2WithTimeOut:timeOut];
             timeOut += 6;
-            if (retryCount > 3) {
+            QIMWarnLog(@"群历史记录重试第%d次", retryCount);
+            if (retryCount >= 3) {
                 QIMWarnLog(@"重试超过三次，结束请求群历史记录");
                 self.latestGroupMessageFlag = NO;
             }

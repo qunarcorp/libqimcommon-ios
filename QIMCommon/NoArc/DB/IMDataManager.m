@@ -321,6 +321,8 @@ static IMDataManager *__global_data_manager = nil;
         result = [database executeNonQuery:@"CREATE INDEX IF NOT EXISTS IX_IM_MESSAGE_ChatType_State ON \
                   IM_Message(ChatType, State);"
                             withParameters:nil];
+        result = [database executeNonQuery:@"CREATE INDEX IF NOT EXISTS IX_IM_MESSAGE_State_Direction ON \
+                  IM_Message(State, Direction);" withParameters:nil];
     }
     
     result = [database executeNonQuery: @"CREATE TABLE IF NOT EXISTS IM_Recent_Contacts(\
@@ -786,14 +788,7 @@ static IMDataManager *__global_data_manager = nil;
               createTime            INTEGER,\
               userFromHost          TEXT,\
               fromAnonymousName     TEXT);" withParameters:nil];
-    //创建一个缓存表
-    result = [database executeNonQuery:@"CREATE TABLE IM_Cache_Data(\
-              key           TEXT,\
-              type          INTEGER,\
-              value         TEXT,\
-              valueInt      INTEGER DEFAULT 0,\
-              primary key(key , type));" withParameters:nil];
-    
+
     return result;
 }
 
