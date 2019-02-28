@@ -585,6 +585,33 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     return count;
 }
 
+- (NSInteger)qimDB_getWorkNoticePOSTCount {
+    __block NSInteger count = 0;
+    [[self dbInstance] syncUsingTransaction:^(Database *database) {
+        NSString *sql = [NSString stringWithFormat:@"select count(*) from IM_Work_NoticeMessage Where readState=0 and eventType=2;"];
+        NSLog(@"sql : %@", sql);
+        DataReader *reader = [database executeReader:sql withParameters:nil];
+        if ([reader read]) {
+            count = [[reader objectForColumnIndex:0] integerValue];
+        }
+    }];
+    NSLog(@"qimDB_getWorkNoticePOSTCount : %ld", count);
+    return count;
+}
+
+- (void)qimDB_updateWorkNoticePOSTMessageReadState {
+    [[self dbInstance] syncUsingTransaction:^(Database *database) {
+        NSString *sql = [NSString stringWithFormat:@"update IM_Work_NoticeMessage set readState=1 where readState=0 and eventType=2"];
+        NSLog(@"qimDB_updateWorkNoticePOSTMessageReadState sql : %@", sql);
+        BOOL success = [database executeNonQuery:sql withParameters:nil];
+        if (success) {
+            NSLog(@"qimDB_updateWorkNoticePOSTMessageReadState success");
+        } else {
+            NSLog(@"qimDB_updateWorkNoticePOSTMessageReadState faild");
+        }
+    }];
+}
+
 - (NSArray *)qimDB_getWorkNoticeMessagesWihtLimit:(int)limit WithOffset:(int)offset {
     __block NSMutableArray *result = nil;
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
@@ -644,7 +671,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
 
 - (void)qimDB_updateWorkNoticeMessageReadStateWithTime:(long long)time {
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
-        NSString *sql = [NSString stringWithFormat:@"update IM_Work_NoticeMessage set readState=1 where readState=0 and createTime <= %lld", time];
+        NSString *sql = [NSString stringWithFormat:@"update IM_Work_NoticeMessage set readState=1 where readState=0 and eventType=1 and createTime <= %lld", time];
         NSLog(@"qimDB_updateWorkNoticeMessageReadStateWithTime sql : %@", sql);
         BOOL success = [database executeNonQuery:sql withParameters:nil];
         if (success) {

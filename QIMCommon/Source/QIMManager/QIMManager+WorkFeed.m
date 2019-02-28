@@ -957,6 +957,14 @@
     return [[IMDataManager sharedInstance] qimDB_getWorkNoticeMessagesCount];
 }
 
+- (NSInteger)getWorkNoticePOSTCount {
+    return [[IMDataManager sharedInstance] qimDB_getWorkNoticePOSTCount];
+}
+
+- (void)updateWorkNoticePOSTMessageReadState {
+    [[IMDataManager sharedInstance] qimDB_updateWorkNoticePOSTMessageReadState];
+}
+
 - (NSArray *)getWorkNoticeMessagesWihtLimit:(int)limit WithOffset:(int)offset {
     return [[IMDataManager sharedInstance] qimDB_getWorkNoticeMessagesWihtLimit:limit WithOffset:offset];
 }

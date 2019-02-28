@@ -50,6 +50,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSInteger)qimDB_getWorkNoticeMessagesCount;
 
+- (NSInteger)qimDB_getWorkNoticePOSTCount;
+
+- (void)qimDB_updateWorkNoticePOSTMessageReadState;
+
 - (NSArray *)qimDB_getWorkNoticeMessagesWihtLimit:(int)limit WithOffset:(int)offset;
 
 - (void)qimDB_updateWorkNoticeMessageReadStateWithTime:(long long)time;

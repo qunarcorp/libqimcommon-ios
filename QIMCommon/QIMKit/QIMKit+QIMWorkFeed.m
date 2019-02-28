@@ -93,6 +93,14 @@
     return [[QIMManager sharedInstance] getWorkNoticeMessagesCount];
 }
 
+- (NSInteger)getWorkNoticePOSTCount {
+    return [[QIMManager sharedInstance] getWorkNoticePOSTCount];
+}
+
+- (void)updateWorkNoticePOSTMessageReadState {
+    [[QIMManager sharedInstance] updateWorkNoticePOSTMessageReadState];
+}
+
 - (NSArray *)getWorkNoticeMessagesWihtLimit:(int)limit WithOffset:(int)offset {
     return [[QIMManager sharedInstance] getWorkNoticeMessagesWihtLimit:limit WithOffset:offset];
 }
