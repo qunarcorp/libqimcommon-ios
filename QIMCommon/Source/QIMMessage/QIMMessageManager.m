@@ -16,6 +16,7 @@ static QIMMessageManager *__global_msg_manager = nil;
     NSMutableDictionary *_msgVCClassDic;
     NSMutableArray *_textBarButtonList;
     NSMutableDictionary *_showTextDic;
+    NSMutableArray *_removeButtonList;
 }
 
 + (instancetype)sharedInstance {
@@ -33,6 +34,7 @@ static QIMMessageManager *__global_msg_manager = nil;
         _msgVCClassDic = [[NSMutableDictionary alloc] init];
         _textBarButtonList = [[NSMutableArray alloc] init];
         _showTextDic = [[NSMutableDictionary alloc] init];
+        _removeButtonList = [[NSMutableArray alloc] init];
     }
     return self;
 }
@@ -128,17 +130,22 @@ static QIMMessageManager *__global_msg_manager = nil;
         [dic setObject:title?title:@"" forKey:@"title"];
         [dic setObject:itemId?itemId:@"" forKey:@"trdextendId"];
         [dic setObject:@(YES) forKey:@"local"];
-        [_textBarButtonList addObject:dic];
+        if (![_removeButtonList containsObject:itemId]) {
+            [_textBarButtonList addObject:dic];
+        }
     }
 }
 
 - (void)addMsgTextBarWithTrdInfo:(NSDictionary *)trdExtendInfo {
+    NSString *trdEntendId = [trdExtendInfo objectForKey:@"trdextendId"];
     NSString *imageName = [trdExtendInfo objectForKey:@"icon"];
     if (imageName.length > 0) {
         if (!_textBarButtonList) {
             _textBarButtonList = [NSMutableArray arrayWithCapacity:1];
         }
-        [_textBarButtonList addObject:trdExtendInfo];
+        if (![_removeButtonList containsObject:trdEntendId]) {
+            [_textBarButtonList addObject:trdExtendInfo];
+        }
     }
 }
 
@@ -189,6 +196,16 @@ static QIMMessageManager *__global_msg_manager = nil;
         }
     }
     return NO;
+}
+
+- (NSArray *)getHasRemoveExpandItems {
+    return _removeButtonList;
+}
+
+- (void)removeExpandItemsForItemId:(NSString *)itemId {
+    if (itemId.length > 0) {
+        [_removeButtonList addObject:itemId];
+    }
 }
 
 @end

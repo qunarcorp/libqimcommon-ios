@@ -90,4 +90,12 @@
     [[QIMMessageManager sharedInstance] removeAllExpandItems];
 }
 
+- (NSArray *)getHasRemoveExpandItems {
+    return [[QIMMessageManager sharedInstance] getHasRemoveExpandItems];
+}
+
+- (void)removeExpandItemsForItemId:(NSString *)itemId {
+    [[QIMMessageManager sharedInstance] removeExpandItemsForItemId:itemId];
+}
+
 @end
