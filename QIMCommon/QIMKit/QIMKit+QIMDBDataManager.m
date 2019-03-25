@@ -162,6 +162,10 @@
     return [[IMDataManager sharedInstance] qimDB_getGroupMember:groupId BySearchStr:searchStr];
 }
 
+- (NSArray *)qimDB_getGroupMember:(NSString *)groupId WithGroupIdentity:(NSInteger)identity {
+    return [[IMDataManager sharedInstance] qimDB_getGroupMember:groupId WithGroupIdentity:identity];
+}
+
 - (NSDictionary *)getGroupOwnerInfoForGroupId:(NSString *)groupId {
     return [[IMDataManager sharedInstance] getGroupOwnerInfoForGroupId:groupId];
 }

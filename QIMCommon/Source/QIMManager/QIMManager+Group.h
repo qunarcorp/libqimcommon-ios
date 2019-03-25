@@ -144,6 +144,8 @@
  */
 - (QIMGroupIdentity)GroupIdentityForUser:(NSString *)userId byGroup:(NSString *)groupId;
 
+- (NSString *)getGroupaffiliationWithIdentity:(QIMGroupIdentity)identity;
+
 #pragma mark - 群头像
 
 /**

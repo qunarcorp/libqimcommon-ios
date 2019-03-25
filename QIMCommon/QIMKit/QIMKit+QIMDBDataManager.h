@@ -59,6 +59,7 @@
 - (NSArray *)getQChatGroupMember:(NSString *)groupId BySearchStr:(NSString *)searchStr;
 - (NSArray *)qimDB_getGroupMember:(NSString *)groupId;
 - (NSArray *)qimDB_getGroupMember:(NSString *)groupId BySearchStr:(NSString *)searchStr;
+- (NSArray *)qimDB_getGroupMember:(NSString *)groupId WithGroupIdentity:(NSInteger)identity;
 - (NSDictionary *)getGroupOwnerInfoForGroupId:(NSString *)groupId;
 - (void)deleteGroupMemberWithGroupId:(NSString *)groupId;
 - (void)deleteGroupMemberJid:(NSString *)memberJid WithGroupId:(NSString *)groupId;

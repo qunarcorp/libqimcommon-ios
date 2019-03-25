@@ -87,6 +87,10 @@
     return [[QIMManager sharedInstance] GroupIdentityForUser:userId byGroup:groupId];
 }
 
+- (NSString *)getGroupaffiliationWithIdentity:(QIMGroupIdentity)identity {
+    return [[QIMManager sharedInstance] getGroupaffiliationWithIdentity:identity];
+}
+
 #pragma mark - 群头像
 
 + (UIImage *)defaultGroupHeaderImage {

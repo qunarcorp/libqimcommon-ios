@@ -512,6 +512,19 @@
     return id_;
 }
 
+- (NSString *)getGroupaffiliationWithIdentity:(QIMGroupIdentity)identity {
+    NSString *affiliation = @"none";
+    if (identity == QIMGroupIdentityNone) {
+        affiliation = @"none";
+    } else if (identity == QIMGroupIdentityAdmin) {
+        affiliation = @"admin";
+    } else if (identity == QIMGroupIdentityOwner) {
+        affiliation = @"owner";
+    } else {
+        affiliation = @"none";
+    }
+    return affiliation;
+}
 
 - (BOOL)joinGroupId:(NSString *)groupId ByName:(NSString *)name isInitiative:(BOOL)initiative{
     

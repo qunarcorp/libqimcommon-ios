@@ -40,5 +40,8 @@
 - (BOOL)hasExpandItemForType:(QIMTextBarExpandViewItemType)itemType;
 - (void)removeAllExpandItems;
 
+- (NSArray *)getHasRemoveExpandItems;
+
+- (void)removeExpandItemsForItemId:(NSString *)itemId;
 
 @end

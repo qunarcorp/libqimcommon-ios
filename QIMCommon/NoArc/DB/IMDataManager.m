@@ -2127,9 +2127,9 @@ static IMDataManager *__global_data_manager = nil;
         
         for (NSDictionary *memberDic in members) {
             
-            NSString *memId = [groupId stringByAppendingFormat:@"/%@",[memberDic objectForKey:@"name"]];  //448353735b6b4a7e91ef9f70ade46fd8@conference.ejabhost1/李露lucas
-            NSString *name = [memberDic objectForKey:@"name"];  //李露lucas
-            NSString *affiliation = [memberDic objectForKey:@"affiliation"]; //owner / admin / none
+            NSString *memId = [groupId stringByAppendingFormat:@"/%@",[memberDic objectForKey:@"name"]];
+            NSString *name = [memberDic objectForKey:@"name"];
+            NSString *affiliation = [memberDic objectForKey:@"affiliation"];
             NSNumber *lastUpdateTime = [NSNumber numberWithDouble:[[NSDate date] timeIntervalSince1970]];
             NSString *memberXmppJid = [memberDic objectForKey:@"jid"];
             if ([memberDic isEqual:members.lastObject]) {
@@ -2230,6 +2230,50 @@ static IMDataManager *__global_data_manager = nil;
             NSString *affiliation = [reader objectForColumnIndex:3];
             if (jid == nil)
             continue;
+            NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
+            [dic setObject:memberId forKey:@"jid"];
+            [dic setObject:name forKey:@"name"];
+            [dic setObject:jid forKey:@"xmppjid"];
+            [dic setObject:affiliation forKey:@"affiliation"];
+            [members addObject:dic];
+            [dic release];
+            dic = nil;
+        }
+    }];
+    return [members autorelease];
+}
+
+- (NSArray *)qimDB_getGroupMember:(NSString *)groupId WithGroupIdentity:(NSInteger)identity {
+    __block NSMutableArray *members = nil;
+    NSMutableArray *identityArray = [[NSMutableArray alloc] init];
+    if (identity == 2) {
+        //Owner
+        identityArray = @[@"admin", @"none"];
+    } else if (identity == 1) {
+        identityArray = @[@"none"];
+    } else {
+        
+    }
+    [[self dbInstance] syncUsingTransaction:^(Database *database) {
+        NSMutableString *sql = [NSMutableString stringWithFormat:@"Select a.MemberId, a.Name, b.XmppId as Jid, a.Affiliation, a.LastUpdateTime From IM_Group_Member a left join IM_User b on a.MemberJid = b.XmppId Where GroupId = :GroupId and a.Affiliation in (", identityArray];
+        for (NSString *affiliation in identityArray) {
+            if ([affiliation isEqual:identityArray.lastObject]) {
+                [sql appendFormat:@"'%@') Order By a.Name;",affiliation];
+            } else {
+                [sql appendFormat:@"'%@',",affiliation];
+            }
+        }
+        DataReader *reader = [database executeReader:sql withParameters:@[groupId]];
+        while ([reader read]) {
+            if (members == nil) {
+                members = [[NSMutableArray alloc] init];
+            }
+            NSString *memberId = [reader objectForColumnIndex:0];
+            NSString *name = [reader objectForColumnIndex:1];
+            NSString *jid = [reader objectForColumnIndex:2];
+            NSString *affiliation = [reader objectForColumnIndex:3];
+            if (jid == nil)
+                continue;
             NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
             [dic setObject:memberId forKey:@"jid"];
             [dic setObject:name forKey:@"name"];
