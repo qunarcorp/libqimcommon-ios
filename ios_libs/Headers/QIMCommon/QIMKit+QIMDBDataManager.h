@@ -335,11 +335,6 @@
 - (void)updateMsgIdToDidreadForNotReadMsgIdList:(NSArray *)notReadList AndSourceMsgIdList:(NSArray *)sourceMsgIdList WithDidReadState:(int)didReadState;
 // 搜索
 - (NSArray *)searchMsgHistoryWithKey:(NSString *)key;
-// ******************** 最近联系人 **************************** //
-- (NSArray *)getRecentContacts;
-- (void)insertRecentContact:(NSDictionary *)contact;
-- (void)removeRecentContact:(NSString *)xmppId;
-
 
 #pragma mark - 消息数据方法
 - (NSArray *) existsMessageUsers;
