@@ -2067,6 +2067,7 @@
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"kNotificationOutOfDate" object:nil];
             });
+            /*
             dispatch_async(dispatch_get_main_queue(), ^{
                 __block UIAlertController *alertOutOfDateVc = [UIAlertController alertControllerWithTitle:@"提示" message:@"登录失败" preferredStyle:UIAlertControllerStyleAlert];
                 UIAlertAction *quitAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"ok", nil) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -2074,7 +2075,7 @@
                 }];
                 [alertOutOfDateVc addAction:quitAction];
                 [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:alertOutOfDateVc animated:YES completion:nil];
-            });
+            });*/
         }
         
         [self updateAppWorkState:AppWorkState_Logout];
