@@ -59,6 +59,7 @@
 - (NSArray *)getQChatGroupMember:(NSString *)groupId BySearchStr:(NSString *)searchStr;
 - (NSArray *)qimDB_getGroupMember:(NSString *)groupId;
 - (NSArray *)qimDB_getGroupMember:(NSString *)groupId BySearchStr:(NSString *)searchStr;
+- (NSArray *)qimDB_getGroupMember:(NSString *)groupId WithGroupIdentity:(NSInteger)identity;
 - (NSDictionary *)getGroupOwnerInfoForGroupId:(NSString *)groupId;
 - (void)deleteGroupMemberWithGroupId:(NSString *)groupId;
 - (void)deleteGroupMemberJid:(NSString *)memberJid WithGroupId:(NSString *)groupId;
@@ -335,11 +336,6 @@
 - (void)updateMsgIdToDidreadForNotReadMsgIdList:(NSArray *)notReadList AndSourceMsgIdList:(NSArray *)sourceMsgIdList WithDidReadState:(int)didReadState;
 // 搜索
 - (NSArray *)searchMsgHistoryWithKey:(NSString *)key;
-// ******************** 最近联系人 **************************** //
-- (NSArray *)getRecentContacts;
-- (void)insertRecentContact:(NSDictionary *)contact;
-- (void)removeRecentContact:(NSString *)xmppId;
-
 
 #pragma mark - 消息数据方法
 - (NSArray *) existsMessageUsers;
