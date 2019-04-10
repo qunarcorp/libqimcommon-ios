@@ -324,8 +324,8 @@
     return [[QIMManager sharedInstance] getNotReadMsgIdListByUserId:userId WithRealJid:realJid];
 }
 
-- (void)getMsgListByUserId:(NSString *)userId WithRealJid:(NSString *)realJid WihtLimit:(int)limit WithOffset:(int)offset WihtComplete:(void (^)(NSArray *))complete {
-    [[QIMManager sharedInstance] getMsgListByUserId:userId WithRealJid:realJid WihtLimit:limit WithOffset:offset WihtComplete:complete];
+- (void)getMsgListByUserId:(NSString *)userId WithRealJid:(NSString *)realJid WihtLimit:(int)limit WithOffset:(int)offset WithNeedReload:(BOOL)needReload WihtComplete:(void (^)(NSArray *))complete {
+    [[QIMManager sharedInstance] getMsgListByUserId:userId WithRealJid:realJid WihtLimit:limit WithOffset:offset WithNeedReload:needReload WihtComplete:complete];
 }
 
 - (void)getMsgListByUserId:(NSString *)userId FromTimeStamp:(long long)timeStamp WihtComplete:(void (^)(NSArray *))complete {

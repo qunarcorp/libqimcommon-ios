@@ -1235,7 +1235,7 @@
 - (void)clearNotReadMsgByGroupId:(NSString *)groupId {
     
     [self removeAtMeByJid:groupId];
-    [self getMsgListByUserId:groupId WithRealJid:nil WihtLimit:1 WithOffset:0 WihtComplete:^(NSArray *list) {
+    [self getMsgListByUserId:groupId WithRealJid:nil WihtLimit:1 WithOffset:0 WithNeedReload:NO WihtComplete:^(NSArray *list) {
         
         if (list.count) {
             
@@ -1651,8 +1651,8 @@
     return msgIdList;
 }
 
-- (void)getMsgListByUserId:(NSString *)userId WithRealJid:(NSString *)realJid WihtLimit:(int)limit WithOffset:(int)offset WihtComplete:(void (^)(NSArray *))complete{
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+- (void)getMsgListByUserId:(NSString *)userId WithRealJid:(NSString *)realJid WihtLimit:(int)limit WithOffset:(int)offset WithNeedReload:(BOOL)needReload WihtComplete:(void (^)(NSArray *))complete {
+    if (needReload == NO) {
         NSArray *array = [[IMDataManager sharedInstance] qimDB_getMgsListBySessionId:userId WithRealJid:realJid WithLimit:limit WihtOffset:offset];
         if (array.count > 0) {
             NSMutableArray *list = [NSMutableArray array];
@@ -1680,156 +1680,195 @@
             dispatch_async(dispatch_get_main_queue(), ^{
                 complete(list);
             });
-            if (list.count < limit) {
-                if (self.load_history_msg == nil) {
-                    self.load_history_msg = dispatch_queue_create("Load History", 0);
+        }
+    } else {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+            NSArray *array = [[IMDataManager sharedInstance] qimDB_getMgsListBySessionId:userId WithRealJid:realJid WithLimit:limit WihtOffset:offset];
+            if (array.count > 0) {
+                NSMutableArray *list = [NSMutableArray array];
+                for (NSDictionary *infoDic in array) {
+                    Message *msg = [Message new];
+                    [msg setMessageId:[infoDic objectForKey:@"MsgId"]];
+                    [msg setFrom:[infoDic objectForKey:@"From"]];
+                    [msg setNickName:[infoDic objectForKey:@"From"]];
+                    [msg setTo:[infoDic objectForKey:@"To"]];
+                    NSString *msgContent = [infoDic objectForKey:@"Content"];
+                    [msg setMessage:msgContent];
+                    NSString *extendInfo = [infoDic objectForKey:@"ExtendInfo"];
+                    [msg setExtendInformation:(extendInfo.length > 0) ? extendInfo : nil];
+                    [msg setPlatform:[[infoDic objectForKey:@"Platform"] intValue]];
+                    [msg setMessageType:[[infoDic objectForKey:@"MsgType"] intValue]];
+                    [msg setMessageState:[[infoDic objectForKey:@"MsgState"] intValue]];
+                    [msg setMessageDirection:[[infoDic objectForKey:@"MsgDirection"] intValue]];
+                    [msg setMessageDate:[[infoDic objectForKey:@"MsgDateTime"] longLongValue]];
+                    [msg setPropress:[[infoDic objectForKey:@"ExtendedFlag"] floatValue]];
+                    [msg setReplyMsgId:[infoDic objectForKey:@"ReplyMsgId"]];
+                    [msg setReadTag:[[infoDic objectForKey:@"ReadTag"] intValue]];
+                    [msg setMsgRaw:[infoDic objectForKey:@"msgRaw"]];
+                    [list addObject:msg];
                 }
-                dispatch_async(self.load_history_msg, ^{
-                    if ([userId rangeOfString:@"@conference."].location != NSNotFound) {
-                        NSString *groupName = [[[userId componentsSeparatedByString:@"@"] objectAtIndex:0] copy];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    complete(list);
+                });
+                if (needReload == NO) {
+                    return;
+                }
+                if (list.count < limit) {
+                    if (self.load_history_msg == nil) {
+                        self.load_history_msg = dispatch_queue_create("Load History", 0);
+                    }
+                    dispatch_async(self.load_history_msg, ^{
+                        if ([userId rangeOfString:@"@conference."].location != NSNotFound) {
+                            NSString *groupName = [[[userId componentsSeparatedByString:@"@"] objectAtIndex:0] copy];
 #pragma mark - 这里开始拉取群翻页消息
-                        if (groupName) {
-                            NSArray *resultList = [self getMucMsgListWihtGroupId:userId WithDirection:0 WithLimit:limit WithVersion:[[IMDataManager sharedInstance] getMinMsgTimeStampByXmppId:userId]];
-                            NSString *date1Str = [resultList.lastObject objectForKey:@"time"][@"stamp"];
-                            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-                            [dateFormatter setDateFormat:@"yyyyMMdd'T'HH:mm:ss"];
-                            NSDate *date1 = [dateFormatter dateFromString:date1Str];
-                            NSNumber *readMarkT = [NSNumber numberWithLong:[date1 timeIntervalSince1970]];
-                            
-                            if (resultList.count > 0) {
+                            if (groupName) {
+                                NSArray *resultList = [self getMucMsgListWihtGroupId:userId WithDirection:0 WithLimit:limit WithVersion:[[IMDataManager sharedInstance] getMinMsgTimeStampByXmppId:userId]];
+                                NSString *date1Str = [resultList.lastObject objectForKey:@"time"][@"stamp"];
+                                NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+                                [dateFormatter setDateFormat:@"yyyyMMdd'T'HH:mm:ss"];
+                                NSDate *date1 = [dateFormatter dateFromString:date1Str];
+                                NSNumber *readMarkT = [NSNumber numberWithLong:[date1 timeIntervalSince1970]];
                                 
-                                NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                                [[IMDataManager sharedInstance] bulkInsertIphoneMucJSONMsg:resultList WihtMyNickName:[self getMyNickName] WithReadMarkT:[readMarkT longLongValue] WithDidReadState:MessageState_didRead WihtMyRtxId:[self getLastJid]];
-                            }
-                        } else {
+                                if (resultList.count > 0) {
+                                    
+                                    NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
+                                    [[IMDataManager sharedInstance] bulkInsertIphoneMucJSONMsg:resultList WihtMyNickName:[self getMyNickName] WithReadMarkT:[readMarkT longLongValue] WithDidReadState:MessageState_didRead WihtMyRtxId:[self getLastJid]];
+                                }
+                            } else {
 #pragma mark - 这里开始拉取单人翻页消息
-                            NSArray *result = [self getUserChatlogWithFrom:userId to:[self getLastJid] version:[[IMDataManager sharedInstance] getMinMsgTimeStampByXmppId:userId] count:limit direction:0];
-                            if (result.count > 0) {
-                                NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                                NSArray *datas = [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:result WithXmppId:userId WithDidReadState:MessageState_didRead];
-                                
-                                NSDictionary *infoDic = datas.lastObject;
-                                if (infoDic) {
-                                    NSString *channelInfo = [infoDic objectForKey:@"channelid"];
-                                    NSString *buInfo = [infoDic objectForKey:@"bu"];
-                                    NSString *cctextInfo = [infoDic objectForKey:@"cctext"];
-                                    [self setChannelInfo:channelInfo ForUserId:userId];
-                                    if (buInfo.length > 0) {
-                                        [self setAppendInfo:@{@"bu":buInfo} ForUserId:userId];
-                                    }
-                                    if (cctextInfo.length > 0) {
-                                        [self setAppendInfo:@{@"cctext":cctextInfo} ForUserId:userId];
+                                NSArray *result = [self getUserChatlogWithFrom:userId to:[self getLastJid] version:[[IMDataManager sharedInstance] getMinMsgTimeStampByXmppId:userId] count:limit direction:0];
+                                if (result.count > 0) {
+                                    NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
+                                    NSArray *datas = [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:result WithXmppId:userId WithDidReadState:MessageState_didRead];
+                                    
+                                    NSDictionary *infoDic = datas.lastObject;
+                                    if (infoDic) {
+                                        NSString *channelInfo = [infoDic objectForKey:@"channelid"];
+                                        NSString *buInfo = [infoDic objectForKey:@"bu"];
+                                        NSString *cctextInfo = [infoDic objectForKey:@"cctext"];
+                                        [self setChannelInfo:channelInfo ForUserId:userId];
+                                        if (buInfo.length > 0) {
+                                            [self setAppendInfo:@{@"bu":buInfo} ForUserId:userId];
+                                        }
+                                        if (cctextInfo.length > 0) {
+                                            [self setAppendInfo:@{@"cctext":cctextInfo} ForUserId:userId];
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+                }
             }
-        }
-        else {
-            
-            if (self.load_history_msg == nil) {
-                
-                self.load_history_msg = dispatch_queue_create("Load History", 0);
-            }
-            dispatch_async(self.load_history_msg, ^{
-                
-                if ([userId rangeOfString:@"@conference."].location != NSNotFound) {
-                    long long version = [[IMDataManager sharedInstance] getMinMsgTimeStampByXmppId:userId] - timeChange;
-                    int direction = 0;
-                    NSNumber *readMarkT = nil;
-                    NSArray *resultList = [self getMucMsgListWihtGroupId:userId WithDirection:direction WithLimit:version < 0 ? (direction == 0 ? 20 : limit) : limit WithVersion:version < 0 ? (direction == 0 ? INT64_MAX : 0) : version];
+            else {
+                if (needReload == NO) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        complete(@[]);
+                    });
+                    return;
+                }
+                if (self.load_history_msg == nil) {
+                    
+                    self.load_history_msg = dispatch_queue_create("Load History", 0);
+                }
+                dispatch_async(self.load_history_msg, ^{
+                    
+                    if ([userId rangeOfString:@"@conference."].location != NSNotFound) {
+                        long long version = [[IMDataManager sharedInstance] getMinMsgTimeStampByXmppId:userId] - timeChange;
+                        int direction = 0;
+                        NSNumber *readMarkT = nil;
+                        NSArray *resultList = [self getMucMsgListWihtGroupId:userId WithDirection:direction WithLimit:version < 0 ? (direction == 0 ? 20 : limit) : limit WithVersion:version < 0 ? (direction == 0 ? INT64_MAX : 0) : version];
                         NSString *date1Str = [resultList.lastObject objectForKey:@"time"][@"stamp"];
                         //zzz表示时区，zzz可以删除，这样返回的日期字符将不包含时区信息。
                         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
                         [dateFormatter setDateFormat:@"yyyyMMdd'T'HH:mm:ss"];
                         NSDate *date1 = [dateFormatter dateFromString:date1Str];
                         readMarkT = [NSNumber numberWithLong:[date1 timeIntervalSince1970]];
-                    if (resultList.count > 0) {
-                        NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                        NSArray *datas = [[IMDataManager sharedInstance] bulkInsertIphoneMucJSONMsg:resultList WihtMyNickName:[self getMyNickName] WithReadMarkT:[readMarkT longLongValue] WithDidReadState:MessageState_didRead WihtMyRtxId:[self getLastJid]];
-                        NSMutableArray *list = [NSMutableArray array];
-                        for (NSDictionary *infoDic in datas) {
-                            Message *msg = [Message new];
+                        if (resultList.count > 0) {
+                            NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
+                            NSArray *datas = [[IMDataManager sharedInstance] bulkInsertIphoneMucJSONMsg:resultList WihtMyNickName:[self getMyNickName] WithReadMarkT:[readMarkT longLongValue] WithDidReadState:MessageState_didRead WihtMyRtxId:[self getLastJid]];
+                            NSMutableArray *list = [NSMutableArray array];
+                            for (NSDictionary *infoDic in datas) {
+                                Message *msg = [Message new];
+                                
+                                [msg setMessageId:[infoDic objectForKey:@"MsgId"]];
+                                [msg setFrom:[infoDic objectForKey:@"From"]];
+                                [msg setTo:[infoDic objectForKey:@"To"]];
+                                [msg setMessage:[infoDic objectForKey:@"Content"]];
+                                NSString *extendInfo = [infoDic objectForKey:@"ExtendInfo"];
+                                [msg setExtendInformation:(extendInfo.length > 0) ? extendInfo : nil];
+                                [msg setPlatform:[[infoDic objectForKey:@"Platform"] intValue]];
+                                [msg setMessageType:[[infoDic objectForKey:@"MsgType"] intValue]];
+                                [msg setMessageState:[[infoDic objectForKey:@"MsgState"] intValue]];
+                                [msg setMessageDirection:[[infoDic objectForKey:@"MsgDirection"] intValue]];
+                                [msg setMessageDate:[[infoDic objectForKey:@"MsgDateTime"] longLongValue]];
+                                [msg setPropress:[[infoDic objectForKey:@"ExtendedFlag"] floatValue]];
+                                [msg setNickName:[infoDic objectForKey:@"From"]];
+                                [msg setReplyMsgId:[infoDic objectForKey:@"ReplyMsgId"]];
+                                [msg setReadTag:[[infoDic objectForKey:@"ReadTag"] intValue]];
+                                [msg setMsgRaw:[infoDic objectForKey:@"msgRaw"]];
+                                [list addObject:msg];
+                            }
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                complete(list);
+                            });
+                        } else {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                complete(@[]);
+                            });
+                        }
+                    } else {
+                        NSArray *result = [self getUserChatlogWithFrom:userId to:[self getLastJid] version:[[IMDataManager sharedInstance] getMinMsgTimeStampByXmppId:userId] count:limit direction:0];
+                        if (result.count > 0) {
+                            NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
+                            NSArray *datas = [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:result WithXmppId:userId WithDidReadState:MessageState_didRead];
+                            NSMutableArray *list = [NSMutableArray array];
+                            NSString *channelInfo = nil;
+                            NSString *buInfo = nil;
+                            NSString *cctextInfo = nil;
+                            for (NSDictionary *infoDic in datas) {
+                                Message *msg = [Message new];
+                                [msg setMessageId:[infoDic objectForKey:@"MsgId"]];
+                                [msg setFrom:[infoDic objectForKey:@"From"]];
+                                [msg setNickName:[infoDic objectForKey:@"From"]];
+                                [msg setTo:[infoDic objectForKey:@"To"]];
+                                [msg setMessage:[infoDic objectForKey:@"Content"]];
+                                NSString *extendInfo = [infoDic objectForKey:@"ExtendInfo"];
+                                [msg setExtendInformation:(extendInfo.length > 0) ? extendInfo : nil];
+                                [msg setPlatform:[[infoDic objectForKey:@"Platform"] intValue]];
+                                [msg setMessageType:[[infoDic objectForKey:@"MsgType"] intValue]];
+                                [msg setMessageState:[[infoDic objectForKey:@"MsgState"] intValue]];
+                                [msg setMessageDirection:[[infoDic objectForKey:@"MsgDirection"] intValue]];
+                                [msg setMessageDate:[[infoDic objectForKey:@"MsgDateTime"] longLongValue]];
+                                [msg setPropress:[[infoDic objectForKey:@"ExtendedFlag"] floatValue]];
+                                [msg setMsgRaw:[infoDic objectForKey:@"msgRaw"]];
+                                [list addObject:msg];
+                                // channelid
+                                channelInfo = [infoDic objectForKey:@"channelid"];
+                                buInfo = [infoDic objectForKey:@"bu"];
+                                cctextInfo = [infoDic objectForKey:@"cctext"];
+                            }
                             
-                            [msg setMessageId:[infoDic objectForKey:@"MsgId"]];
-                            [msg setFrom:[infoDic objectForKey:@"From"]];
-                            [msg setTo:[infoDic objectForKey:@"To"]];
-                            [msg setMessage:[infoDic objectForKey:@"Content"]];
-                            NSString *extendInfo = [infoDic objectForKey:@"ExtendInfo"];
-                            [msg setExtendInformation:(extendInfo.length > 0) ? extendInfo : nil];
-                            [msg setPlatform:[[infoDic objectForKey:@"Platform"] intValue]];
-                            [msg setMessageType:[[infoDic objectForKey:@"MsgType"] intValue]];
-                            [msg setMessageState:[[infoDic objectForKey:@"MsgState"] intValue]];
-                            [msg setMessageDirection:[[infoDic objectForKey:@"MsgDirection"] intValue]];
-                            [msg setMessageDate:[[infoDic objectForKey:@"MsgDateTime"] longLongValue]];
-                            [msg setPropress:[[infoDic objectForKey:@"ExtendedFlag"] floatValue]];
-                            [msg setNickName:[infoDic objectForKey:@"From"]];
-                            [msg setReplyMsgId:[infoDic objectForKey:@"ReplyMsgId"]];
-                            [msg setReadTag:[[infoDic objectForKey:@"ReadTag"] intValue]];
-                            [msg setMsgRaw:[infoDic objectForKey:@"msgRaw"]];
-                            [list addObject:msg];
+                            [self setChannelInfo:channelInfo ForUserId:userId];
+                            if (buInfo.length > 0) {
+                                [self setAppendInfo:@{@"bu":buInfo} ForUserId:userId];
+                            }
+                            if (cctextInfo.length > 0) {
+                                [self setAppendInfo:@{@"cctext":cctextInfo} ForUserId:userId];
+                            }
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                complete(list);
+                            });
+                        } else {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                complete(@[]);
+                            });
                         }
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            complete(list);
-                        });
-                    } else {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            complete(@[]);
-                        });
                     }
-                } else {
-                    NSArray *result = [self getUserChatlogWithFrom:userId to:[self getLastJid] version:[[IMDataManager sharedInstance] getMinMsgTimeStampByXmppId:userId] count:limit direction:0];
-                    if (result.count > 0) {
-                        NSArray *msgTypeList = [[QIMMessageManager sharedInstance] getSupportMsgTypeList];
-                        NSArray *datas = [[IMDataManager sharedInstance] bulkInsertHistoryChatJSONMsg:result WithXmppId:userId WithDidReadState:MessageState_didRead];
-                        NSMutableArray *list = [NSMutableArray array];
-                        NSString *channelInfo = nil;
-                        NSString *buInfo = nil;
-                        NSString *cctextInfo = nil;
-                        for (NSDictionary *infoDic in datas) {
-                            Message *msg = [Message new];
-                            [msg setMessageId:[infoDic objectForKey:@"MsgId"]];
-                            [msg setFrom:[infoDic objectForKey:@"From"]];
-                            [msg setNickName:[infoDic objectForKey:@"From"]];
-                            [msg setTo:[infoDic objectForKey:@"To"]];
-                            [msg setMessage:[infoDic objectForKey:@"Content"]];
-                            NSString *extendInfo = [infoDic objectForKey:@"ExtendInfo"];
-                            [msg setExtendInformation:(extendInfo.length > 0) ? extendInfo : nil];
-                            [msg setPlatform:[[infoDic objectForKey:@"Platform"] intValue]];
-                            [msg setMessageType:[[infoDic objectForKey:@"MsgType"] intValue]];
-                            [msg setMessageState:[[infoDic objectForKey:@"MsgState"] intValue]];
-                            [msg setMessageDirection:[[infoDic objectForKey:@"MsgDirection"] intValue]];
-                            [msg setMessageDate:[[infoDic objectForKey:@"MsgDateTime"] longLongValue]];
-                            [msg setPropress:[[infoDic objectForKey:@"ExtendedFlag"] floatValue]];
-                            [msg setMsgRaw:[infoDic objectForKey:@"msgRaw"]];
-                            [list addObject:msg];
-                            // channelid
-                            channelInfo = [infoDic objectForKey:@"channelid"];
-                            buInfo = [infoDic objectForKey:@"bu"];
-                            cctextInfo = [infoDic objectForKey:@"cctext"];
-                        }
-                        
-                        [self setChannelInfo:channelInfo ForUserId:userId];
-                        if (buInfo.length > 0) {
-                            [self setAppendInfo:@{@"bu":buInfo} ForUserId:userId];
-                        }
-                        if (cctextInfo.length > 0) {
-                            [self setAppendInfo:@{@"cctext":cctextInfo} ForUserId:userId];
-                        }
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            complete(list);
-                        });
-                    } else {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            complete(@[]);
-                        });
-                    }
-                }
-            });
-        }
-    });
+                });
+            }
+        });
+    }
 }
 
 - (void)getConsultServerMsgLisByUserId:(NSString *)userId WithVirtualId:(NSString *)virtualId WithLimit:(int)limit WithOffset:(int)offset WithComplete:(void (^)(NSArray *))complete {
