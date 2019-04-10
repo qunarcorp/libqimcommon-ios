@@ -500,7 +500,7 @@
  @param offset   偏移量
  @param complete 回调block
  */
-- (void)getMsgListByUserId:(NSString *)userId WithRealJid:(NSString *)realJid WihtLimit:(int)limit WithOffset:(int)offset WihtComplete:(void (^)(NSArray *))complete;
+- (void)getMsgListByUserId:(NSString *)userId WithRealJid:(NSString *)realJid WihtLimit:(int)limit WithOffset:(int)offset WithNeedReload:(BOOL)needReload WihtComplete:(void (^)(NSArray *))complete;
 
 /**
  获取消息列表
