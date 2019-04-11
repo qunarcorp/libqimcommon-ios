@@ -26,6 +26,7 @@
 @property (nonatomic, readonly, copy) NSString *protobufPort;   //Pb端口
 @property (nonatomic, readonly, copy) NSString *checkConfig;
 @property (nonatomic, readonly, copy) NSString *shareUrl;   //分享聊天记录
+@property (nonatomic, readonly, copy) NSString *domainHost; //种Cookie的domain
 
 
 //hosts

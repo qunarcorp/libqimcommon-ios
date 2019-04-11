@@ -365,7 +365,7 @@ static QIMManager *__IMManager = nil;
 - (void)loginComplateOperation {
     [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationLoginState object:[NSNumber numberWithBool:YES]];
     [self updateAppWorkState:AppWorkState_Updating];
-
+        self.notNeedCheckNetwotk = NO;
         self.needTryRelogin = YES;
         QIMVerboseLog(@"<Method: %s, Set _needTryRelogin == YES>", __func__);
         //重置消息是否最新Flag

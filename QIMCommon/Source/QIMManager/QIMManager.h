@@ -120,6 +120,7 @@
 @property (nonatomic, assign) BOOL isBackgroundLogin;   //是否是后台登录，YES 是后台重新登录，NO 是前台人工登录
 @property (nonatomic, assign) BOOL willCancelLogin;
 @property (nonatomic, assign) BOOL needTryRelogin;      //是否需要重试登录
+@property (nonatomic, assign) BOOL notNeedCheckNetwotk;    //是否需要检查网络，防止登录失败也一直刷
 
 
 @property (nonatomic, copy) NSString *imLoginDomain;  //Domain

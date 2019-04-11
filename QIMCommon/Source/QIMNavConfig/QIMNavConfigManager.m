@@ -129,6 +129,8 @@
             _protobufPort = @"5202";
             _adShown = NO;
             _qcHost = @"https://qcadmin.qunar.com";
+            _domainHost = @"qunar.com";
+            _shareUrl = @"https://qim.qunar.com/sharemsg/index.php";
         } else if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
             _xmppHost = @"qt.qunar.com";
             _httpHost = @"https://qtapi.qunar.com";
@@ -146,6 +148,8 @@
             _protobufPort = @"5202";
             _adShown = NO;
             _healthcheckUrl = @"http://qt.qunar.com/healthcheck.html";
+            _domainHost = @"qunar.com";
+            _shareUrl = @"https://qim.qunar.com/sharemsg/index.php";
         }
     }
     
@@ -473,6 +477,7 @@
         _takeSmsUrl = [baseAddess objectForKey:@"sms_verify"];
         _checkConfig = [baseAddess objectForKey:@"checkconfig"];
         _shareUrl = [baseAddess objectForKey:@"shareurl"];
+        _domainHost = [baseAddess objectForKey:@"domainhost"];
     }
     NSDictionary *qcadminDic = [navConfig objectForKey:@"qcadmin"];
     if (qcadminDic.count) {

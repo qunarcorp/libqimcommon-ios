@@ -71,6 +71,10 @@
     return [[QIMNavConfigManager sharedInstance] shareUrl];
 }
 
+- (NSString *)qimNav_DomainHost {
+    return [[QIMNavConfigManager sharedInstance] domainHost];
+}
+
 //hosts
 - (NSString *)qimNav_HashHosts {
     return [[QIMNavConfigManager sharedInstance] hashHosts];

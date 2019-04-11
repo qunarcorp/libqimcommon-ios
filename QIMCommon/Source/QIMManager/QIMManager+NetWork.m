@@ -50,7 +50,7 @@
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkNetworkStatus) object:nil];
     QIMWarnLog(@" _needTryRelogin = %d", self.needTryRelogin);
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        if ([self checkNetworkCanUser]) {
+        if ([self checkNetworkCanUser] && self.notNeedCheckNetwotk == NO) {
             if ([self isLogin] == NO) {
                 [self relogin];
             }
