@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "QIMCommon"
-  s.version      = "2.0.8"
+  s.version      = "2.0.9"
   s.summary      = "Qunar chat App 9.0+ version QIMCommon"
   s.description  = <<-DESC
                    Qunar QIMCommon解决方案
@@ -45,8 +45,8 @@ Pod::Spec.new do |s|
   
     puts '线上release QIMCommon依赖第三方库'
     s.dependency 'QIMOpenSSL'
-    s.dependency 'QIMKitVendor'
-    s.dependency 'QIMDataBase'
+    s.dependency 'QIMKitVendor', '~> 2.0'
+    s.dependency 'QIMDataBase', '~> 2.0'
   end
   
   s.dependency 'ASIHTTPRequest'
