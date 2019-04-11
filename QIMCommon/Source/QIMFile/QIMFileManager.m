@@ -296,9 +296,10 @@ typedef enum {
             }else if (self.message.messageType == QIMMessageType_CommonTrdInfo) {
                 NSMutableDictionary * mulDic = [NSMutableDictionary dictionaryWithDictionary:infoDic];
                 NSString * jDataStr = [[[[QIMNavConfigManager sharedInstance].innerFileHttpHost stringByAppendingString:[NSString stringWithFormat:@"/%@",httpUrl]] dataUsingEncoding:NSUTF8StringEncoding] base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
-                jDataStr = [jDataStr stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-                jDataStr = [jDataStr stringByReplacingOccurrencesOfString:@"+" withString:@"."];
-                [mulDic setQIMSafeObject:[NSString stringWithFormat:@"https://qt.qunar.com/sharemsg/index.php?jdata=%@", jDataStr] forKey:@"linkurl"];
+                jDataStr = [jDataStr stringByReplacingOccurrencesOfString:@"/" withString:@"_"];
+                jDataStr = [jDataStr stringByReplacingOccurrencesOfString:@"+" withString:@"-"];
+                NSString *shareurl = [NSString stringWithFormat:@"%@?jdata=%@", [[QIMNavConfigManager sharedInstance] shareUrl], jDataStr];
+                [mulDic setQIMSafeObject:shareurl forKey:@"linkurl"];
                 NSString *msgExtendInfoStr = [[QIMJSONSerializer sharedInstance] serializeObject:mulDic];
                 //QIMSDKTODO
 //                if (encryptState == QTEncryptChatStateEncrypting) {

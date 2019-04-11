@@ -472,6 +472,7 @@
         _checkSmsUrl = [baseAddess objectForKey:@"sms_verify"];
         _takeSmsUrl = [baseAddess objectForKey:@"sms_verify"];
         _checkConfig = [baseAddess objectForKey:@"checkconfig"];
+        _shareUrl = [baseAddess objectForKey:@"shareurl"];
     }
     NSDictionary *qcadminDic = [navConfig objectForKey:@"qcadmin"];
     if (qcadminDic.count) {

@@ -67,6 +67,10 @@
     return [[QIMNavConfigManager sharedInstance] protobufPort];
 }
 
+- (NSString *)qimNav_ShareUrl {
+    return [[QIMNavConfigManager sharedInstance] shareUrl];
+}
+
 //hosts
 - (NSString *)qimNav_HashHosts {
     return [[QIMNavConfigManager sharedInstance] hashHosts];
