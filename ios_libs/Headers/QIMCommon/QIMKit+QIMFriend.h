@@ -56,7 +56,7 @@
  @param xmppId 请求好友id
  @param reason 原因
  */
-- (void)validationFriendWihtXmppId:(NSString *)xmppId WithReason:(NSString *)reason;
+- (void)validationFriendWithXmppId:(NSString *)xmppId WithReason:(NSString *)reason;
 
 /**
  同意好友请求

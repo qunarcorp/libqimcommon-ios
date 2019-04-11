@@ -9,11 +9,7 @@
 
 @interface QIMKit (QIMDB)
 
-/**
- 初始化数据库
- */
-- (void)initDB;
-
+- (NSString *)getDBPathWithUserXmppId:(NSString *)userJid;
 /**
  清空数据库文件
  */

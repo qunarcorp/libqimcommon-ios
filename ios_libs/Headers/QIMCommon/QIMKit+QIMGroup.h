@@ -21,7 +21,7 @@
  @param sendJid 昵称
  @return MessageDirection
  */
-- (MessageDirection)getGroupMsgDirectionWithSendJid:(NSString *)sendJid;
+- (QIMMessageDirection)getGroupMsgDirectionWithSendJid:(NSString *)sendJid;
 
 - (NSArray *)getGroupIdList;
 
@@ -75,11 +75,12 @@
  @param headerSrc 群头像地址
  @return 设置群名片是否成功
  */
-- (BOOL)setMucVcardForGroupId:(NSString *)groupId
+- (void)setMucVcardForGroupId:(NSString *)groupId
                  WithNickName:(NSString *)nickName
                     WithTitle:(NSString *)title
                      WithDesc:(NSString *)desc
-                WithHeaderSrc:(NSString *)headerSrc;
+                WithHeaderSrc:(NSString *)headerSrc
+                 withCallBack:(QIMKitSetMucVCardBlock)callback;
 
 /**
  更新群公告
@@ -143,8 +144,6 @@
  */
 - (QIMGroupIdentity)GroupIdentityForUser:(NSString *)userId byGroup:(NSString *)groupId;
 
-- (NSString *)getGroupaffiliationWithIdentity:(QIMGroupIdentity)identity;
-
 #pragma mark - 群头像
 
 /**
@@ -191,10 +190,6 @@
  @return 更新群组免打扰状态是否成功
  */
 - (BOOL)updatePushState:(NSString *)groupId withOn:(BOOL)on;
-
-- (void)addGroupMemberChange:(NSString *)groupId;
-- (void)removeGroupMemberChange:(NSString *)groupId;
-- (BOOL)isGroupMemberChangeByGroupId:(NSString *)groupId;
 
 /**
  默认群组设置

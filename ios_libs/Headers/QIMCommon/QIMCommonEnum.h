@@ -13,6 +13,7 @@
 typedef enum : NSUInteger {
     QIMProjectTypeQTalk = 0,
     QIMProjectTypeQChat,
+    QIMProjectTypeStartalk = 2
 } QIMProjectType;
 
 typedef enum {
@@ -57,11 +58,6 @@ typedef enum {
     PublicNumberType_System,
     PublicNumberType_Notice,
 } PublicNumberType;
-
-typedef enum {
-    MessageReadFlagDidSend = 3,
-    MessageReadFlagDidRead = 4,
-} MessageReadFlag;
 
 typedef enum {
     PublicNumberMsgType_None                = 0,
@@ -112,9 +108,9 @@ typedef enum ProtocolType{
 } ProtocolType;
 
 typedef enum {
-    QIMGroupIdentityOwner       = 0,
+    QIMGroupIdentityNone        = 0,
     QIMGroupIdentityAdmin       = 1,
-    QIMGroupIdentityNone       = 2,
+    QIMGroupIdentityOwner       = 2,
 } QIMGroupIdentity;
 
 typedef enum {
@@ -227,20 +223,36 @@ typedef enum {
 } ChatType;
 
 typedef enum {
-    MessageState_none      = 0,
-    MessageState_Waiting,
-    MessageState_Success,
-    MessageState_Faild,
-    MessageState_NotRead    = 0xf,   //未读
-    MessageState_didRead    = 0x10, //已读
-    MessageState_didDestroyed = 0x11,//已销毁
-    MessageState_didControl = 0x12, //已操作
-} MessageState;
+    MessageReadFlagDidSend = 3,
+    MessageReadFlagDidRead = 4,
+} MessageReadFlag;
 
 typedef enum {
-    MessageDirection_Sent = 0,
-    MessageDirection_Received = 1,
-} MessageDirection;
+    QIMMessageRemoteReadStateNotSent = 0x00,       //发送到服务器
+    QIMMessageRemoteReadStateDidSent = 0x01,         //已送达，对方已接受
+    QIMMessageRemoteReadStateDidReaded = QIMMessageRemoteReadStateDidSent << 1,    //0x02已阅读，对方已读
+    QIMMessageRemoteReadStateGroupReaded = 0x03,  //群消息已读
+    QIMMessageRemoteReadStateDidOperated = 0x04,  //已操作
+} QIMMessageRemoteReadState; //消息操作状态
+
+typedef enum {
+    QIMMessageReadFlagClearAllUnRead = 0,    //向服务器清空所有未读
+    QIMMessageReadFlagGroupReaded = 2, //向服务器发送群消息已读
+    QIMMessageReadFlagDidSend = 3,     //向服务器发送已送达
+    QIMMessageReadFlagDidRead = 4,     //向服务器发送已阅读
+    QIMMessageReadFlagDidControl = 7,  //向服务器发送已操作
+} QIMMessageReadFlag;   //向服务器发送的标识符
+
+typedef enum {
+    QIMMessageSendState_Waiting    = 0x00,     //发送中
+    QIMMessageSendState_Faild      = 0x01,     //发送失败
+    QIMMessageSendState_Success    = 0x02,     //发送成功
+} QIMMessageSendState; //消息发送状态
+
+typedef enum {
+    QIMMessageDirection_Sent = 0,   //发送的消息
+    QIMMessageDirection_Received = 1,   //接收的消息
+} QIMMessageDirection;  //消息接收方向
 
 typedef enum {
     IMPlatform_UNKNOW   = 0,
@@ -252,12 +264,12 @@ typedef enum {
 } IMPlatform;
 
 typedef enum : NSUInteger {
-    QIMMSGSETTINGSHOW_CONTENT = 0x01,
-    QIMMSGSETTINGPUSH_ONLINE = QIMMSGSETTINGSHOW_CONTENT << 1,
-    QIMMSGSETTINGSOUND_INAPP = QIMMSGSETTINGPUSH_ONLINE << 1,
-    QIMMSGSETTINGVIBRATE_INAPP = QIMMSGSETTINGSOUND_INAPP << 1,
-    QIMMSGSETTINGPUSH_SWITCH = QIMMSGSETTINGVIBRATE_INAPP << 1
-} QIMMSGSETTING;
+    QIMMSGSETTINGSHOW_CONTENT = 0x01,                               //通知显示消息详情
+    QIMMSGSETTINGPUSH_ONLINE = QIMMSGSETTINGSHOW_CONTENT << 1,      //在线也接收通知
+    QIMMSGSETTINGSOUND_INAPP = QIMMSGSETTINGPUSH_ONLINE << 1,       //通知提示音
+    QIMMSGSETTINGVIBRATE_INAPP = QIMMSGSETTINGSOUND_INAPP << 1,     //通知震动提示
+    QIMMSGSETTINGPUSH_SWITCH = QIMMSGSETTINGVIBRATE_INAPP << 1      //开启消息推送
+} QIMMSGSETTING;  //APP消息通知设置
 
 typedef enum : NSUInteger {
     QIMClientConfigTypeKMarkupNames = 0,        //用户备注（通用）
@@ -330,17 +342,26 @@ static const NSString *QIMNavUrlKey = @"NavUrl";
 typedef void(^QIMKitSendTPRequesSuccessedBlock)(NSData *responseData);
 typedef void(^QIMKitSendTPRequesFailedBlock)(NSError *error);
 typedef void(^QIMKitGetTripAreaAvailableRoomBlock)(NSArray *availableRooms);
+typedef void(^QIMKitGetTripAreaAvailableRoomByCityIdBlock)(NSArray *availableRooms);    //根据城市Id获取可用区域
+typedef void(^QIMKitGetTripAllCitysBlock)(NSArray *allCitys);   //获取所有城市
 typedef void(^QIMKitGetTripMemberCheckBlock)(BOOL isConform);   //isConform 冲突
 typedef void(^QIMKitCreateTripBlock)(BOOL success);
 typedef void(^QIMCloseSessionBlock)(NSString *closeMsg);
 
 typedef void(^QIMKitLikeMomentSuccessedBlock)(NSDictionary *responseDic);
 typedef void(^QIMKitWorkCommentBlock)(NSArray *comments);
-typedef void(^QIMKitWorkCommentDeleteSuccessBlock)(BOOL success);
+typedef void(^QIMKitWorkCommentDeleteSuccessBlock)(BOOL success, NSInteger superParentStatus);
 typedef void(^QIMKitLikeContentSuccessedBlock)(NSDictionary *responseDic);
 typedef void(^QIMKitGetMomentNewSuccessedBlock)(NSArray *moments);
 typedef void(^QIMKitGetMomentHistorySuccessedBlock)(NSArray *moments);
 typedef void(^QIMKitgetAnonymouseSuccessedBlock)(NSDictionary *anonymousDic);
 typedef void(^QIMKitgetMomentDetailSuccessedBlock)(NSDictionary *momentDic);
+
+
+typedef void(^QIMKitgetPublicCompanySuccessedBlock)(NSArray *companies);
+
+typedef void(^QIMKitSetMucVCardBlock)(BOOL successed);
+typedef void(^QIMKitSearchRobotBlock)(NSArray *robotList);
+typedef void(^QIMKitUpdateSignatureBlock)(BOOL successed);
 
 #endif /* QIMCommonEnum_h */

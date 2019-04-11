@@ -18,13 +18,13 @@
 
 @property(nonatomic, strong) QIMDatasourceItem * parentNode;
 
-@property(nonatomic, strong) NSMutableArray * childNodesArray;
+@property(nonatomic, strong) NSMutableDictionary * childNodesDict;
 
 @property(nonatomic, assign) BOOL isExpand;
 
 @property(nonatomic, assign) NSInteger  nLevel;
 
--(void)addChildNodesItem:(QIMDatasourceItem *)childNodes;
+-(void)addChildNodesItem:(QIMDatasourceItem *)childNodes withChildDP:(NSString *)dp;
 
 -(NSMutableArray *)expand;
 

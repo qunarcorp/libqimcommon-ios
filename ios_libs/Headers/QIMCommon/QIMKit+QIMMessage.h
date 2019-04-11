@@ -7,7 +7,7 @@
 //
 
 #import "QIMKit.h"
-@class Message;
+@class QIMMessageModel;
 
 @interface QIMKit (QIMMessage)
 
@@ -21,7 +21,7 @@
 
 - (NSDictionary *)getMsgDictByMsgId:(NSString *)msgId;
 
-- (Message *)getMsgByMsgId:(NSString *)msgId;
+- (QIMMessageModel *)getMsgByMsgId:(NSString *)msgId;
 
 - (void)checkMsgTimeWithJid:(NSString *)jid WithRealJid:(NSString *)realJid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag;
 
@@ -88,50 +88,20 @@
  @param msg message
  @param sid 会话ID(单人为to，群为群id)
  */
-- (void)saveMsg:(Message *)msg ByJid:(NSString *)sid;
+- (void)saveMsg:(QIMMessageModel *)msg ByJid:(NSString *)sid;
 
 //更新消息
-- (void)updateMsg:(Message *)msg ByJid:(NSString *)sid;
+- (void)updateMsg:(QIMMessageModel *)msg ByJid:(NSString *)sid;
 
-- (void)deleteMsg:(Message *)msg ByJid:(NSString *)sid;
+- (void)deleteMsg:(QIMMessageModel *)msg ByJid:(NSString *)sid;
 
-/**
- 发送操作状态(单人会话专用)
- 
- @param messages 消息集
- @param xmppId 跟谁的消息对话 to值
- @return 是否成功
- */
 - (BOOL)sendControlStateWithMessagesIdArray:(NSArray *)messages WithXmppId:(NSString *)xmppId;
 
-/**
- 发送已读状态(单人会话专用)
- 
- @param messages 消息集
- @param xmppId 跟谁的消息对话 to值
- @return 是否成功
- */
-- (BOOL)sendReadStateWithMessagesIdArray:(NSArray *)messages WithXmppId:(NSString *)xmppId;
+- (BOOL)sendReadStateWithMessagesIdArray:(NSArray *)messages WithMessageReadFlag:(QIMMessageReadFlag)msgReadFlag WithXmppId:(NSString *)xmppId;
 
-/**
- 发送已读状态(Consult会话专用)
- 
- @param messages 消息集
- @param xmppId 跟谁的消息对话 to值
- @param realJid 真实 to值(consult消息用，普通消息此值传nil)
- @return 是否成功
- */
-- (BOOL)sendReadStateWithMessagesIdArray:(NSArray *)messages WithXmppId:(NSString *)xmppId WithRealJid:(NSString *)realJid;
+- (BOOL)sendReadStateWithMessagesIdArray:(NSArray *)messages WithMessageReadFlag:(QIMMessageReadFlag)msgReadFlag WithXmppId:(NSString *)xmppId WithRealJid:(NSString *)realJid;
 
-/**
- 发送已读状态(群消息用)
- 
- @param lastTime 已读截止时间，一般为最后一条消息时间
- @param groupId 群ID
- @return 是否成功
- */
 - (BOOL)sendReadstateWithGroupLastMessageTime:(long long) lastTime withGroupId:(NSString *) groupId;
-
 
 #pragma mark - 单人消息
 
@@ -140,7 +110,7 @@
  
  @param userId 对方用户Id
  */
-- (Message *)sendShockToUserId:(NSString *)userId;
+- (QIMMessageModel *)sendShockToUserId:(NSString *)userId;
 
 
 /**
@@ -153,15 +123,6 @@
 - (void)revokeMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid;
 
 /**
- 发送文件消息
- 
- @param fileJson 文件URL
- @param userId 对方UserId
- @param msgId 消息Id
- */
-- (void)sendFileJson:(NSString *)fileJson ToUserId:(NSString *)userId WithMsgId:(NSString *)msgId;
-
-/**
  发送语音消息
  
  @param voiceUrl 语音文件地址
@@ -169,7 +130,7 @@
  @param seconds 语音时长
  @param userId 接收方Id
  */
-- (Message *)sendVoiceUrl:(NSString *)voiceUrl withVoiceName:(NSString *)voiceName withSeconds:(int)seconds ToUserId:(NSString *)userId;
+- (QIMMessageModel *)sendVoiceUrl:(NSString *)voiceUrl withVoiceName:(NSString *)voiceName withSeconds:(int)seconds ToUserId:(NSString *)userId;
 
 
 /**
@@ -178,7 +139,7 @@
  @param msg 消息Message对象
  @param userId 接收方Id
  */
-- (Message *)sendMessage:(Message *)msg ToUserId:(NSString *)userId;
+- (QIMMessageModel *)sendMessage:(QIMMessageModel *)msg ToUserId:(NSString *)userId;
 
 /**
  发送单人消息
@@ -188,14 +149,9 @@
  @param userId 接收Id
  @param msgType 消息Type
  */
-- (Message *)sendMessage:(NSString *)msg WithInfo:(NSString *)info ToUserId:(NSString *)userId WihtMsgType:(int)msgType;
-
-
-// Note消息自动回复消息(您好，我是在线客服xxx，很高兴为您服务)
-- (Message *)createNoteReplyMessage:(NSString *)msg ToUserId:(NSString *)user;
+- (QIMMessageModel *)sendMessage:(NSString *)msg WithInfo:(NSString *)info ToUserId:(NSString *)userId WithMsgType:(int)msgType;
 
 #pragma mark - 群消息
-
 
 /**
  发送群消息
@@ -203,7 +159,7 @@
  @param msg 消息Body
  @param groupId 群Id
  */
-- (Message *)sendMessage:(NSString *)msg ToGroupId:(NSString *)groupId ;
+- (QIMMessageModel *)sendMessage:(NSString *)msg ToGroupId:(NSString *)groupId ;
 
 
 /**
@@ -214,7 +170,7 @@
  @param groupId 群Id
  @param msgType 消息Type
  */
-- (Message *)sendMessage:(NSString *)msg WithInfo:(NSString *)info ToGroupId:(NSString *)groupId WihtMsgType:(int)msgType;
+- (QIMMessageModel *)sendMessage:(NSString *)msg WithInfo:(NSString *)info ToGroupId:(NSString *)groupId WithMsgType:(int)msgType;
 
 
 /**
@@ -226,26 +182,7 @@
  @param msgType 消息Type
  @param msgId 消息Id
  */
-- (Message *)sendMessage:(NSString *)msg WithInfo:(NSString *)info ToGroupId:(NSString *)groupId WihtMsgType:(int)msgType WithMsgId:(NSString *)msgId;
-
-/**
- 发送群窗口抖动
- 
- @param groupId 群Id
- */
-- (Message *)sendGroupShockToGroupId:(NSString *)groupId;
-
-/**
- 回复群消息
- 
- @param replyMsgId 回复消息id
- @param replyUser 回复userid
- @param msgId 消息id
- @param message 消息
- @param groupId 群id
- @return 是否成功
- */
-- (BOOL)sendReplyMessageId:(NSString *)replyMsgId WithReplyUser:(NSString *)replyUser WithMessageId:(NSString *)msgId WithMessage:(NSString *)message ToGroupId:(NSString *)groupId;
+- (QIMMessageModel *)sendMessage:(NSString *)msg WithInfo:(NSString *)info ToGroupId:(NSString *)groupId WithMsgType:(int)msgType WithMsgId:(NSString *)msgId;
 
 /**
  撤销群消息
@@ -255,29 +192,6 @@
  @param jid jid
  */
 - (void)revokeGroupMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid;
-
-/**
- 发送群文件
- 
- @param fileJson 文件地址
- @param groupId 群Id
- @param msgId 消息Id
- */
-- (void)sendFileJson:(NSString *)fileJson ToGroupId:(NSString *)groupId WihtMsgId:(NSString *)msgId;
-
-
-/**
- 发送群语音消息
- 
- @param voiceUrl 语音文件地址
- @param voiceName 语音文件名称
- @param seconds 语音时长
- @param groupId 群Id
- */
-- (Message *)sendGroupVoiceUrl:(NSString *)voiceUrl withVoiceName:(NSString *)voiceName withSeconds:(int)seconds ToGroupId:(NSString *)groupId;
-
-// Note消息自动回复消息(您好，我是在线客服xxx，很高兴为您服务)
-- (Message *)createNoteReplyMessage:(NSString *)msg ToGroupId:(NSString *)groupId;
 
 // 发送音视频消息
 - (void)sendAudioVideoWithType:(int)msgType WithBody:(NSString *)body WithExtentInfo:(NSString *)extentInfo WithMsgId:(NSString *)msgId ToJid:(NSString *)jid;
@@ -296,19 +210,19 @@
  @param willSave 是否入库
  @return 返回创建的消息
  */
-- (Message *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId willSave:(BOOL)willSave;
+- (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId willSave:(BOOL)willSave;
 
-- (Message *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId realJid:(NSString *)realJid userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId msgState:(MessageState)msgState willSave:(BOOL)willSave;
+- (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId realJid:(NSString *)realJid userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId msgState:(QIMMessageSendState)msgState willSave:(BOOL)willSave;
 
-- (Message *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId realJid:(NSString *)realJid userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId willSave:(BOOL)willSave;
+- (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId realJid:(NSString *)realJid userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId willSave:(BOOL)willSave;
 
-- (Message *)sendMessage:(Message *)msg withChatType:(ChatType)chatType channelInfo:(NSString *)channelInfo realFrom:(NSString *)realFrom realTo:(NSString *)realTo ochatJson:(NSString *)ochatJson;
+- (QIMMessageModel *)sendMessage:(QIMMessageModel *)msg withChatType:(ChatType)chatType channelInfo:(NSString *)channelInfo realFrom:(NSString *)realFrom realTo:(NSString *)realTo ochatJson:(NSString *)ochatJson;
 
-- (Message *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId userType:(ChatType)userType msgType:(QIMMessageType)msgType;
+- (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId userType:(ChatType)userType msgType:(QIMMessageType)msgType;
 
-- (Message *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId userType:(ChatType)userType msgType:(QIMMessageType)msgType backinfo:(NSString *)backInfo;
+- (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId userType:(ChatType)userType msgType:(QIMMessageType)msgType backinfo:(NSString *)backInfo;
 
-- (Message *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId;
+- (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId;
 
 - (void)synchronizeChatSessionWithUserId:(NSString *)userId WithChatType:(ChatType)chatType WithRealJid:(NSString *)realJid;
 
@@ -323,7 +237,7 @@
  @param msgType 消息类型
  @return 返回消息本身
  */
-- (Message *)sendShareLocationMessage:(NSString *)msg WithInfo:(NSString *)info ToJid:(NSString *)jid WihtMsgType:(int)msgType;
+- (QIMMessageModel *)sendShareLocationMessage:(NSString *)msg WithInfo:(NSString *)info ToJid:(NSString *)jid WithMsgType:(int)msgType;
 
 /**
  共享位置开始
@@ -332,7 +246,7 @@
  @param shareLocationId 共享位置标识
  @return 返回消息本身
  */
-- (Message *)beginShareLocationToUserId:(NSString *)userId WithShareLocationId:(NSString *)shareLocationId;
+- (QIMMessageModel *)beginShareLocationToUserId:(NSString *)userId WithShareLocationId:(NSString *)shareLocationId;
 
 /**
  共享位置开始(群)
@@ -341,7 +255,7 @@
  @param shareLocationId 共享位置标识
  @return 返回消息本身
  */
-- (Message *)beginShareLocationToGroupId:(NSString *)GroupId WithShareLocationId:(NSString *)shareLocationId;
+- (QIMMessageModel *)beginShareLocationToGroupId:(NSString *)GroupId WithShareLocationId:(NSString *)shareLocationId;
 
 /**
  加入消息共享
@@ -398,14 +312,9 @@
 
 #pragma mark - 未读数
 
-- (void)updateMsgReadCompensateSetWithMsgId:(NSString *)msgId WithAddFlag:(BOOL)flag WithState:(MessageState)state;
+- (void)updateMsgReadCompensateSetWithMsgId:(NSString *)msgId WithAddFlag:(BOOL)flag WithState:(QIMMessageSendState)state;
 
 - (NSMutableSet *)getLastMsgCompensateReadSet;
-
-/**
- *  返回未读消息数组
- */
-- (NSArray *)getNotReaderMsgList;
 
 /**
  清空所有未读消息
@@ -440,19 +349,14 @@
 - (void)clearNotReadMsgByGroupId:(NSString *)groupId;
 
 /**
- 获取Jid下的未读消息数
- 
- @param jid Jid
- */
-- (NSInteger)getNotReadMsgCountByJid:(NSString *)jid;
-
-/**
  获取Jid & 真实Id下的未读消息数
  
  @param jid 用户Id
  @param realJid 真实用户Id
  */
 - (NSInteger)getNotReadMsgCountByJid:(NSString *)jid WithRealJid:(NSString *)realJid;
+
+- (NSInteger)getNotReadMsgCountByJid:(NSString *)jid WithRealJid:(NSString *)realJid withChatType:(ChatType)chatType;
 
 - (void)updateAppNotReadCount;
 
@@ -477,7 +381,7 @@
 - (NSInteger)getLeaveMsgNotReaderCount;
 
 - (void)updateNotReadCountCacheByJid:(NSString *)jid WithRealJid:(NSString *)realJid;
-- (void)updateMessageStateWithNewState:(MessageState)state ByMsgIdList:(NSArray *)MsgIdList;
+- (void)updateMessageStateWithNewState:(QIMMessageSendState)state ByMsgIdList:(NSArray *)MsgIdList;
 
 - (void)updateNotReadCountCacheByJid:(NSString *)jid;
 
@@ -500,16 +404,7 @@
  @param offset   偏移量
  @param complete 回调block
  */
-- (void)getMsgListByUserId:(NSString *)userId WithRealJid:(NSString *)realJid WihtLimit:(int)limit WithOffset:(int)offset WithNeedReload:(BOOL)needReload WihtComplete:(void (^)(NSArray *))complete;
-
-/**
- 获取消息列表
- 
- @param userId 虚拟id
- @param timeStamp 时间戳
- @param complete 回调block
- */
-- (void)getMsgListByUserId:(NSString *)userId FromTimeStamp:(long long)timeStamp WihtComplete:(void (^)(NSArray *))complete;
+- (void)getMsgListByUserId:(NSString *)userId WithRealJid:(NSString *)realJid WithLimit:(int)limit WithOffset:(int)offset WithComplete:(void (^)(NSArray *))complete;
 
 /**
  获取消息列表
@@ -520,27 +415,9 @@
  @param timeStamp 时间戳
  @param complete 回调block
  */
-- (void)getMsgListByUserId:(NSString *)userId WithRealJid:(NSString *)realJid FromTimeStamp:(long long)timeStamp WihtComplete:(void (^)(NSArray *))complete;
+- (void)getMsgListByUserId:(NSString *)userId WithRealJid:(NSString *)realJid FromTimeStamp:(long long)timeStamp WithComplete:(void (^)(NSArray *))complete;
 
 - (void)getConsultServerMsgLisByUserId:(NSString *)userId WithVirtualId:(NSString *)virtualId WithLimit:(int)limit WithOffset:(int)offset WithComplete:(void (^)(NSArray *))complete;
-
-/**
- FS msg
- 
- @param xmppId user id
- @return 返回结果
- */
-- (NSArray *)getFSMsgByXmppId:(NSString *)xmppId;
-
-/**
- FS msg
- 
- @param msgId 消息表示
- @return 返回结果
- */
-- (NSDictionary *)getFSMsgByMsgId:(NSString *)msgId;
-
-- (void)checkOfflineMsg;
 
 // ******************** 本地消息搜索 ***************************//
 

@@ -15,7 +15,7 @@
 
 - (void)updateOfflineGroupMessages;
 
-- (NSArray *)getMucMsgListWihtGroupId:(NSString *)groupId WithDirection:(int)direction WithLimit:(int)limit WithVersion:(long long)version;
+- (NSArray *)getMucMsgListWithGroupId:(NSString *)groupId WithDirection:(int)direction WithLimit:(int)limit WithVersion:(long long)version;
 
 - (void)updateMucReadMark;
 

@@ -12,6 +12,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface QIMKit (QIMWorkFeed)
 
+- (NSArray *)getHotCommentUUIdsForMomentId:(NSString *)momentId;
+
+- (void)setHotCommentUUIds:(NSArray *)hotCommentUUIds ForMomentId:(NSString *)momentId;
+
+- (void)removeHotCommentUUIdsForMomentId:(NSString *)momentId;
+
+- (void)removeAllHotCommentUUIds;
+
 - (void)updateLastWorkFeedMsgTime;
 
 - (void)getRemoteMomentDetailWithMomentUUId:(NSString *)momentId withCallback:(QIMKitgetMomentDetailSuccessedBlock)callback;
@@ -26,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)likeRemoteMomentWithMomentId:(NSString *)momentId withLikeFlag:(BOOL)likeFlag withCallBack:(QIMKitLikeMomentSuccessedBlock)callback;
 
-- (void)likeRemoteCommentWithCommentId:(NSString *)commentId withMomentId:(NSString *)momentId withLikeFlag:(BOOL)likeFlag withCallBack:(QIMKitLikeContentSuccessedBlock)callback;
+- (void)likeRemoteCommentWithCommentId:(NSString *)commentId withSuperParentUUID:(NSString *)superParentUUID withMomentId:(NSString *)momentId withLikeFlag:(BOOL)likeFlag withCallBack:(QIMKitLikeContentSuccessedBlock)callback;
 
 - (void)uploadCommentWithCommentDic:(NSDictionary *)commentDic;
 
@@ -34,11 +42,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)getRemoteRecentNewCommentsWithMomentId:(NSString *)momentId withNewCommentCallBack:(QIMKitWorkCommentBlock)callback;
 
-- (NSDictionary *)getWorkMomentWihtMomentId:(NSString *)momentId;
+- (NSDictionary *)getWorkMomentWithMomentId:(NSString *)momentId;
 
-- (void)getWorkMomentWithLastMomentTime:(long long)lastMomentTime withUserXmppId:(NSString *)xmppId WihtLimit:(int)limit WithOffset:(int)offset withFirstLocalMoment:(BOOL)firstLocal WihtComplete:(void (^)(NSArray *))complete;
+- (void)getWorkMomentWithLastMomentTime:(long long)lastMomentTime withUserXmppId:(NSString *)xmppId WithLimit:(int)limit WithOffset:(int)offset withFirstLocalMoment:(BOOL)firstLocal WithComplete:(void (^)(NSArray *))complete;
 
-- (void)deleteRemoteCommentWithComment:(NSString *)commentId withPostUUId:(NSString *)postUUId withCallback:(QIMKitWorkCommentDeleteSuccessBlock)callback;
+- (void)getWorkMoreMomentWithLastMomentTime:(long long)lastMomentTime withUserXmppId:(NSString *)xmppId WithLimit:(int)limit WithOffset:(int)offset withFirstLocalMoment:(BOOL)firstLocal WithComplete:(void (^)(NSArray *))complete;
+
+- (void)deleteRemoteCommentWithComment:(NSString *)commentId withPostUUId:(NSString *)postUUId withSuperParentUUId:(NSString *)superParentUUID withCallback:(QIMKitWorkCommentDeleteSuccessBlock)callback;
 
 #pragma mark - Remote Notice
 
@@ -46,7 +56,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Local Comment
 
-- (void)getWorkCommentWithLastCommentRId:(NSInteger)lastCommentRId withMomentId:(NSString *)momentId WihtLimit:(int)limit WithOffset:(int)offset withFirstLocalComment:(BOOL)firstLocal WihtComplete:(void (^)(NSArray *))complete;
+- (void)getWorkCommentWithLastCommentRId:(NSInteger)lastCommentRId withMomentId:(NSString *)momentId WithLimit:(int)limit WithOffset:(int)offset withFirstLocalComment:(BOOL)firstLocal WithComplete:(void (^)(NSArray *))complete;
+
+- (NSArray *)getWorkChildCommentsWithParentCommentUUID:(NSString *)parentCommentUUID;
 
 #pragma mark - Local NoticeMsg
 
@@ -56,11 +68,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSInteger)getWorkNoticeMessagesCount;
 
-- (NSInteger)getWorkNoticePOSTCount;
+- (NSArray *)getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset;
 
-- (void)updateWorkNoticePOSTMessageReadState;
+- (BOOL)checkWorkMomentExistWithMomentId:(NSString *)momentId;
 
-- (NSArray *)getWorkNoticeMessagesWihtLimit:(int)limit WithOffset:(int)offset;
+- (NSArray *)getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset;
 
 - (void)updateLocalWorkNoticeMsgReadStateWithTime:(long long)time;
 

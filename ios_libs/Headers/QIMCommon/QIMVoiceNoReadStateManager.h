@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-@class Message;
+@class QIMMessageModel;
 @interface QIMVoiceNoReadStateManager : NSObject
 
 + (instancetype)sharedVoiceNoReadStateManager;

@@ -62,17 +62,6 @@
 #pragma mark - sss
 
 /**
- 获取推荐机器人
- */
-- (NSArray *)recommendRobot;
-
-/**
- 注册公众号
- */
-- (void)registerPublicNumber;
-
-
-/**
  获取本地公众号列表
  */
 - (NSArray *)getPublicNumberList;
@@ -111,7 +100,7 @@
  @param msgType 消息类型
  @return 消息对象Message
  */
-- (Message *)createPublicNumberMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo publicNumberId:(NSString *)publicNumberId msgType:(PublicNumberMsgType)msgType;
+- (QIMMessageModel *)createPublicNumberMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo publicNumberId:(NSString *)publicNumberId msgType:(PublicNumberMsgType)msgType;
 
 /**
  发送消息->公众号
@@ -121,7 +110,7 @@
  @param msgId 消息id
  @param msgType 消息类型
  */
-- (Message *)sendMessage:(NSString *)msg ToPublicNumberId:(NSString *)publicNumberId WithMsgId:(NSString *)msgId WihtMsgType:(int)msgType;
+- (QIMMessageModel *)sendMessage:(NSString *)msg ToPublicNumberId:(NSString *)publicNumberId WithMsgId:(NSString *)msgId WithMsgType:(int)msgType;
 
 /**
  获取公众号消息列表
@@ -131,7 +120,7 @@
  @param offset 偏移量
  @return 消息列表
  */
-- (NSArray *)getPublicNumberMsgListById:(NSString *)publicNumberId WihtLimit:(int)limit WithOffset:(int)offset;
+- (NSArray *)getPublicNumberMsgListById:(NSString *)publicNumberId WithLimit:(int)limit WithOffset:(int)offset;
 
 /**
  根据公众号Id清空未读消息

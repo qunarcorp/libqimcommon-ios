@@ -8,7 +8,7 @@
 
 #import "QIMKit.h"
 
-@class Message;
+@class QIMMessageModel;
 typedef void(^QIMFileManagerUploadCompletionBlock)(UIImage *image, NSError *error, QIMFileCacheType cacheType, NSString *imageURL);
 
 @interface QIMKit (QIMFileManager)
@@ -33,7 +33,7 @@ typedef void(^QIMFileManagerUploadCompletionBlock)(UIImage *image, NSError *erro
  @param flag 是文件还是图片
  @return 文件url
  */
-- (NSString *)uploadFileForPath:(NSString *)filePath forMessage:(Message *)message withJid:(NSString *)jid isFile:(BOOL)flag;
+- (NSString *)uploadFileForPath:(NSString *)filePath forMessage:(QIMMessageModel *)message withJid:(NSString *)jid isFile:(BOOL)flag;
 
 /**
  文件上传
@@ -44,7 +44,7 @@ typedef void(^QIMFileManagerUploadCompletionBlock)(UIImage *image, NSError *erro
  @param flag 是文件还是图片
  @return 文件URL
  */
-- (NSString *)uploadFileForData:(NSData *)fileData forMessage:(Message *)message withJid:(NSString *)jid isFile:(BOOL)flag;
+- (NSString *)uploadFileForData:(NSData *)fileData forMessage:(QIMMessageModel *)message withJid:(NSString *)jid isFile:(BOOL)flag;
 
 - (void)uploadFileForData:(NSData *)fileData forCacheType:(QIMFileCacheType)type isFile:(BOOL)flag completionBlock:(QIMFileManagerUploadCompletionBlock)completionBlock;
 

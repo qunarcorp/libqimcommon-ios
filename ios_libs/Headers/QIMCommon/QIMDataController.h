@@ -29,6 +29,8 @@
 
 - (void) removeAllImage;
 
+- (void)clearLogFiles;
+
 - (long long) sizeofImagePath;
 
 @end

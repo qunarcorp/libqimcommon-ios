@@ -38,13 +38,6 @@
 - (void)getHotlineShopList;
 
 /**
- 根据虚拟Id获取真实RealJid
-
- @param virtualJid 虚拟Id
- */
-//- (NSString *)getRealJidForVirtual:(NSString *)virtualJid;
-
-/**
  发送Consult消息
 
  @param msgId MsgId
@@ -56,21 +49,7 @@
  @param msgType 消息类型
  @return 消息对象Message
  */
-- (Message *)sendConsultMessageId:(NSString *)msgId WithMessage:(NSString *)msg WithInfo:(NSString *)info toJid:(NSString *)toJid realToJid:(NSString *)realToJid WithChatType:(ChatType)chatType WithMsgType:(int)msgType;
-
-- (void)chatTransferTo:(NSString *)user message:(NSString *)message chatId:(NSString *)chatId;
-
-/**
- 会话转移
- 
- @param from from
- @param to to
- @param user user
- @param reson 原因
- @param chatId chat id
- @param msgId msgId
- */
-- (void)chatTransferFrom:(NSString *)from To:(NSString *)to User:(NSString *)user Reson:(NSString *)reson chatId:(NSString *)chatId WithMsgId:(NSString *)msgId;
+- (QIMMessageModel *)sendConsultMessageId:(NSString *)msgId WithMessage:(NSString *)msg WithInfo:(NSString *)info toJid:(NSString *)toJid realToJid:(NSString *)realToJid WithChatType:(ChatType)chatType WithMsgType:(int)msgType;
 
 - (void)customerConsultServicesayHelloWithUser:(NSString *)user WithVirtualId:(NSString *)virtualId WithFromUser:(NSString *)fromUser;
 

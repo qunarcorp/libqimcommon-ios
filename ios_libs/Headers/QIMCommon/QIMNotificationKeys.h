@@ -14,7 +14,11 @@
 
 #define kNotificationMessageUpdate          @"kNotificationMessageUpdate"
 
+#define kNotificationMessageSendStateUpdate     @"kNotificationMessageSendStateUpdate"
+
 #define kNotificationMessageStateUpdate     @"kNotificationMessageStateUpdate"
+
+#define kNotificationMessageReadStateUpdate     @"kNotificationMessageReadStateUpdate"
 
 #define kNotificationMessageControlStateUpdate  @"kNotificationMessageControlStateUpdate"
 
@@ -135,17 +139,15 @@
 
 #define kRevokeMsg                          @"kRevokeMsg"
 
-#define kGetSingleHistoryMsgError           @"kGetSingleHistoryMsgError"
+#define kGetNewSingleHistoryMsgError           @"kGetNewSingleHistoryMsgError"
 
-#define kGetSingleReadFlagError             @"kGetSingleReadFlagError"
+#define kGetNewSingleReadFlagError             @"kGetNewSingleReadFlagError"
 
-#define kGetGroupHistoryMsgError            @"kGetGroupHistoryMsgError"
+#define kGetNewGroupHistoryMsgError            @"kGetNewGroupHistoryMsgError"
 
-#define kGetSystemHistoryMsgError           @"kGetSystemHistoryMsgError"
+#define kGetNewSystemHistoryMsgError           @"kGetNewSystemHistoryMsgError"
 
-#define kGetWorkFeedHistoryMessageListError @"kGetWorkFeedHistoryMessageListError"
-
-#define kGetGroupVersionError               @"kGetGroupVersionError"
+#define kGetNewWorkFeedHistoryMessageListError @"kGetNewWorkFeedHistoryMessageListError"
 
 #define kUsersVCardInfo                     @"kUsersVCardInfo"
 
@@ -301,10 +303,19 @@
 
 #define kNotifyReloadWorkComment @"kNotifyReloadWorkComment"
 
+#define kNotifyReloadWorkFeedAttachCommentList      @"kNotifyReloadWorkFeedAttachCommentList"
+
 //驼圈全局通知
 #define kPBPresenceCategoryNotifyWorkNoticeMessage  @"kPBPresenceCategoryNotifyWorkNoticeMessage"
 
+//驼圈未读通知
+#define kNotifyNotReadWorkCountChange              @"kNotifyNotReadWorkCountChange"
+
 //驼圈
 #define kPBPresenceCategoryNotifyWorkNoticeLastMessage  @"kPBPresenceCategoryNotifyWorkNoticeLastMessage"
+
+static const NSString *kGetIncrementMucListVersion = @"kGetIncrementMucListVersion";
+static const NSString *kGetUpdateUsersVersion = @"kGetUpdateUsersVersion";
+static const NSString *kGetGroupReadMarkVersion = @"kGetGroupReadMarkVersion";
 
 #endif /* QIMNotificationKeys_h */

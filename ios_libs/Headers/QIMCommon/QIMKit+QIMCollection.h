@@ -89,7 +89,7 @@
 
  @param msgId msgId
  */
-- (Message *)getCollectionMsgListForMsgId:(NSString *)msgId;
+- (QIMMessageModel *)getCollectionMsgListForMsgId:(NSString *)msgId;
 
 /**
  根据绑定用户Id及消息来源Id获取代收消息列表

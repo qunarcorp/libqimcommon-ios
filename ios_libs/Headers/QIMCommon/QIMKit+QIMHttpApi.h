@@ -12,13 +12,13 @@
 
 + (NSDictionary *)checkUserToken:(NSString *)verifCode;
 
-+ (NSDictionary *)getUserTokenWithUserName:(NSString *)userName WihtVerifyCode:(NSString *)verifCode;
++ (NSDictionary *)getUserTokenWithUserName:(NSString *)userName WithVerifyCode:(NSString *)verifCode;
 
 + (NSDictionary *)getVerifyCodeWithUserName:(NSString *)userName;
 
 + (NSDictionary *)getUserList;
 
-+ (NSString *)updateLoadFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WihtPathExtension:(NSString *)extension;
++ (NSString *)updateLoadFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension;
 
 + (NSString *)updateLoadVoiceFile:(NSData *)voiceFileData WithFilePath:(NSString *)filePath;
 
