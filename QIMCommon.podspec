@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "QIMCommon"
-  s.version      = "2.0.11"
+  s.version      = "2.0.12"
   s.summary      = "Qunar chat App 9.0+ version QIMCommon"
   s.description  = <<-DESC
                    Qunar QIMCommon解决方案
@@ -26,6 +26,7 @@ Pod::Spec.new do |s|
     puts '---------QIMCommonSDK二进制-------'
     s.source_files = 'ios_libs/Headers/**/*.h'
     s.vendored_libraries = ['ios_libs/Frameworks/libQIMCommon.a']
+    s.resource = 'QIMCommonResource.bundle'
     s.pod_target_xcconfig = {"HEADER_SEARCH_PATHS" => "\"${PODS_ROOT}/Headers/Private/**\" \"${PODS_ROOT}/Headers/Private/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\""}
 
   else
@@ -33,6 +34,7 @@ Pod::Spec.new do |s|
     puts '---------QIMCommonSDK二进制-------'
     s.source_files = 'ios_libs/Headers/**/*.h'
     s.vendored_libraries = ['ios_libs/Frameworks/libQIMCommon.a']
+    s.resource = 'QIMCommonResource.bundle'
     s.pod_target_xcconfig = {"HEADER_SEARCH_PATHS" => "\"${PODS_ROOT}/Headers/Private/**\" \"${PODS_ROOT}/Headers/Private/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\""}
 
   end
