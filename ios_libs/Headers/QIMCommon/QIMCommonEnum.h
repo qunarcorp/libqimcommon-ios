@@ -339,13 +339,16 @@ typedef enum : NSUInteger {
 static const NSString *QIMNavNameKey = @"title";
 static const NSString *QIMNavUrlKey = @"NavUrl";
 
+typedef void(^QIMKitGetPhoneNumberBlock)(NSString *phoneNumber);
+typedef void(^QIMKitGetUserWorkInfoBlock)(NSDictionary *userWorkInfo);
+
 typedef void(^QIMKitSendTPRequesSuccessedBlock)(NSData *responseData);
 typedef void(^QIMKitSendTPRequesFailedBlock)(NSError *error);
 typedef void(^QIMKitGetTripAreaAvailableRoomBlock)(NSArray *availableRooms);
 typedef void(^QIMKitGetTripAreaAvailableRoomByCityIdBlock)(NSArray *availableRooms);    //根据城市Id获取可用区域
 typedef void(^QIMKitGetTripAllCitysBlock)(NSArray *allCitys);   //获取所有城市
 typedef void(^QIMKitGetTripMemberCheckBlock)(BOOL isConform);   //isConform 冲突
-typedef void(^QIMKitCreateTripBlock)(BOOL success);
+typedef void(^QIMKitCreateTripBlock)(BOOL success, NSString *errMsg);
 typedef void(^QIMCloseSessionBlock)(NSString *closeMsg);
 
 typedef void(^QIMKitLikeMomentSuccessedBlock)(NSDictionary *responseDic);
@@ -356,6 +359,7 @@ typedef void(^QIMKitGetMomentNewSuccessedBlock)(NSArray *moments);
 typedef void(^QIMKitGetMomentHistorySuccessedBlock)(NSArray *moments);
 typedef void(^QIMKitgetAnonymouseSuccessedBlock)(NSDictionary *anonymousDic);
 typedef void(^QIMKitgetMomentDetailSuccessedBlock)(NSDictionary *momentDic);
+typedef void(^QIMKitPushMomentSuccessedBlock)(BOOL successed);
 
 
 typedef void(^QIMKitgetPublicCompanySuccessedBlock)(NSArray *companies);

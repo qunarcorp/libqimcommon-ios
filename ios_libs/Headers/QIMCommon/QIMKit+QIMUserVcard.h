@@ -39,9 +39,6 @@
  */
 - (NSString *)getUserBigHeaderImageUrlWithUserId:(NSString *)userId;
 
-- (void)updateUserBigHeaderImageUrl:(NSString *)url WithVersion:(NSString *)version ForUserId:(NSString *)userId ;
-
-
 /**
  更新我的名片信息
  */
@@ -81,7 +78,7 @@
 
  @param userId 用户Id
  */
-- (NSDictionary *)getRemoteUserWorkInfoWithUserId:(NSString *)userId;
+- (void)getRemoteUserWorkInfoWithUserId:(NSString *)userId withCallBack:(QIMKitGetUserWorkInfoBlock)callback;
 
 
 /**
@@ -89,7 +86,7 @@
 
  @param qtalkId qtalkId
  */
-- (NSString *)getPhoneNumberWithUserId:(NSString *)qtalkId;
+- (void)getPhoneNumberWithUserId:(NSString *)qtalkId withCallBack:(QIMKitGetPhoneNumberBlock)callback;
 
 /**
  *  通过nickName获取用户信息

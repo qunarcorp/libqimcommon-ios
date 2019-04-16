@@ -30,7 +30,8 @@
 - (NSString *)qimNav_InnerFileHttpHost;
 - (NSString *)qimNav_Port;  //xmpp端口
 - (NSString *)qimNav_ProtobufPort;   //Pb端口
-
+- (NSString *)qimNav_ShareUrl;  //分享聊天记录url
+- (NSString *)qimNav_DomainHost;    //种Cookie的domain
 
 //hosts
 - (NSString *)qimNav_HashHosts;
