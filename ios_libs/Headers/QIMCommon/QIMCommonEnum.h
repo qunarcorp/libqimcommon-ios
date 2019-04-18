@@ -108,9 +108,9 @@ typedef enum ProtocolType{
 } ProtocolType;
 
 typedef enum {
-    QIMGroupIdentityNone        = 0,
+    QIMGroupIdentityOwner       = 0,
     QIMGroupIdentityAdmin       = 1,
-    QIMGroupIdentityOwner       = 2,
+    QIMGroupIdentityNone       = 2,
 } QIMGroupIdentity;
 
 typedef enum {
