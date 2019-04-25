@@ -2246,7 +2246,7 @@ static IMDataManager *__global_data_manager = nil;
 - (NSArray *)qimDB_getGroupMember:(NSString *)groupId WithGroupIdentity:(NSInteger)identity {
     __block NSMutableArray *members = nil;
     NSMutableArray *identityArray = [[NSMutableArray alloc] init];
-    if (identity == 2) {
+    if (identity == 0) {
         //Owner
         identityArray = @[@"admin", @"none"];
     } else if (identity == 1) {
@@ -2256,12 +2256,16 @@ static IMDataManager *__global_data_manager = nil;
     }
     [[self dbInstance] syncUsingTransaction:^(Database *database) {
         NSMutableString *sql = [NSMutableString stringWithFormat:@"Select a.MemberId, a.Name, b.XmppId as Jid, a.Affiliation, a.LastUpdateTime From IM_Group_Member a left join IM_User b on a.MemberJid = b.XmppId Where GroupId = :GroupId and a.Affiliation in (", identityArray];
-        for (NSString *affiliation in identityArray) {
-            if ([affiliation isEqual:identityArray.lastObject]) {
-                [sql appendFormat:@"'%@') Order By a.Name;",affiliation];
-            } else {
-                [sql appendFormat:@"'%@',",affiliation];
+        if (identityArray.count) {
+            for (NSString *affiliation in identityArray) {
+                if ([affiliation isEqual:identityArray.lastObject]) {
+                    [sql appendFormat:@"'%@') Order By a.Name;",affiliation];
+                } else {
+                    [sql appendFormat:@"'%@',",affiliation];
+                }
             }
+        } else {
+            [sql appendFormat:@"'%@') Order By a.Name;"];
         }
         DataReader *reader = [database executeReader:sql withParameters:@[groupId]];
         while ([reader read]) {
