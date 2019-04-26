@@ -1762,7 +1762,11 @@ enum PlaType {
                 NSString *name = [destJid resource];
                 NSString *affiliation = [keyValues objectForKey:@"affiliation"];
                 NSString *domain = [keyValues objectForKey:@"domain"];
-                jid = [NSString stringWithFormat:@"%@@%@", jid, domain];
+                if (domain.length > 0) {
+                    jid = [NSString stringWithFormat:@"%@@%@", jid, domain];
+                } else {
+                    jid = [NSString stringWithFormat:@"%@@%@", jid, self.domain];
+                }
                 if ([[self chatRoomDelegate] respondsToSelector:@selector(pbChatRoom:WithAddJid:WithAffiliation:WithDomain:WithName:)]) {
                     [[self chatRoomDelegate] pbChatRoom:destJid.bare WithAddJid:jid WithAffiliation:affiliation WithDomain:domain WithName:name];
                 }
@@ -1844,6 +1848,11 @@ enum PlaType {
                     NSString *userId = [keyValues objectForKey:@"jid"];
                     NSString *domain = [keyValues objectForKey:@"domain"];
                     NSString *jid = [NSString stringWithFormat:@"%@@%@", userId, domain];
+                    if (domain.length > 0) {
+                        jid = [NSString stringWithFormat:@"%@@%@", jid, domain];
+                    } else {
+                        jid = [NSString stringWithFormat:@"%@@%@", jid, self.domain];
+                    }
                     if ([[self delegate] respondsToSelector:@selector(delFriend:)]) {
                         [[self delegate] delFriend:jid];
                     }
