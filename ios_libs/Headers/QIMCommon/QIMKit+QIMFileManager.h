@@ -210,4 +210,6 @@ typedef void(^QIMFileManagerUploadCompletionBlock)(UIImage *image, NSError *erro
  */
 - (CGSize)getFitSizeForImgSize:(CGSize)imgSize;
 
+- (NSString *)qim_cachedFileNameForKey:(NSString *)key;
+
 @end

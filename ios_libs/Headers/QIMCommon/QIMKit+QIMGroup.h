@@ -128,6 +128,15 @@
 
 
 /**
+  判断某人是否为群成员
+
+ @param userId 用户Id
+ @param groupId 群Id
+ @return 是否存在
+ */
+- (BOOL)isGroupMemberByUserId:(NSString *)userId ByGroupId:(NSString *)groupId;
+
+/**
  判断本人是否为群主
  
  @param groupId 群组Id

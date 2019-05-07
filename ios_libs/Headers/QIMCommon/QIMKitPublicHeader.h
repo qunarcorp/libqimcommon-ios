@@ -14,6 +14,7 @@
 #import "QIMConfigKeys.h"
 #import "QIMKit.h"
 #import "QIMKit+QIMAppInfo.h"
+#import "QIMKit+QIMAPPFound.h"
 #import "QIMKit+QIMAppSetting.h"
 #import "QIMKit+QIMCalendar.h"
 #import "QIMKit+QIMUserMedal.h"
