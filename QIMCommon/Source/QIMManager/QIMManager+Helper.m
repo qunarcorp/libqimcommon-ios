@@ -96,7 +96,7 @@
                 break;
         }
         [rootView setFrame:frame];
-    }                completion:^(BOOL finished) {
+    } completion:^(BOOL finished) {
         if (shockCount < 40) {
             if (shockCount % 10 == 0) {
                 AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
