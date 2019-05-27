@@ -21,6 +21,28 @@
 
 - (dispatch_queue_t)getLastQueue;
 
+- (dispatch_queue_t)getLoadSessionNameQueue;
+
+- (dispatch_queue_t)getLoadHeaderImageQueue;
+
+- (dispatch_queue_t)getLoadSessionContentQueue;
+
+- (dispatch_queue_t)getLoadSessionUnReadCountQueue;
+
+- (dispatch_queue_t)getLoadGroupCardFromDBQueue;
+
+- (NSString *)getOpsFoundRNDebugUrl;
+
+- (void)setOpsFoundRNDebugUrl:(NSString *)opsFoundRNDebugUrl;
+
+- (NSString *)qtalkFoundRNDebugUrl;
+
+- (void)setQtalkFoundRNDebugUrl:(NSString *)qtalkFoundRNDebugUrl;
+
+- (NSString *)qtalkSearchRNDebugUrl;
+
+- (void)setQtalkSearchRNDebugUrl:(NSString *)qtalkSearchRNDebugUrl;
+
 - (NSString *)getImagerCache;
 
 /**
