@@ -13,6 +13,7 @@
 - (void)chooseNewData:(BOOL)flag;
 - (void)setCacheName:(NSString *)cacheName;
 
+- (BOOL)containsObjectForKey:(NSString *)key;
 - (void)setUserObject:(nullable id)object forKey:(nonnull NSString *)aKey;
 - (nullable id)userObjectForKey:(nonnull NSString *)aKey;
 - (void)removeUserObjectForKey:(nonnull NSString *)aKey;

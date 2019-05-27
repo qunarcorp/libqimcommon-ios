@@ -34,6 +34,12 @@
  */
 + (void)updateRequestURL;
 
+
+/**
+ NewHttpUrl数据写入KeyChain
+ */
++ (void)updateNewHttpRequestURL;
+
 /**
  Domain数据写入KeyChain
  */

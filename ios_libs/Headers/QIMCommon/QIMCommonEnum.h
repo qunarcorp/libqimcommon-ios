@@ -167,6 +167,7 @@ typedef enum {
     QIMMessageType_BurnAfterRead = 1 << 7,
     QIMMessageType_CardShare = 1 << 8,
     QIMMessageTypeMeetingRemind = 257,
+    QIMMessageTypeWorkMomentRemind = 258,
     QIMMessageType_RedPack = 1 << 9,
     QIMMessageType_AA = (1 << 9) + 1,
     QIMMessageType_RedPackInfo = 1 << 10,
@@ -221,6 +222,16 @@ typedef enum {
     ChatType_ConsultServer     = 5,
     ChatType_CollectionChat    = 6,
 } ChatType;
+
+typedef enum : NSUInteger {
+    QIMAtTypeSP = 0,        //艾特指定人
+    QIMAtTypeALL,           //艾特所有
+} QIMAtType;
+
+typedef enum : NSUInteger {
+    QIMAtMsgNotReadState = 0,  //艾特消息未读
+    QIMAtMsgHasReadState,      //艾特消息已读
+} QIMAtMsgReadState;
 
 typedef enum {
     MessageReadFlagDidSend = 3,
@@ -334,7 +345,16 @@ typedef enum : NSUInteger {
     QIMWorkFeedNotifyTypePOST = 0,
     QIMWorkFeedNotifyTypeComment = 1,
     QIMWorkFeedNotifyTypeLike = 2,
+    QIMWorkFeedNotifyTypePOSTAt = 3,
+    QIMWorkFeedNotifyTypeCommentAt = 4,
+    QIMWorkFeedNotifyTypeMyComment = 5,
 } QIMWorkFeedNotifyType;
+
+typedef enum : NSUInteger {
+    QIMWorkFeedContentTypeText = 0,    //驼圈文本
+    QIMWorkFeedContentTypeImage = 1,   //驼圈图片
+    QIMWorkFeedContentTypeLink = 2,    //驼圈LinkUrl
+} QIMWorkFeedContentType;
 
 static const NSString *QIMNavNameKey = @"title";
 static const NSString *QIMNavUrlKey = @"NavUrl";
@@ -360,7 +380,7 @@ typedef void(^QIMKitGetMomentHistorySuccessedBlock)(NSArray *moments);
 typedef void(^QIMKitgetAnonymouseSuccessedBlock)(NSDictionary *anonymousDic);
 typedef void(^QIMKitgetMomentDetailSuccessedBlock)(NSDictionary *momentDic);
 typedef void(^QIMKitPushMomentSuccessedBlock)(BOOL successed);
-
+typedef void(^QIMKitUpdateMomentNotifyConfigSuccessedBlock)(BOOL successed);
 
 typedef void(^QIMKitgetPublicCompanySuccessedBlock)(NSArray *companies);
 

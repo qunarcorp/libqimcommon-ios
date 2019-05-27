@@ -21,6 +21,10 @@
 - (NSString *)qimNav_Domain;
 - (QTLoginType)qimNav_LoginType; //登录方式
 - (NSString *)qimNav_XmppHost;
+- (NSString *)qimNav_LeaderUrl;
+
+- (NSString *)qimNav_Mobileurl;
+- (NSString *)qimNav_resetPwdUrl;
 
 /**
  文件服务HTTP接口 Host
@@ -95,6 +99,8 @@
 //imConfig
 - (BOOL)qimNav_ShowOA;                //展示OA
 - (BOOL)qimNav_ShowOrganizational;    //展示组织架构
+- (NSString *)qimNav_Email;
+- (NSString *)qimNav_UploadLog;     //上报日志
 
 //ability
 - (NSString *)qimNav_GetPushState;

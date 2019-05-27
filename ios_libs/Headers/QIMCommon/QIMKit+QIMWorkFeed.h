@@ -50,6 +50,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)deleteRemoteCommentWithComment:(NSString *)commentId withPostUUId:(NSString *)postUUId withSuperParentUUId:(NSString *)superParentUUID withCallback:(QIMKitWorkCommentDeleteSuccessBlock)callback;
 
+//我的驼圈儿获取我的回复数据源
+- (void)getRemoteOwnerCamelGetMyReplyWithCreateTime:(long long)createTime pageSize:(NSInteger)pageSize complete:(void (^)(NSArray *))complete;
+
+//我的驼圈儿获取我@我的数据源
+- (void)getRemoteOwnerCamelGetAtListWithCreateTime:(long long)createTime pageSize:(NSInteger)pageSize complete:(void (^)(NSArray *))complete;
+
 #pragma mark - Remote Notice
 
 - (void)updateRemoteWorkNoticeMsgReadStateWithTime:(long long)time;
@@ -60,19 +66,28 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSArray *)getWorkChildCommentsWithParentCommentUUID:(NSString *)parentCommentUUID;
 
+#pragma mark - 驼圈提醒
+- (BOOL)getLocalWorkMomentNotifyConfig;
+
+- (void)getRemoteWorkMomentSwitch;
+
+- (void)updateRemoteWorkMomentNotifyConfig:(BOOL)flag withCallBack:(QIMKitUpdateMomentNotifyConfigSuccessedBlock)callback;
+
 #pragma mark - Local NoticeMsg
 
 - (void)getRemoteLastWorkMoment;
 
 - (NSDictionary *)getLastWorkMoment;
 
-- (NSInteger)getWorkNoticeMessagesCount;
+- (NSInteger)getWorkNoticeMessagesCountWithEventType:(NSArray *)eventTypes;
 
 - (NSArray *)getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset;
+
+- (NSArray *)getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset eventTypes:(NSArray *)eventTypes readState:(int)readState;
+
+- (NSArray *)getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset eventTypes:(NSArray *)eventTypes;
 
 - (BOOL)checkWorkMomentExistWithMomentId:(NSString *)momentId;
-
-- (NSArray *)getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset;
 
 - (void)updateLocalWorkNoticeMsgReadStateWithTime:(long long)time;
 

@@ -100,6 +100,7 @@
 - (NSArray *)getOrganUserList;
 - (NSInteger)selectUserListTotalCountBySearchStr:(NSString *)searchStr;
 
+- (NSArray *)selectUserListExMySelfBySearchStr:(NSString *)searchStr WithLimit:(NSInteger)limit WithOffset:(NSInteger)offset;
 - (NSArray *)selectUserListBySearchStr:(NSString *)searchStr WithLimit:(NSInteger)limit WithOffset:(NSInteger)offset;
 - (NSArray *)selectUserListBySearchStr:(NSString *)searchStr inGroup:(NSString *) groupId;
 - (NSArray *)selectUserListByUserIds:(NSArray *)userIds;

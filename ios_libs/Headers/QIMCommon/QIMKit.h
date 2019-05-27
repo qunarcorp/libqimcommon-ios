@@ -196,35 +196,54 @@
  */
 - (void)setMoodshow:(BOOL)flag;
 
+//是否展示水印
+- (BOOL)waterMarkState;
+
+
+/**
+ 设置展示水印
+
+ @param flag 展示水印bool值
+ */
+- (void)setWaterMarkState:(BOOL)flag;
+
+//艾特
 /**
  获取At me的
  
  @param jid 会话id
  @return 返回结果
  */
-- (NSArray *)getHasAtMeByJid:(NSString *)jid ;
-
-- (void)addAtMeByJid:(NSString *)jid WithNickName:(NSString *)nickName;
-
-- (void)removeAtMeByJid:(NSString *)jid;
-
-- (void)addAtALLByJid:(NSString *)jid WithMsgId:(NSString *)msgId WithMsg:(QIMMessageModel *)message WithNickName:(NSString *)nickName;
+- (NSArray *)getHasAtMeByJid:(NSString *)jid;
 
 /**
- 移除atall
+ 更新艾特消息操作状态
  
- @param jid 用户id
+ @param groupId 群Id
+ @param msgId 艾特消息MsgId
+ @param readState 操作状态
  */
-- (void)removeAtAllByJid:(NSString *)jid;
+- (void)updateAtMeMessageWithJid:(NSString *)groupId withMsgIds:(NSArray *)msgIds withReadState:(QIMAtMsgReadState)readState;
 
 /**
- 获取atall
+ 清空艾特消息
  
- @param jid user id
- @return 返回atall信息
+ @param groupId 群Id
  */
-- (NSDictionary *)getAtAllInfoByJid:(NSString *)jid;
+- (void)clearAtMeMessageWithJid:(NSString *)groupId;
 
+/**
+ 新增艾特消息
+ 
+ @param groupId 群Id
+ @param atType at类型
+ @param msgId 艾特消息MsgId
+ @param msgTime 艾特消息时间戳
+ */
+- (void)addAtMeMessageByJid:(NSString *)groupId withType:(QIMAtType)atType withMsgId:(NSString *)msgId withMsgTime:(long long)msgTime;
+
+
+//输入框草稿
 - (NSDictionary *)getNotSendTextByJid:(NSString *)jid ;
 
 - (void)setNotSendText:(NSString *)text inputItems:(NSArray *)inputItems ForJid:(NSString *)jid;

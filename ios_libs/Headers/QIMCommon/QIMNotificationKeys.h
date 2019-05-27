@@ -10,7 +10,7 @@
 
 #define kNotificationLoginState             @"kNotificationLoginState"
 
-#define kNotificationLogout                 @"kNotificationLogout"
+#define kNotificationLogout                 @"kNotificationLogout"          //退出登录通知
 
 #define kNotificationMessageUpdate          @"kNotificationMessageUpdate"
 
@@ -305,17 +305,24 @@
 
 #define kNotifyReloadWorkFeedAttachCommentList      @"kNotifyReloadWorkFeedAttachCommentList"
 
+//驼圈入口权限变更
+#define kNotifyReloadWorkFeedEntrance               @"kNotifyReloadWorkFeedEntrance"
+
 //驼圈全局通知
 #define kPBPresenceCategoryNotifyWorkNoticeMessage  @"kPBPresenceCategoryNotifyWorkNoticeMessage"
 
 //驼圈未读通知
 #define kNotifyNotReadWorkCountChange              @"kNotifyNotReadWorkCountChange"
 
+//驼圈提醒通知
+#define kNotifyUpdateNotifyConfig                  @"kNotifyUpdateNotifyConfig"
+
 //驼圈
 #define kPBPresenceCategoryNotifyWorkNoticeLastMessage  @"kPBPresenceCategoryNotifyWorkNoticeLastMessage"
 
 static const NSString *kGetIncrementMucListVersion = @"kGetIncrementMucListVersion";
-static const NSString *kGetUpdateUsersVersion = @"kGetUpdateUsersVersion";
+static const NSString *kGetUpdateUsersV2Version = @"kGetUpdateUsersV2Version";
 static const NSString *kGetGroupReadMarkVersion = @"kGetGroupReadMarkVersion";
+static const NSString *kWorkMomentNotifySwitchConfig = @"kWorkMomentNotifySwitchConfig";
 
 #endif /* QIMNotificationKeys_h */
