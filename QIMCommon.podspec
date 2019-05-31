@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "QIMCommon"
-  s.version      = "3.0.10211580"
+  s.version      = "3.0.10211595"
   s.summary      = "Qunar chat App 9.0+ version QIMCommon"
   s.description  = <<-DESC
                    Qunar QIMCommon解决方案
@@ -59,7 +59,8 @@ Pod::Spec.new do |s|
   s.dependency 'AvoidCrash'
   
   s.dependency 'CocoaLumberjack'
-  
+  s.dependency 'YYDispatchQueuePool' 
+ 
   s.frameworks = 'Foundation', 'CoreTelephony', 'SystemConfiguration', 'AudioToolbox', 'AVFoundation', 'UserNotifications', 'CoreTelephony','QuartzCore', 'CoreGraphics', 'Security'
     s.libraries = 'sqlite3.0', 'stdc++', 'bz2'
 
