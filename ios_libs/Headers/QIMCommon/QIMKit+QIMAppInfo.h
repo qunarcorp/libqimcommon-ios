@@ -52,6 +52,14 @@
  */
 - (NSString *)appAID;
 
+
+/**
+ 用户自定义设备Model
+ iPhone / iPad
+ @param customDeviceModel 设备Model
+ */
+- (void)setCustomDeviceModel:(NSString *)customDeviceModel;
+
 /**
  判断是不是iPad
  */
