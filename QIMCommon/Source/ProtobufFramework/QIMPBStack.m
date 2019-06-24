@@ -2107,6 +2107,9 @@ enum PlaType {
                     [self recordLog:log withDirection:MsgDirection_Receive];
                 }
                 NSString *sendJid = [pMessage sendjid];
+                if (!sendJid.length) {
+                    sendJid = [pMessage realfrom];
+                }
                 NSDictionary *keyValues = [xmppMessage getHeadersDicForHeaders:xmppMessage.body.headers];
                 NSString *autoReply = [keyValues objectForKey:@"auto_reply"];
                 int platform = xmppMessage.clientType;
