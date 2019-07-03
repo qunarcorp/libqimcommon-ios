@@ -65,6 +65,9 @@
             if (!tempMarkupName) {
                 tempMarkupName = [[self getUserInfoByUserId:userId] objectForKey:@"Name"];
             }
+            if (!tempMarkupName) {
+                tempMarkupName = [[userId componentsSeparatedByString:@"@"] firstObject];
+            }
             dispatch_block_t block = ^{
 
                 [self.userMarkupNameDic setQIMSafeObject:tempMarkupName forKey:userId];
