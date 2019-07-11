@@ -139,19 +139,11 @@ typedef enum {
             BOOL ret = [[result objectForKey:@"ret"] boolValue];
             if (ret) {
                 NSString *resultUrl = [result objectForKey:@"data"];
-                if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
-                    NSURL *url = [NSURL URLWithString:resultUrl];
-                    resultUrl = [url path];
-                    NSString *innerFileUrlPath = [[NSURL URLWithString:[[QIMNavConfigManager sharedInstance] innerFileHttpHost]] path];
-                    if ([resultUrl containsString:innerFileUrlPath]) {
-                        resultUrl = [resultUrl substringFromIndex:innerFileUrlPath.length];
-                    }
-                    NSUInteger loc = [resultUrl rangeOfString:@"/"].location + 1;
-                    NSDictionary *queryDic = [[url query] qim_dictionaryFromQueryComponents];
-                    if (loc < resultUrl.length) {
-                        NSString *fileName = url.pathComponents.lastObject;
-                        httpUrl = [[resultUrl substringFromIndex:1] stringByAppendingFormat:@"?file=file/%@&FileName=file/%@&name=%@",fileName,fileName,[queryDic objectForKey:@"name"]];
-                    }
+                if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl) {
+                    httpUrl = resultUrl;
+                }
+                if (![httpUrl qim_hasPrefixHttpHeader]) {
+                    httpUrl = [[QIMNavConfigManager sharedInstance].innerFileHttpHost stringByAppendingFormat:@"/%@", httpUrl];
                 }
             }
             if (httpUrl == nil) {
@@ -877,6 +869,9 @@ typedef enum {
                       [[QIMManager sharedInstance] myRemotelogginKey]];
         }
     }
+    if (![urlStr qim_hasPrefixHttpHeader]) {
+        urlStr = [[QIMNavConfigManager sharedInstance].innerFileHttpHost stringByAppendingFormat:@"/%@", urlStr];
+    }
     [[QIMHttpRequestMonitor sharedInstance] runblock:^{
         
         NSString *filePath = [[QIMFileManager documentsofPath:type] stringByAppendingPathComponent:md5];
@@ -1467,7 +1462,7 @@ typedef enum {
  */
 
 - (void )getPermUrlWithTempUrl:(NSString *)tempUrl PermHttpUrl:(void(^)(NSString *))callBackPermUrl{
-    
+    /*
     __block NSString *httpPermUrl = @"";
     [[QIMHttpRequestMonitor sharedInstance] syncRunBlock:^{
         
@@ -1488,7 +1483,8 @@ typedef enum {
     } url:tempUrl];
     NSString *md5 = [[QIMFileManager sharedInstance] getFileNameFromUrl:httpPermUrl];
     httpPermUrl = [NSString stringWithFormat:@"%@?filename=%@&md5=%@", httpPermUrl, md5, md5];
-    callBackPermUrl(httpPermUrl);
+    */
+    callBackPermUrl(tempUrl);
 }
 
 - (CGSize)getFitSizeForImgSize:(CGSize)imgSize {

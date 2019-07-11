@@ -62,14 +62,7 @@
         if (ret) {
             NSString *resultUrl = [result objectForKey:@"data"];
             if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl) {
-                NSURL *url = [NSURL URLWithString:resultUrl];
-                resultUrl = [url path];
-                NSUInteger loc = [resultUrl rangeOfString:@"/"].location + 1;
-                if (loc < resultUrl.length) {
-                    NSString *fileName = url.pathComponents.lastObject;
-                    resultUrl = [[resultUrl substringFromIndex:1] stringByAppendingFormat:@"?file=file/%@&FileName=file/%@",fileName,fileName];
-                    return resultUrl;
-                }
+                return resultUrl;
             }
         }
     }
@@ -92,14 +85,7 @@
         if (ret) {
             NSString *resultUrl = [result objectForKey:@"data"];
             if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl) {
-                NSURL *url = [NSURL URLWithString:resultUrl];
-                resultUrl = [url path];
-                NSUInteger loc = [resultUrl rangeOfString:@"/"].location + 1;
-                if (loc < resultUrl.length) {
-                    NSString *fileName = url.pathComponents.lastObject;
-                    resultUrl = [[resultUrl substringFromIndex:1] stringByAppendingFormat:@"?file=file/%@&FileName=file/%@",fileName,fileName];
-                    return resultUrl;
-                }
+                return resultUrl;
             }
         }
     }
@@ -261,16 +247,6 @@ done:
             NSString *resultUrl = [result objectForKey:@"data"];
             if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl) {
                 return resultUrl;
-                /*
-                NSURL *url = [NSURL URLWithString:resultUrl];
-                resultUrl = [url path];
-                NSUInteger loc = [resultUrl rangeOfString:@"/"].location + 1;
-                if (loc < resultUrl.length) {
-                    NSString *fileName = url.pathComponents.lastObject;
-                    resultUrl = [[resultUrl substringFromIndex:1] stringByAppendingFormat:@"?file=file/%@&FileName=file/%@",fileName,fileName];
-                    return resultUrl;
-                }
-                */
             }
         }
     }
@@ -315,14 +291,7 @@ done:
         if (ret) {
             NSString *resultUrl = [result objectForKey:@"data"];
             if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl) {
-                NSURL *url = [NSURL URLWithString:resultUrl];
-                resultUrl = [url path];
-                NSUInteger loc = [resultUrl rangeOfString:@"/"].location + 1;
-                if (loc < resultUrl.length) {
-                    NSString *fileName = url.pathComponents.lastObject;
-                    resultUrl = [[resultUrl substringFromIndex:1] stringByAppendingFormat:@"?file=file/%@&FileName=file/%@",fileName,fileName];
-                    return resultUrl;
-                }
+                return resultUrl;
             }
         }
     }
@@ -392,15 +361,7 @@ done:
         if (ret) {
             NSString *resultUrl = [result objectForKey:@"data"];
             if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl) {
-                NSURL *url = [NSURL URLWithString:resultUrl];
-                resultUrl = [url path];
-                NSUInteger loc = [resultUrl rangeOfString:@"/"].location + 1;
-                NSDictionary *queryDic = [[url query] qim_dictionaryFromQueryComponents];
-                if (loc < resultUrl.length) {
-                    NSString *fileName = url.pathComponents.lastObject;
-                   NSString *httpUrl = [[resultUrl substringFromIndex:1] stringByAppendingFormat:@"?file=file/%@&FileName=file/%@&name=%@",fileName,fileName,[queryDic objectForKey:@"name"]];
-                    return httpUrl;
-                }
+                return resultUrl;
             }
         }
     }
