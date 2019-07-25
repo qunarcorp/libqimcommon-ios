@@ -887,9 +887,9 @@ static QIMManager *__IMManager = nil;
         return requestURL;
     } else {
         if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
-            return @"https://qcweb.qunar.com/api/package/newapi";
+            return [[QIMNavConfigManager sharedInstance] newerHttpUrl];
         } else{
-            return @"https://qt.qunar.com/package/newapi";
+            return [[QIMNavConfigManager sharedInstance] newerHttpUrl];
         }
     }
 }
@@ -1307,7 +1307,7 @@ static QIMManager *__IMManager = nil;
 
 - (NSDictionary *)getQChatTokenWithBusinessLineName:(NSString *)businessLineName {
     
-    NSString *desturl = @"https://qcweb.qunar.com/api/http_gettk";
+    NSString *desturl = [[QIMNavConfigManager sharedInstance] getQChatGetTKUrl];
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:desturl]];
     NSDictionary *params = @{@"macCode": [[QIMAppInfo sharedInstance] macAddress], @"plat": (businessLineName.length > 0) ? businessLineName : @"app"};
     NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:params error:nil];

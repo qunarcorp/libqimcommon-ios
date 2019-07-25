@@ -266,6 +266,8 @@
 		2CB8DB7B2149503000B57B8D /* QIMWomanDefaultHeader.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CB8DB722149502F00B57B8D /* QIMWomanDefaultHeader.png */; };
 		2CB8DB7C2149503000B57B8D /* QIMGroupDefaultHeader.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CB8DB732149502F00B57B8D /* QIMGroupDefaultHeader.png */; };
 		2CB8DB7D2149503000B57B8D /* Activity_default.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CB8DB742149502F00B57B8D /* Activity_default.png */; };
+		2CFD33AE22E9927C00429246 /* QIMNavDefaultSetting.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CFD33AC22E9927C00429246 /* QIMNavDefaultSetting.h */; };
+		2CFD33AF22E9927C00429246 /* QIMNavDefaultSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 2CFD33AD22E9927C00429246 /* QIMNavDefaultSetting.m */; };
 		7E3841C6EFA7895FA232B20B /* libPods-QIMCommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAFC17F7E3C83EB275405581 /* libPods-QIMCommon.a */; };
 /* End PBXBuildFile section */
 
@@ -517,6 +519,8 @@
 		2CB8DB722149502F00B57B8D /* QIMWomanDefaultHeader.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = QIMWomanDefaultHeader.png; sourceTree = "<group>"; };
 		2CB8DB732149502F00B57B8D /* QIMGroupDefaultHeader.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = QIMGroupDefaultHeader.png; sourceTree = "<group>"; };
 		2CB8DB742149502F00B57B8D /* Activity_default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Activity_default.png; sourceTree = "<group>"; };
+		2CFD33AC22E9927C00429246 /* QIMNavDefaultSetting.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QIMNavDefaultSetting.h; sourceTree = "<group>"; };
+		2CFD33AD22E9927C00429246 /* QIMNavDefaultSetting.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QIMNavDefaultSetting.m; sourceTree = "<group>"; };
 		CAFC17F7E3C83EB275405581 /* libPods-QIMCommon.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-QIMCommon.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D13CC9115C6C9C049DE1929D /* Pods-QIMCommon.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QIMCommon.release.xcconfig"; path = "Pods/Target Support Files/Pods-QIMCommon/Pods-QIMCommon.release.xcconfig"; sourceTree = "<group>"; };
 		FDAEFB566F27EE8C94093452 /* Pods-QIMCommon.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QIMCommon.debug.xcconfig"; path = "Pods/Target Support Files/Pods-QIMCommon/Pods-QIMCommon.debug.xcconfig"; sourceTree = "<group>"; };
@@ -548,6 +552,8 @@
 			children = (
 				2C1D0EDC215E4F5200275225 /* QIMNavConfigManager.h */,
 				2C1D0EDB215E4F5200275225 /* QIMNavConfigManager.m */,
+				2CFD33AC22E9927C00429246 /* QIMNavDefaultSetting.h */,
+				2CFD33AD22E9927C00429246 /* QIMNavDefaultSetting.m */,
 			);
 			path = QIMNavConfig;
 			sourceTree = "<group>";
@@ -1041,6 +1047,7 @@
 				2C5AA0E022E8301700201F2A /* IMDataManager+QIMSession.h in Headers */,
 				2CB8DB4621494C2000B57B8D /* QIMPBStream.h in Headers */,
 				2CB8DB3B21494C2000B57B8D /* IQMessage+Utility.h in Headers */,
+				2CFD33AE22E9927C00429246 /* QIMNavDefaultSetting.h in Headers */,
 				2C5AA0E622E8301700201F2A /* IMDataManager+QIMDBCollectionMessage.h in Headers */,
 				2C1D0F38215E4F5E00275225 /* QIMManager+EncryptChat.h in Headers */,
 				2CB8DAFE21494C2000B57B8D /* QIMNetworkObserver.h in Headers */,
@@ -1212,6 +1219,7 @@
 				2CB8DA5F21494C1800B57B8D /* QIMKit+QIMPublicRobot.m in Sources */,
 				2CB8DA9721494C1800B57B8D /* QIMKit+QIMGroup.m in Sources */,
 				2C1D0F37215E4F5E00275225 /* QIMManager+resetLoginInfo.m in Sources */,
+				2CFD33AF22E9927C00429246 /* QIMNavDefaultSetting.m in Sources */,
 				2C1D0F3E215E4F5E00275225 /* QIMManager+UserVcard.m in Sources */,
 				2CB8DA7221494C1800B57B8D /* QIMKit+QIMFriend.m in Sources */,
 				2C1D0F68215E51B800275225 /* XmppImManager.m in Sources */,

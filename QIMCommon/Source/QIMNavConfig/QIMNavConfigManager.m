@@ -10,10 +10,13 @@
 #import "QIMPrivateHeader.h"
 #import "QIMAdvertItem.h"
 
-@interface QIMNavConfigManager()
+@interface QIMNavConfigManager ()
+
+@property(nonatomic, strong) NSDictionary *defaultSettings;
 
 @end
-@implementation QIMNavConfigManager{
+
+@implementation QIMNavConfigManager {
     NSDictionary *_oldAdvertDic;
     NSString *_httpHost;
     NSString *_newerHttpUrl;
@@ -31,32 +34,32 @@
     NSString *_protobufPort;   //Pb端口
     NSString *_resetPwdUrl; //重设密码
     NSString *_hashHosts;
-    
+
     NSArray *_adItems;
-    int  _adSec;
+    int _adSec;
     BOOL _adShown;
     BOOL _adCarousel;
-    int  _adCarouselDelay;
+    int _adCarouselDelay;
     BOOL _adAllowSkip;
     NSString *_adSkipTips;
-    
+
     NSString *_navUrl;
     BOOL _debug;
     NSString *_healthcheckUrl;
-    
+
     //Video
     NSString *_videoApiHost;
     NSString *_wssHost;
     NSString *_signal_host;
     NSString *_group_room_host;
-    
+
     //OPS
     NSString *_opsHost;
-    
+
     NSString *_qcHost;
 }
 
-+ (QIMNavConfigManager *)sharedInstance{
++ (QIMNavConfigManager *)sharedInstance {
     static QIMNavConfigManager *__monitor = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -65,10 +68,22 @@
     return __monitor;
 }
 
-- (instancetype)init{
+- (instancetype)init {
     self = [super init];
     QIMVerboseLog(@" QIMNavConfigManager sharedInstance");
     if (self) {
+
+        if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
+            NSString *qtalkSettingsPath = [[NSBundle mainBundle] pathForResource:@"qtalkDefaultSetting" ofType:@"json"];
+            NSData *data = [[NSData alloc] initWithContentsOfFile:qtalkSettingsPath];
+            self.defaultSettings = [[QIMJSONSerializer sharedInstance] deserializeObject:data error:nil];
+        } else if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
+            NSString *qchatSettings = [[NSBundle mainBundle] pathForResource:@"qchatDefaultSetting" ofType:@"json"];
+            NSData *data = [[NSData alloc] initWithContentsOfFile:qchatSettings];
+            self.defaultSettings = [[QIMJSONSerializer sharedInstance] deserializeObject:data error:nil];
+        } else {
+            self.defaultSettings = nil;
+        }
         CFAbsoluteTime startTime1 = [[QIMWatchDog sharedInstance] startTime];
         NSString *navConfigStr = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"NavConfig"];
         NSMutableDictionary *navConfig = [[QIMJSONSerializer sharedInstance] deserializeObject:navConfigStr error:nil];
@@ -85,7 +100,7 @@
                 [self qimNav_updateNavigationConfigWithNavDict:oldNavConfigUrlDict WithUserName:nil Check:YES WithForcedUpdate:YES];
             }
         }
-        
+
         NSDictionary *advertConfig = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"AdvertConfig"];
         NSArray *adList = [advertConfig objectForKey:@"adlist"];
         if (adList.count > 0) {
@@ -95,7 +110,7 @@
                 [advertItem setAdType:[[adDic objectForKey:@"adtype"] intValue]];
                 [advertItem setAdImgUrl:[adDic objectForKey:@"imgurl"]];
                 [advertItem setAdLinkUrl:[adDic objectForKey:@"linkurl"]];
-                if (advertItem.adType == AdvertType_Image) { 
+                if (advertItem.adType == AdvertType_Image) {
                     NSString *filePath = [[QIMDataController getInstance] getSourcePath:advertItem.adImgUrl];
                     if (filePath == nil) {
                         continue;
@@ -120,61 +135,61 @@
 - (void)initialNavConfig {
     if (_xmppHost == nil) {
         if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
-            _xmppHost = @"qchat.qunar.com";
-            _httpHost = @"https://qcweb.qunar.com/api";
-            _newerHttpUrl = @"https://qcweb.qunar.com/api/package/newapi";
-            _javaurl = @"https://qim.qunar.com/package";
-            _domain = @"ejabhost2";
-            _innerFileHttpHost = @"https://qcweb.qunar.com";
-            _pubkey = @"pub_key_chat_release";
+            _xmppHost = [self.defaultSettings objectForKey:@"xmppHost"];
+            _httpHost = [self.defaultSettings objectForKey:@"httpHost"];
+            _newerHttpUrl = [self.defaultSettings objectForKey:@"newerHttpUrl"];
+            _javaurl = [self.defaultSettings objectForKey:@"javaurl"];
+            _domain = [self.defaultSettings objectForKey:@"domain"];
+            _innerFileHttpHost = [self.defaultSettings objectForKey:@"innerFileHttpHost"];
+            _pubkey = [self.defaultSettings objectForKey:@"pubkey"];
             _takeSmsUrl = nil;
             _checkSmsUrl = nil;
-            _port = @"5222";
-            _protobufPort = @"5202";
+            _port = [self.defaultSettings objectForKey:@"port"];
+            _protobufPort = [self.defaultSettings objectForKey:@"protobufPort"];
             _adShown = NO;
-            _qcHost = @"https://qcadmin.qunar.com";
-            _domainHost = @".qunar.com";
-            _shareUrl = @"https://qim.qunar.com/sharemsg/index.php";
-            _uploadLog = @"https://im.qunar.com/pubapi/qtalk/log/upload.qunar";
-            _resetPwdUrl = @"http://im.qunar.com/clientweb/reterievePassword#/";
-            _isToC = NO;
+            _qcHost = [self.defaultSettings objectForKey:@"qcHost"];
+            _domainHost = [self.defaultSettings objectForKey:@"domainHost"];
+            _shareUrl = [self.defaultSettings objectForKey:@"shareUrl"];
+            _uploadLog = [self.defaultSettings objectForKey:@"uploadLog"];
+            _resetPwdUrl = [self.defaultSettings objectForKey:@"resetPwdUrl"];
+            _isToC = [[self.defaultSettings objectForKey:@"isToC"] boolValue];
         } else if ([[QIMAppInfo sharedInstance] appType] != QIMProjectTypeQChat) {
-            _xmppHost = @"qt.qunar.com";
-            _httpHost = @"https://qtapi.qunar.com";
-            _javaurl = @"https://im.qunar.com/pubim/s/hosts";
-            _newerHttpUrl = @"https://qim.qunar.com/package/newapi";
-            _domain = @"ejabhost1";
-            _innerFileHttpHost = @"https://qim.qunar.com";
-            _pubkey = @"pub_key_chat_release";
-            _takeSmsUrl = @"https://smsauth.qunar.com/api/2.0/verify_code";
-            _checkSmsUrl = @"https://smsauth.qunar.com/api/2.0/token/auth";
-            _tokenSmsUrl = @"https://smsauth.qunar.com/api/2.0/token";
-            _getPushState = @"qim.qunar.com/package/qtapi/push/getState.qunar";
-            _setPushState = @"https://qim.qunar.com/package/qtapi/push/setState.qunar";
-            _port = @"5223";
-            _protobufPort = @"5202";
-            _adShown = NO;
-            _healthcheckUrl = @"http://qt.qunar.com/healthcheck.html";
-            _domainHost = @".qunar.com";
-            _shareUrl = @"https://qim.qunar.com/sharemsg/index.php";
-            _email = @"qunar.com";
-            _uploadLog = @"https://im.qunar.com/pubapi/qtalk/log/upload.qunar";
-            _resetPwdUrl = @"http://im.qunar.com/clientweb/reterievePassword#/";
-            _qSearchUrl = @"https://qim.qunar.com/py/search";
-            _isToC = NO;
+            _xmppHost = [self.defaultSettings objectForKey:@"xmppHost"];
+            _httpHost = [self.defaultSettings objectForKey:@"httpHost"];
+            _javaurl = [self.defaultSettings objectForKey:@"javaurl"];
+            _newerHttpUrl = [self.defaultSettings objectForKey:@"newerHttpUrl"];
+            _domain = [self.defaultSettings objectForKey:@"domain"];
+            _innerFileHttpHost = [self.defaultSettings objectForKey:@"innerFileHttpHost"];
+            _pubkey = [self.defaultSettings objectForKey:@"pubkey"];
+            _takeSmsUrl = [self.defaultSettings objectForKey:@"takeSmsUrl"];
+            _checkSmsUrl = [self.defaultSettings objectForKey:@"checkSmsUrl"];
+            _tokenSmsUrl = [self.defaultSettings objectForKey:@"tokenSmsUrl"];
+            _getPushState = [self.defaultSettings objectForKey:@"getPushState"];
+            _setPushState = [self.defaultSettings objectForKey:@"setPushState"];
+            _port = [self.defaultSettings objectForKey:@"port"];
+            _protobufPort = [self.defaultSettings objectForKey:@"protobufPort"];
+            _adShown = [[self.defaultSettings objectForKey:@"adShown"] boolValue];
+            _healthcheckUrl = [self.defaultSettings objectForKey:@"healthcheckUrl"];
+            _domainHost = [self.defaultSettings objectForKey:@"domainHost"];
+            _shareUrl = [self.defaultSettings objectForKey:@"shareUrl"];
+            _email = [self.defaultSettings objectForKey:@"email"];
+            _uploadLog = [self.defaultSettings objectForKey:@"uploadLog"];
+            _resetPwdUrl = [self.defaultSettings objectForKey:@"resetPwdUrl"];
+            _qSearchUrl = [self.defaultSettings objectForKey:@"qSearchUrl"];
+            _isToC = [[self.defaultSettings objectForKey:@"isToC"] boolValue];
         }
     }
-    
+
     if (_takeSmsUrl == nil || [_takeSmsUrl length] <= 0) {
-        _takeSmsUrl = @"https://smsauth.qunar.com/api/2.0/verify_code";
+        _takeSmsUrl = [self.defaultSettings objectForKey:@"takeSmsUrl"];
     }
     if (_checkSmsUrl == nil || [_checkSmsUrl length] <= 0) {
-        _checkSmsUrl = @"https://smsauth.qunar.com/api/2.0/token/auth";
+        _checkSmsUrl = [self.defaultSettings objectForKey:@"checkSmsUrl"];
     }
     if (_tokenSmsUrl == nil || [_tokenSmsUrl length] <= 0) {
-        _tokenSmsUrl = @"https://smsauth.qunar.com/api/2.0/token";
+        _tokenSmsUrl = [self.defaultSettings objectForKey:@"tokenSmsUrl"];
     }
-    
+
     [[QIMManager sharedInstance] setImLoginType:_loginType];
     [[QIMManager sharedInstance] setImLoginDomain:_domain];
     [[QIMManager sharedInstance] setImLoginXmppHost:_xmppHost];
@@ -232,7 +247,7 @@
 // OPS
 - (NSString *)opsHost {
     if (!_opsHost) {
-        _opsHost = @"https://opsapp.qunar.com";
+        _opsHost = [self.defaultSettings objectForKey:@"opsHost"];
     }
     return _opsHost;
 }
@@ -240,49 +255,49 @@
 //Video
 - (NSString *)signal_host {
     if (!_signal_host) {
-        _signal_host = @"https://qim.qunar.com/rtc/pc/index.html";
+        _signal_host = [self.defaultSettings objectForKey:@"signal_host"];
     }
     return _signal_host;
 }
 
 - (NSString *)group_room_host {
     if (!_group_room_host) {
-        _group_room_host = @"https://qim.qunar.com/rtc/index.php";
+        _group_room_host = [self.defaultSettings objectForKey:@"group_room_host"];
     }
     return _group_room_host;
 }
 
 - (NSString *)videoApiHost {
     if (!_videoApiHost) {
-        _videoApiHost = @"https://l-wxapp2.vc.beta.cn0.qunar.com:9090";
+        _videoApiHost = [self.defaultSettings objectForKey:@"videoApiHost"];
     }
     return _videoApiHost;
 }
 
 - (NSString *)wssHost {
     if (!_wssHost) {
-        _wssHost = @"wss://l-wxapp2.vc.beta.cn0.qunar.com:9090";
+        _wssHost = [self.defaultSettings objectForKey:@"wssHost"];
     }
     return _wssHost;
 }
 
 - (NSString *)javaurl {
     if (!_javaurl) {
-        _javaurl = @"https://qim.qunar.com/package";
+        _javaurl = [self.defaultSettings objectForKey:@"javaurl"];
     }
     return _javaurl;
 }
 
 - (NSString *)qcHost {
     if (!_qcHost) {
-        _qcHost = @"https://qcadmin.qunar.com";
+        _qcHost = [self.defaultSettings objectForKey:@"qcHost"];
     }
     return _qcHost;
 }
 
 - (NSString *)healthcheckUrl {
     if (!_healthcheckUrl.length) {
-        _healthcheckUrl = @"http://qt.qunar.com/healthcheck.html";
+        _healthcheckUrl = [self.defaultSettings objectForKey:@"healthcheckUrl"];
     }
     return _healthcheckUrl;
 }
@@ -291,19 +306,19 @@
     if (!_localNavConfigs) {
         NSMutableArray *clientNavServerConfigs = [NSMutableArray arrayWithArray:[[QIMUserCacheManager sharedInstance] userObjectForKey:@"QC_NavAllDicts"]];
         if (!clientNavServerConfigs.count) {
-            
+
             clientNavServerConfigs = [NSMutableArray arrayWithCapacity:5];
             NSString *tempNavName = [NSString stringWithFormat:@"%@导航", [[QIMAppInfo sharedInstance] appName]];
-            NSDictionary *qtalkNav = @{QIMNavNameKey:tempNavName, QIMNavUrlKey:@"https://qim.qunar.com/package/static/qtalk/nav"};
-            NSDictionary *publicQTalkNav = @{QIMNavNameKey:@"Qunar公共域导航", QIMNavUrlKey:@"https://qim.qunar.com/package/static/qtalk/publicnav?c=qunar.com"};
-            NSDictionary *qchatNav = @{QIMNavNameKey:@"QChat导航", QIMNavUrlKey:@"https://qim.qunar.com/package/static/qchat/nav"};
+            NSDictionary *qtalkNav = @{QIMNavNameKey: tempNavName, QIMNavUrlKey: @"https://qim.qunar.com/package/static/qtalk/nav"};
+            NSDictionary *publicQTalkNav = @{QIMNavNameKey: @"Qunar公共域导航", QIMNavUrlKey: @"https://qim.qunar.com/package/static/qtalk/publicnav?c=qunar.com"};
+            NSDictionary *qchatNav = @{QIMNavNameKey: @"QChat导航", QIMNavUrlKey: @"https://qim.qunar.com/package/static/qchat/nav"};
             if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
                 [clientNavServerConfigs addObject:qtalkNav];
                 [clientNavServerConfigs addObject:publicQTalkNav];
             } else if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
                 [clientNavServerConfigs addObject:qchatNav];
             } else {
-                
+
             }
         }
         _localNavConfigs = [NSMutableArray arrayWithArray:clientNavServerConfigs];
@@ -359,7 +374,7 @@
 }
 
 - (void)setNavConfig:(NSDictionary *)navConfig {
-    
+
     NSString *hashHosts = [navConfig objectForKey:@"hosts"];
     if (hashHosts.length > 0) {
         _hashHosts = hashHosts;
@@ -402,7 +417,7 @@
     } else {
         _checkConfigVersion = 0;
     }
-    
+
     NSDictionary *imConfigDic = [navConfig objectForKey:@"imConfig"];
     if (imConfigDic.count) {
         NSString *showOA = [imConfigDic objectForKey:@"showOA"];
@@ -412,7 +427,7 @@
         } else {
             _showOA = NO;
         }
-        
+
         if ([showOrganizational boolValue]) {
             _showOrganizational = YES;
         } else {
@@ -428,7 +443,7 @@
     }
     QIMVerboseLog(@"updateNavigationConfigWithNavDict SHOWOA : %d", _showOA);
     QIMVerboseLog(@"showOrganizational : %d", _showOrganizational);
-    
+
     //Video
     NSDictionary *videoConfigDic = [navConfig objectForKey:@"video"];
     if (videoConfigDic.count) {
@@ -437,13 +452,13 @@
         _wssHost = [videoConfigDic objectForKey:@"wsshost"];
         _videoApiHost = [videoConfigDic objectForKey:@"apihost"];
     }
-    
+
     //OPS
     NSDictionary *opsDict = [navConfig objectForKey:@"ops"];
     if (opsDict.count) {
         _opsHost = [opsDict objectForKey:@"host"];
     }
-    
+
     NSDictionary *RNAbilityDict = [navConfig objectForKey:@"RNAbility"];
     if (RNAbilityDict.count) {
         NSString *RNContactView = [RNAbilityDict objectForKey:@"RNContactView"];
@@ -476,21 +491,21 @@
         } else {
             _RNGroupCardView = NO;
         }
-    
+
         NSString *RNGroupListView = [RNAbilityDict objectForKey:@"RNGroupListView"];
         if ([RNGroupListView boolValue]) {
             _RNGroupListView = YES;
         } else {
             _RNGroupListView = NO;
         }
-    
+
         NSString *RNPublicNumberListView = [RNAbilityDict objectForKey:@"RNPublicNumberListView"];
         if ([RNPublicNumberListView boolValue]) {
             _RNPublicNumberListView = YES;
         } else {
             _RNPublicNumberListView = NO;
         }
-        
+
         NSString *RNUserCardView = [RNAbilityDict objectForKey:@"RNUserCardView"];
         if ([RNUserCardView boolValue]) {
             _RNUserCardView = YES;
@@ -545,7 +560,7 @@
     if (qcadminDic.count) {
         _qcHost = [qcadminDic objectForKey:@"host"];
     }
-    
+
     NSString *navConfigStr = [[QIMJSONSerializer sharedInstance] serializeObject:navConfig];
     [[QIMUserCacheManager sharedInstance] setUserObject:navConfigStr forKey:@"NavConfig"];
     [[QIMManager sharedInstance] setImLoginType:_loginType];
@@ -562,7 +577,7 @@
     if (![hashHost containsString:@"u="] && userName) {
         hashHost = [_hashHosts stringByAppendingFormat:@"&u=%@", [QIMManager getLastUserName]];
     }
-    
+
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:hashHost]];
     [request setTimeoutInterval:3.0f];
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
@@ -585,8 +600,8 @@
                 _appWeb = [baseAddess objectForKey:@"appWeb"];
             }
         }
-    } failure:^(NSError *error) {
-        
+    }                  failure:^(NSError *error) {
+
     }];
 }
 
@@ -632,7 +647,7 @@
 
 - (BOOL)qimNav_updateNavigationConfigWithDomain:(NSString *)domain WithUserName:(NSString *)userName {
     if (domain) {
-        NSDictionary *currentNav = @{QIMNavNameKey:domain, QIMNavUrlKey:domain};
+        NSDictionary *currentNav = @{QIMNavNameKey: domain, QIMNavUrlKey: domain};
         [[QIMUserCacheManager sharedInstance] setUserObject:currentNav forKey:@"QC_CurrentNavDict"];
         return [self qimNav_updateNavigationConfigWithNavDict:currentNav WithUserName:userName Check:YES WithForcedUpdate:YES];
     }
@@ -641,13 +656,13 @@
 
 - (BOOL)qimNav_updateNavigationConfigWithNavUrl:(NSString *)navUrl WithUserName:(NSString *)userName {
     if (navUrl.length > 0) {
-        NSDictionary *currentNav = @{QIMNavNameKey:navUrl, QIMNavUrlKey:navUrl};
+        NSDictionary *currentNav = @{QIMNavNameKey: navUrl, QIMNavUrlKey: navUrl};
         return [self qimNav_updateNavigationConfigWithNavDict:currentNav WithUserName:userName Check:YES WithForcedUpdate:YES];
     }
     return NO;
 }
 
-- (BOOL)qimNav_updateNavigationConfigWithNavDict:(NSDictionary *)navDict WithUserName:(NSString *)userName Check:(BOOL)check WithForcedUpdate:(BOOL)forcedUpdate{
+- (BOOL)qimNav_updateNavigationConfigWithNavDict:(NSDictionary *)navDict WithUserName:(NSString *)userName Check:(BOOL)check WithForcedUpdate:(BOOL)forcedUpdate {
     NSString *customNavUrl = [navDict objectForKey:QIMNavUrlKey];
     NSString *realNavUrl = nil;
     if (customNavUrl.length > 0) {
@@ -664,21 +679,21 @@
         realNavUrl = [[realNavUrl stringByReplacingOccurrencesOfString:@" " withString:@""] lowercaseString];
         if (![realNavUrl containsString:@"https://"]) {
             if (![realNavUrl containsString:@"http://"]) {
-                 realNavUrl = [NSString stringWithFormat:@"https://qim.qunar.com/package/static/qtalk/publicnav?c=%@", realNavUrl];
+                realNavUrl = [NSString stringWithFormat:@"https://qim.qunar.com/package/static/qtalk/publicnav?c=%@", realNavUrl];
             }
         }
         NSString *navConfigUrl = realNavUrl;
         if ([realNavUrl containsString:@"?"]) {
             if ([navConfigUrl containsString:@"debug"]) {
-                navConfigUrl = [realNavUrl stringByAppendingFormat:@"&v=%@&p=%@",appVersion,@"iphone"];
+                navConfigUrl = [realNavUrl stringByAppendingFormat:@"&v=%@&p=%@", appVersion, @"iphone"];
             } else {
-                navConfigUrl = [realNavUrl stringByAppendingFormat:@"&v=%@&p=%@&debug=%@",appVersion,@"iphone",[self debug]==1?@"true":@"false"];
+                navConfigUrl = [realNavUrl stringByAppendingFormat:@"&v=%@&p=%@&debug=%@", appVersion, @"iphone", [self debug] == 1 ? @"true" : @"false"];
             }
         } else {
             if ([navConfigUrl containsString:@"debug"]) {
-                navConfigUrl = [realNavUrl stringByAppendingFormat:@"?v=%@&p=%@",appVersion,@"iphone"];
+                navConfigUrl = [realNavUrl stringByAppendingFormat:@"?v=%@&p=%@", appVersion, @"iphone"];
             } else {
-                navConfigUrl = [realNavUrl stringByAppendingFormat:@"?v=%@&p=%@&debug=%@",appVersion,@"iphone",[self debug]==1?@"true":@"false"];
+                navConfigUrl = [realNavUrl stringByAppendingFormat:@"?v=%@&p=%@&debug=%@", appVersion, @"iphone", [self debug] == 1 ? @"true" : @"false"];
             }
         }
         if (![navConfigUrl containsString:@"u="] && userName.length > 0) {
@@ -706,7 +721,7 @@
         if (navDict.count > 0) {
             [[QIMUserCacheManager sharedInstance] setUserObject:navDict forKey:@"QC_CurrentNavDict"];
         } else {
-            NSDictionary *emptyNavDict = @{QIMNavNameKey:[self navTitle], QIMNavUrlKey:[self navUrl]};
+            NSDictionary *emptyNavDict = @{QIMNavNameKey: [self navTitle], QIMNavUrlKey: [self navUrl]};
             [[QIMUserCacheManager sharedInstance] setUserObject:emptyNavDict forKey:@"QC_CurrentNavDict"];
         }
 //        [[QIMManager sharedInstance] updateNavigationConfig];
@@ -725,7 +740,7 @@
     NSString *userName = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"currentLoginUserName"];
     if (currentLoginNav.count) {
         return [self qimNav_updateNavigationConfigWithNavDict:currentLoginNav WithUserName:userName Check:check WithForcedUpdate:NO];
-    } 
+    }
     return [self qimNav_updateNavigationConfigWithNavDict:[[QIMUserCacheManager sharedInstance] userObjectForKey:@"QC_CurrentNavDict"] WithUserName:userName Check:check WithForcedUpdate:NO];
 }
 
@@ -739,7 +754,7 @@
     id willNavDict = [navDict objectForKey:@"NavUrl"];
     QIMVerboseLog(@"willNavDict : %@", willNavDict);
     NSString *userName = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"currentLoginName"];
-    if ([willNavDict isKindOfClass:[NSDictionary class]] ) {
+    if ([willNavDict isKindOfClass:[NSDictionary class]]) {
         QIMVerboseLog(@"willNavDict is NSDictionary");
         if (willNavDict) {
             [self qimNav_updateNavigationConfigWithNavDict:willNavDict WithUserName:userName Check:YES WithForcedUpdate:YES];
@@ -758,7 +773,7 @@
     [[QIMManager sharedInstance] clearQIMManager];
 }
 
-- (NSString *)qimNav_getAdvertImageFilePath{
+- (NSString *)qimNav_getAdvertImageFilePath {
     NSString *advertCache = [UserCachesPath stringByAppendingPathComponent:@"AdvertCache/"];
     if ([[NSFileManager defaultManager] fileExistsAtPath:advertCache] == NO) {
         [[NSFileManager defaultManager] createDirectoryAtPath:advertCache withIntermediateDirectories:YES attributes:nil error:nil];
@@ -766,8 +781,8 @@
     return advertCache;
 }
 
-- (void)qimNav_updateAdvertImageFileWithImageUrl:(NSString *)imageUrl{
-    
+- (void)qimNav_updateAdvertImageFileWithImageUrl:(NSString *)imageUrl {
+
     NSURL *requestUrl = [[NSURL alloc] initWithString:[imageUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:requestUrl];
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
@@ -780,13 +795,13 @@
                 [responseData writeToFile:filePath atomically:YES];
             });
         }
-    } failure:^(NSError *error) {
-        
+    }                  failure:^(NSError *error) {
+
     }];
 }
 
 // 更新广告配置
-- (void)qimNav_updateAdvertConfigWithCheck:(BOOL)check{
+- (void)qimNav_updateAdvertConfigWithCheck:(BOOL)check {
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
     NSString *appVersion = [[infoDictionary objectForKey:@"CFBundleVersion"] description];
     long long navConfigUpdateTime = [[[QIMUserCacheManager sharedInstance] userObjectForKey:@"AdvertConfigUpdateTime"] longLongValue];
@@ -797,8 +812,8 @@
         NSString *user = [[[QIMUserCacheManager sharedInstance] userObjectForKey:@"kLastUserId"] lowercaseString];
         NSURL *url = [NSURL URLWithString:[self navUrl]];
         NSString *host = [url host];
-        NSString *advertConfigUrl = [NSString stringWithFormat:@"https://qim.qunar.com/advert/%@/advert.php?v=%@&p=%@&u=%@&debug=%@&ver=%d&nav=%@&mv=%@", [[QIMAppInfo sharedInstance] appName], appVersion, @"iphone",[user?user:@"unknow" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],[self debug]?@"true":@"false",oldVersion, host ? host : @"unkown",@"v2"];
-        
+        NSString *advertConfigUrl = [NSString stringWithFormat:@"https://qim.qunar.com/advert/%@/advert.php?v=%@&p=%@&u=%@&debug=%@&ver=%d&nav=%@&mv=%@", [[QIMAppInfo sharedInstance] appName], appVersion, @"iphone", [user ? user : @"unknow" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [self debug] ? @"true" : @"false", oldVersion, host ? host : @"unkown", @"v2"];
+
         QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:advertConfigUrl]];
         request.shouldASynchronous = YES;
         [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
@@ -847,7 +862,7 @@
                     }
                 });
             }
-        } failure:^(NSError *error) {
+        }                  failure:^(NSError *error) {
             QIMErrorLog(@"获取广告配置失败 : %@", error);
         }];
     }
@@ -910,18 +925,26 @@
     }
 }
 
--(NSString *)getWebAppUrl{
-    return [NSString stringWithFormat:@"%@/entry/#/?domain=%@",self.appWeb,self.domain];
+- (NSString *)getWebAppUrl {
+    return [NSString stringWithFormat:@"%@/entry/#/?domain=%@", self.appWeb, self.domain];
 }
 
-- (NSString *)getManagerAppUrl{
-    ///test
-        return [NSString stringWithFormat:@"%@/manage#/nav_code?domain=%@",self.appWeb,self.domain];
+- (NSString *)getManagerAppUrl {
+    return [NSString stringWithFormat:@"%@/manage#/nav_code?domain=%@", self.appWeb, self.domain];
 }
 
 
--(NSString *)getNewResetPwdUrl{
-    
-    return [NSString stringWithFormat:@"%@?domain=%@",self.resetPwdUrl,self.domain];
+- (NSString *)getNewResetPwdUrl {
+
+    return [NSString stringWithFormat:@"%@?domain=%@", self.resetPwdUrl, self.domain];
 }
+
+- (NSString *)getPubSearchUserHostUrl {
+    return [self.defaultSettings objectForKey:@"pubSearchUserHost"];
+}
+
+- (NSString *)getQChatGetTKUrl {
+    return [self.defaultSettings objectForKey:@"qchatGetTk"];
+}
+
 @end

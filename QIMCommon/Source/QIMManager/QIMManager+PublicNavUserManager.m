@@ -20,7 +20,7 @@
         });
     }
     keyword = [keyword stringByReplacingOccurrencesOfString:@" " withString:@""];
-    NSString *destUrl = [NSString stringWithFormat:@"https://im.qunar.com/pubapi/qtalk/domain/search_user_host.qunar?keyword=%@", [keyword stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    NSString *destUrl = [NSString stringWithFormat:@"%@%@", [[QIMNavConfigManager sharedInstance] getPubSearchUserHostUrl], [keyword stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     QIMVerboseLog(@"destUrl : %@", destUrl);
     [self sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
         
