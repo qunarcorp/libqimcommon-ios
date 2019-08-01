@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
-		2CDF25FE216C805400B88324 /* QIMPubCommonBuild */ = {
+		2CDF25FE216C805400B88324 /* QIMCommonBuild */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = 2CDF2601216C805500B88324 /* Build configuration list for PBXAggregateTarget "QIMPubCommonBuild" */;
+			buildConfigurationList = 2CDF2601216C805500B88324 /* Build configuration list for PBXAggregateTarget "QIMCommonBuild" */;
 			buildPhases = (
 				2CDF2602216C805C00B88324 /* ShellScript */,
 			);
 			dependencies = (
 			);
-			name = QIMPubCommonBuild;
+			name = QIMCommonBuild;
 			productName = QIMCommonBuild;
 		};
 /* End PBXAggregateTarget section */
@@ -177,7 +177,7 @@
 		2C8DF1E421D50DE0001A3B0E /* QIMDatasourceItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C8DF1D821D50DE0001A3B0E /* QIMDatasourceItem.m */; };
 		2C95DE2F2176194C0090BC54 /* QIMHttpAPIBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C95DE2D2176194C0090BC54 /* QIMHttpAPIBlock.h */; };
 		2C95DE302176194C0090BC54 /* QIMHttpAPIBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C95DE2E2176194C0090BC54 /* QIMHttpAPIBlock.m */; };
-		2CB8D9E721494B1D00B57B8D /* QIMPubCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CB8D9E521494B1D00B57B8D /* QIMPubCommon.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2CB8D9E721494B1D00B57B8D /* QIMCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CB8D9E521494B1D00B57B8D /* QIMCommon.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2CB8DA5821494C1800B57B8D /* QIMKit+QIMFileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CB8DA0D21494C1800B57B8D /* QIMKit+QIMFileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2CB8DA5921494C1800B57B8D /* QIMKit+QIMSingleMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CB8DA0E21494C1800B57B8D /* QIMKit+QIMSingleMessage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2CB8DA5A21494C1800B57B8D /* QIMKit+QIMKeyChain.m in Sources */ = {isa = PBXBuildFile; fileRef = 2CB8DA0F21494C1800B57B8D /* QIMKit+QIMKeyChain.m */; };
@@ -259,11 +259,10 @@
 		2CB8DB7B2149503000B57B8D /* QIMWomanDefaultHeader.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CB8DB722149502F00B57B8D /* QIMWomanDefaultHeader.png */; };
 		2CB8DB7C2149503000B57B8D /* QIMGroupDefaultHeader.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CB8DB732149502F00B57B8D /* QIMGroupDefaultHeader.png */; };
 		2CB8DB7D2149503000B57B8D /* Activity_default.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CB8DB742149502F00B57B8D /* Activity_default.png */; };
-		B6A83F6553A4525F4336BD8A /* libPods-QIMPubCommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77E2F4BDA0B467BA5D26B68E /* libPods-QIMPubCommon.a */; };
+		67B191F252E51C15CD96C43F /* libPods-QIMCommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 34F99E8C0B7832540CBD6FA2 /* libPods-QIMCommon.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		28F439E701B1F764036DF455 /* Pods-QIMPubCommon.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QIMPubCommon.release.xcconfig"; path = "Pods/Target Support Files/Pods-QIMPubCommon/Pods-QIMPubCommon.release.xcconfig"; sourceTree = "<group>"; };
 		2C06A00222042C66000CAF37 /* QIMManager+WorkFeed.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "QIMManager+WorkFeed.m"; sourceTree = "<group>"; };
 		2C06A00322042C66000CAF37 /* QIMManager+WorkFeed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "QIMManager+WorkFeed.h"; sourceTree = "<group>"; };
 		2C06A00622042C75000CAF37 /* QIMKit+QIMWorkFeed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "QIMKit+QIMWorkFeed.h"; sourceTree = "<group>"; };
@@ -420,8 +419,8 @@
 		2C8DF1D821D50DE0001A3B0E /* QIMDatasourceItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QIMDatasourceItem.m; sourceTree = "<group>"; };
 		2C95DE2D2176194C0090BC54 /* QIMHttpAPIBlock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QIMHttpAPIBlock.h; sourceTree = "<group>"; };
 		2C95DE2E2176194C0090BC54 /* QIMHttpAPIBlock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QIMHttpAPIBlock.m; sourceTree = "<group>"; };
-		2CB8D9E221494B1D00B57B8D /* QIMPubCommon.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = QIMPubCommon.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		2CB8D9E521494B1D00B57B8D /* QIMPubCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QIMPubCommon.h; sourceTree = "<group>"; };
+		2CB8D9E221494B1D00B57B8D /* QIMCommon.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = QIMCommon.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2CB8D9E521494B1D00B57B8D /* QIMCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QIMCommon.h; sourceTree = "<group>"; };
 		2CB8D9E621494B1D00B57B8D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2CB8DA0D21494C1800B57B8D /* QIMKit+QIMFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "QIMKit+QIMFileManager.h"; sourceTree = "<group>"; };
 		2CB8DA0E21494C1800B57B8D /* QIMKit+QIMSingleMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "QIMKit+QIMSingleMessage.h"; sourceTree = "<group>"; };
@@ -504,8 +503,9 @@
 		2CB8DB722149502F00B57B8D /* QIMWomanDefaultHeader.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = QIMWomanDefaultHeader.png; sourceTree = "<group>"; };
 		2CB8DB732149502F00B57B8D /* QIMGroupDefaultHeader.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = QIMGroupDefaultHeader.png; sourceTree = "<group>"; };
 		2CB8DB742149502F00B57B8D /* Activity_default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Activity_default.png; sourceTree = "<group>"; };
-		43485D53099A2F894FA5BE7E /* Pods-QIMPubCommon.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QIMPubCommon.debug.xcconfig"; path = "Pods/Target Support Files/Pods-QIMPubCommon/Pods-QIMPubCommon.debug.xcconfig"; sourceTree = "<group>"; };
-		77E2F4BDA0B467BA5D26B68E /* libPods-QIMPubCommon.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-QIMPubCommon.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		34F99E8C0B7832540CBD6FA2 /* libPods-QIMCommon.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-QIMCommon.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		652488555A0B5B668F0DF75F /* Pods-QIMCommon.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QIMCommon.debug.xcconfig"; path = "Pods/Target Support Files/Pods-QIMCommon/Pods-QIMCommon.debug.xcconfig"; sourceTree = "<group>"; };
+		F17E28B52D4BD40CE541D235 /* Pods-QIMCommon.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QIMCommon.release.xcconfig"; path = "Pods/Target Support Files/Pods-QIMCommon/Pods-QIMCommon.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -514,7 +514,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2C38D71D22F2D615006B0AC7 /* libQIMPrivatePBCommon.a in Frameworks */,
-				B6A83F6553A4525F4336BD8A /* libPods-QIMPubCommon.a in Frameworks */,
+				67B191F252E51C15CD96C43F /* libPods-QIMCommon.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -524,8 +524,8 @@
 		1F98424CB687FF6F59E5FFFD /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				43485D53099A2F894FA5BE7E /* Pods-QIMPubCommon.debug.xcconfig */,
-				28F439E701B1F764036DF455 /* Pods-QIMPubCommon.release.xcconfig */,
+				652488555A0B5B668F0DF75F /* Pods-QIMCommon.debug.xcconfig */,
+				F17E28B52D4BD40CE541D235 /* Pods-QIMCommon.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -759,7 +759,7 @@
 		2CB8D9E321494B1D00B57B8D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2CB8D9E221494B1D00B57B8D /* QIMPubCommon.framework */,
+				2CB8D9E221494B1D00B57B8D /* QIMCommon.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -769,7 +769,7 @@
 			children = (
 				2C38D70022F2D615006B0AC7 /* QIMPrivatePBCommonFramework */,
 				2CB8D9E621494B1D00B57B8D /* Info.plist */,
-				2CB8D9E521494B1D00B57B8D /* QIMPubCommon.h */,
+				2CB8D9E521494B1D00B57B8D /* QIMCommon.h */,
 				2C5AA0BA22E8301700201F2A /* QIMDB */,
 				2CB8DA0C21494C1800B57B8D /* QIMKit */,
 				2CB8DB6C2149502F00B57B8D /* QIMKitCommonResource */,
@@ -925,7 +925,7 @@
 		47D61FA6D567EECE539E68B2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				77E2F4BDA0B467BA5D26B68E /* libPods-QIMPubCommon.a */,
+				34F99E8C0B7832540CBD6FA2 /* libPods-QIMCommon.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1046,7 +1046,7 @@
 				2C1D0F21215E4F5E00275225 /* QIMManager+SingleMessage.h in Headers */,
 				2C5AA0EE22E8301700201F2A /* IMDataManager+QIMFoundList.h in Headers */,
 				2C09E4F121902B500083154F /* QIMManager+Request.h in Headers */,
-				2CB8D9E721494B1D00B57B8D /* QIMPubCommon.h in Headers */,
+				2CB8D9E721494B1D00B57B8D /* QIMCommon.h in Headers */,
 				2C5AA0E522E8301700201F2A /* IMDataManager.h in Headers */,
 				2C1D0F2B215E4F5E00275225 /* QIMManager+Calendar.h in Headers */,
 				2C5AA0E022E8301700201F2A /* IMDataManager+QIMSession.h in Headers */,
@@ -1067,9 +1067,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		2CB8D9E121494B1D00B57B8D /* QIMPubCommon */ = {
+		2CB8D9E121494B1D00B57B8D /* QIMCommon */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2CB8D9EA21494B1D00B57B8D /* Build configuration list for PBXNativeTarget "QIMPubCommon" */;
+			buildConfigurationList = 2CB8D9EA21494B1D00B57B8D /* Build configuration list for PBXNativeTarget "QIMCommon" */;
 			buildPhases = (
 				19536E4A934F3D0467D65953 /* [CP] Check Pods Manifest.lock */,
 				2CB8D9DD21494B1D00B57B8D /* Sources */,
@@ -1082,9 +1082,9 @@
 			);
 			dependencies = (
 			);
-			name = QIMPubCommon;
+			name = QIMCommon;
 			productName = QIMCommon;
-			productReference = 2CB8D9E221494B1D00B57B8D /* QIMPubCommon.framework */;
+			productReference = 2CB8D9E221494B1D00B57B8D /* QIMCommon.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -1104,7 +1104,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 2CB8D9DC21494B1D00B57B8D /* Build configuration list for PBXProject "QIMPubCommon" */;
+			buildConfigurationList = 2CB8D9DC21494B1D00B57B8D /* Build configuration list for PBXProject "QIMCommon" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -1116,8 +1116,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2CB8D9E121494B1D00B57B8D /* QIMPubCommon */,
-				2CDF25FE216C805400B88324 /* QIMPubCommonBuild */,
+				2CB8D9E121494B1D00B57B8D /* QIMCommon */,
+				2CDF25FE216C805400B88324 /* QIMCommonBuild */,
 			);
 		};
 /* End PBXProject section */
@@ -1152,7 +1152,7 @@
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-QIMPubCommon-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-QIMCommon-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1179,7 +1179,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-QIMPubCommon/Pods-QIMPubCommon-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-QIMCommon/Pods-QIMCommon-resources.sh",
 				"${PODS_CONFIGURATION_BUILD_DIR}/QIMKitVendor/QIMPinYin.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
@@ -1188,7 +1188,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-QIMPubCommon/Pods-QIMPubCommon-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-QIMCommon/Pods-QIMCommon-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -1429,7 +1429,7 @@
 		};
 		2CB8D9EB21494B1D00B57B8D /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 43485D53099A2F894FA5BE7E /* Pods-QIMPubCommon.debug.xcconfig */;
+			baseConfigurationReference = 652488555A0B5B668F0DF75F /* Pods-QIMCommon.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
@@ -1461,7 +1461,7 @@
 		};
 		2CB8D9EC21494B1D00B57B8D /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 28F439E701B1F764036DF455 /* Pods-QIMPubCommon.release.xcconfig */;
+			baseConfigurationReference = F17E28B52D4BD40CE541D235 /* Pods-QIMCommon.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
@@ -1514,7 +1514,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2CB8D9DC21494B1D00B57B8D /* Build configuration list for PBXProject "QIMPubCommon" */ = {
+		2CB8D9DC21494B1D00B57B8D /* Build configuration list for PBXProject "QIMCommon" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2CB8D9E821494B1D00B57B8D /* Debug */,
@@ -1523,7 +1523,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2CB8D9EA21494B1D00B57B8D /* Build configuration list for PBXNativeTarget "QIMPubCommon" */ = {
+		2CB8D9EA21494B1D00B57B8D /* Build configuration list for PBXNativeTarget "QIMCommon" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2CB8D9EB21494B1D00B57B8D /* Debug */,
@@ -1532,7 +1532,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2CDF2601216C805500B88324 /* Build configuration list for PBXAggregateTarget "QIMPubCommonBuild" */ = {
+		2CDF2601216C805500B88324 /* Build configuration list for PBXAggregateTarget "QIMCommonBuild" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2CDF25FF216C805500B88324 /* Debug */,
