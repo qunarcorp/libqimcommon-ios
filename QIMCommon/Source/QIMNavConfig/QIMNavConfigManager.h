@@ -51,7 +51,7 @@
 @property(nonatomic, readonly, copy) NSString *email;              //邮箱号
 @property(nonatomic, readonly, copy) NSString *uploadLog;          //数据上报
 @property(nonatomic, readonly, copy) NSString *foundConfigUrl;     //发现页配置url
-@property(nonatomic, readonly, copy) NSString *isToC;             //判断是否toC
+@property(nonatomic, readonly, assign) BOOL isToC;             //判断是否toC
 
 
 //ability

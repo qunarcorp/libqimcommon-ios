@@ -3,17 +3,16 @@ platform :ios, '9.0'
 source 'git@github.com:CocoaPods/Specs.git'
 source 'git@github.com:qunarcorp/libqimkit-ios-cook.git'
 
-
-target 'QIMCommon' do
+target 'QIMPubCommon' do
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
   # use_frameworks!
 
   # Pods for QIMCommon
   
-    pod 'QIMKitVendor', '~> 3.0'
+    pod 'QIMKitVendor', '~> 4.0'
 
-    pod 'QIMCommonCategories', '~> 3.0'
-    pod 'QIMDataBase', '~> 3.0'
+    pod 'QIMCommonCategories', '~> 4.0'
+    pod 'QIMDataBase', '~> 4.0'
     pod 'QIMOpenSSL'
 
     pod 'ASIHTTPRequest'

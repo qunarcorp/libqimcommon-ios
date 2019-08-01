@@ -765,6 +765,7 @@ static QIMManager *__IMManager = nil;
             return [isMerchantCacheNumber boolValue];
         }
     }
+    return _isMerchant;
 }
 
 /**
