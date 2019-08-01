@@ -41,9 +41,9 @@ Pod::Spec.new do |s|
   end
   
   s.subspec 'QIMPrivatePBCommon' do |pbcommon|
-    pbcommon.source_files = 'QIMPrivatePBCommonFramework/Headers/**/*.h'
-    pbcommon.public_header_files = 'QIMPrivatePBCommonFramework/Headers/**/*.h'
-    pbcommon.vendored_libraries = 'QIMPrivatePBCommonFramework/Frameworks/libQIMPrivatePBCommon.a'
+    pbcommon.source_files = 'QIMCommon/QIMPrivatePBCommonFramework/Headers/**/*.h'
+    pbcommon.public_header_files = 'QIMCommon/QIMPrivatePBCommonFramework/Headers/**/*.h'
+    pbcommon.vendored_libraries = 'QIMCommon/QIMPrivatePBCommonFramework/Frameworks/libQIMPrivatePBCommon.a'
   end
   
   if $debug
