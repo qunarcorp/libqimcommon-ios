@@ -72,6 +72,9 @@ static void ringAudioServicesSystemSoundCompletionProc(SystemSoundID ssID, void 
                 SystemSoundID soundID;
                 // 读文件获取SoundID
                 NSString *filePath = [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"msg" ofType:@"wav"];
+                if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
+                    filePath = [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"in" ofType:@"caf"];
+                }
                 if (filePath != nil) {
                     //声音
                     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategorySoloAmbient

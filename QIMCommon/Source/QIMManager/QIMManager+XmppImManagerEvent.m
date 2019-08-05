@@ -845,6 +845,7 @@
     QIMMessageModel *message = [QIMMessageModel new];
     [message setMessageId:msgId];
     [message setFrom:publicNumberId];
+    [message setRealJid:publicNumberId];
     [message setMessageDirection:QIMMessageDirection_Received];
     if (isSystemMsg) {
         [message setChatType:ChatType_System];
