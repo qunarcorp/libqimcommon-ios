@@ -21,9 +21,8 @@ Pod::Spec.new do |s|
   
   s.subspec 'QIMPrivatePBCommon' do |pbcommon|
     pbcommon.source_files = 'QIMCommon/QIMPrivatePBCommonFramework/Headers/**/*.{h,m,c}'
-    pbcommon.public_header_files = 'QIMCommon/QIMPrivatePBCommonFramework/Headers/**/*.h'
     pbcommon.vendored_libraries = ['QIMCommon/QIMPrivatePBCommonFramework/Frameworks/libQIMPrivatePBCommon.a']
-    pbcommon.pod_target_xcconfig = {"HEADER_SEARCH_PATHS" => "\"${PODS_ROOT}/Headers/Private/**\" \"${PODS_ROOT}/Headers/Private/QIMKitVendor/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\""}
+    pbcommon.pod_target_xcconfig = {"HEADER_SEARCH_PATHS" => "\"${PODS_ROOT}/Headers/Private/**\" \"${PODS_ROOT}/Headers/Private/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\""}
   end
   
   s.subspec 'Base' do |base|
@@ -44,7 +43,6 @@ Pod::Spec.new do |s|
       base.source_files = "QIMCommon/Source/**/*.{h,m,c}", "QIMCommon/QIMKit/**/*.{h,m,c}", "QIMCommon/QIMDB/**/*.{h,m,mm}"
       base.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => 'DEBUGLOG=1'}
       base.pod_target_xcconfig = {"HEADER_SEARCH_PATHS" => "\"${PODS_ROOT}/Headers/Private/**\" \"${PODS_ROOT}/Headers/Private/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\""}
-      base.dependency 'QIMCommon/QIMPrivatePBCommon'
     end
   end
   
