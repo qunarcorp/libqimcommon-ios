@@ -19,31 +19,33 @@ Pod::Spec.new do |s|
 
   s.platform     = :ios, "9.0"
   
+  s.subspec 'QIMPrivatePBCommon' do |pbcommon|
+    pbcommon.source_files = 'QIMCommon/QIMPrivatePBCommonFramework/Headers/**/*.{h,m,c}'
+    pbcommon.public_header_files = 'QIMCommon/QIMPrivatePBCommonFramework/Headers/**/*.h'
+    pbcommon.vendored_libraries = ['QIMCommon/QIMPrivatePBCommonFramework/Frameworks/libQIMPrivatePBCommon.a']
+    pbcommon.pod_target_xcconfig = {"HEADER_SEARCH_PATHS" => "\"${PODS_ROOT}/Headers/Private/**\" \"${PODS_ROOT}/Headers/Private/QIMKitVendor/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\""}
+  end
+  
   s.subspec 'Base' do |base|
     $lib = ENV['use_lib']
     $debug = ENV['debug']
     if $lib
       
       puts '---------QIMCommonSDK二进制-------'
-      s.source_files = 'ios_libs/Headers/**/*.h'
-      s.vendored_libraries = ['ios_libs/Frameworks/libQIMCommon.a']
-      s.pod_target_xcconfig = {"HEADER_SEARCH_PATHS" => "\"${PODS_ROOT}/Headers/Private/**\" \"${PODS_ROOT}/Headers/Private/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\""}
+      base.source_files = 'ios_libs/Headers/**/*.h'
+      base.vendored_libraries = ['ios_libs/Frameworks/libQIMCommon.a']
+      base.pod_target_xcconfig = {"HEADER_SEARCH_PATHS" => "\"${PODS_ROOT}/Headers/Private/**\" \"${PODS_ROOT}/Headers/Private/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\""}
       
       else
       
       puts '---------QIMCommonSDK源码-------'
-      s.public_header_files = "QIMCommon/QIMKit/**/*.{h}", "QIMCommon/QIMDB/**/*.{h}"
+      base.public_header_files = "QIMCommon/QIMKit/**/*.{h}", "QIMCommon/QIMDB/**/*.{h}"
       
-      s.source_files = "QIMCommon/Source/**/*.{h,m,c}", "QIMCommon/QIMKit/**/*.{h,m,c}", "QIMCommon/QIMDB/**/*.{h,m,mm}"
-      s.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => 'DEBUGLOG=1'}
-      s.pod_target_xcconfig = {"HEADER_SEARCH_PATHS" => "\"${PODS_ROOT}/Headers/Private/**\" \"${PODS_ROOT}/Headers/Private/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\""}
+      base.source_files = "QIMCommon/Source/**/*.{h,m,c}", "QIMCommon/QIMKit/**/*.{h,m,c}", "QIMCommon/QIMDB/**/*.{h,m,mm}"
+      base.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => 'DEBUGLOG=1'}
+      base.pod_target_xcconfig = {"HEADER_SEARCH_PATHS" => "\"${PODS_ROOT}/Headers/Private/**\" \"${PODS_ROOT}/Headers/Private/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\""}
+      base.dependency 'QIMCommon/QIMPrivatePBCommon'
     end
-  end
-  
-  s.subspec 'QIMPrivatePBCommon' do |pbcommon|
-    pbcommon.source_files = 'QIMCommon/QIMPrivatePBCommonFramework/Headers/**/*.h'
-    pbcommon.public_header_files = 'QIMCommon/QIMPrivatePBCommonFramework/Headers/**/*.h'
-    pbcommon.vendored_libraries = 'QIMCommon/QIMPrivatePBCommonFramework/Frameworks/libQIMPrivatePBCommon.a'
   end
   
   if $debug
