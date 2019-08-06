@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
 
-  s.name         = "QIMCommon"
-  s.version      = "2.0.1-beta"
+  s.name         = "QIMPubCommon"
+  s.version      = "4.0.0"
   s.summary      = "Qunar chat App 9.0+ version QIMCommon"
   s.description  = <<-DESC
-                   Qunar QIMCommon解决方案
+                   Qunar QIMPubCommon解决方案
 
                    DESC
 
@@ -47,13 +47,13 @@ Pod::Spec.new do |s|
   end
   
   if $debug
-    puts 'debug QIMCommon依赖第三方库'
+    puts 'debug QIMPubCommon依赖第三方库'
     s.dependency 'QIMOpenSSL'
     s.default_subspecs = 'Base'
 
   else
   
-    puts '线上release QIMCommon依赖第三方库'
+    puts '线上release QIMPubCommon依赖第三方库'
     s.dependency 'QIMOpenSSL'
     s.dependency 'QIMKitVendor'
     s.dependency 'QIMDataBase'
@@ -75,5 +75,3 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation', 'CoreTelephony', 'SystemConfiguration', 'AudioToolbox', 'AVFoundation', 'UserNotifications', 'CoreTelephony','QuartzCore', 'CoreGraphics', 'Security'
     s.libraries = 'stdc++', 'bz2'
-
-end

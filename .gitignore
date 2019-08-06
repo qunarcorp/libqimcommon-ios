@@ -1,4 +1,6 @@
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
 ﻿# kdiff3 ignore
 *.orig
 
@@ -37,6 +39,7 @@ Thumbs.db
 # pods ignore
 Pods/
 =======
+>>>>>>> 78f1fdaf9509fd6baa3333fec7e9edcb85ad2822
 # Xcode
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
@@ -59,7 +62,10 @@ QIMCommon/PrivateCommon/.DS_Store
 xcuserdata/
 
 ## Other
+<<<<<<< HEAD
+=======
 .idea/
+>>>>>>> 78f1fdaf9509fd6baa3333fec7e9edcb85ad2822
 *.moved-aside
 *.xccheckout
 *.xcscmblueprint
@@ -108,4 +114,7 @@ fastlane/test_output
 QIMCommonCategories.xcworkspace/
 QIMCommonCategories.xcodeproj/
 Pods/
+<<<<<<< HEAD
+=======
 >>>>>>> 0551e1366353a375a671679d3caa390a2846b64c
+>>>>>>> 78f1fdaf9509fd6baa3333fec7e9edcb85ad2822
