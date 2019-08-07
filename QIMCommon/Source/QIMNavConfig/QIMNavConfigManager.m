@@ -151,6 +151,7 @@
             _adShown = NO;
             _qcHost = [self.defaultSettings objectForKey:@"qcHost"];
             _domainHost = [self.defaultSettings objectForKey:@"domainHost"];
+            _searchUrl = [self.defaultSettings objectForKey:@"searchurl"];
             _shareUrl = [self.defaultSettings objectForKey:@"shareUrl"];
             _uploadLog = [self.defaultSettings objectForKey:@"uploadLog"];
             _resetPwdUrl = [self.defaultSettings objectForKey:@"resetPwdUrl"];
