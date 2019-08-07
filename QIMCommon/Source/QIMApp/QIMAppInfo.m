@@ -239,9 +239,6 @@ static QIMAppInfo *__globalAppInfo = nil;
 }
 
 - (BOOL)getIsIpad {
-    if (self.appType == QIMProjectTypeQChat) {
-        return NO;
-    }
 #if __has_include("QIMIPadWindowManager.h")
     if (self.customDeviceModel.length > 0) {
         if ([self.customDeviceModel isEqualToString:@"iPhone"]) {
