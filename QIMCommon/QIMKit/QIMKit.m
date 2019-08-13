@@ -177,16 +177,8 @@ static QIMKit *__global_QIMKit = nil;
     return [[QIMManager sharedInstance] getMyNickName];
 }
 
-- (NSString *)getCompany {
-    return [[QIMManager sharedInstance] getCompany];
-}
-
 - (NSString *)getDomain {
     return [[QIMManager sharedInstance] getDomain];
-}
-
-- (NSString *)getClientIp {
-    return [[QIMManager sharedInstance] getClientIp];
 }
 
 - (long long)getCurrentServerTime {

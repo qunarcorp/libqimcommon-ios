@@ -47,4 +47,19 @@
 
 -(BOOL)setStarOrblackContacts:(NSDictionary *)map ConfigKey:(NSString *)pkey Flag:(BOOL)value;
 
+/**
+ 客户端消息提示音
+ 
+ @return 提示音soundName
+ */
+- (NSString *)getClientNotificationSoundName;
+
+/**
+ 设置客户端消息提示音
+ 
+ @param soundName 提示音文件名
+ @return 是否设置成功
+ */
+- (BOOL)setClientNotificationSound:(NSString *)soundName;
+
 @end

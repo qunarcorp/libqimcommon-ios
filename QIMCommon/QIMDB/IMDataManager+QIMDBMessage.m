@@ -2687,7 +2687,7 @@
     if (groupId.length > 0) {
         if (readState == QIMAtMsgHasReadState) {
             [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-                NSString *sql = @"Update IM_AT_Message Set ReadState = 1 where GroupId = :GroupId;";
+                NSString *sql = @"delete from IM_AT_Message where GroupId = :GroupId;";
                 NSMutableArray *paramList = [[NSMutableArray alloc] init];
                 NSMutableArray *param = [[NSMutableArray alloc] init];
                 [param addObject:groupId];
@@ -2705,7 +2705,7 @@
         __block NSMutableArray *params = [[NSMutableArray alloc] initWithCapacity:1];
         if (readState == QIMAtMsgHasReadState) {
             [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-                NSString *sql = @"Update IM_AT_Message Set ReadState = 1 where GroupId = :GroupId And MsgId = :MsgId;";
+                NSString *sql = @"delete from IM_AT_Message where GroupId = :GroupId And MsgId = :MsgId;";
                 for (NSString *msgId in msgIds) {
                     
                     NSMutableArray *param = [[NSMutableArray alloc] init];
@@ -2800,7 +2800,7 @@
     }
     __block NSMutableArray *params = [[NSMutableArray alloc] init];
     [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-        NSString *sql = [NSString stringWithFormat:@"Update IM_AT_Message Set ReadState = 1 Where GroupId = :GroupId And MsgTime <= :MsgTime;"];
+        NSString *sql = [NSString stringWithFormat:@"delete from IM_AT_Message Where GroupId = :GroupId And MsgTime <= :MsgTime;"];
         for (NSDictionary *groupDic in groupReadMarkArray) {
             
             NSString *domain = [groupDic objectForKey:@"domain"];
@@ -2819,7 +2819,7 @@
 - (BOOL)qimDB_clearAtMessageWithGroupId:(NSString *)groupId withMsgId:(NSString *)msgId {
     __block BOOL clearATSuccess = NO;
     [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-        NSString *sql = [NSString stringWithFormat:@"Update IM_AT_Message Set ReadState = 1 where GroupId = :GroupId And MsgId = :MsgId"];
+        NSString *sql = [NSString stringWithFormat:@"delete from IM_AT_Message where GroupId = :GroupId And MsgId = :MsgId"];
         NSMutableArray *parames = [[NSMutableArray alloc] init];
         [parames addObject:groupId];
         [parames addObject:msgId];
@@ -2831,7 +2831,7 @@
 - (BOOL)qimDB_clearAtMessageWithGroupId:(NSString *)groupId {
     __block BOOL clearATSuccess = NO;
     [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-        NSString *sql = [NSString stringWithFormat:@"Update IM_AT_Message Set ReadState = 1 where GroupId=:GroupId"];
+        NSString *sql = [NSString stringWithFormat:@"delete from IM_AT_Message where GroupId=:GroupId"];
         NSMutableArray *parames = [[NSMutableArray alloc] init];
         [parames addObject:groupId];
         clearATSuccess = [database executeNonQuery:sql withParameters:parames];
@@ -2842,7 +2842,7 @@
 - (BOOL)qimDB_clearAtMessage {
     __block BOOL clearATSuccess = NO;
     [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-        NSString *sql = [NSString stringWithFormat:@"Update IM_AT_Message Set ReadState = 1;"];
+        NSString *sql = [NSString stringWithFormat:@"delete from IM_AT_Message;"];
         NSMutableArray *parames = [[NSMutableArray alloc] init];
         clearATSuccess = [database executeNonQuery:sql withParameters:parames];
     }];

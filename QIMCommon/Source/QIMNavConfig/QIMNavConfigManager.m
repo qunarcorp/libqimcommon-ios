@@ -34,15 +34,15 @@
     NSString *_protobufPort;   //Pb端口
     NSString *_resetPwdUrl; //重设密码
     NSString *_hashHosts;
-
+    
     NSArray *_adItems;
-    int _adSec;
+    int  _adSec;
     BOOL _adShown;
     BOOL _adCarousel;
-    int _adCarouselDelay;
+    int  _adCarouselDelay;
     BOOL _adAllowSkip;
     NSString *_adSkipTips;
-
+    
     NSString *_navUrl;
     BOOL _debug;
     NSString *_healthcheckUrl;

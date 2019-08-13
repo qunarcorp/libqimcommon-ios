@@ -45,14 +45,6 @@
 - (BOOL)isLogin;
 
 /**
- 注册用户
-
- @param userName 用户名
- @param pwd 密码
- */
-- (void)registerWithUserName:(NSString *)userName WithPassWord:(NSString *)pwd;
-
-/**
  缓存用户登录
 
  @param userName 用户名称
@@ -112,16 +104,6 @@
 
 
 - (void)sendHeartBeat;
-
-/**
- 是否为自动登录
- */
-- (BOOL)isAutoLogin;
-
-/**
- 设置自动登录
- */
-- (void)setAutoLogin:(BOOL)flag;
 
 /**
  QChat rsa登录

@@ -60,6 +60,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)getCricleCamelEntrance;
 
+#pragma mark - 用户发视频size权限
+- (void)getCricleCamelVideoConfig;
+
 #pragma mark - Remote Notice
 
 - (void)getupdateRemoteWorkNoticeMsgs;

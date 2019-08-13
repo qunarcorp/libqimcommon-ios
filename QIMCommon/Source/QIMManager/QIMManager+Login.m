@@ -30,20 +30,6 @@
     return [[XmppImManager sharedInstance] loginState];
 }
 
-- (void)registerWithUserName:(NSString *)userName WithPassWord:(NSString *)pwd {
-    [QIMUUIDTools setUserName:[userName lowercaseString]];
-    [[QIMUserCacheManager sharedInstance] setUserObject:[userName lowercaseString] forKey:kLastUserId];
-    [[QIMUserCacheManager sharedInstance] setUserObject:pwd forKey:kLastPassword];
-}
-
-- (void)registerFaild {
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationRegisterState object:[NSNumber numberWithBool:NO]];
-    });
-}
-
 - (void)loginWithUserName:(NSString *)userName WithPassWord:(NSString *)pwd {
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
@@ -276,19 +262,6 @@
     BOOL bValue = [[XmppImManager sharedInstance] forgelogin];
     
     return bValue;
-}
-
-- (BOOL)isAutoLogin {
-    NSNumber *flagNum = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"AutoLogin"];
-    if (flagNum == nil) {
-        flagNum = @(YES);
-        [self setAutoLogin:YES];
-    }
-    return [flagNum boolValue];
-}
-
-- (void)setAutoLogin:(BOOL)flag {
-    [[QIMUserCacheManager sharedInstance] setUserObject:@(flag) forKey:@"AutoLogin"];
 }
 
 @end

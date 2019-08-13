@@ -51,15 +51,6 @@
     return [[QIMManager sharedInstance] isLogin];
 }
 
-- (void)registerWithUserName:(NSString *)userName WithPassWord:(NSString *)pwd {
-    [[QIMManager sharedInstance] registerWithUserName:userName WithPassWord:pwd];
-}
-
-- (void)registerFaild {
-    
-    [[QIMManager sharedInstance] registerFaild];
-}
-
 - (void)loginWithUserName:(NSString *)userName WithPassWord:(NSString *)pwd {
     [[QIMManager sharedInstance] loginWithUserName:userName WithPassWord:pwd];
 }
@@ -104,14 +95,6 @@
 
 - (BOOL)forgelogin {
     return [[QIMManager sharedInstance] forgelogin];
-}
-
-- (BOOL)isAutoLogin {
-    return [[QIMManager sharedInstance] isAutoLogin];
-}
-
-- (void)setAutoLogin:(BOOL)flag {
-    [[QIMManager sharedInstance] setAutoLogin:flag];
 }
 
 @end

@@ -12,10 +12,13 @@
 #import "zlib.h" 
 #import "ASIFormDataRequest.h"
 #import "QIMManager.h"
+#import "QIMManager+Request.h"
 #import "QIMHttpAPIBlock.h"
 #import "QIMNavConfigManager.h"
 #import "NSString+QIMUtility.h"
 #import <CommonCrypto/CommonCrypto.h>
+#import "QIMCommonCategories.h"
+
 // Request
 #define REQ_LOGIN                    @"userN/login.htm"
 #define REQ_GET_USER_CARD            @"userN/getQunarUserInfoByUid.htm"
@@ -60,15 +63,8 @@
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
         if (ret) {
             NSString *resultUrl = [result objectForKey:@"data"];
-            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl) {
-                NSURL *url = [NSURL URLWithString:resultUrl];
-                resultUrl = [url path];
-                NSUInteger loc = [resultUrl rangeOfString:@"/"].location + 1;
-                if (loc < resultUrl.length) {
-                    NSString *fileName = url.pathComponents.lastObject;
-                    resultUrl = [[resultUrl substringFromIndex:1] stringByAppendingFormat:@"?file=file/%@&FileName=file/%@",fileName,fileName];
-                    return resultUrl;
-                }
+            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
+                return resultUrl;
             }
         }
     }
@@ -90,22 +86,15 @@
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
         if (ret) {
             NSString *resultUrl = [result objectForKey:@"data"];
-            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl) {
-                NSURL *url = [NSURL URLWithString:resultUrl];
-                resultUrl = [url path];
-                NSUInteger loc = [resultUrl rangeOfString:@"/"].location + 1;
-                if (loc < resultUrl.length) {
-                    NSString *fileName = url.pathComponents.lastObject;
-                    resultUrl = [[resultUrl substringFromIndex:1] stringByAppendingFormat:@"?file=file/%@&FileName=file/%@",fileName,fileName];
-                    return resultUrl;
-                }
+            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
+                return resultUrl;
             }
         }
     }
     return nil;
 }
 
-+(NSString *)getFileDataMD5WithPath:(NSData *)fileData{
++(NSString *)getFileDataMD5WithFileData:(NSData *)fileData{
     return (__bridge_transfer NSString *)QIMFileMD5HashCreateWithData([fileData bytes], fileData.length);
 }
 
@@ -298,7 +287,7 @@ done:
 }
 
 + (NSString *) updateLoadMomentFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension{
-    NSString *fileKey = [self getFileDataMD5WithPath:fileData];
+    NSString *fileKey = [self getFileDataMD5WithFileData:fileData];
     NSString *fileExt = [self getFileExt:fileData];
     if (fileExt.length > 0) {
         extension = fileExt;
@@ -311,7 +300,7 @@ done:
 }
 
 + (NSString *) updateLoadFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension{
-    NSString *fileKey = [self getFileDataMD5WithPath:fileData];
+    NSString *fileKey = [self getFileDataMD5WithFileData:fileData];
     NSString *fileExt = [self getFileExt:fileData];
     if (fileExt.length > 0) {
         extension = fileExt;
@@ -324,6 +313,104 @@ done:
                         WithPathExtension:extension];
     }
     return httpUrl;
+}
+
++ (NSDictionary *)checkVideo:(NSString *)fileMd5 {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/video/check", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    NSDictionary *bodyDic = @{@"videoMd5":fileMd5};
+    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
+    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
+    [request setRequestMethod:@"POST"];
+    [request setUseCookiePersistence:NO];
+    [request addRequestHeader:@"Content-type" value:@"application/json;"];
+    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    [request addRequestHeader:@"Cookie" value:requestHeaders];
+    NSMutableData *postData = [NSMutableData dataWithData:[[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil]];
+    [request setPostBody:postData];
+    [request startSynchronous];
+    if ([request responseStatusCode] == 200) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:request.responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        if (ret) {
+            NSDictionary *resultDic = [result objectForKey:@"data"];
+            if ([resultDic isEqual:[NSNull null]] == NO && resultDic.count > 0) {
+                BOOL ready = [[resultDic objectForKey:@"ready"] boolValue];
+                if (ready == YES) {
+                    return resultDic;
+                } else {
+                    return nil;
+                }
+            }
+        }
+    }
+    return nil;
+}
+
++ (void)uploadVideo:(NSData *)fileData withCallBack:(QIMKitUploadVideoRequesSuccessedBlock)callback {
+    NSString *fileMd5 = [[fileData mutableCopy] qim_md5String];
+    if (fileMd5.length > 0) {
+        NSDictionary *checkResultDic = [self checkVideo:fileMd5];
+        if (checkResultDic) {
+            if (callback) {
+                callback(checkResultDic);
+            }
+        } else {
+            NSString *destUrl = [NSString stringWithFormat:@"%@/video/upload", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFileData:fileData withSuccessCallBack:^(NSData *responseData) {
+                NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+                NSLog(@"resultDic : %@", resultDic);
+                BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
+                if (ret) {
+                    NSDictionary *data = [resultDic objectForKey:@"data"];
+                    if (callback) {
+                        callback(data);
+                    }
+                } else {
+                    if (callback) {
+                        callback(nil);
+                    }
+                }
+            } withFailedCallBack:^(NSError *error) {
+                if (callback) {
+                    callback(nil);
+                }
+            }];
+        }
+    }
+}
+
++ (void)uploadVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequesSuccessedBlock)callback {
+    NSData *fileData = [NSData dataWithContentsOfFile:filePath];
+    NSString *fileMd5 = [[fileData mutableCopy] qim_md5String];
+    if (fileMd5.length > 0) {
+        NSDictionary *checkResultDic = [self checkVideo:fileMd5];
+        if (checkResultDic) {
+            if (callback) {
+                callback(checkResultDic);
+            }
+        } else {
+            NSString *destUrl = [NSString stringWithFormat:@"%@/video/upload", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:filePath withSuccessCallBack:^(NSData *responseData) {
+                NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+                NSLog(@"resultDic : %@", resultDic);
+                BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
+                if (ret) {
+                    NSDictionary *data = [resultDic objectForKey:@"data"];
+                    if (callback) {
+                        callback(data);
+                    }
+                } else {
+                    if (callback) {
+                        callback(nil);
+                    }
+                }
+            } withFailedCallBack:^(NSError *error) {
+                if (callback) {
+                    callback(nil);
+                }
+            }];
+        }
+    }
 }
  
 #pragma mark -load voice file return url -add by dan.zheng 15/4/24
@@ -347,15 +434,8 @@ done:
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
         if (ret) {
             NSString *resultUrl = [result objectForKey:@"data"];
-            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl) {
-                NSURL *url = [NSURL URLWithString:resultUrl];
-                resultUrl = [url path];
-                NSUInteger loc = [resultUrl rangeOfString:@"/"].location + 1;
-                if (loc < resultUrl.length) {
-                    NSString *fileName = url.pathComponents.lastObject;
-                    resultUrl = [[resultUrl substringFromIndex:1] stringByAppendingFormat:@"?file=file/%@&FileName=file/%@",fileName,fileName];
-                    return resultUrl;
-                }
+            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
+                return resultUrl;
             }
         }
     }
@@ -364,7 +444,7 @@ done:
 
 //将voice文件提交到网络上并获取到文件存储的url
 + (NSString *)updateLoadVoiceFile:(NSData *)voiceFileData WithFilePath:(NSString *)filePath {
-    NSString *fileKey = [self getFileDataMD5WithPath:voiceFileData];
+    NSString *fileKey = [self getFileDataMD5WithFileData:voiceFileData];
     NSString *httpUrl = [self checkFileKeyForFile:fileKey WithFileLength:voiceFileData.length WithPathExtension:@"amr"];
     if (httpUrl == nil) {
         return [QIMHttpApi updateLoadVoiceFile_New:voiceFileData WithFilePath:filePath WithFileKey:fileKey];
@@ -401,7 +481,7 @@ done:
 }
 
 + (NSString *)updateMyPhoto:(NSData *)headerData{
-    NSString *fileKey = [self getFileDataMD5WithPath:headerData];
+    NSString *fileKey = [self getFileDataMD5WithFileData:headerData];
     NSString *method = @"file/v2/upload/avatar";
     NSString *fileName = [fileKey stringByAppendingPathExtension:[self getFileExt:headerData]];
     long long size = ceil(headerData.length / 1024.0 / 1024.0);

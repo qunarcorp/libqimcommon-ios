@@ -346,16 +346,4 @@
     return [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithNavDict:navDict WithUserName:userName Check:check WithForcedUpdate:forcedUpdate];
 }
 
--(NSString *)qimNav_webAppUrl{
-    return [[QIMNavConfigManager sharedInstance] getWebAppUrl];
-}
-
-- (NSString *)qimNav_getManagerAppUrl{
-    return [[QIMNavConfigManager sharedInstance] getManagerAppUrl];
-}
-
--(BOOL)qimNav_isToC{
-    return [[QIMNavConfigManager sharedInstance] isToC];
-}
-
 @end

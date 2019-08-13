@@ -9,6 +9,7 @@
 //extern NSString *kIMInnerFileServer;
 
 #import <Foundation/Foundation.h>
+#import "QIMCommonEnum.h"
 
 CFStringRef QIMFileMD5HashCreateWithPath(CFStringRef filePath,size_t chunkSizeForReadingData);
 CFStringRef QIMFileMD5HashCreateWithData(const void *data,long long dataLenght);
@@ -29,8 +30,11 @@ CFStringRef QIMFileMD5HashCreateWithData(const void *data,long long dataLenght);
 
 + (NSString *) updateLoadFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension;
 
++ (void)uploadVideo:(NSData *)fileData withCallBack:(QIMKitUploadVideoRequesSuccessedBlock)callback;
+
++ (void)uploadVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequesSuccessedBlock)callback;
+
 + (NSDictionary *)getUserList;
- 
 
 + (NSString *)updateLoadFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension;
 
@@ -38,7 +42,7 @@ CFStringRef QIMFileMD5HashCreateWithData(const void *data,long long dataLenght);
 + (NSString *)updateLoadVoiceFile:(NSData *)voiceFileData WithFilePath:(NSString *)filePath;
 + (NSString *)updateMyPhoto:(NSData *)headerData;
 
-+(NSString *)getFileDataMD5WithPath:(NSData *)fileData;
++(NSString *)getFileDataMD5WithFileData:(NSData *)fileData;
 
 +(NSString*)getFileMD5WithPath:(NSString*)path;
 
