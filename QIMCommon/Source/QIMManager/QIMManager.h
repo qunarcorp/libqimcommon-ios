@@ -124,6 +124,8 @@
 @property (nonatomic, strong) NSMutableDictionary *userNormalHeaderDic;   //用户普通头像字典
 @property (nonatomic, strong) NSMutableDictionary *userInfoDic;           //用户内存化名片信息
 
+@property (nonatomic, strong) NSString *soundName;
+
 @property (nonatomic, strong) NSMutableDictionary *hasAtMeDic;           //At 字典
 @property (nonatomic, strong) NSMutableDictionary *hasAtAllDic;          //At All
 @property (nonatomic, strong) NSMutableDictionary *conversationParamDic;         //会话参数
