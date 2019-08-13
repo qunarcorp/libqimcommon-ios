@@ -35,3 +35,5 @@ Thumbs.db
 
 # pods ignore
 Pods/
+QIMCommon.xcodeproj/xcuserdata/
+QIMCommon.xcworkspace/xcuserdata/
