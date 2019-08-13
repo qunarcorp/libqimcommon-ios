@@ -285,20 +285,9 @@
 - (NSString *)getMyNickName;
 
 /**
- 获取当前登录的公司
- */
-- (NSString *)getCompany;
-
-/**
  获取当前登录的domain
  */
 - (NSString *)getDomain;
-
-/**
- 偷摸获取客户端Ip地址
- */
-- (NSString *)getClientIp;
-
 
 - (long long)getCurrentServerTime;
 

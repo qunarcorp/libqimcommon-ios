@@ -36,21 +36,28 @@
     return [QIMHttpApi updateLoadFile:fileData WithMsgId:key WithMsgType:type WithPathExtension:extension];
 }
 
++ (void)uploadVideo:(NSData *)fileData withCallBack:(QIMKitUploadVideoRequesSuccessedBlock)callback {
+    [QIMHttpApi uploadVideo:fileData withCallBack:callback];
+}
+
++ (void)uploadVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequesSuccessedBlock)callback {
+    [QIMHttpApi uploadVideoPath:filePath withCallBack:callback];
+}
+
 + (NSString *)updateLoadVoiceFile:(NSData *)voiceFileData WithFilePath:(NSString *)filePath {
     return [QIMHttpApi updateLoadVoiceFile:voiceFileData WithFilePath:filePath];
 }
 
-+ (NSString *)getFileDataMD5WithPath:(NSData *)fileData {
-    return [QIMHttpApi getFileDataMD5WithPath:fileData];
++ (NSString *)getFileDataMD5WithFileData:(NSData *)fileData {
+    return [QIMHttpApi getFileDataMD5WithFileData:fileData];
 }
 
 + (NSString*)getFileMD5WithPath:(NSString*)path {
     return [QIMHttpApi getFileMD5WithPath:path];
 }
 
-
 - (NSString *)getFileMD5WithData:(NSData *)data {
-    return [QIMHttpApi getFileDataMD5WithPath:data];
+    return [QIMHttpApi getFileDataMD5WithFileData:data];
 }
 
 - (NSString*)getFileMD5WithPath:(NSString*)path{

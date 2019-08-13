@@ -65,11 +65,10 @@ pod 'QIMCommon'
     * QIMOpenSSL
     * QIMKitVendor
     * QIMDataBase
-    
+
 ## 历史版本:
 你可以在当前仓库的 Release 进行QIMCommon历史版本下载。
-    
+
 ## 问题反馈
 
 -   qchat@qunar.com（邮件）
-

@@ -75,14 +75,12 @@
 
         if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
             NSString *qtalkSettingsPath = [[NSBundle mainBundle] pathForResource:@"qtalkDefaultSetting" ofType:@"json"];
-            NSString *str = [[NSString alloc] initWithContentsOfFile:qtalkSettingsPath];
-            NSData *encodeBase64Data = [NSData qim_dataWithBase64EncodedString:str];
-            self.defaultSettings = [[QIMJSONSerializer sharedInstance] deserializeObject:encodeBase64Data error:nil];
+            NSData *data = [[NSData alloc] initWithContentsOfFile:qtalkSettingsPath];
+            self.defaultSettings = [[QIMJSONSerializer sharedInstance] deserializeObject:data error:nil];
         } else if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
             NSString *qchatSettings = [[NSBundle mainBundle] pathForResource:@"qchatDefaultSetting" ofType:@"json"];
-            NSString *str = [[NSString alloc] initWithContentsOfFile:qchatSettings];
-            NSData *encodeBase64Data = [NSData qim_dataWithBase64EncodedString:str];
-            self.defaultSettings = [[QIMJSONSerializer sharedInstance] deserializeObject:encodeBase64Data error:nil];
+            NSData *data = [[NSData alloc] initWithContentsOfFile:qchatSettings];
+            self.defaultSettings = [[QIMJSONSerializer sharedInstance] deserializeObject:data error:nil];
         } else {
             self.defaultSettings = nil;
         }

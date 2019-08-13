@@ -861,6 +861,31 @@
     }];
 }
 
+#pragma mark - 用户发视频size权限
+- (void)getCricleCamelVideoConfig {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/video/getUserVideoConfig", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    [self sendTPPOSTRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [result objectForKey:@"data"];
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                BOOL useAble = [[data objectForKey:@"useAble"] boolValue];
+                BOOL highDefinition = [[data objectForKey:@"highDefinition"] boolValue];
+                NSInteger videoFileSize = [[data objectForKey:@"videoFileSize"] integerValue];
+                NSInteger videoTimeLen = [[data objectForKey:@"videoTimeLen"] integerValue];
+                [[QIMUserCacheManager sharedInstance] setUserObject:@(useAble) forKey:@"VideoConfigUseAble"];
+                [[QIMUserCacheManager sharedInstance] setUserObject:@(highDefinition) forKey:@"highDefinition"];
+                [[QIMUserCacheManager sharedInstance] setUserObject:@(videoFileSize) forKey:@"videoFileSize"];
+                [[QIMUserCacheManager sharedInstance] setUserObject:@(videoTimeLen) forKey:@"videoTimeLen"];
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+
+    }];
+}
+
 #pragma mark - Remote Notice
 
 - (void)getupdateRemoteWorkNoticeMsgs {
@@ -1012,6 +1037,54 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             if (callback) {
                 callback(NO);
+            }
+        });
+    }];
+}
+
+
+#pragma mark - SearchMoment
+
+- (void)searchMomentWithKey:(NSString *)key withSearchTime:(long long)searchTime withStartNum:(NSInteger)startNum withPageNum:(NSInteger)pageNum withSearchType:(NSInteger)searchType  withCallBack:(QIMKitSearchMomentBlock)callback {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/cricle_camel/search", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    NSMutableDictionary *bodyDic = [[NSMutableDictionary alloc] init];
+    [bodyDic setQIMSafeObject:key forKey:@"key"];
+    //    [bodyDic setQIMSafeObject:@"" forKey:@"searchTime"];
+    [bodyDic setQIMSafeObject:@(startNum) forKey:@"startNum"];
+    [bodyDic setQIMSafeObject:@(pageNum) forKey:@"pageNum"];
+    [bodyDic setQIMSafeObject:@(3) forKey:@"searchType"];
+
+    NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:bodyData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [result objectForKey:@"data"];
+            if ([data isKindOfClass:[NSArray class]]) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(data);
+                    }
+                });
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(nil);
+                    }
+                });
+            }
+        } else {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (callback) {
+                    callback(nil);
+                }
+            });
+        }
+    } withFailedCallBack:^(NSError *error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (callback) {
+                callback(nil);
             }
         });
     }];

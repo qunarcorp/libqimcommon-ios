@@ -82,7 +82,7 @@
         if (!groupVCard.count) {
             groupVCard = [[IMDataManager qimDB_SharedInstance] qimDB_getGroupCardByGroupId:groupId];
         }
-        
+
         [self.groupVCardDict setQIMSafeObject:groupVCard forKey:groupId];
     };
     if (dispatch_get_specific(self.cacheTag))

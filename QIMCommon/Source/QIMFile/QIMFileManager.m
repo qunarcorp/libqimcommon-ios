@@ -1099,7 +1099,7 @@ typedef enum {
     __weak typeof(self) weakSelf = self;
 
     [[QIMHttpRequestMonitor sharedInstance] runblock:^{
-        
+
         NSURL *requestUrl = [[NSURL alloc] initWithString:[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
         ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
         [request startAsynchronous];
@@ -1107,7 +1107,7 @@ typedef enum {
         if (!error && [request responseStatusCode] == 200) {
             NSData *responseData = [request responseData];
             if (responseData != nil) {
-                
+
                 NSString *fileName = nil;
                 if (flag == NO) {
                     float width = 0;

@@ -310,6 +310,7 @@ typedef enum : NSUInteger {
     QIMClientConfigTypeKLocalSingleHistoryUpdateTime, //本地单人历史时间戳
     QIMClientConfigTypeKLocalSystemHistoryUpdateTime, //本地系统历史时间戳
     QIMClientConfigTypeKLocalTripUpdateTime,     //本地行程更新时间戳
+    QIMClientConfigTypeKNotificationSound,       //系统提示音
     QIMClientConfigTypeALL,                     //所有
 } QIMClientConfigType;
 
@@ -364,6 +365,7 @@ typedef enum : NSUInteger {
     QIMWorkFeedContentTypeText = 0,    //驼圈文本
     QIMWorkFeedContentTypeImage = 1,   //驼圈图片
     QIMWorkFeedContentTypeLink = 2,    //驼圈LinkUrl
+    QIMWorkFeedContentTypeVideo = 3,   //驼圈视频
 } QIMWorkFeedContentType;
 
 typedef enum : NSUInteger {
@@ -384,6 +386,9 @@ typedef void(^QIMKitGetUserWorkInfoBlock)(NSDictionary *userWorkInfo);
 
 typedef void(^QIMKitSendTPRequesSuccessedBlock)(NSData *responseData);
 typedef void(^QIMKitSendTPRequesFailedBlock)(NSError *error);
+typedef void(^QIMKitUploadVideoRequesSuccessedBlock)(NSDictionary *videoDic);
+
+
 typedef void(^QIMKitGetTripAreaAvailableRoomBlock)(NSArray *availableRooms);
 typedef void(^QIMKitGetTripAreaAvailableRoomByCityIdBlock)(NSArray *availableRooms);    //根据城市Id获取可用区域
 typedef void(^QIMKitGetTripAllCitysBlock)(NSArray *allCitys);   //获取所有城市
@@ -401,6 +406,7 @@ typedef void(^QIMKitgetAnonymouseSuccessedBlock)(NSDictionary *anonymousDic);
 typedef void(^QIMKitgetMomentDetailSuccessedBlock)(NSDictionary *momentDic);
 typedef void(^QIMKitPushMomentSuccessedBlock)(BOOL successed);
 typedef void(^QIMKitUpdateMomentNotifyConfigSuccessedBlock)(BOOL successed);
+typedef void(^QIMKitSearchMomentBlock)(NSArray *result);
 
 typedef void(^QIMKitgetPublicCompanySuccessedBlock)(NSArray *companies);
 

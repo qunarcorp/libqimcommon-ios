@@ -60,6 +60,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)getCricleCamelEntrance;
 
+#pragma mark - 用户发视频size权限
+- (void)getCricleCamelVideoConfig;
+
 #pragma mark - Remote Notice
 
 - (void)getupdateRemoteWorkNoticeMsgs;
@@ -76,6 +79,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)getRemoteWorkMomentSwitch;
 
 - (void)updateRemoteWorkMomentNotifyConfig:(BOOL)flag withCallBack:(QIMKitUpdateMomentNotifyConfigSuccessedBlock)callback;
+
+#pragma mark - Search Moment
+- (void)searchMomentWithKey:(NSString *)key withSearchTime:(long long)searchTime withStartNum:(NSInteger)startNum withPageNum:(NSInteger)pageNum withSearchType:(NSInteger)searchType  withCallBack:(QIMKitSearchMomentBlock)callback;
 
 #pragma mark - Local NoticeMsg
 

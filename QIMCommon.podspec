@@ -24,7 +24,7 @@ Pod::Spec.new do |s|
     pbcommon.vendored_libraries = ['QIMCommon/QIMPrivatePBCommonFramework/Frameworks/libQIMPrivatePBCommon.a']
     pbcommon.pod_target_xcconfig = {"HEADER_SEARCH_PATHS" => "\"${PODS_ROOT}/Headers/Private/**\" \"${PODS_ROOT}/Headers/Private/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\""}
   end
-  
+
   s.subspec 'Base' do |base|
     $lib = ENV['use_lib']
     $debug = ENV['debug']
@@ -38,16 +38,22 @@ Pod::Spec.new do |s|
       else
       
       puts '---------QIMCommonSDK源码-------'
-      base.public_header_files = "QIMCommon/QIMKit/**/*.{h}", "QIMCommon/QIMDB/**/*.{h}"
-      
-      base.source_files = "QIMCommon/Source/**/*.{h,m,c}", "QIMCommon/QIMKit/**/*.{h,m,c}", "QIMCommon/QIMDB/**/*.{h,m,mm}"
-      base.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => 'DEBUGLOG=1'}
-      base.pod_target_xcconfig = {"HEADER_SEARCH_PATHS" => "\"${PODS_ROOT}/Headers/Private/**\" \"${PODS_ROOT}/Headers/Private/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\" \"${PODS_ROOT}/Headers/Public/QIMCommon/**\""}
+      s.public_header_files = "QIMCommon/QIMKit/**/*.{h}", "QIMCommon/QIMDB/**/*.{h}"
+
+      s.source_files = "QIMCommon/Source/**/*.{h,m,c}", "QIMCommon/QIMKit/**/*.{h,m,c}", "QIMCommon/QIMDB/**/*.{h,m,mm}"
+      s.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => 'DEBUGLOG=1'}
+
     end
   end
-  
+
+  s.subspec 'QIMPrivatePBCommon' do |pbcommon|
+    pbcommon.source_files = 'QIMPrivatePBCommonFramework/Headers/**/*.h'
+    pbcommon.public_header_files = 'QIMPrivatePBCommonFramework/Headers/**/*.h'
+    pbcommon.vendored_libraries = 'QIMPrivatePBCommonFramework/Frameworks/libQIMPrivatePBCommon.a'
+  end
+
   if $debug
-    puts 'debug QIMPubCommon依赖第三方库'
+    puts 'debug QIMCommon依赖第三方库'
     s.dependency 'QIMOpenSSL'
     s.default_subspecs = 'Base'
 
@@ -74,6 +80,6 @@ Pod::Spec.new do |s|
   s.dependency 'WCDB'
 
   s.frameworks = 'Foundation', 'CoreTelephony', 'SystemConfiguration', 'AudioToolbox', 'AVFoundation', 'UserNotifications', 'CoreTelephony','QuartzCore', 'CoreGraphics', 'Security'
-  s.libraries = 'stdc++', 'bz2'
+    s.libraries = 'stdc++', 'bz2'
 
 end

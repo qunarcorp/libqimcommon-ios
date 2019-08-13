@@ -35,11 +35,11 @@
         if (lastMaxMsgTime <= msgTime) {
             lastMaxMsgTime = msgTime;
         }
-        
+
         if ([key hasPrefix:@"rbt-notice"] || [key hasPrefix:@"rbt-qiangdan"] || [key hasPrefix:@"rbt-zhongbao"] || [key hasPrefix:@"FriendNotify"] || [key hasPrefix:@"rbt-system"]) {
             chattype = ChatType_System;
         }
-        
+
         if (isConsult) {
 
             [[IMDataManager qimDB_SharedInstance] qimDB_insertSessionWithSessionId:userId WithUserId:userId WithLastMsgId:userId WithLastUpdateTime:msgTime ChatType:chattype WithRealJid:realJid];

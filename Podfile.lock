@@ -18,90 +18,90 @@ PODS:
     - CocoaLumberjack/Core (= 3.5.3)
   - CocoaLumberjack/Core (3.5.3)
   - ProtocolBuffers (1.9.11)
-  - QIMCommonCategories (4.0.3)
-  - QIMDataBase (4.0.3)
-  - QIMKitVendor (4.0.1):
+  - QIMCommonCategories (3.0.10211613)
+  - QIMDataBase (3.0.10211613)
+  - QIMKitVendor (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
-    - QIMKitVendor/Audio (= 4.0.1)
-    - QIMKitVendor/DES (= 4.0.1)
-    - QIMKitVendor/DOG (= 4.0.1)
-    - QIMKitVendor/GCD (= 4.0.1)
-    - QIMKitVendor/Helper (= 4.0.1)
-    - QIMKitVendor/HTTP (= 4.0.1)
-    - QIMKitVendor/JSON (= 4.0.1)
-    - QIMKitVendor/PinYin (= 4.0.1)
-    - QIMKitVendor/PublicRedefineHeader (= 4.0.1)
-    - QIMKitVendor/SDWebImage (= 4.0.1)
-    - QIMKitVendor/UUID (= 4.0.1)
-    - QIMKitVendor/ZBar (= 4.0.1)
-    - QIMKitVendor/Zip (= 4.0.1)
+    - QIMCommonCategories (~> 3.0)
+    - QIMKitVendor/Audio (= 3.0.10211613)
+    - QIMKitVendor/DES (= 3.0.10211613)
+    - QIMKitVendor/DOG (= 3.0.10211613)
+    - QIMKitVendor/GCD (= 3.0.10211613)
+    - QIMKitVendor/Helper (= 3.0.10211613)
+    - QIMKitVendor/HTTP (= 3.0.10211613)
+    - QIMKitVendor/JSON (= 3.0.10211613)
+    - QIMKitVendor/PinYin (= 3.0.10211613)
+    - QIMKitVendor/PublicRedefineHeader (= 3.0.10211613)
+    - QIMKitVendor/SDWebImage (= 3.0.10211613)
+    - QIMKitVendor/UUID (= 3.0.10211613)
+    - QIMKitVendor/ZBar (= 3.0.10211613)
+    - QIMKitVendor/Zip (= 3.0.10211613)
     - ZipArchive
-  - QIMKitVendor/Audio (4.0.1):
+  - QIMKitVendor/Audio (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - QIMKitVendor/PublicRedefineHeader
     - ZipArchive
-  - QIMKitVendor/DES (4.0.1):
+  - QIMKitVendor/DES (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - QIMKitVendor/PublicRedefineHeader
     - ZipArchive
-  - QIMKitVendor/DOG (4.0.1):
+  - QIMKitVendor/DOG (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - QIMKitVendor/PublicRedefineHeader
     - ZipArchive
-  - QIMKitVendor/GCD (4.0.1):
+  - QIMKitVendor/GCD (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - QIMKitVendor/PublicRedefineHeader
     - ZipArchive
-  - QIMKitVendor/Helper (4.0.1):
+  - QIMKitVendor/Helper (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - QIMKitVendor/PublicRedefineHeader
     - ZipArchive
-  - QIMKitVendor/HTTP (4.0.1):
+  - QIMKitVendor/HTTP (3.0.10211613):
     - ASIHTTPRequest
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - QIMKitVendor/DOG
     - QIMKitVendor/JSON
     - QIMKitVendor/PublicRedefineHeader
     - ZipArchive
-  - QIMKitVendor/JSON (4.0.1):
+  - QIMKitVendor/JSON (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - QIMKitVendor/PublicRedefineHeader
     - ZipArchive
-  - QIMKitVendor/PinYin (4.0.1):
+  - QIMKitVendor/PinYin (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - QIMKitVendor/PublicRedefineHeader
     - ZipArchive
-  - QIMKitVendor/PublicRedefineHeader (4.0.1):
+  - QIMKitVendor/PublicRedefineHeader (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - ZipArchive
-  - QIMKitVendor/SDWebImage (4.0.1):
+  - QIMKitVendor/SDWebImage (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - ZipArchive
-  - QIMKitVendor/UUID (4.0.1):
+  - QIMKitVendor/UUID (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - QIMKitVendor/PublicRedefineHeader
     - UICKeyChainStore
     - ZipArchive
-  - QIMKitVendor/ZBar (4.0.1):
+  - QIMKitVendor/ZBar (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - QIMKitVendor/PublicRedefineHeader
     - ZipArchive
-  - QIMKitVendor/Zip (4.0.1):
+  - QIMKitVendor/Zip (3.0.10211613):
     - CocoaLumberjack
-    - QIMCommonCategories (~> 4.0)
+    - QIMCommonCategories (~> 3.0)
     - QIMKitVendor/PublicRedefineHeader
     - ZipArchive
   - QIMOpenSSL (1.0.0)
@@ -176,6 +176,6 @@ SPEC CHECKSUMS:
   YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
   ZipArchive: e25a4373192673e3229ac8d6e9f64a3e5713c966
 
-PODFILE CHECKSUM: fe19cc5a43c03673bda627a9f6645c95272ec6c7
+PODFILE CHECKSUM: a324fbfad592932d87f45d5089d803ca3f135d5d
 
 COCOAPODS: 1.6.0

@@ -55,6 +55,9 @@
         case QIMClientConfigTypeKBlackList:
             return @"kBlackList";
             break;
+        case QIMClientConfigTypeKNotificationSound:
+            return @"kNotificationSound";
+            break;
         default:
             return @"ALL";
             break;
@@ -180,7 +183,7 @@
             }
         } else if ([key isEqualToString:@"kNoticeStickJidDic"]) {
             if (!self.notMindGroupDic) {
-                self.notMindGroupDic = [NSMutableArray arrayWithCapacity:3];
+                self.notMindGroupDic = [NSMutableDictionary dictionaryWithCapacity:3];
             }
             for (NSDictionary *noticeStickInfo in configInfoData) {
                 NSString *subkey = [noticeStickInfo objectForKey:@"subkey"];
@@ -210,6 +213,15 @@
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationCurrentFontUpdate object:nil];
             });
+        } else if ([key isEqualToString:@"kNotificationSound"]) {
+            for (NSDictionary *markupInfo in configInfoData) {
+                NSString *subkey = [markupInfo objectForKey:@"subkey"];
+                if ([subkey isEqualToString:@"ios"]) {
+                    self.soundName = [[QIMManager sharedInstance] getClientNotificationSoundName];
+                }
+            }
+        } else {
+
         }
     }
 }
@@ -356,7 +368,7 @@
     return [[IMDataManager qimDB_SharedInstance] qimDB_getConfigArrayUserNotInStartContacts:key];
 }
 
--(BOOL)isStarOrBlackContact:(NSString *)subkey ConfigKey:(NSString *)pkey {
+- (BOOL)isStarOrBlackContact:(NSString *)subkey ConfigKey:(NSString *)pkey {
     if([@"kStarContact" isEqualToString:pkey]){
         return [[QIMManager sharedInstance] getClientConfigDeleteFlagWithType:QIMClientConfigTypeKStarContact WithSubKey:subkey] == 0;
     }else if([@"kBlackList" isEqualToString:pkey]){
@@ -366,7 +378,7 @@
     }
 }
 
--(BOOL)setStarOrblackContact:(NSString *)subkey ConfigKey:(NSString *)pkey Flag:(BOOL)value {
+- (BOOL)setStarOrblackContact:(NSString *)subkey ConfigKey:(NSString *)pkey Flag:(BOOL)value {
     if([@"kStarContact" isEqualToString:pkey]){
         return [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKStarContact WithSubKey:subkey WithConfigValue:value?@"1":@"0" WithDel:!value];
     }else if([@"kBlackList" isEqualToString:pkey]){
@@ -376,7 +388,7 @@
     }
 }
 
--(BOOL)setStarOrblackContacts:(NSDictionary *)map ConfigKey:(NSString *)pkey Flag:(BOOL)value {
+- (BOOL)setStarOrblackContacts:(NSDictionary *)map ConfigKey:(NSString *)pkey Flag:(BOOL)value {
     if(map == nil){
         return YES;
     }
@@ -394,6 +406,15 @@
         [deleteStickList addObject:dict];
     }
     return [[QIMManager sharedInstance] updateRemoteClientConfigWithType:configType BatchProcessConfigInfo:deleteStickList WithDel:!value];
+}
+
+- (NSString *)getClientNotificationSoundName {
+    return [[QIMManager sharedInstance] getClientConfigInfoWithType:QIMClientConfigTypeKNotificationSound WithSubKey:@"ios"];
+}
+
+- (BOOL)setClientNotificationSound:(NSString *)soundName {
+    BOOL success = [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKNotificationSound WithSubKey:@"ios" WithConfigValue:soundName WithDel:NO];
+    return success;
 }
 
 @end
