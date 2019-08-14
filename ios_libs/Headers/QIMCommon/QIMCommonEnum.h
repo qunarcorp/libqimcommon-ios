@@ -342,5 +342,6 @@ typedef void(^QIMKitGetMomentNewSuccessedBlock)(NSArray *moments);
 typedef void(^QIMKitGetMomentHistorySuccessedBlock)(NSArray *moments);
 typedef void(^QIMKitgetAnonymouseSuccessedBlock)(NSDictionary *anonymousDic);
 typedef void(^QIMKitgetMomentDetailSuccessedBlock)(NSDictionary *momentDic);
+typedef void(^QIMKitSetMucVCardSuccessedBlock)(BOOL success);
 
 #endif /* QIMCommonEnum_h */
