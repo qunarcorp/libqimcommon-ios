@@ -1586,7 +1586,7 @@
         QIMErrorLog(@"LoginFaild: %@", errDic);
         if ([[errDic objectForKey:@"errMsg"] isEqualToString:@"out_of_date"]) {
             
-            [self sendNoPush];
+//            [self sendNoPush];
             [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"kTempUserToken"];
             [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"userToken"];
             dispatch_async(dispatch_get_main_queue(), ^{

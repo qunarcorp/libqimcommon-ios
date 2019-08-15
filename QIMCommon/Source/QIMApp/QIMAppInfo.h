@@ -19,6 +19,8 @@
 
 + (id)sharedInstance;
 
+- (NSString *)getPushToken;
+
 /**
  网卡地址
  */

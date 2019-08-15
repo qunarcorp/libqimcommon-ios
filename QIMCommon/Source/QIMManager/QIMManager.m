@@ -545,7 +545,7 @@ static QIMManager *__IMManager = nil;
     QIMVerboseLog(@"开始获取加密会话密码箱2结束");
     
     CFAbsoluteTime startTime13 = [[QIMWatchDog sharedInstance] startTime];
-    [self sendPushTokenWithMyToken:[[QIMAppInfo sharedInstance] pushToken] WithDeleteFlag:NO];
+    [self sendPushTokenWithMyToken:[[QIMAppInfo sharedInstance] getPushToken] WithDeleteFlag:NO];
     QIMVerboseLog(@"注册Token1loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime13]);
     
     // 更新好友列表
