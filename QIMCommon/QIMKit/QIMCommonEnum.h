@@ -353,6 +353,11 @@ typedef enum : NSUInteger {
 } QIMWorkFeedType;
 
 typedef enum : NSUInteger {
+    QIMWorkMomentMediaTypeImage = 0,    //图片类型
+    QIMWorkMomentMediaTypeVideo = 1,    //视频类型
+} QIMWorkMomentMediaType;   //即将上传的媒体资源类型
+
+typedef enum : NSUInteger {
     QIMWorkFeedNotifyTypePOST = 0,
     QIMWorkFeedNotifyTypeComment = 1,
     QIMWorkFeedNotifyTypeLike = 2,

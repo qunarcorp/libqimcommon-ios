@@ -37,6 +37,7 @@ typedef enum {
 @property (nonatomic, assign) ASIHTTPRequest *fileRequest;
 @property (nonatomic, assign) FileRequestType fileReuqestType;
 @property (nonatomic, assign) QIMFileCacheType fileCacheType;
+@property (nonatomic, assign) BOOL newVideoInterface;
 @property (nonatomic, strong) NSString *filePath;
 @property (nonatomic, strong) NSString *fileId;
 @property (nonatomic, strong) NSString *fileSizeStr;
@@ -128,6 +129,7 @@ typedef enum {
     NSString *fileId = self.fileId;
     if (self.fileReuqestType == FileRequest_Upload) {
         NSString *httpUrl = nil;
+        NSDictionary *resultVideoData = nil;
         QIMVerboseLog(@"上传真正的文件结果 : %@ ForMessage: %@", [request responseString], self.message);
         if ([request responseStatusCode] == 200) {
             NSData * data = nil;
@@ -137,32 +139,47 @@ typedef enum {
                 data = _receiveData;
             }
             NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:data error:nil];
-
+            
             BOOL ret = [[result objectForKey:@"ret"] boolValue];
             if (ret) {
-                NSString *resultUrl = [result objectForKey:@"data"];
-                if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
-                    NSURL *url = [NSURL URLWithString:resultUrl];
-                    resultUrl = [url path];
-                    NSString *innerFileUrlPath = [[NSURL URLWithString:[[QIMNavConfigManager sharedInstance] innerFileHttpHost]] path];
-                    if ([resultUrl containsString:innerFileUrlPath]) {
-                        resultUrl = [resultUrl substringFromIndex:innerFileUrlPath.length];
-                    }
-                    NSUInteger loc = [resultUrl rangeOfString:@"/"].location + 1;
-                    NSDictionary *queryDic = [[url query] qim_dictionaryFromQueryComponents];
-                    if (loc < resultUrl.length) {
-                        NSString *fileName = url.pathComponents.lastObject;
-                        httpUrl = [[resultUrl substringFromIndex:1] stringByAppendingFormat:@"?file=file/%@&FileName=file/%@&name=%@",fileName,fileName,[queryDic objectForKey:@"name"]];
+                if (self.newVideoInterface == YES) {
+                    resultVideoData = [result objectForKey:@"data"];
+                } else {
+                    NSString *resultUrl = [result objectForKey:@"data"];
+                    if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
+                        httpUrl = resultUrl;
+                        /*
+                         NSURL *url = [NSURL URLWithString:resultUrl];
+                         resultUrl = [url path];
+                         NSString *innerFileUrlPath = [[NSURL URLWithString:[[QIMNavConfigManager sharedInstance] innerFileHttpHost]] path];
+                         if ([resultUrl containsString:innerFileUrlPath]) {
+                         resultUrl = [resultUrl substringFromIndex:innerFileUrlPath.length];
+                         }
+                         NSUInteger loc = [resultUrl rangeOfString:@"/"].location + 1;
+                         NSDictionary *queryDic = [[url query] qim_dictionaryFromQueryComponents];
+                         if (loc < resultUrl.length) {
+                         NSString *fileName = url.pathComponents.lastObject;
+                         httpUrl = [[resultUrl substringFromIndex:1] stringByAppendingFormat:@"?file=file/%@&FileName=file/%@&name=%@",fileName,fileName,[queryDic objectForKey:@"name"]];
+                         } */
                     }
                 }
             }
-            if (httpUrl == nil) {
-                [self requestFailed:request];
-                [[QIMFileManager sharedInstance] removeFileId:self.fileId];
-                return;
+            if (self.newVideoInterface == YES) {
+                if (resultVideoData == nil) {
+                    [self requestFailed:request];
+                    [[QIMFileManager sharedInstance] removeFileId:self.fileId];
+                    return;
+                }
+            } else {
+                if (httpUrl == nil) {
+                    [self requestFailed:request];
+                    [[QIMFileManager sharedInstance] removeFileId:self.fileId];
+                    return;
+                }
+                //image url 拼上msgID
+                httpUrl = [httpUrl stringByAppendingFormat:@"&msgid=%@",self.message.messageId];
             }
-            //image url 拼上msgID
-            httpUrl = [httpUrl stringByAppendingFormat:@"&msgid=%@",self.message.messageId];
+
             //更新消息时间
             long long msgDate = ([[NSDate date] timeIntervalSince1970] - [[QIMManager sharedInstance] getServerTimeDiff])*1000;
             self.message.messageDate = msgDate;
@@ -170,103 +187,78 @@ typedef enum {
             //获取加密状态
             //QIMSDKTODO
 //            QTEncryptChatState encryptState = [[QTEncryptChat sharedInstance] getEncryptChatStateWithUserId:self.message.to];
-            if (self.message.messageType == QIMMessageType_SmallVideo || (self.message.messageType == QIMMessageType_BurnAfterRead && [[infoDic objectForKey:@"msgType"] integerValue] == QIMMessageType_SmallVideo)) {
-                if ([[infoDic objectForKey:@"msgType"] integerValue] == QIMMessageType_SmallVideo && self.message.extendInformation.length > 0) {
-                    self.message.message = [[[QIMJSONSerializer sharedInstance] deserializeObject:self.message.extendInformation error:nil] objectForKey:@"message"];
-                }
-                NSDictionary *dic = [[QIMJSONSerializer sharedInstance] deserializeObject:self.message.message error:nil];
-                if (dic) {
-                    NSMutableDictionary *infoDic = [NSMutableDictionary dictionaryWithDictionary:dic];
-                    [infoDic setObject:httpUrl forKey:@"FileUrl"];
-                    NSString *msg = [[QIMJSONSerializer sharedInstance] serializeObject:infoDic];
-                    NSString *domain = [[self.toJid componentsSeparatedByString:@"@"] lastObject];
-                    if (![domain hasPrefix:@"conference"]){
-                        NSString * burnAfterReadingStatus = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"burnAfterReadingStatus"];
-                        if (burnAfterReadingStatus && [burnAfterReadingStatus isEqualToString:@"ON"]) {
-                            
-                            NSMutableDictionary *dicInfo = [NSMutableDictionary dictionary];
-                            [dicInfo setObject:@(QIMMessageType_SmallVideo) forKey:@"msgType"];
-                            [dicInfo setObject:[NSString stringWithFormat:@"发送了一段视频. [obj type=\"url\" value=\"%@\"]", [[QIMNavConfigManager sharedInstance].innerFileHttpHost stringByAppendingFormat:@"/%@", httpUrl]] forKey:@"descStr"];
-                            [dicInfo setObject:msg forKey:@"message"];
-                            NSString *extendInformation = [[QIMJSONSerializer sharedInstance] serializeObject:dicInfo];
-                            //QIMSDKTODO
-//                            if (encryptState == QTEncryptChatStateEncrypting) {
-//
-//                                NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_BurnAfterRead WithOriginBody:@"此为阅后即焚消息，该终端不支持阅后即焚~~" WithOriginExtendInfo:extendInformation WithUserId:self.message.to];
-//                                self.message.extendInformation = encryptContent;
-//                                self.message.message = @"加密阅后即焚视频消息iOS";
-//                                self.message.messageType = QIMMessageType_Encrypt;
-//                            } else {
-                                self.message.message = @"此为阅后即焚消息，该终端不支持阅后即焚~~";
-                                self.message.extendInformation = extendInformation;
-                                self.message.messageType = QIMMessageType_BurnAfterRead;
-//                            }
-                            [[QIMManager sharedInstance] sendMessage:self.message ToUserId:self.toJid];
-                        }else{
-                            
-                            NSString *url = [[QIMNavConfigManager sharedInstance].innerFileHttpHost stringByAppendingFormat:@"/%@", httpUrl];
-                            NSString *msgContent = [NSString stringWithFormat:@"发送了一段视频. [obj type=\"url\" value=\"%@\"]", url];
-                            //QIMSDKTODO
-//                            if (encryptState == QTEncryptChatStateEncrypting) {
-//                                NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_SmallVideo WithOriginBody:msgContent WithOriginExtendInfo:msg WithUserId:self.message.to];
-//                                self.message.message = @"加密视频消息iOS";
-//                                self.message.extendInformation = encryptContent;
-//                                self.message.messageType = QIMMessageType_Encrypt;
-//                            } else {
-                                self.message.message = msgContent;
-                                self.message.extendInformation = msg;
-                                self.message.messageType = QIMMessageType_SmallVideo;
-//                            }
-                            if (self.message.chatType == ChatType_PublicNumber) {
-                                [[QIMManager sharedInstance] sendMessage:msg ToPublicNumberId:self.toJid WithMsgId:self.message.messageId WithMsgType:self.message.messageType];
-                            } else if (self.message.chatType == ChatType_Consult || self.message.chatType == ChatType_ConsultServer) {
-                                [[QIMManager sharedInstance] sendConsultMessageId:self.message.messageId WithMessage:self.message.message WithInfo:self.message.extendInformation toJid:self.message.to realToJid:self.message.realJid WithChatType:self.message.chatType WithMsgType:self.message.messageType];
-                            } else {
-                                [[QIMManager sharedInstance] sendMessage:self.message ToUserId:self.toJid];
-                            }
+            if (self.message.messageType == QIMMessageType_SmallVideo) {
+                if (self.newVideoInterface == YES) {
+                    NSString *firstThumbUrl = [resultVideoData objectForKey:@"firstThumbUrl"];
+                    NSString *ThumbName = [resultVideoData objectForKey:@"firstThumb"];
+                    NSString *videoUrl = [resultVideoData objectForKey:@"transUrl"];
+                    NSDictionary *transFileInfo = [resultVideoData objectForKey:@"transFileInfo"];
+                    NSString *videoName = [transFileInfo objectForKey:@"videoName"];
+                    NSString *videoSize = [transFileInfo objectForKey:@"videoSize"];
+                    NSString *height = [transFileInfo objectForKey:@"height"];
+                    NSString *width = [transFileInfo objectForKey:@"width"];
+                    NSNumber *Duration = [transFileInfo objectForKey:@"duration"];
+                    
+                    NSString *onlineUrl = [resultVideoData objectForKey:@"onlineUrl"];
+                    NSMutableDictionary *videoContentDic = [NSMutableDictionary dictionaryWithCapacity:1];
+                    
+                    /*
+                     {\"Duration\":\"11050\",\"FileName\":\"20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.mp4\",\"FileSize\":\"739546\",\"FileUrl\":\"http://osd.corp.qunar.com/vs_cricle_camel_vs_cricle_camel/20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.mp4\",\"Height\":\"1920\",\"ThumbName\":\"20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.png\",\"ThumbUrl\":\"http://osd.corp.qunar.com/vs_cricle_camel_vs_cricle_camel/20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.png\",\"Width\":\"1080\"}
+                     */
+                    NSMutableDictionary *newVideoDic = [NSMutableDictionary dictionaryWithCapacity:1];
+                    [newVideoDic setQIMSafeObject:Duration forKey:@"Duration"];
+                    [newVideoDic setQIMSafeObject:videoName forKey:@"FileName"];
+                    [newVideoDic setQIMSafeObject:videoSize forKey:@"FileSize"];
+                    [newVideoDic setQIMSafeObject:videoUrl forKey:@"FileUrl"];
+                    [newVideoDic setQIMSafeObject:height forKey:@"Height"];
+                    [newVideoDic setQIMSafeObject:ThumbName forKey:@"ThumbName"];
+                    [newVideoDic setQIMSafeObject:firstThumbUrl forKey:@"ThumbUrl"];
+                    [newVideoDic setQIMSafeObject:width forKey:@"Width"];
+                    [newVideoDic setQIMSafeObject:@(YES) forKey:@"newVideo"];
+                    
+                    NSString *msg = [[QIMJSONSerializer sharedInstance] serializeObject:newVideoDic];
+                    NSString *msgContent = [NSString stringWithFormat:@"发送了一段视频. [obj type=\"url\" value=\"%@\"]", onlineUrl];
+                    self.message.message = msgContent;
+                    self.message.extendInformation = msg;
+                    self.message.messageType = QIMMessageType_SmallVideo;
+                    if (self.message.chatType == ChatType_PublicNumber) {
+                        [[QIMManager sharedInstance] sendMessage:msg ToPublicNumberId:self.toJid WithMsgId:self.message.messageId WithMsgType:self.message.messageType];
+                    } else if (self.message.chatType == ChatType_Consult || self.message.chatType == ChatType_ConsultServer) {
+                        [[QIMManager sharedInstance] sendConsultMessageId:self.message.messageId WithMessage:self.message.message WithInfo:self.message.extendInformation toJid:self.message.to realToJid:self.message.realJid WithChatType:self.message.chatType WithMsgType:self.message.messageType];
+                    } else {
+                        [[QIMManager sharedInstance] sendMessage:self.message ToUserId:self.message.to];
+                    }
+                } else {
+                    if ([[infoDic objectForKey:@"msgType"] integerValue] == QIMMessageType_SmallVideo && self.message.extendInformation.length > 0) {
+                        self.message.message = [[[QIMJSONSerializer sharedInstance] deserializeObject:self.message.extendInformation error:nil] objectForKey:@"message"];
+                    }
+                    NSDictionary *dic = [[QIMJSONSerializer sharedInstance] deserializeObject:self.message.message error:nil];
+                    if (dic) {
+                        NSMutableDictionary *infoDic = [NSMutableDictionary dictionaryWithDictionary:dic];
+                        [infoDic setObject:httpUrl forKey:@"FileUrl"];
+                        NSString *msg = [[QIMJSONSerializer sharedInstance] serializeObject:infoDic];
+                        
+                        if (![httpUrl qim_hasPrefixHttpHeader]){
+                            httpUrl = [[QIMNavConfigManager sharedInstance].innerFileHttpHost stringByAppendingFormat:@"/%@", httpUrl];
                         }
-                    } else{
-                        NSString * burnAfterReadingStatus = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"burnAfterReadingStatus"];
-                        if (burnAfterReadingStatus && [burnAfterReadingStatus isEqualToString:@"ON"]) {
-                            NSMutableDictionary *dicInfo = [NSMutableDictionary dictionary];
-                            [dicInfo setObject:@(QIMMessageType_SmallVideo) forKey:@"msgType"];
-                            [dicInfo setObject:[NSString stringWithFormat:@"发送了一段视频. [obj type=\"url\" value=\"%@\"]", [[QIMNavConfigManager sharedInstance].innerFileHttpHost stringByAppendingFormat:@"/%@", httpUrl]] forKey:@"descStr"];
-                            [dicInfo setObject:msg forKey:@"message"];
-                            NSString *extendInformation = [[QIMJSONSerializer sharedInstance] serializeObject:dicInfo];
-                            //QIMSDKTODO
-//                            if (encryptState == QTEncryptChatStateEncrypting) {
-//                                NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_SmallVideo WithOriginBody:@"此为阅后即焚视频消息，该终端不支持阅后即焚~~" WithOriginExtendInfo:extendInformation WithUserId:self.message.to];
-//                                self.message.message = @"加密视频消息iOS";
-//                                self.message.extendInformation = encryptContent;
-//                                self.message.messageType = QIMMessageType_Encrypt;
-//                            } else {
-                                self.message.message = @"此为阅后即焚消息，该终端不支持阅后即焚~~";
-                                self.message.extendInformation = extendInformation;
-                                self.message.messageType = QIMMessageType_BurnAfterRead;
-//                            }
-
+                        NSString *messageContent = [NSString stringWithFormat:@"发送了一段视频. [obj type=\"url\" value=\"%@\"]", httpUrl];
+                        //QIMSDKTODO
+//                        if (encryptState == QTEncryptChatStateEncrypting) {
+//                            NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_SmallVideo WithOriginBody:messageContent WithOriginExtendInfo:msg WithUserId:self.message.to];
+//                            self.message.message = @"加密视频消息iOS";
+//                            self.message.extendInformation = encryptContent;
+//                            self.message.messageType = QIMMessageType_Encrypt;
+//                        } else {
+                            self.message.message = messageContent;
+                            self.message.extendInformation = msg;
+                            self.message.messageType = QIMMessageType_SmallVideo;
+//                        }
+                        if (self.message.chatType == ChatType_PublicNumber) {
+                            [[QIMManager sharedInstance] sendMessage:msg ToPublicNumberId:self.toJid WithMsgId:self.message.messageId WithMsgType:self.message.messageType];
+                        } else if (self.message.chatType == ChatType_Consult || self.message.chatType == ChatType_ConsultServer) {
+                            [[QIMManager sharedInstance] sendConsultMessageId:self.message.messageId WithMessage:self.message.message WithInfo:self.message.extendInformation toJid:self.message.to realToJid:self.message.realJid WithChatType:self.message.chatType WithMsgType:self.message.messageType];
+                        } else {
                             [[QIMManager sharedInstance] sendMessage:self.message ToUserId:self.toJid];
-//                            [[QIMManager sharedInstance] sendMessage:@"此为阅后即焚消息，该终端不支持阅后即焚~~" WithInfo:extendInformation ToGroupId:self.toJid WithMsgType:QIMMessageType_BurnAfterRead];
-                        }else{
-                             NSString *messageContent = [NSString stringWithFormat:@"发送了一段视频. [obj type=\"url\" value=\"%@\"]", [[QIMNavConfigManager sharedInstance].innerFileHttpHost  stringByAppendingFormat:@"/%@", httpUrl]];
-                            //QIMSDKTODO
-//                            if (encryptState == QTEncryptChatStateEncrypting) {
-//                                NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_SmallVideo WithOriginBody:messageContent WithOriginExtendInfo:msg WithUserId:self.message.to];
-//                                self.message.message = @"加密视频消息iOS";
-//                                self.message.extendInformation = encryptContent;
-//                                self.message.messageType = QIMMessageType_Encrypt;
-//                            } else {
-                                self.message.message = messageContent;
-                                self.message.extendInformation = msg;
-                                self.message.messageType = QIMMessageType_SmallVideo;
-//                            }
-                            if (self.message.chatType == ChatType_PublicNumber) {
-                                [[QIMManager sharedInstance] sendMessage:msg ToPublicNumberId:self.toJid WithMsgId:self.message.messageId WithMsgType:self.message.messageType];
-                            } else if (self.message.chatType == ChatType_Consult || self.message.chatType == ChatType_ConsultServer) {
-                                [[QIMManager sharedInstance] sendConsultMessageId:self.message.messageId WithMessage:self.message.message WithInfo:self.message.extendInformation toJid:self.message.to realToJid:self.message.realJid WithChatType:self.message.chatType WithMsgType:self.message.messageType];
-                            } else {
-                                [[QIMManager sharedInstance] sendMessage:self.message ToUserId:self.toJid];
-                            }
                         }
                     }
                 }
@@ -343,7 +335,7 @@ typedef enum {
                 } else {
                     [[QIMManager sharedInstance] sendMessage:self.message ToUserId:self.toJid];
                 }
-            }else {
+            } else {
                 UIImage * image = [UIImage imageWithData:self.imageData];
                 float maxWidth = kThumbMaxWidth;
                 float maxHeight = kThumbMaxHeight;
@@ -362,21 +354,6 @@ typedef enum {
                     if (![tempHttpUrl qim_hasPrefixHttpHeader]){
                         tempHttpUrl = [[QIMNavConfigManager sharedInstance].innerFileHttpHost stringByAppendingFormat:@"/%@", tempHttpUrl];
                     }
-                    NSString * burnAfterReadingStatus = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"burnAfterReadingStatus"];
-                    if (burnAfterReadingStatus && [burnAfterReadingStatus isEqualToString:@"ON"]) {
-                        string = [NSString stringWithFormat:@"[obj type=\\\"%@\\\" value=\\\"%@\\\" width=%d height=%d ]", @"image",httpUrl,(int)image.size.width,(int)image.size.height];
-                        NSString *msgExtendInfoStr = [NSString stringWithFormat:@"{\"msgType\":\"%d\",\"descStr\":\"%@\",\"message\":\"%@\"}",QIMMessageType_Image,[[QIMNavConfigManager sharedInstance].innerFileHttpHost stringByAppendingFormat:@"/%@", httpUrl],string];
-                        //QIMSDKTODO
-//                        if (encryptState == QTEncryptChatStateEncrypting) {
-//                            NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:self.message.messageType WithOriginBody:@"此为阅后即焚消息，该终端不支持阅后即焚~~" WithOriginExtendInfo:msgExtendInfoStr WithUserId:self.message.to];
-//                            self.message.message = @"加密消息iOS";
-//                            self.message.extendInformation = encryptContent;
-//                            self.message.messageType = QIMMessageType_Encrypt;
-//                        } else {
-                            self.message.message = @"此为阅后即焚消息，该终端不支持阅后即焚~~";
-                            self.message.extendInformation = msgExtendInfoStr;
-//                        }
-                    } else {
                         //QIMSDKTODO
 //                        if (encryptState == QTEncryptChatStateEncrypting) {
 //                            NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:self.message.messageType WithOriginBody:string WithOriginExtendInfo:nil WithUserId:self.message.to];
@@ -384,7 +361,6 @@ typedef enum {
 //                            self.message.extendInformation = encryptContent;
 //                            self.message.messageType = QIMMessageType_Encrypt;
 //                        }
-                    }
 //                    self.message.messageSendState = MessageState_Success;
                     if (self.message.chatType == ChatType_PublicNumber) {
                         [[QIMManager sharedInstance] sendMessage:self.message.message ToPublicNumberId:self.toJid WithMsgId:self.message.messageId WithMsgType:self.message.messageType];
@@ -676,7 +652,48 @@ typedef enum {
     if ([fileExt.uppercaseString isEqualToString:@"GIF"]) {
         isGif = YES;
     }
+    
+    BOOL isVideo = (message.messageType == QIMMessageType_SmallVideo);
+    BOOL videoConfigUseAble = [[[QIMUserCacheManager sharedInstance] userObjectForKey:@"VideoConfigUseAble"] boolValue];
     __block NSString * fileName = fileExt.length ? [fileKey stringByAppendingPathExtension:fileExt] : fileKey;
+
+    if (isVideo && videoConfigUseAble) {
+        
+        NSString *destUrl = [NSString stringWithFormat:@"%@/video/upload", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+        NSLog(@"上传视频destUrl : %@", destUrl);
+        NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
+       
+        ASIFormDataRequest *formRequest = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
+        [formRequest setRequestMethod:@"POST"];
+        
+        NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+        NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+        [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+        [formRequest setRequestHeaders:cookieProperties];
+        [formRequest setTimeOutSeconds:600];
+        [formRequest setUseCookiePersistence:NO];
+
+        QIMFileRequest *fileRequest = [[QIMFileRequest alloc] init];
+        [fileRequest setFileRequest:formRequest];
+        [fileRequest setNewVideoInterface:YES];
+        [fileRequest setFileReuqestType:FileRequest_Upload];
+        [fileRequest setImageData:fileData];
+        [fileRequest setMessage:message];
+        [fileRequest appendToJid:jid];
+        [formRequest setDelegate:fileRequest];
+        formRequest.showAccurateProgress = YES;
+        [formRequest setUploadProgressDelegate:fileRequest];
+        [formRequest addData:fileData withFileName:fileName andContentType:@"multipart/form-data" forKey:@"file"];
+        [formRequest setResponseEncoding:NSISOLatin1StringEncoding];
+        [formRequest setPostFormat:ASIMultipartFormDataPostFormat];
+        [formRequest startAsynchronous];
+        [self.file_dic setObject:fileRequest forKey:message.messageId];
+    
+        return fileName;
+    } else {
+        
+    }
+    
     CGSize size = [self getFitSizeForImgSize:[UIImage imageWithData:fileData].size];
     //存小图
     [self saveImageData:fileData withFileName:fileName width:size.width height:size.height forCacheType:QIMFileCacheTypeColoction];
