@@ -197,20 +197,20 @@ static dispatch_once_t _onceQIMDatasourceItemManager;
             userItem.jid = xmppId;
             userItem.index = i + 1;
         }
-        
+
         [[QIMDatasourceItemManager sharedInstance] addChildDataSourceItem:userItem WithId:userDep];
         for (NSInteger i = organTemp.count - 1; i >= 0; i--) {
             NSString *dep = @"staff";
             for (NSInteger j = 0; j <= i; j++) {
                 NSString * tmpStr = organTemp.lastObject;
                 if (organTemp.count == 1 && (tmpStr == nil|| tmpStr.length == 0)) {
-                    
+
                 }
                 else{
                     dep = [dep stringByAppendingFormat:@"/%@", [organTemp objectAtIndex:j]];
                 }
             }
-            
+
             QIMDatasourceItem *childItem = [[QIMDatasourceItemManager sharedInstance] getChildDataSourceItemWithId:dep];
             if (!childItem) {
                 childItem = [[QIMDatasourceItem alloc] init];
@@ -239,7 +239,7 @@ static dispatch_once_t _onceQIMDatasourceItemManager;
             }
             parentItem.isParentNode = YES;
             if ([parentDep isEqualToString:dep]) {
-                
+
             }
             else{
                 [parentItem addChildNodesItem:childItem withChildDP:dep];

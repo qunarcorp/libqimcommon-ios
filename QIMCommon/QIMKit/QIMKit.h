@@ -141,12 +141,6 @@
  */
 - (NSString *)getDomain;
 
-/**
- 偷摸获取客户端Ip地址
- */
-- (NSString *)getClientIp;
-
-
 - (long long)getCurrentServerTime;
 
 
@@ -260,7 +254,7 @@
 
 /**
  新增离线艾特消息
- 
+
  @param groupId 群Id
  @param atType at类型
  @param msgId 艾特消息MsgId

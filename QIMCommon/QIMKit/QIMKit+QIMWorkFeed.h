@@ -73,6 +73,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)updateRemoteWorkMomentNotifyConfig:(BOOL)flag withCallBack:(QIMKitUpdateMomentNotifyConfigSuccessedBlock)callback;
 
+#pragma mark - Search Moment
+- (void)searchMomentWithKey:(NSString *)key withSearchTime:(long long)searchTime withStartNum:(NSInteger)startNum withPageNum:(NSInteger)pageNum withSearchType:(NSInteger)searchType  withCallBack:(QIMKitSearchMomentBlock)callback;
+
 #pragma mark - Local NoticeMsg
 
 - (void)getRemoteLastWorkMoment;

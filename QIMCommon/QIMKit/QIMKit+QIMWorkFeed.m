@@ -125,6 +125,12 @@
     [[QIMManager sharedInstance] updateRemoteWorkMomentNotifyConfig:flag withCallBack:callback];
 }
 
+#pragma mark - Search Moment
+
+- (void)searchMomentWithKey:(NSString *)key withSearchTime:(long long)searchTime withStartNum:(NSInteger)startNum withPageNum:(NSInteger)pageNum withSearchType:(NSInteger)searchType  withCallBack:(QIMKitSearchMomentBlock)callback {
+        [[QIMManager sharedInstance] searchMomentWithKey:key withSearchTime:searchTime withStartNum:startNum withPageNum:pageNum withSearchType:searchType withCallBack:callback];
+    }
+
 #pragma mark - Local NoticeMsg
 
 - (void)getRemoteLastWorkMoment {

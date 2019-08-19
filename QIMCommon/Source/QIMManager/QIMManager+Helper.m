@@ -68,21 +68,58 @@ static void ringAudioServicesSystemSoundCompletionProc(SystemSoundID ssID, void 
         if ([[NSDate date] timeIntervalSince1970] - lastPlay > 2.0) {
             UIApplicationState applicationState = [[UIApplication sharedApplication] applicationState];
             if (applicationState == UIApplicationStateActive) {
-                // 非租车业务才播放声音
-                SystemSoundID soundID;
-                // 读文件获取SoundID
-                NSString *filePath = [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"msg" ofType:@"wav"];
-                if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
-                    filePath = [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"in" ofType:@"caf"];
-                }
-                if (filePath != nil) {
-                    //声音
-                    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategorySoloAmbient
-                                                           error:nil];
-                    AudioServicesCreateSystemSoundID((__bridge CFURLRef) [NSURL fileURLWithPath:filePath], &_ringSystemSoundID);
-                    AudioServicesAddSystemSoundCompletion(_ringSystemSoundID, NULL, NULL, ringAudioServicesSystemSoundCompletionProc, NULL);
-                    //通过创建的soundID打开对应的音频文件
-                    AudioServicesPlayAlertSound(_ringSystemSoundID);
+                NSString *soundName = [[QIMManager sharedInstance] soundName];
+                if (!soundName) {
+                    // 非租车业务才播放声音
+                    SystemSoundID soundID;
+                    // 读文件获取SoundID
+
+                    NSString *filePath = [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"msg" ofType:@"wav"];
+                    if (filePath != nil) {
+                        //声音
+                        [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategorySoloAmbient
+                                                               error:nil];
+                        AudioServicesCreateSystemSoundID((__bridge CFURLRef) [NSURL fileURLWithPath:filePath], &_ringSystemSoundID);
+                        AudioServicesAddSystemSoundCompletion(_ringSystemSoundID, NULL, NULL, ringAudioServicesSystemSoundCompletionProc, NULL);
+                        //通过创建的soundID打开对应的音频文件
+                        AudioServicesPlayAlertSound(_ringSystemSoundID);
+                    }
+                } else {
+                    if ([soundName isEqualToString:@"default"]) {
+                        //定义一个SystemSoundID
+                        //http://iphonedevwiki.net/index.php/AudioServices
+                        // 非租车业务才播放声音
+                        SystemSoundID soundID;
+                        // 读文件获取SoundID
+                        NSString *soundFirstName = [[soundName componentsSeparatedByString:@"."] firstObject];
+                        NSString *soundLastName = [[soundName componentsSeparatedByString:@"."] lastObject];
+                        NSString *filePath = [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"in" ofType:@"caf"];
+                        if (filePath != nil) {
+                            //声音
+                            [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategorySoloAmbient
+                                                                   error:nil];
+                            AudioServicesCreateSystemSoundID((__bridge CFURLRef) [NSURL fileURLWithPath:filePath], &_ringSystemSoundID);
+                            AudioServicesAddSystemSoundCompletion(_ringSystemSoundID, NULL, NULL, ringAudioServicesSystemSoundCompletionProc, NULL);
+                            //通过创建的soundID打开对应的音频文件
+                            AudioServicesPlayAlertSound(_ringSystemSoundID);
+                        }
+                    } else {
+                        // 非租车业务才播放声音
+                        SystemSoundID soundID;
+                        // 读文件获取SoundID
+                        NSString *soundFirstName = [[soundName componentsSeparatedByString:@"."] firstObject];
+                        NSString *soundLastName = [[soundName componentsSeparatedByString:@"."] lastObject];
+                        NSString *filePath = [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:soundFirstName ofType:soundLastName];
+                        if (filePath != nil) {
+                            //声音
+                            [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategorySoloAmbient
+                                                                   error:nil];
+                            AudioServicesCreateSystemSoundID((__bridge CFURLRef) [NSURL fileURLWithPath:filePath], &_ringSystemSoundID);
+                            AudioServicesAddSystemSoundCompletion(_ringSystemSoundID, NULL, NULL, ringAudioServicesSystemSoundCompletionProc, NULL);
+                            //通过创建的soundID打开对应的音频文件
+                            AudioServicesPlayAlertSound(_ringSystemSoundID);
+                        }
+                    }
                 }
             }
             lastPlay = [[NSDate date] timeIntervalSince1970];

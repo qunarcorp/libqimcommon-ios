@@ -1029,7 +1029,7 @@
     
     //TODO 清除未读时候，清除一下艾特消息
     dispatch_block_t block = ^{
-        
+
         [self.hasAtMeDic removeObjectForKey:xmppId];
     };
     if (dispatch_get_specific(self.atMeCacheTag)) {

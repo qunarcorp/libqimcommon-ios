@@ -147,13 +147,13 @@
             result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         } else {
             getMucHistorySuccess == NO;
-            
+
             NSDictionary *logDic3 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"HTTPStatusCode":@([request responseStatusCode]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"获取群离线消息失败了"};
-            
+
             Class autoManager3 = NSClassFromString(@"QIMAutoTrackerManager");
             id autoManagerObject3 = [[autoManager3 alloc] init];
             [autoManagerObject3 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic3];
-            
+
             QIMErrorLog(@"获取群历史记录失败了了了 : %@, [request responseStatusCode] : %d", error, [request responseStatusCode]);
         }
         if (result.count > 0) {
@@ -166,13 +166,13 @@
                 } else {
                     self.latestGroupMessageFlag = NO;
                 }
-                
+
                 NSDictionary *logDic4 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"是否还要继续拉取群离线消息":@(self.latestGroupMessageFlag), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"是否还要继续拉取群离线消息"};
-                
+
                 Class autoManager4 = NSClassFromString(@"QIMAutoTrackerManager");
                 id autoManagerObject4 = [[autoManager4 alloc] init];
                 [autoManagerObject4 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic4];
-                
+
                 QIMVerboseLog(@"是否还要继续拉取群离线消息 : %d", self.latestGroupMessageFlag);
                 [self dealWithGroupMsg:data successed:&getMucHistorySuccess];
             } else {
@@ -180,13 +180,14 @@
                 if (errCode == 5000) {
                     [self updateRemoteLoginKey];
                 }
-                
+
+
                 NSDictionary *logDic5 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"Error":result, @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"获取群离线消息失败了"};
-                
+
                 Class autoManager5 = NSClassFromString(@"QIMAutoTrackerManager");
                 id autoManagerObject5 = [[autoManager5 alloc] init];
                 [autoManagerObject5 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic5];
-                
+
                 QIMErrorLog(@"获取群历史记录失败,ErrMsg:%@", result);
             }
         } else {

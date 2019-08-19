@@ -124,6 +124,8 @@
 @property (nonatomic, strong) NSMutableDictionary *userNormalHeaderDic;   //用户普通头像字典
 @property (nonatomic, strong) NSMutableDictionary *userInfoDic;           //用户内存化名片信息
 
+@property (nonatomic, strong) NSString *soundName;
+
 @property (nonatomic, strong) NSMutableDictionary *hasAtMeDic;           //At 字典
 @property (nonatomic, strong) NSMutableDictionary *hasAtAllDic;          //At All
 @property (nonatomic, strong) NSMutableDictionary *conversationParamDic;         //会话参数
@@ -285,20 +287,9 @@
 - (NSString *)getMyNickName;
 
 /**
- 获取当前登录的公司
- */
-- (NSString *)getCompany;
-
-/**
  获取当前登录的domain
  */
 - (NSString *)getDomain;
-
-/**
- 偷摸获取客户端Ip地址
- */
-- (NSString *)getClientIp;
-
 
 - (long long)getCurrentServerTime;
 

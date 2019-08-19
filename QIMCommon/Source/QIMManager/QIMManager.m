@@ -231,6 +231,21 @@ static QIMManager *__IMManager = nil;
     _shareLocationFromIdDic = [NSMutableDictionary dictionary];
     _userResourceDic = [NSMutableDictionary dictionary];
     _onlineTables = [[NSMutableDictionary alloc] init];
+    _imageCachePath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/imageCache/"]];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:_imageCachePath]) {
+        [[NSFileManager defaultManager] createDirectoryAtPath:_imageCachePath withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+
+    _downLoadFile = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/imageCache/"]];
+
+    if (![[NSFileManager defaultManager] fileExistsAtPath:_downLoadFile]) {
+        [[NSFileManager defaultManager] createDirectoryAtPath:_downLoadFile withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+
+    _groupHeaderImageCachePath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/imageCache/"]];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:_groupHeaderImageCachePath]) {
+        [[NSFileManager defaultManager] createDirectoryAtPath:_groupHeaderImageCachePath withIntermediateDirectories:YES attributes:nil error:nil];
+    }
 }
 
 - (void)initUserDicts {
@@ -313,6 +328,7 @@ static QIMManager *__IMManager = nil;
             }
         }
     }
+    _soundName = [[QIMManager sharedInstance] getClientNotificationSoundName];
 }
 
 @end
@@ -390,7 +406,8 @@ static QIMManager *__IMManager = nil;
         QIMVerboseLog(@"LoginComplate 之后的tempUserToken : %@", tempUserToken);
 #warning NavDict NavConfig
         NSDictionary *currentLoginNavConfig = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"NavConfig"];
-        NSDictionary *navDict = @{@"NavConfig":currentLoginNavConfig?currentLoginNavConfig:@{}, @"NavUrl":[[QIMUserCacheManager sharedInstance] userObjectForKey:@"QC_CurrentNavDict"]};
+        NSDictionary *currentNavDict = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"QC_CurrentNavDict"];
+        NSDictionary *navDict = @{@"NavConfig":currentLoginNavConfig?currentLoginNavConfig:@{}, @"NavUrl":currentNavDict?currentNavDict : @{}};
         [self addUserCacheWithUserId:userName WithUserFullJid:userFullJid WithNavDict:navDict];
         
         NSString *oldLoginUser = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"LastestLoginUser"];
@@ -409,18 +426,18 @@ static QIMManager *__IMManager = nil;
     if (![[NSFileManager defaultManager] fileExistsAtPath:_imageCachePath]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:_imageCachePath withIntermediateDirectories:YES attributes:nil error:nil];
     }
-    
+
     _downLoadFile = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/imageCache/"]];
-    
+
     if (![[NSFileManager defaultManager] fileExistsAtPath:_downLoadFile]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:_downLoadFile withIntermediateDirectories:YES attributes:nil error:nil];
     }
-    
+
     _groupHeaderImageCachePath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/imageCache/"]];
     if (![[NSFileManager defaultManager] fileExistsAtPath:_groupHeaderImageCachePath]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:_groupHeaderImageCachePath withIntermediateDirectories:YES attributes:nil error:nil];
     }
-   
+
     QIMVerboseLog(@"开始获取单人历史记录2");
     CFAbsoluteTime startTime1 = [[QIMWatchDog sharedInstance] startTime];
     [self updateOfflineMessagesV2];
@@ -528,7 +545,7 @@ static QIMManager *__IMManager = nil;
     QIMVerboseLog(@"开始获取加密会话密码箱2结束");
     
     CFAbsoluteTime startTime13 = [[QIMWatchDog sharedInstance] startTime];
-    [self sendPushTokenWithMyToken:[[QIMAppInfo sharedInstance] pushToken] WithDeleteFlag:NO];
+    [self sendPushTokenWithMyToken:[[QIMAppInfo sharedInstance] getPushToken] WithDeleteFlag:NO];
     QIMVerboseLog(@"注册Token1loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime13]);
     
     // 更新好友列表
@@ -570,6 +587,8 @@ static QIMManager *__IMManager = nil;
         
         QIMVerboseLog(@"登录之后请求一下驼圈入口开关");
         [self getCricleCamelEntrance];
+        QIMVerboseLog(@"登录之后请求一下驼圈视频配置");
+        [self getCricleCamelVideoConfig];
         
         QIMVerboseLog(@"登录之后获取一下驼圈提醒开关");
         [self getRemoteWorkMomentSwitch];
@@ -1079,10 +1098,6 @@ static QIMManager *__IMManager = nil;
     return [otherConfig objectForKey:@"myredpackageurl"];
 }
 
-- (NSString *)getClientIp {
-    return @"0.0.0.0";
-}
-
 //新消息提醒
 - (BOOL)isNewMsgNotify {
     BOOL state = [[QIMManager sharedInstance] getLocalMsgNotifySettingWithIndex:QIMMSGSETTINGSOUND_INAPP];
@@ -1215,11 +1230,11 @@ static QIMManager *__IMManager = nil;
         [_hasAtMeDic removeObjectForKey:groupId];
         [[IMDataManager qimDB_SharedInstance] qimDB_UpdateAtMessageReadStateWithGroupId:groupId withReadState:QIMAtMsgHasReadState];
         dispatch_async(dispatch_get_main_queue(), ^{
-            
+
             [[NSNotificationCenter defaultCenter] postNotificationName:kAtMeChange object:groupId];
         });
     };
-    
+
     if (dispatch_get_specific(_atMeCacheTag)) {
         block();
     } else {
@@ -1232,7 +1247,7 @@ static QIMManager *__IMManager = nil;
         _hasAtMeDic = nil;
         [[IMDataManager qimDB_SharedInstance] qimDB_insertAtMessageWithGroupId:groupId withType:atType withMsgId:msgId withMsgTime:msgTime];
         dispatch_async(dispatch_get_main_queue(), ^{
-            
+
             [[NSNotificationCenter defaultCenter] postNotificationName:kAtMeChange object:groupId];
         });
     };
@@ -1578,24 +1593,24 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
 }
 
 - (void)findNewestClient {
-    NSString *destUrl = [NSString stringWithFormat:@"https://03682da0-c9cb-4f53-a918-22903cb93bc3.mock.pstmn.io/qtalk/findNewestClient"];
     NSInteger updateAppVersion = [[[QIMUserCacheManager sharedInstance] userObjectForKey:@"updateAppVersion"] integerValue];
     if (updateAppVersion > 0 && updateAppVersion > [[[QIMAppInfo sharedInstance] AppBuildVersion] integerValue]) {
         
     } else {
         updateAppVersion = [[[QIMAppInfo sharedInstance] AppBuildVersion] integerValue];
     }
-    NSDictionary *param = @{@"clientType":@"ios", @"version":@(updateAppVersion)};
-    NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:param error:nil];
+    NSString *destUrl = [NSString stringWithFormat:@"%@/nck/client/get_version.qunar?clientname=%@&ver=%ld&u=%@&d=%@", [[QIMNavConfigManager sharedInstance] newerHttpUrl], @"qtalk_ios", updateAppVersion, [QIMManager getLastUserName], [[QIMManager sharedInstance] getDomain]];
 
-    [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
+    [[QIMManager sharedInstance] sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[responseDic objectForKey:@"ret"] boolValue];
         NSInteger errcode = [[responseDic objectForKey:@"errcode"] integerValue];
         if (ret && errcode==0) {
             NSDictionary *data = [responseDic objectForKey:@"data"];
             if ([data isKindOfClass:[NSDictionary class]] && data.count > 0) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyUpdateAppVersion object:data];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                   [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyUpdateAppVersion object:data];
+                });
             }
         }
     } withFailedCallBack:^(NSError *error) {
