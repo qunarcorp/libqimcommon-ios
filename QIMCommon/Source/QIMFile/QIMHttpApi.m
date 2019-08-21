@@ -170,7 +170,7 @@ done:
 
 + (NSDictionary *)checkUserToken:(NSString *)token{
     NSDictionary *result = nil;
-    NSString *destUrl = [[QIMNavConfigManager sharedInstance] checkSmsUrl];//@"https://smsauth.qunar.com/api/1.0/token/auth";
+    NSString *destUrl = [[QIMNavConfigManager sharedInstance] checkSmsUrl];
     NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
     ASIFormDataRequest *request = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
     [request addPostValue:token forKey:@"token"];
@@ -187,7 +187,7 @@ done:
 
 + (NSDictionary *)getUserTokenWithUserName:(NSString *)userName WihtVerifyCode:(NSString *)verifCode{
     NSDictionary *result = nil;
-    NSString *destUrl = [[QIMNavConfigManager sharedInstance] tokenSmsUrl];//@"https://smsauth.qunar.com/api/2.0/token";
+    NSString *destUrl = [[QIMNavConfigManager sharedInstance] tokenSmsUrl];
     NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
     ASIFormDataRequest *request = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
     [request addPostValue:userName forKey:@"rtx_id"];
@@ -204,7 +204,7 @@ done:
 
 + (NSDictionary *)getVerifyCodeWithUserName:(NSString *)userName{
     NSDictionary *result = nil;
-    NSString *destUrl = [[QIMNavConfigManager sharedInstance] takeSmsUrl]; //  @"https://smsauth.qunar.com/api/1.0/verify_code";
+    NSString *destUrl = [[QIMNavConfigManager sharedInstance] takeSmsUrl];
     NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
     ASIFormDataRequest *request = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
     [request addPostValue:userName forKey:@"rtx_id"];
