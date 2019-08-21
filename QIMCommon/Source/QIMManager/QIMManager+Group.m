@@ -348,7 +348,8 @@
         NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
         NSMutableDictionary *requestHeaders = [[NSMutableDictionary alloc] initWithCapacity:2];
         [requestHeaders setObject:@"application/json;" forKey:@"Content-type"];
-        
+
+
         QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:requestUrl];
         [request setHTTPMethod:QIMHTTPMethodPOST];
         [request setHTTPRequestHeaders:requestHeaders];
@@ -392,6 +393,153 @@
             QIMErrorLog(@"获取群名片接口失败。：%@", error);
         }];
     });
+}
+
+- (NSDictionary *)updateGroupCard2:(NSString *)groupId {
+    
+    if (groupId.length <= 0) {
+        return nil;
+    }
+    if (!self.load_customEvent_queue) {
+        self.load_customEvent_queue = dispatch_queue_create("Load CustomEvent Queue", DISPATCH_QUEUE_SERIAL);
+    }
+//    dispatch_async(self.load_customEvent_queue, ^{
+        NSDictionary *groupDic = [[IMDataManager sharedInstance] getGroupCardByGroupId:groupId];
+        NSMutableDictionary *groupIdDic = [NSMutableDictionary dictionary];
+        NSArray *coms = [groupId componentsSeparatedByString:@"@"];
+        NSArray *comLastObject = [[coms lastObject] componentsSeparatedByString:@"."];
+        NSString *domain = @"";
+        if ([comLastObject lastObject]) {
+            domain = [comLastObject lastObject];
+        }
+        NSNumber *version = [groupDic objectForKey:@"LastUpdateTime"];
+        if (domain && groupId) {
+            NSMutableArray *users = [groupIdDic objectForKey:domain];
+            if (users == nil) {
+                users = [NSMutableArray array];
+                [groupIdDic setObject:users forKey:domain];
+            }
+            [users addObject:@{@"muc_name": groupId ? groupId : @"", @"version": version ? version : @"0"}];
+        }
+        
+        [[IMDataManager sharedInstance] insertGroup:groupId];
+        
+        NSMutableArray *params = [NSMutableArray array];
+        for (NSString *domain in groupIdDic.allKeys) {
+            NSArray *users = [groupIdDic objectForKey:domain];
+            if (users.count <= 0) {
+                return nil;
+            }
+            [params addObject:@{@"domain": domain ? domain : @"", @"mucs": users}];
+        }
+    
+    NSArray *array = @[@{
+        @"domain" : @"conference.ejabpublic",
+        @"mucs" : @[
+                      @{
+                          @"muc_name" : @"b3981c383416429e9daf82be211c1c2b@conference.ejabpublic",
+                          @"version" : @(0)
+                      }
+                ]
+        }];
+    
+        NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:array error:nil];
+        
+        NSString *destUrl = [NSString stringWithFormat:@"%@/domain/get_muc_vcard?u=%@&k=%@&platform=iphone&version=%@", [[QIMNavConfigManager sharedInstance] httpHost], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
+        
+        if (self.remoteKey.length <= 0) {
+            [self updateRemoteLoginKey];
+        }
+        NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
+        NSMutableDictionary *requestHeaders = [[NSMutableDictionary alloc] initWithCapacity:2];
+        [requestHeaders setObject:@"application/json;" forKey:@"Content-type"];
+        
+        ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
+        [request setRequestMethod:@"POST"];
+        [request setUseCookiePersistence:NO];
+        [request setPostBody:[NSMutableData dataWithData:requestData]];
+        NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+        [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+        [request setRequestHeaders:cookieProperties];
+        [request startSynchronous];
+        NSError *error = [request error];
+        if ([request responseStatusCode] == 200 && !error) {
+            NSData *responseData = [request responseData];
+            NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+            BOOL ret = [[result objectForKey:@"ret"] boolValue];
+            if (ret) {
+                NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+                BOOL ret = [[result objectForKey:@"ret"] boolValue];
+                if (ret) {
+                    NSMutableArray *dataList = [NSMutableArray array];
+                    NSArray *list = [result objectForKey:@"data"];
+                    for (NSDictionary *dataDic in list) {
+                        NSArray *mucList = [dataDic objectForKey:@"mucs"];
+                        if (mucList) {
+                            [dataList addObjectsFromArray:mucList];
+                        }
+                    }
+                    if (dataList.count > 0) {
+                        
+                        dispatch_block_t block = ^{
+                            [self.groupVCardDict removeObjectForKey:groupId];
+                        };
+                        
+                        if (dispatch_get_specific(self.cacheTag))
+                            block();
+                        else
+                            dispatch_sync(self.cacheQueue, block);
+                    }
+                }
+            }
+        }
+        
+        /*
+        QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:requestUrl];
+        [request setHTTPMethod:QIMHTTPMethodPOST];
+        [request setHTTPRequestHeaders:requestHeaders];
+        [request setHTTPBody:[NSMutableData dataWithData:requestData]];
+        [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+            if (response.code == 200) {
+                QIMErrorLog(@"群名片获取当前线程 : %@", [NSThread currentThread]);
+                NSData *responseData = response.data;
+                NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+                BOOL ret = [[result objectForKey:@"ret"] boolValue];
+                if (ret) {
+                    NSMutableArray *dataList = [NSMutableArray array];
+                    NSArray *list = [result objectForKey:@"data"];
+                    for (NSDictionary *dataDic in list) {
+                        NSArray *mucList = [dataDic objectForKey:@"mucs"];
+                        if (mucList) {
+                            [dataList addObjectsFromArray:mucList];
+                        }
+                    }
+                    if (dataList.count > 0) {
+                        
+                        dispatch_block_t block = ^{
+                            for (NSString *groupId in groupIds) {
+                                [self.groupVCardDict removeObjectForKey:groupId];
+                            }
+                        };
+                        
+                        if (dispatch_get_specific(self.cacheTag))
+                            block();
+                        else
+                            dispatch_sync(self.cacheQueue, block);
+                        
+                        [[IMDataManager sharedInstance] bulkUpdateGroupCards:dataList];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kGroupNickNameChanged object:groupIds];
+                        });
+                    }
+                }
+            }
+        } failure:^(NSError *error) {
+            QIMErrorLog(@"获取群名片接口失败。：%@", error);
+        }];
+        */
+//    });
+    return nil;
 }
 
 #pragma mark - GroupHeader 群头像

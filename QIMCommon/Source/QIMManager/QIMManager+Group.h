@@ -67,6 +67,8 @@
  */
 - (void)updateGroupCard:(NSArray *)groupIds;
 
+- (NSDictionary *)updateGroupCard2:(NSString *)groupId;
+
 /**
  设置群名片信息
  
