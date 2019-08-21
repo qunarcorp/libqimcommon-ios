@@ -775,28 +775,33 @@
         NSString *fromNickName = [infoDic objectForKey:@"FromNickName"];
         NSDictionary *groupCardDic = [self getGroupCardByGroupId:groupId];
         NSString *groupName = [groupCardDic objectForKey:@"Name"];
-        if (fromNickName.length > 0) {
-            NSDictionary *userInfoDic = [self getUserInfoByGroupName:fromNickName];
-            fromNickName = [userInfoDic objectForKey:@"Name"];
-        }
-        [self removeSessionById:groupId];
-        [[IMDataManager sharedInstance] deleteGroup:groupId];
-        [[IMDataManager sharedInstance] deleteMessageWithXmppId:groupId];
-        NSMutableDictionary *userInfoDic = [NSMutableDictionary dictionary];
-        if (reason.length > 0) {
-            [userInfoDic setObject:reason forKey:@"Reason"];
-        }
-        if (groupName.length > 0) {
-            [userInfoDic setObject:groupName forKey:@"GroupName"];
-        }
-        if (fromNickName.length > 0) {
-            [userInfoDic setObject:fromNickName forKey:@"FromNickName"];
-        }
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[NSNotificationCenter defaultCenter] postNotificationName:kChatRoomDestroy object:groupId userInfo:userInfoDic];
+        NSInteger LastUpdateTime = [[groupCardDic objectForKey:@"LastUpdateTime"] integerValue];
+        if (LastUpdateTime <= 0) {
+            return;
+        } else {
+            if (fromNickName.length > 0) {
+                NSDictionary *userInfoDic = [self getUserInfoByGroupName:fromNickName];
+                fromNickName = [userInfoDic objectForKey:@"Name"];
+            }
+            [self removeSessionById:groupId];
+            [[IMDataManager sharedInstance] deleteGroup:groupId];
+            [[IMDataManager sharedInstance] deleteMessageWithXmppId:groupId];
+            NSMutableDictionary *userInfoDic = [NSMutableDictionary dictionary];
+            if (reason.length > 0) {
+                [userInfoDic setObject:reason forKey:@"Reason"];
+            }
+            if (groupName.length > 0) {
+                [userInfoDic setObject:groupName forKey:@"GroupName"];
+            }
+            if (fromNickName.length > 0) {
+                [userInfoDic setObject:fromNickName forKey:@"FromNickName"];
+            }
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kChatRoomDestroy object:groupId userInfo:userInfoDic];
+                });
             });
-        });
+        }
     });
 }
 
