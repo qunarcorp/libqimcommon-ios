@@ -1108,8 +1108,7 @@
     }];
 }
 
-- (int)getLeaveMsgNotReaderCount {//    prod:http://u.package.qunar.com/user/message/countUnreply.json
-    //    dev：http://l-djb2c8.vc.dev.cn0.qunar.com:8972/user/message/countUnreply.json
+- (int)getLeaveMsgNotReaderCount {
     NSURL *url = [NSURL URLWithString:@"http://u.package.qunar.com/user/message/countUnreply.json"];
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:url];
     [request addRequestHeader:@"Content-type" value:@"application/x-www-form-urlencoded;"];

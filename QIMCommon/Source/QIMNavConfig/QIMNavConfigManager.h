@@ -116,4 +116,6 @@
 
 - (NSString *)qimNav_getRSACodePublicKeyPathWithFileName:(NSString *)fileName;
 
+- (NSString *)getQChatGetTKUrl;
+
 @end

@@ -51,7 +51,6 @@
 }
 
 - (void)getReadFlag {
-    //curl -X POST  -H 'content-type: application/json' -d '{"time":1.520480778253E9, "domain":"ejabhost1"}' 'http://l-im3.vc.beta.cn0.qunar.com:8900/qtapi/getreadflag.qunar
     NSString *destUrl = [NSString stringWithFormat:@"%@/qtapi/getreadflag.qunar?server=%@&c=qtalk&u=%@&k=%@&p=iphone&v=%@",
                          [[QIMNavConfigManager sharedInstance] javaurl],
                          [[XmppImManager sharedInstance] domain],

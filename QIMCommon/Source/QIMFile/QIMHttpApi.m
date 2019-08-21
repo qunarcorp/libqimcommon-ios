@@ -4,7 +4,6 @@
 //
 //  Created by ping.xue on 14-3-13.
 //  Copyright (c) 2014年 May. All rights reserved.
-//  211.151.112.140
 
 #import "QIMHttpApi.h"
 #import "QIMAppInfo.h"

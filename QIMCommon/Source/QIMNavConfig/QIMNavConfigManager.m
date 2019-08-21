@@ -12,6 +12,8 @@
 
 @interface QIMNavConfigManager()
 
+@property(nonatomic, strong) NSDictionary *defaultSettings;
+
 @end
 @implementation QIMNavConfigManager{
     NSDictionary *_oldAdvertDic;
@@ -69,6 +71,19 @@
     self = [super init];
     QIMVerboseLog(@" QIMNavConfigManager sharedInstance");
     if (self) {
+        if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
+            NSString *qtalkSettingsPath = [[NSBundle mainBundle] pathForResource:@"qtalkDefaultSetting" ofType:@"json"];
+            NSString *str = [[NSString alloc] initWithContentsOfFile:qtalkSettingsPath];
+            NSData *encodeBase64Data = [NSData qim_dataWithBase64EncodedString:str];
+            self.defaultSettings = [[QIMJSONSerializer sharedInstance] deserializeObject:encodeBase64Data error:nil];
+        } else if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
+            NSString *qchatSettings = [[NSBundle mainBundle] pathForResource:@"qchatDefaultSetting" ofType:@"json"];
+            NSString *str = [[NSString alloc] initWithContentsOfFile:qchatSettings];
+            NSData *encodeBase64Data = [NSData qim_dataWithBase64EncodedString:str];
+            self.defaultSettings = [[QIMJSONSerializer sharedInstance] deserializeObject:encodeBase64Data error:nil];
+        } else {
+            self.defaultSettings = nil;
+        }
         NSString *navConfigStr = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"NavConfig"];
         NSMutableDictionary *navConfig = [[QIMJSONSerializer sharedInstance] deserializeObject:navConfigStr error:nil];
         QIMVerboseLog(@"本地找到的NavConfig ： %@", navConfig);
@@ -116,51 +131,52 @@
 - (void)initialNavConfig {
     if (_xmppHost == nil) {
         if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
-            _xmppHost = @"qchat.qunar.com";
-            _httpHost = @"https://qcweb.qunar.com/api";
-            _newerHttpUrl = @"https://qcweb.qunar.com/api/package/newapi";
-            _javaurl = @"https://qt.qunar.com/package";
-            _domain = @"ejabhost2";
-            _innerFileHttpHost = @"https://qcweb.qunar.com";
-            _pubkey = @"pub_key_chat_release";
+            _xmppHost = [self.defaultSettings objectForKey:@"xmppHost"];
+            _httpHost = [self.defaultSettings objectForKey:@"httpHost"];
+            _newerHttpUrl = [self.defaultSettings objectForKey:@"newerHttpUrl"];
+            _javaurl = [self.defaultSettings objectForKey:@"javaurl"];
+            _domain = [self.defaultSettings objectForKey:@"domain"];
+            _innerFileHttpHost = [self.defaultSettings objectForKey:@"innerFileHttpHost"];
+            _pubkey = [self.defaultSettings objectForKey:@"pubkey"];
             _takeSmsUrl = nil;
             _checkSmsUrl = nil;
-            _port = @"5222";
-            _protobufPort = @"5202";
+            _port = [self.defaultSettings objectForKey:@"port"];
+            _protobufPort = [self.defaultSettings objectForKey:@"protobufPort"];
             _adShown = NO;
-            _qcHost = @"https://qcadmin.qunar.com";
-            _domainHost = @".qunar.com";
-            _shareUrl = @"https://qim.qunar.com/sharemsg/index.php";
+            _qcHost = [self.defaultSettings objectForKey:@"qcHost"];
+            _domainHost = [self.defaultSettings objectForKey:@"domainHost"];
+            _searchUrl = [self.defaultSettings objectForKey:@"searchurl"];
+            _shareUrl = [self.defaultSettings objectForKey:@"shareUrl"];
         } else if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
-            _xmppHost = @"qt.qunar.com";
-            _httpHost = @"https://qtapi.qunar.com";
-            _javaurl = @"https://im.qunar.com/pubim/s/hosts";
-            _newerHttpUrl = @"https://qt.qunar.com/package/newapi";
-            _domain = @"ejabhost1";
-            _innerFileHttpHost = @"https://qt.qunar.com";
-            _pubkey = @"pub_key_chat_release";
-            _takeSmsUrl = @"https://smsauth.qunar.com/api/2.0/verify_code";
-            _checkSmsUrl = @"https://smsauth.qunar.com/api/2.0/token/auth";
-            _tokenSmsUrl = @"https://smsauth.qunar.com/api/2.0/token";
-            _getPushState = @"qt.qunar.com/package/qtapi/push/getState.qunar";
-            _setPushState = @"https://qt.qunar.com/package/qtapi/push/setState.qunar";
-            _port = @"5223";
-            _protobufPort = @"5202";
-            _adShown = NO;
-            _healthcheckUrl = @"http://qt.qunar.com/healthcheck.html";
-            _domainHost = @".qunar.com";
-            _shareUrl = @"https://qim.qunar.com/sharemsg/index.php";
+            _xmppHost = [self.defaultSettings objectForKey:@"xmppHost"];
+            _httpHost = [self.defaultSettings objectForKey:@"httpHost"];
+            _javaurl = [self.defaultSettings objectForKey:@"javaurl"];
+            _newerHttpUrl = [self.defaultSettings objectForKey:@"newerHttpUrl"];
+            _domain = [self.defaultSettings objectForKey:@"domain"];
+            _innerFileHttpHost = [self.defaultSettings objectForKey:@"innerFileHttpHost"];
+            _pubkey = [self.defaultSettings objectForKey:@"pubkey"];
+            _takeSmsUrl = [self.defaultSettings objectForKey:@"takeSmsUrl"];
+            _checkSmsUrl = [self.defaultSettings objectForKey:@"checkSmsUrl"];
+            _tokenSmsUrl = [self.defaultSettings objectForKey:@"tokenSmsUrl"];
+            _getPushState = [self.defaultSettings objectForKey:@"getPushState"];
+            _setPushState = [self.defaultSettings objectForKey:@"setPushState"];
+            _port = [self.defaultSettings objectForKey:@"port"];
+            _protobufPort = [self.defaultSettings objectForKey:@"protobufPort"];
+            _adShown = [[self.defaultSettings objectForKey:@"adShown"] boolValue];
+            _healthcheckUrl = [self.defaultSettings objectForKey:@"healthcheckUrl"];
+            _domainHost = [self.defaultSettings objectForKey:@"domainHost"];
+            _shareUrl = [self.defaultSettings objectForKey:@"shareUrl"];
         }
     }
     
     if (_takeSmsUrl == nil || [_takeSmsUrl length] <= 0) {
-        _takeSmsUrl = @"https://smsauth.qunar.com/api/2.0/verify_code";
+        _takeSmsUrl = [self.defaultSettings objectForKey:@"takeSmsUrl"];
     }
     if (_checkSmsUrl == nil || [_checkSmsUrl length] <= 0) {
-        _checkSmsUrl = @"https://smsauth.qunar.com/api/2.0/token/auth";
+        _checkSmsUrl = [self.defaultSettings objectForKey:@"checkSmsUrl"];
     }
     if (_tokenSmsUrl == nil || [_tokenSmsUrl length] <= 0) {
-        _tokenSmsUrl = @"https://smsauth.qunar.com/api/2.0/token";
+        _tokenSmsUrl = [self.defaultSettings objectForKey:@"tokenSmsUrl"];
     }
     
     [[QIMManager sharedInstance] setImLoginType:_loginType];
@@ -220,7 +236,7 @@
 // OPS
 - (NSString *)opsHost {
     if (!_opsHost) {
-        _opsHost = @"https://opsapp.qunar.com";
+        _opsHost = [self.defaultSettings objectForKey:@"opsHost"];
     }
     return _opsHost;
 }
@@ -228,49 +244,49 @@
 //Video
 - (NSString *)signal_host {
     if (!_signal_host) {
-        _signal_host = @"https://qt.qunar.com/rtc/pc/index.html";
+        _signal_host = [self.defaultSettings objectForKey:@"signal_host"];
     }
     return _signal_host;
 }
 
 - (NSString *)group_room_host {
     if (!_group_room_host) {
-        _group_room_host = @"https://qt.qunar.com/rtc/index.php";
+        _group_room_host = [self.defaultSettings objectForKey:@"group_room_host"];
     }
     return _group_room_host;
 }
 
 - (NSString *)videoApiHost {
     if (!_videoApiHost) {
-        _videoApiHost = @"https://l-wxapp2.vc.beta.cn0.qunar.com:9090";
+        _videoApiHost = [self.defaultSettings objectForKey:@"videoApiHost"];
     }
     return _videoApiHost;
 }
 
 - (NSString *)wssHost {
     if (!_wssHost) {
-        _wssHost = @"wss://l-wxapp2.vc.beta.cn0.qunar.com:9090";
+        _wssHost = [self.defaultSettings objectForKey:@"wssHost"];
     }
     return _wssHost;
 }
 
 - (NSString *)javaurl {
     if (!_javaurl) {
-        _javaurl = @"https://qt.qunar.com/package";
+        _javaurl = [self.defaultSettings objectForKey:@"javaurl"];
     }
     return _javaurl;
 }
 
 - (NSString *)qcHost {
     if (!_qcHost) {
-        _qcHost = @"https://qcadmin.qunar.com";
+        _qcHost = [self.defaultSettings objectForKey:@"qcHost"];
     }
     return _qcHost;
 }
 
 - (NSString *)healthcheckUrl {
     if (!_healthcheckUrl.length) {
-        _healthcheckUrl = @"http://qt.qunar.com/healthcheck.html";
+        _healthcheckUrl = [self.defaultSettings objectForKey:@"healthcheckUrl"];
     }
     return _healthcheckUrl;
 }
@@ -834,6 +850,10 @@
             }
         }
     }
+}
+
+- (NSString *)getQChatGetTKUrl {
+    return [self.defaultSettings objectForKey:@"qchatGetTk"];
 }
 
 @end
