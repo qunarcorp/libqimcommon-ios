@@ -168,15 +168,6 @@
  */
 - (void)getGroupHeaderImageFromRemoteWithGroupId:(NSString *)groupId;
 
-
-/**
- 根据群Id获取群组头像本地路径
- 
- @param groupId 群Id
- @return 本地路径
- */
-- (NSString *)getGroupImagePathFromLocalByGroupId:(NSString *)groupId;
-
 /**
  根据GroupId从本地取群头像
  

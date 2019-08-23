@@ -479,26 +479,6 @@ static NSMutableArray *cacheGroupCardHttpList = nil;
 
 #pragma mark - GroupHeader 群头像
 
-- (NSString *)getGroupImagePathFromLocalByGroupId:(NSString *)groupId {
-    
-    NSString *groupHeaderImagePath = [[self getImagerCache] stringByAppendingPathComponent:groupId];
-    BOOL isExist = [[NSFileManager defaultManager] fileExistsAtPath:groupHeaderImagePath];
-    if (isExist) {
-        return groupHeaderImagePath;
-    } else {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-            [self getGroupHeaderImageFromRemoteWithGroupId:groupId];
-        });
-        if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeStartalk) {
-            NSString *groupHeaderPath = [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"QIMSTGroupDefaultHeader" ofType:@"png"];
-            return groupHeaderPath;
-        } else {
-            NSString *groupHeaderPath = [NSBundle qim_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"QIMGroupDefaultHeader" ofType:@"png"];
-            return groupHeaderPath;
-        }
-    }
-}
-
 - (UIImage *)getGroupImageFromLocalByGroupId:(NSString *)groupId {
     
     if (groupId.length <= 0) {
