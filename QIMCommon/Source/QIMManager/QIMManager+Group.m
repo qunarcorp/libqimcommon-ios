@@ -441,6 +441,42 @@ static NSMutableArray *cacheGroupCardHttpList = nil;
     });
 }
 
+- (void)getIncrementGroupCards {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/muc/get_user_increment_muc_vcard.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
+    NSMutableDictionary *requestHeaders = [[NSMutableDictionary alloc] initWithCapacity:2];
+    [requestHeaders setObject:@"application/json;" forKey:@"Content-type"];
+    [requestHeaders setObject:[NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]] forKey:@"Cookie"];
+
+    NSInteger maxUTLastTime = [[IMDataManager qimDB_SharedInstance] qimDB_getGroupListMaxUTLastUpdateTime];
+    NSDictionary *paramDic = @{@"lastupdtime":[NSString stringWithFormat:@"%ld", maxUTLastTime], @"userid":[QIMManager getLastUserName]};
+    NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:paramDic error:nil];
+
+    QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:requestUrl];
+    [request setHTTPMethod:QIMHTTPMethodPOST];
+    [request setHTTPRequestHeaders:requestHeaders];
+    [request setHTTPBody:[NSMutableData dataWithData:requestData]];
+    [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+        if (response.code == 200) {
+            QIMErrorLog(@"群名片获取当前线程 : %@", [NSThread currentThread]);
+            NSData *responseData = response.data;
+            NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+            BOOL ret = [[result objectForKey:@"ret"] boolValue];
+            if (ret) {
+                NSArray *dataList = [result objectForKey:@"data"];
+                if ([dataList isKindOfClass:[NSArray class]]) {
+                    [[IMDataManager qimDB_SharedInstance] qimDB_bulkUpdateIncrementGroupCards:dataList];
+                }
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationSessionListUpdate object:nil];
+                });
+            }
+        }
+    } failure:^(NSError *error) {
+
+    }];
+}
+
 #pragma mark - GroupHeader 群头像
 
 - (NSString *)getGroupImagePathFromLocalByGroupId:(NSString *)groupId {

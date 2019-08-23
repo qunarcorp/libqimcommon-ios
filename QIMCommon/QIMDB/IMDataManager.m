@@ -45,7 +45,6 @@ static dispatch_once_t _onceDBToken;
         [__global_data_manager setDBOwnerFullJid:dbOwnerFullJid];
         [__global_data_manager setDomain:[[dbOwnerFullJid componentsSeparatedByString:@"@"] lastObject]];
         __global_data_manager.databasePool = [QIMDataBasePool databasePoolWithPath:dbPath];
-//        __global_data_manager.dataBaseQueue = [QIMDataBaseQueue databaseQueueWithPath:dbPath];
         [__global_data_manager openDB];
     });
     return __global_data_manager;
@@ -97,52 +96,62 @@ static dispatch_once_t _onceDBToken;
 
 - (void)openDB {
     [self reCreateDB];
-    /*
-    DatabaseOperator *op = [_dataBasePoolManager getDatabaseOperator];
-    Database *dataBase = op.database;
-    BOOL isSuccess = [dataBase open:_dbPath usingCurrentThread:YES];
-    if (isSuccess == NO) {
-        // 防止数据库文件无效 But 有一种数据库文件能打开 缺不是有效文件 不知怎么解
-        [[NSFileManager defaultManager] removeItemAtPath:_dbPath error:nil];
-        [self reCreateDB];
-    } else {
-        
-    }
-    
-    [self reCreateDB];
-//    [self initSQLiteLog];
-    [self qimDB_updateMsgTimeToMillSecond];
-     */
 }
 
 - (void)reCreateDB {
-    BOOL notCheckCreateDataBase = [[NSFileManager defaultManager] fileExistsAtPath:_dbPath] == NO;
-    NSArray *paths = [_dbPath pathComponents];
-    NSString *dbValue = [[NSUserDefaults standardUserDefaults] objectForKey:@"dbVersion"];
-    NSString *currentValue = [NSString stringWithFormat:@"%@_%lld",[paths objectAtIndex:paths.count-2] , [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"] longLongValue]];
-    if (notCheckCreateDataBase || [currentValue isEqualToString:dbValue] == NO) {
+    BOOL dataBaseExist = [[NSFileManager defaultManager] fileExistsAtPath:_dbPath];
+    NSInteger oldDbVersion = [[[NSUserDefaults standardUserDefaults] objectForKey:@"qimDbVersion"] integerValue];
+    NSInteger currentDBVersion = [self qim_dbVersion];
+    if (dataBaseExist == NO || oldDbVersion <= currentDBVersion) {
         QIMVerboseLog(@"reCreateDB");
         __block BOOL result = NO;
-//        [_dataBaseQueue inDatabase:^(QIMDataBase * _Nonnull db) {
-//            result = [self createDb:db];
-//        }];
         [_databasePool inDatabase:^(QIMDataBase* _Nonnull db) {
             result = [self createDb:db];
         }];
-//        [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-//            result = [self createDb:database];
-//        }];
+        [self upgradeDB:oldDbVersion];
         if (result) {
             QIMVerboseLog(@"创建DB文件成功");
             [self insertUserCacheData];
-            [[NSUserDefaults standardUserDefaults] setObject:currentValue forKey:@"dbVersion"];
+            [[NSUserDefaults standardUserDefaults] setObject:@(currentDBVersion) forKey:@"qimDbVersion"];
             [[NSUserDefaults standardUserDefaults] synchronize];
         } else {
             QIMVerboseLog(@"创建DB文件失败");
         }
     } else {
-        QIMVerboseLog(@"notCheckCreateDataBase : %d, [currentValue isEqualToString:dbValue] : %d", notCheckCreateDataBase, [currentValue isEqualToString:dbValue]);
+        QIMVerboseLog(@"DataBaseExist : %d, currentDBVersion : %ld", dataBaseExist, currentDBVersion);
     }
+}
+
+- (NSInteger)qim_dbVersion {
+    return 1;
+}
+
+- (void)upgradeDB:(NSInteger)oldVersion {
+    if (oldVersion >= [self qim_dbVersion]) {
+        return;;
+    }
+    switch (oldVersion) {
+        case 0:
+            [self upgradeFrom0To1];
+            break;
+        default: {
+            [[NSUserDefaults standardUserDefaults] setObject:@(oldVersion) forKey:@"dBUpdateVersion"];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+        }
+            break;
+    }
+    oldVersion ++;
+
+    // 递归判断是否需要升级
+    [self upgradeDB:oldVersion];
+}
+
+- (void)upgradeFrom0To1 {
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+        if ([database checkExistsOnTable:@"IM_Group" withColumn:@"UTLastUpdateTime"] == NO) {
+            [database executeNonQuery:@"ALTER TABLE IM_Group ADD UTLastUpdateTime INTEGER;" withParameters:nil];
+        }
+    }];
 }
 
 - (void)initSQLiteLog {
@@ -219,9 +228,7 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (id)dbInstance {
-//    return _dataBaseQueue;
     return _databasePool;
-//    return [self getDatabaseOperator];
 }
 
 + (void)safeSaveForDic:(NSMutableDictionary *)dic setObject:(id)value forKey:(id)key{

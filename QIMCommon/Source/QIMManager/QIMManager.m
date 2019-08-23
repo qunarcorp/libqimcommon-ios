@@ -485,7 +485,7 @@ static QIMManager *__IMManager = nil;
         QIMVerboseLog(@"获取阅读指针之后再次强制刷新列表页结束");
     });
     QIMVerboseLog(@"同步消息完成耗时 : %lf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime1]);
-    
+
     QIMVerboseLog(@"开始获取系统历史记录2");
     CFAbsoluteTime startTime5 = [[QIMWatchDog sharedInstance] startTime];
     [self updateOfflineSystemNoticeMessages];
@@ -523,7 +523,11 @@ static QIMManager *__IMManager = nil;
     [self quickJoinAllGroup];
     QIMVerboseLog(@"快速入群完成2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime10]);
     QIMVerboseLog(@"快速入群完成2");
-        
+
+    QIMVerboseLog(@"开始获取增量群名片");
+    [self getIncrementGroupCards];
+    QIMVerboseLog(@"获取增量群名片完成");
+
     QIMVerboseLog(@"开始TCP发送已送达消息状态2");
     CFAbsoluteTime startTime11 = [[QIMWatchDog sharedInstance] startTime];
     [self sendRecevieMessageState];

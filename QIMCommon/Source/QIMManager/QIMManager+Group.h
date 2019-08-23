@@ -69,6 +69,9 @@
  */
 - (void)updateGroupCard:(NSArray *)groupIds;
 
+/*获取增量的群名片*/
+- (void)getIncrementGroupCards;
+
 /**
  设置群名片信息
  
