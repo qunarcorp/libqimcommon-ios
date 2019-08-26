@@ -605,7 +605,7 @@ static QIMManager *__IMManager = nil;
         [[QIMManager sharedInstance] getExploreNotReaderCount];
         
         QIMVerboseLog(@"登录之后请求热线账户列表");
-        [self getHotlineShopList];
+        [self getRemoteHotlineShopList];
         
         QIMVerboseLog(@"登录之后获取发现页应用列表");
         [self getRemoteFoundNavigation];

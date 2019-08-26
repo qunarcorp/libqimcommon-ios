@@ -68,8 +68,8 @@
     if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQChat) {
         
     } else {
-        NSDictionary *virtualDic = [self getVirtualDic];
-        BOOL isConsult = [[virtualDic allKeys] containsObject:xmppId];
+        NSArray *allhotlines = [self getAllHotLines];
+        BOOL isConsult = [allhotlines containsObject:xmppId];
         if (isConsult == YES) {
             [self addConsultSessionById:xmppId ByRealJid:xmppId WithUserId:xmppId ByMsgId:nil WithOpen:YES WithLastUpdateTime:[[NSDate date] qim_timeIntervalSince1970InMilliSecond] WithChatType:ChatType_Consult];
             return ChatType_Consult;
@@ -101,8 +101,9 @@
             return ChatType_SingleChat;
         }
     } else {
-        NSDictionary *virtualDic = [self getVirtualDic];
-        BOOL isConsult = [[virtualDic allKeys] containsObject:userId];
+        
+        NSArray *allhotlines = [self getAllHotLines];
+        BOOL isConsult = [allhotlines containsObject:userId];
         if (isConsult == YES) {
             [self addConsultSessionById:userId ByRealJid:userId WithUserId:userId ByMsgId:nil WithOpen:YES WithLastUpdateTime:[[NSDate date] qim_timeIntervalSince1970InMilliSecond] WithChatType:ChatType_Consult];
             return ChatType_Consult;
