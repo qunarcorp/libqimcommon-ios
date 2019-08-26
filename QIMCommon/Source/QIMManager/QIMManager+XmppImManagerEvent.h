@@ -15,4 +15,6 @@
 
 - (void)onReadState:(NSDictionary *)infoDic;
 
++ (void)qim_privateCommonLog:(NSString *)log;
+
 @end
