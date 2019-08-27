@@ -289,7 +289,7 @@
                         [self updateRemoteLoginKey];
                     }
 
-                    NSDictionary *logDic4 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":jsonDic, @"requestHeaders":cookieProperties, @"describtion":@"获取单人历史JSON记录请求失败", @"ext":@{@"error":result}};
+                    NSDictionary *logDic4 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":jsonDic, @"requestHeaders":cookieProperties, @"describtion":@"获取单人历史JSON记录请求失败", @"ext":@{@"error":result?result:@""}};
                     Class autoManager4 = NSClassFromString(@"QIMAutoTrackerManager");
                     id autoManagerObject4 = [[autoManager4 alloc] init];
                     [autoManagerObject4 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic4];
