@@ -26,6 +26,67 @@ typedef enum {
 #import "QIMHttpRequestMonitor.h"
 #import "QIMJSONSerializer.h"
 
+@interface QIMFileManagerSizeManager :NSObject
+
+@end
+
+@implementation QIMFileManagerSizeManager
+
++ (NSString *)qim_CapacityTransformStrWithSize:(long long)size{
+    return [self qim_CapacityTransformStrWithSize:size WithStrLenght:0];
+}
+
+
++ (NSString *)qim_CapacityTransformStrWithSize:(long long)size WithStrLenght:(NSUInteger)length{
+    double lengths = size;
+    NSString *lenStr = nil;
+    NSString *unitStr = nil;
+    int unit = 0;
+    while ( lengths > 1000 && unit < 5) {
+        unit++;
+        lengths = lengths / 1024.0;
+    }
+    if (length == 0) {
+        if (unit == 0) {
+            lenStr = [NSString stringWithFormat:@"%.2fB",lengths];
+        } else if (unit == 1) {
+            lenStr = [NSString stringWithFormat:@"%.2fKB",lengths];
+        } else if (unit == 2) {
+            lenStr = [NSString stringWithFormat:@"%.2fMB",lengths];
+        } else if (unit == 3) {
+            lenStr = [NSString stringWithFormat:@"%.2fG",lengths];
+        } else {
+            lenStr = [NSString stringWithFormat:@"%.2fTB",lengths];
+        }
+    } else {
+        if (unit == 0) {
+            unitStr = @"B";
+        } else if (unit == 1) {
+            unitStr = @"KB";
+        } else if (unit == 2) {
+            unitStr = @"MB";
+        } else if (unit == 3) {
+            unitStr = @"G";
+        } else {
+            unitStr = @"TB";
+        }
+        if (length > 2) {
+            NSInteger strl = length - [unitStr length];
+            NSString *ls = [[NSString stringWithFormat:@"%.2f",lengths] substringToIndex:strl];
+            if ([[ls substringWithRange:NSMakeRange(ls.length - 1, 1)] isEqualToString:@"."]) {
+                ls = [ls substringToIndex:ls.length - 1];
+            }
+            lenStr = [NSString stringWithFormat:@"%@%@",ls,unitStr];
+        } else {
+            lenStr = [NSString stringWithFormat:@"%.2f%@",lengths,unitStr];
+        }
+    }
+    
+    return lenStr;
+}
+
+@end
+
 @interface QIMFileManager () {
     
 }
@@ -38,6 +99,7 @@ typedef enum {
 @property (nonatomic, assign) FileRequestType fileReuqestType;
 @property (nonatomic, assign) QIMFileCacheType fileCacheType;
 @property (nonatomic, assign) BOOL newVideoInterface;
+@property (nonatomic, assign) BOOL transVideo;
 @property (nonatomic, strong) NSString *filePath;
 @property (nonatomic, strong) NSString *fileId;
 @property (nonatomic, strong) NSString *fileSizeStr;
@@ -194,11 +256,12 @@ typedef enum {
                     NSString *videoUrl = [resultVideoData objectForKey:@"transUrl"];
                     NSDictionary *transFileInfo = [resultVideoData objectForKey:@"transFileInfo"];
                     NSString *videoName = [transFileInfo objectForKey:@"videoName"];
-                    NSString *videoSize = [transFileInfo objectForKey:@"videoSize"];
+                    long long videoSize = [[transFileInfo objectForKey:@"videoSize"] longLongValue];
                     NSString *height = [transFileInfo objectForKey:@"height"];
                     NSString *width = [transFileInfo objectForKey:@"width"];
-                    NSNumber *Duration = [transFileInfo objectForKey:@"duration"];
-                    
+                    NSInteger Duration = [[transFileInfo objectForKey:@"duration"] integerValue] / 1000;
+                    NSString *fileSizeStr = [QIMFileManagerSizeManager qim_CapacityTransformStrWithSize:videoSize];
+
                     NSString *onlineUrl = [resultVideoData objectForKey:@"onlineUrl"];
                     NSMutableDictionary *videoContentDic = [NSMutableDictionary dictionaryWithCapacity:1];
                     
@@ -206,15 +269,19 @@ typedef enum {
                      {\"Duration\":\"11050\",\"FileName\":\"20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.mp4\",\"FileSize\":\"739546\",\"FileUrl\":\"http://osd.corp.qunar.com/vs_cricle_camel_vs_cricle_camel/20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.mp4\",\"Height\":\"1920\",\"ThumbName\":\"20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.png\",\"ThumbUrl\":\"http://osd.corp.qunar.com/vs_cricle_camel_vs_cricle_camel/20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.png\",\"Width\":\"1080\"}
                      */
                     NSMutableDictionary *newVideoDic = [NSMutableDictionary dictionaryWithCapacity:1];
-                    [newVideoDic setQIMSafeObject:Duration forKey:@"Duration"];
+                    [newVideoDic setQIMSafeObject:@(Duration) forKey:@"Duration"];
                     [newVideoDic setQIMSafeObject:videoName forKey:@"FileName"];
-                    [newVideoDic setQIMSafeObject:videoSize forKey:@"FileSize"];
+                    [newVideoDic setQIMSafeObject:fileSizeStr forKey:@"FileSize"];
                     [newVideoDic setQIMSafeObject:videoUrl forKey:@"FileUrl"];
                     [newVideoDic setQIMSafeObject:height forKey:@"Height"];
                     [newVideoDic setQIMSafeObject:ThumbName forKey:@"ThumbName"];
                     [newVideoDic setQIMSafeObject:firstThumbUrl forKey:@"ThumbUrl"];
                     [newVideoDic setQIMSafeObject:width forKey:@"Width"];
-                    [newVideoDic setQIMSafeObject:@(YES) forKey:@"newVideo"];
+                    if (self.transVideo == YES) {
+                        [newVideoDic setQIMSafeObject:@(YES) forKey:@"newVideo"];
+                    } else {
+                        [newVideoDic setQIMSafeObject:@(NO) forKey:@"newVideo"];
+                    }
                     
                     NSString *msg = [[QIMJSONSerializer sharedInstance] serializeObject:newVideoDic];
                     NSString *msgContent = [NSString stringWithFormat:@"发送了一段视频. [obj type=\"url\" value=\"%@\"]", onlineUrl];
@@ -656,8 +723,13 @@ typedef enum {
     BOOL isVideo = (message.messageType == QIMMessageType_SmallVideo);
     BOOL videoConfigUseAble = [[[QIMUserCacheManager sharedInstance] userObjectForKey:@"VideoConfigUseAble"] boolValue];
     __block NSString * fileName = fileExt.length ? [fileKey stringByAppendingPathExtension:fileExt] : fileKey;
-
     if (isVideo && videoConfigUseAble) {
+        
+        //限制视频时长
+        NSInteger videoTimeLen = [[[QIMUserCacheManager sharedInstance] userObjectForKey:@"videoTimeLen"] integerValue] / 1000;
+        NSDictionary *videoExt = [[QIMJSONSerializer sharedInstance] deserializeObject:message.message error:nil];
+        NSInteger videoDuration = [[videoExt objectForKey:@"Duration"] integerValue];
+
         
         NSString *destUrl = [NSString stringWithFormat:@"%@/video/upload", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
         NSLog(@"上传视频destUrl : %@", destUrl);
@@ -683,6 +755,18 @@ typedef enum {
         [formRequest setDelegate:fileRequest];
         formRequest.showAccurateProgress = YES;
         [formRequest setUploadProgressDelegate:fileRequest];
+        
+        NSString *needTrans = @"true";
+        if (videoDuration < videoTimeLen) {
+            //小于限制时长，需要转码
+            needTrans = @"true";
+            [fileRequest setTransVideo:YES];
+        } else {
+            //大于限制时长，不需要转码
+            needTrans = @"false";
+            [fileRequest setTransVideo:NO];
+        }
+        [formRequest addPostValue:needTrans forKey:@"needTrans"];
         [formRequest addData:fileData withFileName:fileName andContentType:@"multipart/form-data" forKey:@"file"];
         [formRequest setResponseEncoding:NSISOLatin1StringEncoding];
         [formRequest setPostFormat:ASIMultipartFormDataPostFormat];
