@@ -389,7 +389,7 @@
 
 - (void)qimDB_bulkUpdateGroupCards:(NSArray *)array{
     [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-        NSString *sql = @"Update IM_Group Set Name=(CASE WHEN :Name ISNULL then Name else :Name1 end),Introduce=(CASE WHEN :Introduce ISNULL then Introduce else :Introduce1 end), HeaderSrc=(CASE WHEN :HeaderSrc ISNULL then HeaderSrc else :HeaderSrc1 end),Topic=(CASE WHEN :Topic ISNULL then Topic else :Topic1 end), LastUpdateTime=:LastUpdateTime,ExtendedFlag=:ExtendedFlag Where GroupId = :GroupId;";
+        NSString *sql = @"Update IM_Group Set Name=(CASE WHEN :Name ISNULL then Name else :Name1 end),Introduce=(CASE WHEN :Introduce ISNULL then Introduce else :Introduce1 end), HeaderSrc=(CASE WHEN :HeaderSrc ISNULL then HeaderSrc else :HeaderSrc1 end),Topic=(CASE WHEN :Topic ISNULL then Topic else :Topic1 end), LastUpdateTime=:LastUpdateTime, UTLastUpdateTime=:UTLastUpdateTime, ExtendedFlag=:ExtendedFlag Where GroupId = :GroupId;";
         NSMutableArray *paramList = [[NSMutableArray alloc] initWithCapacity:2];
         for (NSMutableDictionary *infoDic in array) {
             NSString *groupId = [infoDic objectForKey:@"MN"];
@@ -398,6 +398,7 @@
             NSString *topic = [infoDic objectForKey:@"MT"];
             NSString *headerSrc = [infoDic objectForKey:@"MP"];
             NSString *version = [infoDic objectForKey:@"VS"];
+            NSInteger UTLastUpdateTime = [[infoDic objectForKey:@"UT"] integerValue];
             NSMutableArray *param = [NSMutableArray array];
             [param addObject:nickName.length > 0?nickName:@":NULL"];
             [param addObject:nickName.length > 0?nickName:@":NULL"];
@@ -408,6 +409,7 @@
             [param addObject:topic.length > 0?topic:@":NULL"];
             [param addObject:topic.length > 0?topic:@":NULL"];
             [param addObject:version?version:@"0"];
+            [param addObject:@(UTLastUpdateTime)];
             [param addObject:@(headerSrc.length > 0)];
             [param addObject:groupId];
             [paramList addObject:param];
@@ -415,6 +417,48 @@
         [database executeBulkInsert:sql withParameters:paramList];
     }];
     QIMVerboseLog(@"");
+}
+
+- (void)qimDB_bulkUpdateIncrementGroupCards:(NSArray *)array{
+    __block NSInteger maxUTTime = 0;
+    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+        NSString *sql = @"Update IM_Group Set Name=(CASE WHEN :Name ISNULL then Name else :Name1 end),Introduce=(CASE WHEN :Introduce ISNULL then Introduce else :Introduce1 end), HeaderSrc=(CASE WHEN :HeaderSrc ISNULL then HeaderSrc else :HeaderSrc1 end),Topic=(CASE WHEN :Topic ISNULL then Topic else :Topic1 end), LastUpdateTime=:LastUpdateTime, UTLastUpdateTime=:UTLastUpdateTime, ExtendedFlag=:ExtendedFlag Where GroupId = :GroupId;";
+        NSMutableArray *paramList = [[NSMutableArray alloc] initWithCapacity:2];
+        for (NSMutableDictionary *infoDic in array) {
+            NSString *groupId = [infoDic objectForKey:@"MN"];
+            NSString *nickName = [infoDic objectForKey:@"SN"];
+            NSString *desc = [infoDic objectForKey:@"MD"];
+            NSString *topic = [infoDic objectForKey:@"MT"];
+            NSString *headerSrc = [infoDic objectForKey:@"MP"];
+            NSString *version = [infoDic objectForKey:@"VS"];
+            NSInteger UTLastUpdateTime = [[infoDic objectForKey:@"UT"] integerValue];
+            NSMutableArray *param = [NSMutableArray array];
+            [param addObject:nickName.length > 0?nickName:@":NULL"];
+            [param addObject:nickName.length > 0?nickName:@":NULL"];
+            [param addObject:desc.length > 0?desc:@":NULL"];
+            [param addObject:desc.length > 0?desc:@":NULL"];
+            [param addObject:headerSrc.length > 0?headerSrc:@":NULL"];
+            [param addObject:headerSrc.length > 0?headerSrc:@":NULL"];
+            [param addObject:topic.length > 0?topic:@":NULL"];
+            [param addObject:topic.length > 0?topic:@":NULL"];
+            [param addObject:version?version:@"0"];
+            [param addObject:@(UTLastUpdateTime)];
+            if (UTLastUpdateTime > maxUTTime) {
+                maxUTTime = UTLastUpdateTime;
+            }
+            [param addObject:@(headerSrc.length > 0)];
+            [param addObject:groupId];
+            [paramList addObject:param];
+        }
+        [database executeBulkInsert:sql withParameters:paramList];
+    }];
+    [[IMDataManager qimDB_SharedInstance] qimDB_UpdateUserCacheDataWithKey:@"kGetIncrementMucGroupCardVersion" withType:12 withValue:@"获取群增量名片" withValueInt:maxUTTime];
+    QIMVerboseLog(@"");
+}
+
+- (NSInteger)qimDB_getGroupListMaxUTLastUpdateTime {
+    NSInteger lastMaxUTTime = [[IMDataManager qimDB_SharedInstance] qimDB_getUserCacheDataWithKey:@"kGetIncrementMucGroupCardVersion" withType:12];
+    return lastMaxUTTime;
 }
 
 - (void)qimDB_updateGroup:(NSString *)groupId

@@ -110,10 +110,6 @@
     [[QIMManager sharedInstance] getGroupHeaderImageFromRemoteWithGroupId:groupId];
 }
 
-- (NSString *)getGroupImagePathFromLocalByGroupId:(NSString *)groupId {
-    return [[QIMManager sharedInstance] getGroupImagePathFromLocalByGroupId:groupId];
-}
-
 - (UIImage *)getGroupImageFromLocalByGroupId:(NSString *)groupId {
     return [[QIMManager sharedInstance] getGroupImageFromLocalByGroupId:groupId];
 }

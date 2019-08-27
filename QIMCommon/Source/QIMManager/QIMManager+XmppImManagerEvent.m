@@ -1215,6 +1215,10 @@
     });
 }
 
++ (void)qim_privateCommonLog:(NSString *)log {
+    QIMVerboseLog(@"qim_privateCommonLog ：%@", log);
+}
+
 - (void)connectTimeOut{
     [self socketDisconnect];
 }

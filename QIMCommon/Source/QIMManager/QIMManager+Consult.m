@@ -12,46 +12,17 @@
 @implementation QIMManager (Consult)
 
 #pragma mark - setter and getter
-/*
-- (void)setVirtualRealJidDic:(NSMutableDictionary *)virtualRealJidDic {
-    objc_setAssociatedObject(self, "virtualRealJidDic", virtualRealJidDic, OBJC_ASSOCIATION_COPY);
+
+- (void)setAllhotlines:(NSArray *)allhotlines {
+    objc_setAssociatedObject(self, "allhotlines", allhotlines, OBJC_ASSOCIATION_COPY);
 }
 
-- (NSMutableDictionary *)virtualRealJidDic {
-    NSMutableDictionary *virtualRealJidDic = objc_getAssociatedObject(self, "virtualRealJidDic");
-    if (!virtualRealJidDic) {
-        virtualRealJidDic = [NSMutableDictionary dictionaryWithCapacity:5];
+- (NSArray *)getAllHotLines {
+    NSArray *allhotLines = objc_getAssociatedObject(self, "allhotlines");
+    if (!allhotLines) {
+        allhotLines = [NSArray array];
     }
-    return virtualRealJidDic;
-}
-*/
-
-/*
-- (void)setVirtualList:(NSArray *)virtualList {
-    objc_setAssociatedObject(self, "virtualList", virtualList, OBJC_ASSOCIATION_COPY);
-}
-
-- (NSArray *)getVirtualList{
-    
-    NSArray *virtualList = [NSArray array];
-    if (!virtualList) {
-        virtualList = [[XmppImManager sharedInstance] getVirtualList];
-    }
-    return virtualList;
-}
-
-*/
-
-- (void)setVirtualDic:(NSDictionary *)virtualDic {
-    objc_setAssociatedObject(self, "virtualDic", virtualDic, OBJC_ASSOCIATION_COPY);
-}
-
-- (NSDictionary *)getVirtualDic {
-    NSDictionary *virtualDic = objc_getAssociatedObject(self, "virtualDic");
-    if (!virtualDic) {
-        virtualDic = [NSDictionary dictionary];
-    }
-    return virtualDic;
+    return allhotLines;
 }
 
 - (void)setMyhotLinelist:(NSArray *)myhotLinelist {
@@ -115,85 +86,7 @@
     return message;
 }
 
-- (void)customerConsultServicesayHelloWithUser:(NSString *)user WithVirtualId:(NSString *)virtualId WithFromUser:(NSString *)fromUser{
-    NSString *host = @"http://qcadmin.qunar.com";
-    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/notice/sayHello.json?userQName=%@&seatQName=%@&virtualId=%@&line=dujia&u=%@&k=%@&p=iphone&v=%@",host,user,fromUser,virtualId,[QIMManager getLastUserName],self.remoteKey,[[QIMAppInfo sharedInstance] AppBuildVersion]]];
-    
-    QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:url];
-    [request setTimeoutInterval:1];
-    [QIMHTTPClient sendRequest:request complete:nil failure:nil];
-}
-
-- (void)customerServicesayHelloWithUser:(NSString *)user{
-    NSString *host = @"http://qcadmin.qunar.com";
-    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/notice/sayHello.json?userQName=%@&seatQName=%@&line=dujia&u=%@&k=%@&p=iphone&v=%@",host,user,[QIMManager getLastUserName],[QIMManager getLastUserName],self.remoteKey,[[QIMAppInfo sharedInstance] AppBuildVersion]]];
-    
-    QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:url];
-    [request setTimeoutInterval:1];
-    [QIMHTTPClient sendRequest:request complete:nil failure:nil];
-}
-
-- (NSArray *)searchSuggestWithKeyword:(NSString *)keyword{
-    
-    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/api/supplier/name/suggest.json?qunarName=%@&query=%@&u=%@&k=%@&p=iphone&v=%@",[[QIMNavConfigManager sharedInstance] qcHost],[QIMManager getLastUserName],[keyword stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],[QIMManager getLastUserName],self.remoteKey,[[QIMAppInfo sharedInstance] AppBuildVersion]]];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:url];
-    [request setTimeOutSeconds:1];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSDictionary *infoDic = [[QIMJSONSerializer sharedInstance] deserializeObject:request.responseData error:nil];
-        BOOL ret = [[infoDic objectForKey:@"ret"] boolValue];
-        if (ret) {
-            return [infoDic objectForKey:@"data"];
-        }
-    }
-    return nil;
-}
-
-- (NSArray *)getSuggestOrganizationBySuggestId:(NSString *)suggestId{
-    NSString *host = @"http://qcadmin.qunar.com";
-    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/api/supplier/organization.json?qunarName=%@&id=%@&u=%@&k=%@&p=iphone&v=%@",host,[QIMManager getLastUserName],suggestId,[QIMManager getLastUserName], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]]];
-    
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:url];
-    [request setTimeOutSeconds:1];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSDictionary *infoDic = [[QIMJSONSerializer sharedInstance] deserializeObject:request.responseData error:nil];
-        BOOL ret = [[infoDic objectForKey:@"ret"] boolValue];
-        if (ret) {
-            return [infoDic objectForKey:@"data"];
-        }
-    }
-    return nil;
-}
-
-- (NSDictionary *)getBusinessInfoByBusinessId:(NSString *)businessId {
-    
-    NSURL *url = nil;
-    if ([QIMNavConfigManager sharedInstance].debug) {
-        url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/api/seat/judgmentOrRedistribution.json?shopId=%@",@"https://qcadminbeta.qunar.com",businessId]];
-    }else{
-        url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/api/seat/judgmentOrRedistribution.json?shopId=%@",@"https://qcadmin.qunar.com",businessId]];
-    }
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:url];
-    [request setTimeOutSeconds:1];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSDictionary *infoDic = [[QIMJSONSerializer sharedInstance] deserializeObject:request.responseData error:nil];
-        BOOL ret = [[infoDic objectForKey:@"ret"] boolValue];
-        if (ret) {
-            return [infoDic objectForKey:@"data"];
-        }
-    }
-    return nil;
-}
-
-- (void)getHotlineShopList {
+- (void)getRemoteHotlineShopList {
     NSString *destUrl = [NSString stringWithFormat:@"%@/qcadmin/getHotlineShopList.qunar?line=%@&username=%@&host=%@", [[QIMNavConfigManager sharedInstance] newerHttpUrl], @"qtalk", [QIMManager getLastUserName], [[QIMManager sharedInstance] getDomain]];
     __weak __typeof(self) weakSelf = self;
     [self sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
@@ -209,7 +102,7 @@
                 if (!strongSelf) {
                     return;
                 }
-                strongSelf.virtualDic = [NSDictionary dictionaryWithDictionary:allhotlines];
+                strongSelf.allhotlines = [allhotlines allKeys];
                 strongSelf.myhotLinelist = myhotlines;
                 NSLog(@"getHotlineShopList.qunar : %@", data);
             }
@@ -217,16 +110,38 @@
     } withFailedCallBack:^(NSError *error) {
         
     }];
+    /*
+    NSString *destUrl = [NSString stringWithFormat:@"%@/admin/outer/qtalk/getHotlineList", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    NSDictionary *body = @{@"username":[QIMManager getLastUserName], @"host":[[QIMManager sharedInstance] getDomain]};
+    NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:body error:nil];
+    __weak __typeof(self) weakSelf = self;
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:bodyData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[responseDic objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[responseDic objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [responseDic objectForKey:@"data"];
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                NSArray *allhotlines = [data objectForKey:@"allhotlines"];
+                NSArray *myhotlines = [data objectForKey:@"myhotlines"];
+                __typeof(self) strongSelf = weakSelf;
+                if (!strongSelf) {
+                    return;
+                }
+                strongSelf.allhotlines = allhotlines;
+                strongSelf.myhotLinelist = myhotlines;
+                NSLog(@"getRemoteHotlineShopList.qunar : %@", data);
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        
+    }];
+     */
 }
 
 //V2版获取客服坐席列表：支持多店铺
 - (NSArray *)getSeatSeStatus {
-    NSString *urlHost = nil;
-    if ([[QIMNavConfigManager sharedInstance] debug]) {
-        urlHost = @"https://qcadminbeta.qunar.com";
-    } else {
-        urlHost = @"https://qcadmin.qunar.com";
-    }
+    NSString *urlHost = @"https://qcadmin.qunar.com";
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/api/seat/getSeatSeStatusWithSid.qunar", urlHost]];
     NSString *postDataStr = [NSString stringWithFormat:@"qName=%@", [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     NSMutableData *postData = [NSMutableData dataWithData:[postDataStr dataUsingEncoding:NSUTF8StringEncoding]];
@@ -253,12 +168,7 @@
 
 //V2版区别Shop来设置服务模式upSeatSeStatusWithSid.qunar
 - (BOOL)updateSeatSeStatusWithShopId:(NSInteger)shopId WithStatus:(NSInteger)shopServiceStatus {
-    NSString *urlHost = nil;
-    if ([[QIMNavConfigManager sharedInstance] debug]) {
-        urlHost = @"https://qcadminbeta.qunar.com";
-    } else {
-        urlHost = @"https://qcadmin.qunar.com";
-    }
+    NSString *urlHost = @"https://qcadmin.qunar.com";
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/api/seat/upSeatSeStatusWithSid.qunar", urlHost]];
     NSString *postDataStr = [NSString stringWithFormat:@"qName=%@&st=%ld&sid=%ld", [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], shopServiceStatus, shopId];
     NSMutableData *postData = [NSMutableData dataWithData:[postDataStr dataUsingEncoding:NSUTF8StringEncoding]];
@@ -375,21 +285,6 @@
                         NSMutableArray *list = [NSMutableArray array];
                         for (NSDictionary *infoDic in datas) {
                             QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
-                            /*
-                             QIMMessageModel *msg = [QIMMessageModel new];
-                             [msg setMessageId:[infoDic objectForKey:@"MsgId"]];
-                             [msg setFrom:[infoDic objectForKey:@"From"]];
-                             [msg setTo:[infoDic objectForKey:@"To"]];
-                             [msg setMessage:[infoDic objectForKey:@"Content"]];
-                             NSString *extendInfo = [infoDic objectForKey:@"ExtendInfo"];
-                             [msg setExtendInformation:(extendInfo.length > 0) ? extendInfo : nil];
-                             [msg setPlatform:[[infoDic objectForKey:@"Platform"] intValue]];
-                             [msg setMessageType:[[infoDic objectForKey:@"MsgType"] intValue]];
-                             [msg setMessageSendState:[[infoDic objectForKey:@"MsgState"] intValue]];
-                             [msg setMessageDirection:[[infoDic objectForKey:@"MsgDirection"] intValue]];
-                             [msg setMessageDate:[[infoDic objectForKey:@"MsgDateTime"] longLongValue]];
-                             [msg setMsgRaw:[infoDic objectForKey:@"msgRaw"]];
-                             */
                             [list addObject:msg];
                         }
                         dispatch_async(dispatch_get_main_queue(), ^{

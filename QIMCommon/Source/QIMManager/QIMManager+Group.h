@@ -69,6 +69,9 @@
  */
 - (void)updateGroupCard:(NSArray *)groupIds;
 
+/*获取增量的群名片*/
+- (void)getIncrementGroupCards;
+
 /**
  设置群名片信息
  
@@ -160,15 +163,6 @@
  根据GroupId从远程拉取群头像
  */
 - (void)getGroupHeaderImageFromRemoteWithGroupId:(NSString *)groupId;
-
-
-/**
- 根据群Id获取群组头像本地路径
-
- @param groupId 群Id
- @return 本地路径
- */
-- (NSString *)getGroupImagePathFromLocalByGroupId:(NSString *)groupId;
 
 /**
  根据GroupId从本地取群头像

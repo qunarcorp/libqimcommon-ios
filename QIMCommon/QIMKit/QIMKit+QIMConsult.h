@@ -10,36 +10,18 @@
 @interface QIMKit (QIMConsult)
 
 /**
- 虚拟账号的RealJid列表
- */
-//@property (nonatomic, strong) NSMutableDictionary *virtualRealJidDic;
-
-/**
- 虚拟账号列表
- */
-//@property (nonatomic, strong) NSArray *virtualList;
-
-/**
- 获取虚拟账号列表
- */
-//- (NSArray *)getVirtualList;
-
-
-/**
  获取虚拟帐号列表
  */
-- (NSDictionary *)getVirtualDic;
+- (NSArray *)getAllHotLines;
 
 /**
  获取我服务的虚拟帐号列表
  */
 - (NSArray *)getMyhotLinelist;
 
-- (void)getHotlineShopList;
-
 /**
  发送Consult消息
-
+ 
  @param msgId MsgId
  @param msg 消息Body内容
  @param info 消息ExtendInfo
@@ -51,34 +33,19 @@
  */
 - (QIMMessageModel *)sendConsultMessageId:(NSString *)msgId WithMessage:(NSString *)msg WithInfo:(NSString *)info toJid:(NSString *)toJid realToJid:(NSString *)realToJid WithChatType:(ChatType)chatType WithMsgType:(int)msgType;
 
-- (void)customerConsultServicesayHelloWithUser:(NSString *)user WithVirtualId:(NSString *)virtualId WithFromUser:(NSString *)fromUser;
-
 /**
- 欢迎语接口？
- 
- @param user 客服id
+ 获取远程的热线账号列表
  */
-- (void)customerServicesayHelloWithUser:(NSString *)user;
+- (void)getRemoteHotlineShopList;
 
-/**
- 输入预测
- 
- @param keyword 关键词
- @return 返回预测结果
- */
-- (NSArray *)searchSuggestWithKeyword:(NSString *)keyword;
+//V2版获取客服坐席列表：支持多店铺
+- (NSArray *)getSeatSeStatus;
 
-/**
- organization预测
- 
- @param suggestId 输入id
- @return 返回预测结果
- */
-- (NSArray *)getSuggestOrganizationBySuggestId:(NSString *)suggestId;
+//V2版区别Shop来设置服务模式upSeatSeStatusWithSid.qunar
 
 /**
  根据店铺Id 设置服务模式
-
+ 
  @param shopId 店铺Id
  @param shopServiceStatus 服务模式
  @return 是否设置成功
@@ -87,20 +54,12 @@
 
 /**
  根据服务模式获取基础信息
-
+ 
  @param userStatus 服务模式
  */
 - (NSDictionary *)userSeatStatusDict:(int)userStatus;
 
-
 - (NSString *)userStatusTitleWithStatus:(int)userStatus;
-
-/**
- 获取坐席状态
- 
- @return 返回坐席状态
- */
-- (NSArray *)getSeatSeStatus;
 
 /**
  获取状态坐席状态列表
@@ -115,5 +74,7 @@
  @return 关闭之后的提示语
  */
 - (void)closeSessionWithShopId:(NSString *)shopId WithVisitorId:(NSString *)visitorId withBlock:(QIMCloseSessionBlock)block;
+
+- (void)getConsultServerMsgLisByUserId:(NSString *)userId WithVirtualId:(NSString *)virtualId WithLimit:(int)limit WithOffset:(int)offset withLoadMore:(BOOL)loadMore WithComplete:(void (^)(NSArray *))complete;
 
 @end

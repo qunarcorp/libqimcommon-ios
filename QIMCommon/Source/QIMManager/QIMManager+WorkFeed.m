@@ -875,10 +875,12 @@
                 BOOL highDefinition = [[data objectForKey:@"highDefinition"] boolValue];
                 NSInteger videoFileSize = [[data objectForKey:@"videoFileSize"] integerValue];
                 NSInteger videoTimeLen = [[data objectForKey:@"videoTimeLen"] integerValue];
+                NSInteger videoMaxTimeLen = [[data objectForKey:@"videoMaxTimeLen"] integerValue];
                 [[QIMUserCacheManager sharedInstance] setUserObject:@(useAble) forKey:@"VideoConfigUseAble"];
                 [[QIMUserCacheManager sharedInstance] setUserObject:@(highDefinition) forKey:@"highDefinition"];
                 [[QIMUserCacheManager sharedInstance] setUserObject:@(videoFileSize) forKey:@"videoFileSize"];
                 [[QIMUserCacheManager sharedInstance] setUserObject:@(videoTimeLen) forKey:@"videoTimeLen"];
+                [[QIMUserCacheManager sharedInstance] setUserObject:@(videoMaxTimeLen) forKey:@"videoMaxTimeLen"];
             }
         }
     } withFailedCallBack:^(NSError *error) {

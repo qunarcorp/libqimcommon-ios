@@ -45,6 +45,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSArray *)qimDB_getGroupListMsgMaxTime;
 
+- (NSInteger)qimDB_getGroupListMaxUTLastUpdateTime;
+
 - (BOOL)qimDB_needUpdateGroupImage:(NSString *)groupId;
 
 - (NSString *)qimDB_getGroupHeaderSrc:(NSString *)groupId;
@@ -58,6 +60,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)qimDB_updateGroup:(NSString *)groupId WithTopic:(NSString *)topic;
 
 - (void)qimDB_bulkUpdateGroupCards:(NSArray *)array;
+
+- (void)qimDB_bulkUpdateIncrementGroupCards:(NSArray *)array;
 
 - (void)qimDB_updateGroup:(NSString *)groupId
              WithNickName:(NSString *)nickName
