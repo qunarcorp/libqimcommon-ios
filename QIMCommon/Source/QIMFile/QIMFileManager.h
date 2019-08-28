@@ -31,12 +31,6 @@ typedef void(^QIMFileManagerUploadCompletionBlock)(UIImage *image, NSError *erro
 
 -(void)downloadImage:(NSString *)url width:(CGFloat) width height:(CGFloat) height  forCacheType:(QIMFileCacheType)type;
 
--(void)downloadCollectionEmoji:(NSString *)url
-                         width:(CGFloat) width
-                        height:(CGFloat) height
-                  forCacheType:(QIMFileCacheType)type
-                    complation:(void(^)(NSData *)) complation;
-
 -(void)downloadImage:(NSString *)url
                width:(CGFloat) width
               height:(CGFloat) height
@@ -54,8 +48,6 @@ typedef void(^QIMFileManagerUploadCompletionBlock)(UIImage *image, NSError *erro
 - (NSString *) getFilePathForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type;
 
 - (NSString *) getFilePathForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type careExist:(BOOL) careExist;
-
-- (void )getPermUrlWithTempUrl:(NSString *)tempUrl PermHttpUrl:(void(^)(NSString *))callBackPermUrl;
 
 - (BOOL)isFileExistForUrl:(NSString *)url width:(float)width height:(float)height forCacheType:(QIMFileCacheType)type;
 

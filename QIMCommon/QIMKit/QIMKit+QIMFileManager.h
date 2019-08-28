@@ -79,14 +79,6 @@ typedef void(^QIMFileManagerUploadCompletionBlock)(UIImage *image, NSError *erro
         forCacheType:(QIMFileCacheType)type
           complation:(void(^)(NSData *)) complation;
 
--(void)downloadCollectionEmoji:(NSString *)url
-                         width:(CGFloat) width
-                        height:(CGFloat) height
-                  forCacheType:(QIMFileCacheType)type
-                    complation:(void(^)(NSData *)) complation;
-
-//- (NSData *) getSmallFileDataFromUrl:(NSString *)url forCacheType:(QIMFileCacheType)type;
-
 /**
  缓存文件
  
@@ -129,13 +121,6 @@ typedef void(^QIMFileManagerUploadCompletionBlock)(UIImage *image, NSError *erro
  @return 返回Path
  */
 - (NSString *) getFilePathForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type careExist:(BOOL) careExist;
-
-/**
- *  临时文件URL调明星接口换取持久化URL
- *
- *  @param tempUrl 临时URL
- */
-- (void )getPermUrlWithTempUrl:(NSString *)tempUrl PermHttpUrl:(void(^)(NSString *))callBackPermUrl;
 
 /**
  文件是否存在

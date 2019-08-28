@@ -25,67 +25,7 @@ typedef enum {
 #import "QIMUserCacheManager.h"
 #import "QIMHttpRequestMonitor.h"
 #import "QIMJSONSerializer.h"
-
-@interface QIMFileManagerSizeManager :NSObject
-
-@end
-
-@implementation QIMFileManagerSizeManager
-
-+ (NSString *)qim_CapacityTransformStrWithSize:(long long)size{
-    return [self qim_CapacityTransformStrWithSize:size WithStrLenght:0];
-}
-
-
-+ (NSString *)qim_CapacityTransformStrWithSize:(long long)size WithStrLenght:(NSUInteger)length{
-    double lengths = size;
-    NSString *lenStr = nil;
-    NSString *unitStr = nil;
-    int unit = 0;
-    while ( lengths > 1000 && unit < 5) {
-        unit++;
-        lengths = lengths / 1024.0;
-    }
-    if (length == 0) {
-        if (unit == 0) {
-            lenStr = [NSString stringWithFormat:@"%.2fB",lengths];
-        } else if (unit == 1) {
-            lenStr = [NSString stringWithFormat:@"%.2fKB",lengths];
-        } else if (unit == 2) {
-            lenStr = [NSString stringWithFormat:@"%.2fMB",lengths];
-        } else if (unit == 3) {
-            lenStr = [NSString stringWithFormat:@"%.2fG",lengths];
-        } else {
-            lenStr = [NSString stringWithFormat:@"%.2fTB",lengths];
-        }
-    } else {
-        if (unit == 0) {
-            unitStr = @"B";
-        } else if (unit == 1) {
-            unitStr = @"KB";
-        } else if (unit == 2) {
-            unitStr = @"MB";
-        } else if (unit == 3) {
-            unitStr = @"G";
-        } else {
-            unitStr = @"TB";
-        }
-        if (length > 2) {
-            NSInteger strl = length - [unitStr length];
-            NSString *ls = [[NSString stringWithFormat:@"%.2f",lengths] substringToIndex:strl];
-            if ([[ls substringWithRange:NSMakeRange(ls.length - 1, 1)] isEqualToString:@"."]) {
-                ls = [ls substringToIndex:ls.length - 1];
-            }
-            lenStr = [NSString stringWithFormat:@"%@%@",ls,unitStr];
-        } else {
-            lenStr = [NSString stringWithFormat:@"%.2f%@",lengths,unitStr];
-        }
-    }
-    
-    return lenStr;
-}
-
-@end
+#import "QIMStringTransformTools.h"
 
 @interface QIMFileManager () {
     
@@ -260,7 +200,7 @@ typedef enum {
                     NSString *height = [transFileInfo objectForKey:@"height"];
                     NSString *width = [transFileInfo objectForKey:@"width"];
                     NSInteger Duration = [[transFileInfo objectForKey:@"duration"] integerValue] / 1000;
-                    NSString *fileSizeStr = [QIMFileManagerSizeManager qim_CapacityTransformStrWithSize:videoSize];
+                    NSString *fileSizeStr = [QIMStringTransformTools qim_CapacityTransformStrWithSize:videoSize];
 
                     NSString *onlineUrl = [resultVideoData objectForKey:@"onlineUrl"];
                     NSMutableDictionary *videoContentDic = [NSMutableDictionary dictionaryWithCapacity:1];
@@ -1016,98 +956,6 @@ typedef enum {
     });
 }
 
--(void)downloadCollectionEmoji:(NSString *)url
-                         width:(CGFloat) width
-                        height:(CGFloat) height
-                  forCacheType:(QIMFileCacheType)type
-                    complation:(void(^)(NSData *)) complation {
-    if ([url containsString:@"null"] || !url) {
-        return;
-    }
-    __weak typeof(self) weakSelf = self;
-    NSString *urlStr = [url stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *md5 = [self getFileNameFromUrl:url width:width height:height];
-    if (height > 0.0 && width > 0.0) {
-        
-        if ([url rangeOfString:@"?"].location != NSNotFound) {
-            
-            urlStr = [url stringByAppendingFormat:@"&u=%@&k=%@&w=%d&h=%d",
-                      [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                      [[QIMManager sharedInstance] myRemotelogginKey],
-                      (int)width,
-                      (int)height];
-        } else {
-            urlStr = [url stringByAppendingFormat:@"?u=%@&k=%@&w=%d&h=%d",
-                      [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                      [[QIMManager sharedInstance] myRemotelogginKey],
-                      (int)width,
-                      (int)height];
-        }
-    } else {
-        
-        if ([url rangeOfString:@"?"].location != NSNotFound) {
-            urlStr = [url stringByAppendingFormat:@"&u=%@&k=%@",
-                      [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                      [[QIMManager sharedInstance] myRemotelogginKey]];
-        } else {
-            urlStr = [url stringByAppendingFormat:@"?u=%@&k=%@",
-                      [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                      [[QIMManager sharedInstance] myRemotelogginKey]];
-        }
-    }
-    [[QIMHttpRequestMonitor sharedInstance] runblock:^{
-        
-        NSString *filePath = [[QIMFileManager documentsofPath:type] stringByAppendingPathComponent:md5];
-        if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-            if (!complation) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[NSNotificationCenter defaultCenter] postNotificationName:KDownloadFileFinishedNotificationName object:nil userInfo:@{@"url":urlStr ? urlStr:@"",@"md5":md5 ? md5:@"",@"type":@(type)}];
-                });
-            } else {
-                NSData *data = [NSData dataWithContentsOfFile:filePath];
-                complation(data);
-            }
-        } else {
-            NSURL *requestUrl = [[NSURL alloc] initWithString:[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-            ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-            [request startSynchronous];
-            NSError *error = [request error];
-            
-            if (!error && [request responseStatusCode] == 200) {
-                NSData *responseData = [request responseData];
-                if ([responseData length] > 0) {
-                    
-                    NSString * fileName = [self saveFileData:responseData url:request.url.absoluteString forCacheType:type];
-                    if (!complation) {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            [[NSNotificationCenter defaultCenter] postNotificationName:KDownloadFileFinishedNotificationName object:nil userInfo:@{@"url":url ? url:@"",@"md5":fileName ? fileName:@"",@"type":@(type)}];
-                        });
-                    } else {
-                        complation(responseData);
-                    }
-                }else{
-                    if (!complation) {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            [[NSNotificationCenter defaultCenter] postNotificationName:KDownloadFileFailedNotificationName object:nil userInfo:@{@"url":url?url:@"",@"md5":@"",@"type":@(type)}];
-                        });
-                        
-                    } else {
-                        complation(nil);
-                    }
-                }
-            } else {
-                if (!complation) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [[NSNotificationCenter defaultCenter] postNotificationName:KDownloadFileFailedNotificationName object:nil userInfo:@{@"url":url?url:@"",@"md5":@"",@"type":@(type)}];
-                    });
-                } else {
-                    complation(nil);
-                }
-            }
-        }
-    } url:urlStr];
-}
-
 -(void)downloadImage:(NSString *)url
                width:(CGFloat) width
               height:(CGFloat) height
@@ -1636,38 +1484,6 @@ typedef enum {
         isImage = YES;
     }
     return isImage;
-}
-
-/**
- *  临时文件URL调明星接口换取持久化URL
- *
- *  @param tempUrl 临时URL
- */
-
-- (void )getPermUrlWithTempUrl:(NSString *)tempUrl PermHttpUrl:(void(^)(NSString *))callBackPermUrl{
-    /*
-    __block NSString *httpPermUrl = @"";
-    [[QIMHttpRequestMonitor sharedInstance] syncRunBlock:^{
-        
-        NSString *compnentString = [tempUrl componentsSeparatedByString:@"?"].firstObject;
-        NSString *PerString = [NSString stringWithFormat:@"%@/file/v2/stp?url=%@",
-                               [[QIMNavConfigManager sharedInstance] innerFileHttpHost],
-                               compnentString];
-        NSURL *requestUrl = [[NSURL alloc] initWithString:[PerString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-        ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-        [request startSynchronous];
-        NSError *error = [request error];
-        if (!error) {
-            NSError *error = nil;
-            NSDictionary *dict = [[QIMJSONSerializer sharedInstance] deserializeObject:request.responseData error:&error];
-            httpPermUrl = [NSString stringWithFormat:@"%@", dict[@"data"]];
-        }
-        
-    } url:tempUrl];
-    NSString *md5 = [[QIMFileManager sharedInstance] getFileNameFromUrl:httpPermUrl];
-    httpPermUrl = [NSString stringWithFormat:@"%@?filename=%@&md5=%@", httpPermUrl, md5, md5];
-    */
-    callBackPermUrl(tempUrl);
 }
 
 - (CGSize)getFitSizeForImgSize:(CGSize)imgSize {

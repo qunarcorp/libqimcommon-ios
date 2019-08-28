@@ -29,6 +29,7 @@
 #import "QIMKit+QIMFileManager.h"
 #import "QIMKit+QIMSearch.h"
 #import "QIMKit+QIMWorkFeed.h"
+#import "QIMKit+QIMNewFileManager.h"
 #import "QIMKit+QIMFriend.h"
 #import "QIMKit+QIMGroup.h"
 #import "QIMKit+QIMGroupMessage.h"

@@ -392,6 +392,8 @@ typedef void(^QIMKitGetUserWorkInfoBlock)(NSDictionary *userWorkInfo);
 typedef void(^QIMKitSendTPRequesSuccessedBlock)(NSData *responseData);
 typedef void(^QIMKitSendTPRequesFailedBlock)(NSError *error);
 typedef void(^QIMKitUploadVideoRequesSuccessedBlock)(NSDictionary *videoDic);
+typedef void(^QIMKitUploadVideoNewRequesSuccessedBlock)(NSDictionary *videoDic, BOOL needTrans);
+
 
 
 typedef void(^QIMKitGetTripAreaAvailableRoomBlock)(NSArray *availableRooms);

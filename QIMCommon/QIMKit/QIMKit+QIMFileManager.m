@@ -51,14 +51,6 @@
     [[QIMFileManager sharedInstance] downloadImage:url width:width height:height forCacheType:type complation:complation];
 }
 
--(void)downloadCollectionEmoji:(NSString *)url
-                         width:(CGFloat) width
-                        height:(CGFloat) height
-                  forCacheType:(QIMFileCacheType)type
-                    complation:(void(^)(NSData *)) complation {
-    [[QIMFileManager sharedInstance] downloadCollectionEmoji:url width:width height:height forCacheType:type complation:complation];
-}
-
 - (NSString *) saveFileData:(NSData *)data withFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type {
     return [[QIMFileManager sharedInstance] saveFileData:data withFileName:fileName forCacheType:type];
 }
@@ -77,10 +69,6 @@
 
 - (NSString *) getFilePathForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type careExist:(BOOL) careExist {
     return [[QIMFileManager sharedInstance] getFilePathForFileName:fileName forCacheType:type careExist:careExist];
-}
-
-- (void )getPermUrlWithTempUrl:(NSString *)tempUrl PermHttpUrl:(void(^)(NSString *))callBackPermUrl {
-    [[QIMFileManager sharedInstance] getPermUrlWithTempUrl:tempUrl PermHttpUrl:callBackPermUrl];
 }
 
 - (BOOL)isFileExistForUrl:(NSString *)url width:(float)width height:(float)height forCacheType:(QIMFileCacheType)type {
