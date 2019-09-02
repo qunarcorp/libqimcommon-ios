@@ -21,8 +21,128 @@ static QIMNewFileManager *_newfileManager = nil;
 
 #pragma mark - 图片
 
-#pragma mark - 文件
+- (NSString *)getImageFileExt:(NSData *)data{
+    const uint8_t *p = [data bytes];
+    if ([data length] > 8) {
+        if (p[0] == 0xff && p[1] == 0xd8) {
+            
+            /* JPEG */
+            
+            return @"jpg";
+            
+        } else if (p[0] == 'G' && p[1] == 'I' && p[2] == 'F' && p[3] == '8'
+                   && p[5] == 'a')
+        {
+            if (p[4] == '9' || p[4] == '7') {
+                /* GIF */
+                return @"gif";
+            }
+            
+        } else if (p[0] == 0x89 && p[1] == 'P' && p[2] == 'N' && p[3] == 'G'
+                   && p[4] == 0x0d && p[5] == 0x0a && p[6] == 0x1a && p[7] == 0x0a)
+        {
+            /* PNG */
+            
+            return @"png";
+        }
+    }
+    return @"png";
+}
 
+- (NSString *)qim_saveImageData:(NSData *)imageData {
+    NSString *imageKey = [[imageData mutableCopy] qim_md5String];
+    NSString *imageExt = [self getImageFileExt:imageData];
+    NSString *fileKey = [NSString stringWithFormat:@"%@.%@", imageKey, imageExt];
+    [[SDImageCache sharedImageCache] storeImageDataToDisk:imageData forKey:fileKey];
+
+    return [[QIMImageManager sharedInstance] defaultCachePathForKey:fileKey];
+}
+
+- (void)checkImageWithImageKey:(NSString *)imageKey WithFileLength:(long long)fileLength WithPathExtension:(NSString *)extension withCallBack:(QIMKitCheckImageCallBack)callback {
+    NSString *method = @"file/v2/inspection/img";
+    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?key=%@&size=%lld&name=%@&platform=iphone&u=%@&k=%@&version=%@",
+                         [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, imageKey, (long long)ceil(fileLength / 1024.0 / 1024.0), [NSString stringWithFormat:@"%@.%@",imageKey, extension],
+                         [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
+                         [[QIMManager sharedInstance] myRemotelogginKey],
+                         [[QIMAppInfo sharedInstance] AppBuildVersion]];
+    [[QIMManager sharedInstance] sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+//        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+//        if (ret) {
+            NSString *resultUrl = [result objectForKey:@"data"];
+            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
+                if (callback) {
+                    callback(resultUrl);
+                }
+            } else {
+                if (callback) {
+                    callback(resultUrl);
+                }
+            }
+//        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
+}
+
+- (void)qim_uploadImage:(NSString *)localImagePath forMessage:(QIMMessageModel *)message {
+    NSData *imageData = [NSData dataWithContentsOfFile:localImagePath];
+    if (imageData.length <= 0) {
+        return;
+    }
+    
+    NSString *fileKey = [[imageData mutableCopy] qim_md5String];
+    NSString *fileExt = [localImagePath pathExtension];
+    long long size = ceil(imageData.length / 1024.0 / 1024.0);
+    NSString *fileName = fileExt.length ? [fileKey stringByAppendingPathExtension:fileExt] : fileKey;
+    UIImage *image = [UIImage imageWithData:imageData];
+    CGFloat width = CGImageGetWidth(image.CGImage);
+    CGFloat height = CGImageGetHeight(image.CGImage);
+    
+    [self checkImageWithImageKey:fileKey WithFileLength:size WithPathExtension:fileExt withCallBack:^(NSString * _Nonnull imageUrl) {
+        if (imageUrl.length > 0) {
+            [self qim_sendImageMessageWithImageUrl:imageUrl forMessage:message withImageWidth:width withImageHeight:height];
+        } else {
+            NSString *method = @"file/v2/upload/img";
+            NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=ios&u=%@&k=%@&v=%@&key=%@&size=%lld",
+                                 [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileName,
+                                 [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
+                                 [[QIMManager sharedInstance] myRemotelogginKey],
+                                 [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
+            
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localImagePath withSuccessCallBack:^(NSData *responseData) {
+                NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+                BOOL ret = [[result objectForKey:@"ret"] boolValue];
+                if (ret) {
+                    NSString *resultUrl = [result objectForKey:@"data"];
+                    if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
+                        [self qim_sendImageMessageWithImageUrl:resultUrl forMessage:message withImageWidth:width withImageHeight:height];
+                    } else {
+                        
+                    }
+                }
+            } withFailedCallBack:^(NSError *error) {
+                
+            }];
+        }
+    }];
+}
+
+- (void)qim_sendImageMessageWithImageUrl:(NSString *)imageUrl forMessage:(QIMMessageModel *)message withImageWidth:(CGFloat)width withImageHeight:(CGFloat)height {
+    QIMMessageType msgType = message.messageType;
+    if (QIMMessageType_Text == msgType || QIMMessageType_Image == msgType || QIMMessageType_ImageNew == msgType) {
+        NSString *messageNewBody = message.message;
+        if ([imageUrl qim_hasPrefixHttpHeader]) {
+            messageNewBody = [NSString stringWithFormat:@"[obj type=\"image\" value=\"%@\" width=%f height=%f]", imageUrl, width, height];
+        } else {
+            messageNewBody = [NSString stringWithFormat:@"[obj type=\"image\" value=\"%@/%@\" width=%f height=%f]", [[QIMKit sharedInstance] qimNav_InnerFileHttpHost], imageUrl, width, height];
+        }
+        message.message = messageNewBody;
+        [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
+    }
+}
 
 #pragma mark - 视频
 - (NSDictionary *)qim_newCheckVideo:(NSString *)fileMd5 {
@@ -161,6 +281,173 @@ static QIMNewFileManager *_newfileManager = nil;
         }];
     } else {
         //老版本上传视频
+        
+    }
+}
+
+#pragma mark - 文件
+
+- (void)checkFileKeyWithKey:(NSString *)fileKey WithFileLength:(long long)fileLength WithPathExtension:(NSString *)extension withCallBack:(QIMKitCheckImageCallBack)callback {
+    NSString *method = @"file/v2/inspection/file";
+    
+    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?key=%@&size=%lld&name=%@&platform=iphone&u=%@&k=%@&version=%@",
+                         [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileKey, (long long)ceil(fileLength / 1024.0 / 1024.0), [NSString stringWithFormat:@"%@.%@",fileKey,extension],
+                         [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
+                         [[QIMManager sharedInstance] myRemotelogginKey],
+                         [[QIMAppInfo sharedInstance] AppBuildVersion]];
+    [[QIMManager sharedInstance] sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        if (ret) {
+            NSString *resultUrl = [result objectForKey:@"data"];
+            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
+                if (callback) {
+                    callback(resultUrl);
+                }
+            } else {
+                if (callback) {
+                    callback(nil);
+                }
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
+}
+
+- (void)qim_uploadFile:(NSString *)localFilePath forMessage:(QIMMessageModel *)message {
+    
+    NSData *fileData = [NSData dataWithContentsOfFile:localFilePath];
+    if (fileData.length <= 0) {
+        return;
+    }
+    
+    NSString *fileKey = [[fileData mutableCopy] qim_md5String];
+    NSString *fileExt = [localFilePath pathExtension];
+    long long size = ceil(fileData.length / 1024.0 / 1024.0);
+    NSString *fileName = fileExt.length ? [fileKey stringByAppendingPathExtension:fileExt] : fileKey;
+    [self checkFileKeyWithKey:fileKey WithFileLength:size WithPathExtension:fileExt withCallBack:^(NSString * _Nonnull imageUrl) {
+        if (imageUrl) {
+            
+        } else {
+            NSString *method = @"file/v2/upload/file";
+            NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=ios&u=%@&k=%@&v=%@&key=%@&size=%lld",
+                                 [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileName,
+                                 [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
+                                 [[QIMManager sharedInstance] myRemotelogginKey],
+                                 [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localFilePath withSuccessCallBack:^(NSData *responseData) {
+                NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+                BOOL ret = [[result objectForKey:@"ret"] boolValue];
+                if (ret) {
+                    NSString *resultUrl = [result objectForKey:@"data"];
+                    if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
+                        [self qim_sendFileMessageWithFileUrl:resultUrl forMessage:message];
+                    } else {
+                        
+                    }
+                }
+            } withFailedCallBack:^(NSError *error) {
+                
+            }];
+        }
+    }];
+}
+
+- (void)qim_sendFileMessageWithFileUrl:(NSString *)fileUrl forMessage:(QIMMessageModel *)message {
+    
+    QIMMessageType msgType = message.messageType;
+    NSDictionary *infoDic = [[QIMJSONSerializer sharedInstance] deserializeObject:message.extendInformation error:nil];
+    if (QIMMessageType_File == msgType) {
+        NSDictionary *infoDic = [[QIMJSONSerializer sharedInstance] deserializeObject:message.extendInformation error:nil];
+        NSMutableDictionary * mulDic = [NSMutableDictionary dictionaryWithDictionary:infoDic];
+        [mulDic setQIMSafeObject:fileUrl forKey:@"HttpUrl"];
+        NSString *msgContent = [[QIMJSONSerializer sharedInstance] serializeObject:mulDic];
+        //QIMSDKTODO
+        //    if (encryptState == QTEncryptChatStateEncrypting) {
+        //        NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_File WithOriginBody:msgContent WithOriginExtendInfo:msgContent WithUserId:self.message.to];
+        //        self.message.message = @"加密消息记录消息iOS";
+        //        self.message.extendInformation = encryptContent;
+        //        self.message.messageType = QIMMessageType_Encrypt;
+        //    } else {
+        message.extendInformation = msgContent;
+        message.message = msgContent;//@"您收到了一个文件，请升级客户端查看。";
+        //    }
+        
+        if (message.messageType == ChatType_ConsultServer || message.messageType == ChatType_Consult) {
+            [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
+        } else {
+            [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
+        }
+    } else if (QIMMessageType_Voice == msgType) {
+        
+        NSDictionary *voiceMsgBodyDic = [[QIMJSONSerializer sharedInstance] deserializeObject:message.message error:nil];
+        NSMutableDictionary *mulDic = [NSMutableDictionary dictionaryWithDictionary:voiceMsgBodyDic];
+        if (![fileUrl qim_hasPrefixHttpHeader]) {
+            fileUrl = [NSString stringWithFormat:@"%@/%@", [QIMNavConfigManager sharedInstance].innerFileHttpHost, fileUrl];
+        }
+        [mulDic setQIMSafeObject:fileUrl forKey:@"HttpUrl"];
+        NSString *msgContent = [[QIMJSONSerializer sharedInstance] serializeObject:mulDic];
+        message.message = msgContent;
+        
+        if (message.messageType == ChatType_ConsultServer || message.messageType == ChatType_Consult) {
+            [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
+        } else {
+            [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
+        }
+    } else if (QIMMessageType_CommonTrdInfo == msgType || QIMMessageType_CommonTrdInfoPer == msgType) {
+        NSMutableDictionary *mulDic = [NSMutableDictionary dictionaryWithDictionary:infoDic];
+        if (![fileUrl qim_hasPrefixHttpHeader]) {
+            fileUrl = [NSString stringWithFormat:@"%@/%@", [QIMNavConfigManager sharedInstance].innerFileHttpHost, fileUrl];
+        }
+        NSString * jDataStr = [[fileUrl dataUsingEncoding:NSUTF8StringEncoding] base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
+        
+        NSString *shareurl = [NSString stringWithFormat:@"%@?jdata=%@", [[QIMNavConfigManager sharedInstance] shareUrl], [jDataStr qim_URLEncodedString]];
+        [mulDic setQIMSafeObject:shareurl forKey:@"linkurl"];
+        NSString *msgExtendInfoStr = [[QIMJSONSerializer sharedInstance] serializeObject:mulDic];
+        //QIMSDKTODO
+//        if (encryptState == QTEncryptChatStateEncrypting) {
+//            NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_CommonTrdInfo WithOriginBody:@"您收到了一个消息记录文件文件，请升级客户端查看。" WithOriginExtendInfo:msgExtendInfoStr WithUserId:self.message.to];
+//            self.message.message = @"加密消息记录消息iOS";
+//            self.message.extendInformation = encryptContent;
+//            self.message.messageType = QIMMessageType_Encrypt;
+//        } else {
+            message.extendInformation = msgExtendInfoStr;
+            message.message = @"您收到了一个消息记录文件文件，请升级客户端查看。";
+//        }
+    
+        if (message.chatType == ChatType_Consult || message.chatType == ChatType_ConsultServer) {
+            [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
+        } else {
+            [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
+        }
+    } else if (QIMMessageType_LocalShare == msgType) {
+        NSDictionary *dic = [[QIMJSONSerializer sharedInstance] deserializeObject:message.originalExtendedInfo error:nil];
+        NSMutableDictionary *mulDic = [NSMutableDictionary dictionaryWithDictionary:dic];
+        [mulDic setQIMSafeObject:fileUrl forKey:@"fileUrl"];
+        NSString *msgExtendInfo = [[QIMJSONSerializer sharedInstance] serializeObject:mulDic];
+        //QIMSDKTODO
+//        if (encryptState == QTEncryptChatStateEncrypting) {
+//            NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_LocalShare WithOriginBody:[[self message] originalMessage] WithOriginExtendInfo:msgExtendInfo WithUserId:self.message.to];
+//            self.message.message = @"加密地理位置共享消息iOS";
+//            self.message.extendInformation = encryptContent;
+//            self.message.messageType = QIMMessageType_Encrypt;
+//        } else {
+            message.extendInformation = msgExtendInfo;
+            message.message = [message originalMessage];
+//        }
+    
+        if (message.chatType == ChatType_Consult) {
+            [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
+        } else if (message.chatType == ChatType_ConsultServer) {
+            [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
+        } else{
+            [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
+        }
+        [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyFileManagerUpdate object:[NSDictionary dictionaryWithObjectsAndKeys:message,@"message",@"1.1",@"propress",@"uploading",@"status", nil]];
+    } else {
         
     }
 }

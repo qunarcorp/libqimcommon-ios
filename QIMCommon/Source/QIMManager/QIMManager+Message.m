@@ -294,7 +294,7 @@
 }
 
 - (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId willSave:(BOOL)willSave {
-    return [self createMessageWithMsg:msg extenddInfo:extendInfo userId:userId realJid:nil userType:userType msgType:msgType forMsgId:mId willSave:willSave];
+    return [self createMessageWithMsg:msg extenddInfo:extendInfo userId:userId realJid:userId userType:userType msgType:msgType forMsgId:mId willSave:willSave];
 }
 
 - (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId realJid:(NSString *)realJid userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId msgState:(QIMMessageSendState)msgState willSave:(BOOL)willSave {
@@ -314,9 +314,6 @@
     } else {
         [mesg setRealJid:realJid?realJid:userId];
     }
-//    if (userType == ChatType_GroupChat) {
-//        [mesg setNickName:[[QIMManager sharedInstance] getLastJid]];
-//    }
     [mesg setMessageDate:msgDate];
     if (msgState) {
         [mesg setMessageSendState:msgState];

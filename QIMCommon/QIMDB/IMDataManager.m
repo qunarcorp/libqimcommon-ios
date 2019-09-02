@@ -95,44 +95,79 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (void)openDB {
-    [self reCreateDB];
-}
-
-- (void)reCreateDB {
+    
     BOOL dataBaseExist = [[NSFileManager defaultManager] fileExistsAtPath:_dbPath];
-    NSInteger oldDbVersion = [[[NSUserDefaults standardUserDefaults] objectForKey:@"qimDbVersion"] integerValue];
+    
+    NSInteger oldDbVersion = [self qim_dbOldVersion];
     NSInteger currentDBVersion = [self qim_dbVersion];
-    if (dataBaseExist == NO || oldDbVersion <= currentDBVersion) {
-        QIMVerboseLog(@"reCreateDB");
+    if (dataBaseExist == NO) {
+        //数据库文件不存在，重新创建
         __block BOOL result = NO;
         [_databasePool inDatabase:^(QIMDataBase* _Nonnull db) {
             result = [self createDb:db];
         }];
-        [self upgradeDB:oldDbVersion];
+        oldDbVersion = 0;
         if (result) {
             QIMVerboseLog(@"创建DB文件成功");
             [self insertUserCacheData];
-            [[NSUserDefaults standardUserDefaults] setObject:@(currentDBVersion) forKey:@"qimDbVersion"];
-            [[NSUserDefaults standardUserDefaults] synchronize];
         } else {
             QIMVerboseLog(@"创建DB文件失败");
         }
-    } else {
-        QIMVerboseLog(@"DataBaseExist : %d, currentDBVersion : %ld", dataBaseExist, currentDBVersion);
     }
+
+    if (oldDbVersion < currentDBVersion) {
+        //数据库升级
+        NSInteger upgradeResultVersion = [self upgradeDB:oldDbVersion];
+        if (upgradeResultVersion == currentDBVersion) {
+            QIMVerboseLog(@"DB文件升级成功");
+            NSString *currentDBVersionStr = [NSString stringWithFormat:@"%ld", currentDBVersion];
+            BOOL writeSucc = [currentDBVersionStr writeToFile:[self qim_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+            if (writeSucc == YES) {
+                QIMVerboseLog(@"最新DB版本：%@写入配置文件成功", currentDBVersionStr);
+            } else {
+                QIMVerboseLog(@"最新DB版本：%@写入配置文件失败", currentDBVersionStr);
+            }
+        } else {
+            QIMVerboseLog(@"DB文件升级失败");
+            NSString *currentDBVersionStr = [NSString stringWithFormat:@"%ld", upgradeResultVersion];
+            BOOL writeSucc = [currentDBVersionStr writeToFile:[self qim_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+            if (writeSucc == YES) {
+                QIMVerboseLog(@"最新DB版本：%@写入配置文件成功", currentDBVersionStr);
+            } else {
+                QIMVerboseLog(@"最新DB版本：%@写入配置文件失败", currentDBVersionStr);
+            }
+        }
+    }
+}
+
+- (NSString *)qim_dbVersionFilePath {
+    NSString *dbVersionFile = [[_dbPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"DBVersion"];
+    return dbVersionFile;
+}
+
+- (NSInteger)qim_dbOldVersion {
+    NSString *dbVersionFile = [self qim_dbVersionFilePath];
+    NSString *dbVersionStr = [[NSString alloc] initWithContentsOfFile:dbVersionFile encoding:NSUTF8StringEncoding error:nil];
+    NSInteger oldDbVersion = [dbVersionStr integerValue];
+    return oldDbVersion;
 }
 
 - (NSInteger)qim_dbVersion {
     return 1;
 }
 
-- (void)upgradeDB:(NSInteger)oldVersion {
-    if (oldVersion >= [self qim_dbVersion]) {
-        return;;
+- (NSInteger)upgradeDB:(NSInteger)oldVersion {
+    NSInteger currentNewVersion = [self qim_dbVersion];
+    if (oldVersion >= currentNewVersion) {
+        return currentNewVersion;
     }
+    __block NSInteger currentOldVersion = oldVersion;
+    __block BOOL result = YES;
     switch (oldVersion) {
-        case 0:
-            [self upgradeFrom0To1];
+        case 0: {
+             result = [self upgradeFrom0To1];
+            currentOldVersion = 0;
+        }
             break;
         default: {
             [[NSUserDefaults standardUserDefaults] setObject:@(oldVersion) forKey:@"dBUpdateVersion"];
@@ -140,18 +175,30 @@ static dispatch_once_t _onceDBToken;
         }
             break;
     }
+    if (result == NO) {
+        return currentOldVersion;
+    }
     oldVersion ++;
 
     // 递归判断是否需要升级
-    [self upgradeDB:oldVersion];
+    if (oldVersion >= currentNewVersion) {
+        return currentNewVersion;
+    } else {
+        [self upgradeDB:oldVersion];
+    }
 }
 
-- (void)upgradeFrom0To1 {
+- (BOOL)upgradeFrom0To1 {
+    QIMVerboseLog(@"upgradeFrom0To1");
+    __block BOOL result = YES;
     [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
-        if ([database checkExistsOnTable:@"IM_Group" withColumn:@"UTLastUpdateTime"] == NO) {
-            [database executeNonQuery:@"ALTER TABLE IM_Group ADD UTLastUpdateTime INTEGER;" withParameters:nil];
+        if ([database columnExists:@"IM_Group" columnName:@"UTLastUpdateTime"] == NO) {
+           result = [database executeNonQuery:@"ALTER TABLE IM_Group ADD UTLastUpdateTime INTEGER;" withParameters:nil];
+        } else {
+            result = YES;
         }
     }];
+    return result;
 }
 
 - (void)initSQLiteLog {

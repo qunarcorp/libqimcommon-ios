@@ -11,9 +11,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface QIMKit (QIMNewFileManager)
 
+- (NSString *)qim_saveImageData:(NSData *)imageData;
+
 - (void)uploadVideo:(NSString *)videoPath videoDic:(NSDictionary *)videoExt withCallBack:(QIMKitUploadVideoNewRequesSuccessedBlock)callback;
 
+- (void)qim_uploadImage:(NSString *)localImagePath forMessage:(QIMMessageModel *)message;
+
 - (void)uploadVideoPath:(NSString *)LocalVideoOutPath forMessage:(QIMMessageModel *)message;
+
+- (void)qim_uploadFile:(NSString *)localFilePath forMessage:(QIMMessageModel *)message;
 
 @end
 

@@ -95,10 +95,6 @@
     [[QIMManager sharedInstance] revokeMessageWithMessageId:messageId message:message ToJid:jid];
 }
 
-- (QIMMessageModel *)sendVoiceUrl:(NSString *)voiceUrl withVoiceName:(NSString *)voiceName withSeconds:(int)seconds ToUserId:(NSString *)userId {
-    return [[QIMManager sharedInstance] sendVoiceUrl:voiceUrl withVoiceName:voiceName withSeconds:seconds ToUserId:userId];
-}
-
 - (QIMMessageModel *)sendMessage:(QIMMessageModel *)msg ToUserId:(NSString *)userId {
     return [[QIMManager sharedInstance] sendMessage:msg ToUserId:userId];
 }

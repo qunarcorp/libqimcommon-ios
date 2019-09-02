@@ -123,7 +123,8 @@
     NSString *destUrl = [NSString stringWithFormat:@"%@/warning/nck/sendtips", [[QIMNavConfigManager sharedInstance] javaurl]];
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
     [request setHTTPMethod:QIMHTTPMethodPOST];
-    
+    [request setShouldASynchronous:YES];
+
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
@@ -151,7 +152,7 @@
     
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:url]];
     [request setHTTPMethod:QIMHTTPMethodGET];
-    
+    [request setShouldASynchronous:YES];
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
