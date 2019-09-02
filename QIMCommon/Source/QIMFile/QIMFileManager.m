@@ -265,9 +265,6 @@ typedef enum {
                     NSString *onlineUrl = [resultVideoData objectForKey:@"onlineUrl"];
                     NSMutableDictionary *videoContentDic = [NSMutableDictionary dictionaryWithCapacity:1];
                     
-                    /*
-                     {\"Duration\":\"11050\",\"FileName\":\"20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.mp4\",\"FileSize\":\"739546\",\"FileUrl\":\"http://osd.corp.qunar.com/vs_cricle_camel_vs_cricle_camel/20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.mp4\",\"Height\":\"1920\",\"ThumbName\":\"20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.png\",\"ThumbUrl\":\"http://osd.corp.qunar.com/vs_cricle_camel_vs_cricle_camel/20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.png\",\"Width\":\"1080\"}
-                     */
                     NSMutableDictionary *newVideoDic = [NSMutableDictionary dictionaryWithCapacity:1];
                     [newVideoDic setQIMSafeObject:@(Duration) forKey:@"Duration"];
                     [newVideoDic setQIMSafeObject:videoName forKey:@"FileName"];
