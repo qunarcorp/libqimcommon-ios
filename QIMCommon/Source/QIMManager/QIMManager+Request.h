@@ -29,4 +29,6 @@
 
 - (void)uploadFileRequest:(NSString *)uploadUrl withFilePath:(NSString *)filePath withPOSTBody:(NSDictionary *)bodyDic withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback;
 
+- (void)sendFormatRequest:(NSString *)destUrl withPOSTBody:(NSDictionary *)bodyDic withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback;
+
 @end

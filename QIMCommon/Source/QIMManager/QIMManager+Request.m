@@ -353,5 +353,46 @@
     }];
 }
 
+- (void)sendFormatRequest:(NSString *)destUrl withPOSTBody:(NSDictionary *)bodyDic withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
+    [request setShouldASynchronous:YES];
+    
+    QIMHTTPUploadComponent *uploadComponent = [[QIMHTTPUploadComponent alloc] init];
+    uploadComponent.bodyDic = bodyDic;
+    request.uploadComponents = @[uploadComponent];
+    [request setHTTPMethod:QIMHTTPMethodPOST];
+    
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+    [request setHTTPRequestHeaders:cookieProperties];
+    __weak __typeof(self) weakSelf = self;
+    [request setTimeoutInterval:600];
+    [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+        if (response.code == 200) {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        } else {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        }
+    } failure:^(NSError *error) {
+        if (fCallback) {
+            fCallback(error);
+        }
+    }];
+}
 
 @end

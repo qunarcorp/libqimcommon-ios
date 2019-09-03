@@ -893,16 +893,6 @@ static QIMManager *__IMManager = nil;
     return _serverTimeDiff;
 }
 
-- (NSHTTPCookie *)cookie {
-    NSDictionary *properties = [[NSMutableDictionary alloc] init];
-    [properties setValue:[[QIMManager sharedInstance] thirdpartKeywithValue] forKey:NSHTTPCookieValue];
-    [properties setValue:@"q_ckey" forKey:NSHTTPCookieName];
-    [properties setValue:@".qunar" forKey:NSHTTPCookieDomain];
-    [properties setValue:@"/" forKey:NSHTTPCookiePath];
-    NSHTTPCookie *cookie = [[NSHTTPCookie alloc] initWithProperties:properties];
-    return cookie;
-}
-
 - (NSString *)getWlanRequestURL {
     
     NSData *requestURLData = [QIMUUIDTools getRequestUrl];

@@ -146,8 +146,6 @@
 
 - (int)getServerTimeDiff;
 
-- (NSHTTPCookie *)cookie;
-
 // 更新导航配置
 - (void)updateNavigationConfig;
 

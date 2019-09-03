@@ -34,7 +34,6 @@
 #import "QIMKit+QIMGroup.h"
 #import "QIMKit+QIMGroupMessage.h"
 #import "QIMKit+QIMHelper.h"
-#import "QIMKit+QIMHttpApi.h"
 #import "QIMKit+QIMKeyChain.h"
 #import "QIMKit+QIMLogin.h"
 #import "QIMKit+QIMMessage.h"

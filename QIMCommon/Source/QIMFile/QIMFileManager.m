@@ -18,7 +18,6 @@ typedef enum {
 
 #import "QIMFileManager.h"
 #import <CommonCrypto/CommonDigest.h>
-#import "QIMHttpApi.h"
 #import "QIMPrivateHeader.h"
 #import "ASIFormDataRequest.h"
 #import "ASIDataDecompressor.h"
@@ -1439,7 +1438,7 @@ typedef enum {
  *  @param fileData 文件data
  */
 - (NSString *)getMD5FromFileData:(NSData *)fileData{
-    return (__bridge_transfer NSString *)QIMFileMD5HashCreateWithData([fileData bytes], fileData.length);
+    return [[fileData mutableCopy] qim_md5String];
 }
 
 /**

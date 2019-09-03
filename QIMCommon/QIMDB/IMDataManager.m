@@ -979,13 +979,9 @@ static dispatch_once_t _onceDBToken;
 - (void)qimDB_closeDataBase {
     __global_data_manager = nil;
     _onceDBToken = 0;
-    /*
-    BOOL result = [DatabaseManager CloseByFullPath:_dbPath];
-    if (result) {
-        __global_data_manager = nil;
-        _onceDBToken = 0;
-    }
-     */
+    [[self dbInstance] syncUsingTransaction:^(QIMDataBase * _Nonnull db, BOOL * _Nonnull rollback) {
+        [db close];
+    }];
 }
 
 + (void)qimDB_clearDataBaseCache{
