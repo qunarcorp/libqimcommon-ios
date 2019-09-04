@@ -450,7 +450,7 @@ static NSMutableArray *cacheUserCardHttpList = nil;
                          [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
                          [[QIMManager sharedInstance] myRemotelogginKey],
                          [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
-    [[QIMManager sharedInstance] uploadFileRequest:destUrl withFileData:imageData withSuccessCallBack:^(NSData *responseData) {
+    [[QIMManager sharedInstance] uploadFileRequest:destUrl withFileData:imageData withProgressBlock:nil withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
         if (ret) {

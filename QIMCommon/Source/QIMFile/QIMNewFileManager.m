@@ -22,37 +22,9 @@ static QIMNewFileManager *_newfileManager = nil;
 
 #pragma mark - 图片
 
-- (NSString *)getImageFileExt:(NSData *)data{
-    const uint8_t *p = [data bytes];
-    if ([data length] > 8) {
-        if (p[0] == 0xff && p[1] == 0xd8) {
-            
-            /* JPEG */
-            
-            return @"jpg";
-            
-        } else if (p[0] == 'G' && p[1] == 'I' && p[2] == 'F' && p[3] == '8'
-                   && p[5] == 'a')
-        {
-            if (p[4] == '9' || p[4] == '7') {
-                /* GIF */
-                return @"gif";
-            }
-            
-        } else if (p[0] == 0x89 && p[1] == 'P' && p[2] == 'N' && p[3] == 'G'
-                   && p[4] == 0x0d && p[5] == 0x0a && p[6] == 0x1a && p[7] == 0x0a)
-        {
-            /* PNG */
-            
-            return @"png";
-        }
-    }
-    return @"png";
-}
-
 - (NSString *)qim_imageKey:(NSData *)imageData {
     NSString *imageKey = [[imageData mutableCopy] qim_md5String];
-    NSString *imageExt = [self getImageFileExt:imageData];
+    NSString *imageExt = [UIImage qim_contentTypeForImageData:imageData];
     NSString *fileKey = [NSString stringWithFormat:@"%@.%@", imageKey, imageExt];
     return fileKey;
 }
@@ -120,7 +92,9 @@ static QIMNewFileManager *_newfileManager = nil;
                                  [[QIMManager sharedInstance] myRemotelogginKey],
                                  [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
             
-            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localImagePath withSuccessCallBack:^(NSData *responseData) {
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localImagePath withProgressBlock:^(float progressValue) {
+                
+            } withSuccessCallBack:^(NSData *responseData) {
                 NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
                 BOOL ret = [[result objectForKey:@"ret"] boolValue];
                 if (ret) {
@@ -163,7 +137,9 @@ static QIMNewFileManager *_newfileManager = nil;
                                  [[QIMManager sharedInstance] myRemotelogginKey],
                                  [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
             
-            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localImagePath withSuccessCallBack:^(NSData *responseData) {
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localImagePath withProgressBlock:^(float progressValue) {
+                
+            } withSuccessCallBack:^(NSData *responseData) {
                 NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
                 BOOL ret = [[result objectForKey:@"ret"] boolValue];
                 if (ret) {
@@ -189,7 +165,7 @@ static QIMNewFileManager *_newfileManager = nil;
     NSString *localImagePath = [[QIMNewFileManager sharedInstance] qim_saveImageData:imageData];
     
     NSString *fileKey = [[imageData mutableCopy] qim_md5String];
-    NSString *fileExt = [self getImageFileExt:imageData];
+    NSString *fileExt = [UIImage qim_contentTypeForImageData:imageData];
     long long size = ceil(imageData.length / 1024.0 / 1024.0);
     NSString *fileName = fileExt.length ? [fileKey stringByAppendingPathExtension:fileExt] : fileKey;
     UIImage *image = [UIImage imageWithData:imageData];
@@ -209,7 +185,9 @@ static QIMNewFileManager *_newfileManager = nil;
                                  [[QIMManager sharedInstance] myRemotelogginKey],
                                  [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
             
-            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localImagePath withSuccessCallBack:^(NSData *responseData) {
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localImagePath withProgressBlock:^(float progressValue) {
+                
+            } withSuccessCallBack:^(NSData *responseData) {
                 NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
                 BOOL ret = [[result objectForKey:@"ret"] boolValue];
                 if (ret) {
@@ -260,7 +238,9 @@ static QIMNewFileManager *_newfileManager = nil;
                                  [[QIMManager sharedInstance] myRemotelogginKey],
                                  [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
             
-            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localImagePath withSuccessCallBack:^(NSData *responseData) {
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localImagePath withProgressBlock:^(float progressValue) {
+                
+            } withSuccessCallBack:^(NSData *responseData) {
                 NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
                 BOOL ret = [[result objectForKey:@"ret"] boolValue];
                 if (ret) {
@@ -340,7 +320,7 @@ static QIMNewFileManager *_newfileManager = nil;
 
 - (NSString *)qim_syncUploadImage:(NSData *)fileData {
     NSString *fileKey = [[fileData mutableCopy] qim_md5String];
-    NSString *fileExt = [self getImageFileExt:fileData];
+    NSString *fileExt = [UIImage qim_contentTypeForImageData:fileData];
     NSString *httpUrl = [self qim_syncCheckFileKey:fileKey WithFileLength:fileData.length WithPathExtension:fileExt];
     if (httpUrl == nil) {
         NSString *fileName = fileExt.length ? [fileKey stringByAppendingPathExtension:fileExt] : fileKey;
@@ -425,7 +405,9 @@ static QIMNewFileManager *_newfileManager = nil;
             
             NSString *destUrl = [NSString stringWithFormat:@"%@/video/upload", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
             NSDictionary *bodyDic = @{@"needTrans":needTransStr};
-            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:videoPath withPOSTBody:bodyDic withSuccessCallBack:^(NSData *responseData) {
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:videoPath withPOSTBody:bodyDic withProgressBlock:^(float progressValue) {
+                
+            } withSuccessCallBack:^(NSData *responseData) {
                 NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
                 NSLog(@"resultDic : %@", resultDic);
                 BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
@@ -506,6 +488,59 @@ static QIMNewFileManager *_newfileManager = nil;
 
 #pragma mark - 文件
 
+- (NSString *)qim_specialMd5fromUrl:(NSString *) url {
+    if ([url isKindOfClass:[NSString class]]) {
+        NSURL *tempUrl = [NSURL URLWithString:url];
+        NSString *tempKey = nil;
+        NSString *query = [tempUrl query];
+        NSString *path = [tempUrl path];
+        if (path.length > 0) {
+            NSString *lastPathComponent = [path lastPathComponent];
+            NSString *firstComponent = [[lastPathComponent componentsSeparatedByString:@"="] lastObject];
+            NSString *lastComponent = [firstComponent stringByDeletingPathExtension];
+            if (lastComponent.length > 0) {
+                tempKey = lastComponent;
+            }
+            tempKey = [tempKey stringByDeletingPathExtension];
+            return tempKey;
+        }
+    }
+    return nil;
+}
+
+- (NSString *)qim_specialGetFileExtFromUrl:(NSString *) url {
+    NSURL *tempUrl = [NSURL URLWithString:url];
+    NSString *extent = [[[tempUrl pathExtension] componentsSeparatedByString:@"&"] firstObject];
+    return extent;
+    
+    NSString *query = [tempUrl query];
+    if (query) {
+        NSArray *parameters = [query componentsSeparatedByString:@"&"];
+        for (NSString *item in parameters) {
+            NSArray *value = [item componentsSeparatedByString:@"="];
+            if ([value count] == 2) {
+                NSString *key = [value objectAtIndex:0];
+                if ([key isEqualToString:@"file"] ||
+                    [key isEqualToString:@"fileurl"] ||
+                    [key isEqualToString:@"md5"]||
+                    [key isEqualToString:@"FileName"]||
+                    [key isEqualToString:@"name"]) {
+                    return [[[value objectAtIndex:1] componentsSeparatedByString:@"/"].lastObject pathExtension];
+                }
+            }
+        }
+    }
+    
+    
+    NSString * urlStr = [tempUrl.absoluteString componentsSeparatedByString:@"?"].firstObject;
+    if ([urlStr rangeOfString:@"?"].location == NSNotFound) {
+        NSArray *pathComponents = [urlStr pathComponents];
+        NSString * tempKey = [pathComponents.lastObject componentsSeparatedByString:@"."].firstObject;
+        return (tempKey.length  == 32 ) ? [pathComponents.lastObject pathExtension]:nil;
+    }
+    return nil;
+}
+
 - (void)checkFileKeyWithKey:(NSString *)fileKey WithFileLength:(long long)fileLength WithPathExtension:(NSString *)extension withCallBack:(QIMKitCheckFileCallBack)callback {
     NSString *method = @"file/v2/inspection/file";
     
@@ -557,7 +592,9 @@ static QIMNewFileManager *_newfileManager = nil;
                                  [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
                                  [[QIMManager sharedInstance] myRemotelogginKey],
                                  [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
-            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localFilePath withSuccessCallBack:^(NSData *responseData) {
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localFilePath withProgressBlock:^(float progressValue) {
+                
+            } withSuccessCallBack:^(NSData *responseData) {
                 NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
                 BOOL ret = [[result objectForKey:@"ret"] boolValue];
                 if (ret) {
@@ -597,7 +634,9 @@ static QIMNewFileManager *_newfileManager = nil;
                                  [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
                                  [[QIMManager sharedInstance] myRemotelogginKey],
                                  [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
-            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localFilePath withSuccessCallBack:^(NSData *responseData) {
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localFilePath withProgressBlock:^(float progressValue) {
+                
+            } withSuccessCallBack:^(NSData *responseData) {
                 NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
                 BOOL ret = [[result objectForKey:@"ret"] boolValue];
                 if (ret) {
@@ -642,7 +681,9 @@ static QIMNewFileManager *_newfileManager = nil;
                                  [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
                                  [[QIMManager sharedInstance] myRemotelogginKey],
                                  [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
-            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFileData:fileData withSuccessCallBack:^(NSData *responseData) {
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFileData:fileData withProgressBlock:^(float progressValue) {
+                
+            } withSuccessCallBack:^(NSData *responseData) {
                 NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
                 BOOL ret = [[result objectForKey:@"ret"] boolValue];
                 if (ret) {

@@ -30,9 +30,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSString *)qim_syncUploadImage:(NSData *)fileData;
 
-
-
 - (void)qim_uploadVideoPath:(NSString *)LocalVideoOutPath forMessage:(QIMMessageModel *)message;
+
+- (NSString *)qim_specialMd5fromUrl:(NSString *) url;
+
+- (NSString *)qim_specialGetFileExtFromUrl:(NSString *)url;
 
 - (void)qim_uploadFile:(NSString *)localFilePath forMessage:(QIMMessageModel *)message;
 

@@ -13,15 +13,6 @@ typedef void(^QIMFileManagerUploadCompletionBlock)(UIImage *image, NSError *erro
 
 @interface QIMKit (QIMFileManager)
 
-
-/**
- 根据文件URL获取文件后缀
-
- @param url 文件URL
- @return 文件后缀
- */
-+ (NSString *) urlpathExtension:(NSString *) url;
-
 + (NSString *) documentsofPath:(QIMFileCacheType) type;
 
 /**
@@ -50,35 +41,6 @@ typedef void(^QIMFileManagerUploadCompletionBlock)(UIImage *image, NSError *erro
 
 - (void)uploadFileForData:(NSData *)fileData forCacheType:(QIMFileCacheType)type isFile:(BOOL)flag fileExt:(NSString *)fileExt completionBlock:(QIMFileManagerUploadCompletionBlock)completionBlock;
 
-- (void )downloadFileWithUrl:(NSString *)url isFile:(BOOL)flag forCacheType:(QIMFileCacheType)type;
-
-
-/**
- 下载图片
-
- @param url 图片URL
- @param width 图片width
- @param height 图片height
- @param type 图片缓存类型
- */
--(void)downloadImage:(NSString *)url width:(CGFloat) width height:(CGFloat) height  forCacheType:(QIMFileCacheType)type;
-
-
-/**
- 下载图片
-
- @param url 图片URL
- @param width 图片width
- @param height 图片height
- @param type 图片缓存类型
- @param complation 下载成功的回调
- */
--(void)downloadImage:(NSString *)url
-               width:(CGFloat) width
-              height:(CGFloat) height
-        forCacheType:(QIMFileCacheType)type
-          complation:(void(^)(NSData *)) complation;
-
 /**
  缓存文件
  
@@ -103,99 +65,9 @@ typedef void(^QIMFileManagerUploadCompletionBlock)(UIImage *image, NSError *erro
  */
 - (NSString *) saveFileData:(NSData *)data url:(NSString *)httpUrl  width:(CGFloat) width height:(CGFloat) height forCacheType:(QIMFileCacheType)type;
 
-/**
- 获取文件path
- 
- @param fileName 文件名
- @param type 缓存类型
- @return 返回path
- */
-- (NSString *) getFilePathForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type;
-
-/**
- 获取文件path
-
- @param fileName 文件名
- @param type 缓存类型
- @param careExist 是否关心文件已存在
- @return 返回Path
- */
-- (NSString *) getFilePathForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type careExist:(BOOL) careExist;
-
-/**
- 文件是否存在
- 
- @param url 文件url
- @param width 宽
- @param height 高
- @param type 缓存类型
- @return 返回是否存在
- */
-- (BOOL)isFileExistForUrl:(NSString *)url width:(float)width height:(float)height forCacheType:(QIMFileCacheType)type;
-
-- (NSString *)fileExistLocalPathForUrl:(NSString *)url width:(float)width height:(float)height forCacheType:(QIMFileCacheType)type;
-
 - (NSString *)getNewMd5ForMd5:(NSString *)oldMd5 withWidth:(float)width height:(float)height;
 
-/**
- 获取file data
- 
- @param fileName file名称
- @param type file缓存类型
- @return 返回file data
- */
-- (NSData *) getFileDataForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type;
-
-- (NSData *) getFileDataFromUrl:(NSString *)url forCacheType:(QIMFileCacheType)type;
-
-- (NSData *) getFileDataFromUrl:(NSString *)url forCacheType:(QIMFileCacheType)type needUpdate:(BOOL)update;
-
-- (NSData *) getFileDataFromUrl:(NSString *)url width:(float)width height:(float)height forCacheType:(QIMFileCacheType)type;
-
 - (CGSize)getImageSizeFromUrl:(NSString *)url;
-
-- (NSString *) getFileNameFromKey:(NSString *)url;
-
-/**
- *  根据URL获得文件名
- *
- *  @param url URL
- */
-- (NSString *) getFileNameFromUrl:(NSString *)url;
-
-- (NSString *) getFileExtFromUrl:(NSString *) url;
-
-- (NSString *) md5fromUrl:(NSString *) url;
-
-/**
- 根据URL获得文件名
-
- @param url 图片URL
- @param width 图片width
- @param height 图片height
- @return 图片文件名
- */
-- (NSString *) getFileNameFromUrl:(NSString *)url width:(CGFloat) width height:(CGFloat) height;
-
-/**
- 获取图片后缀
- 
- @param data data
- @return 返回图片后缀
- */
-- (NSString *)getImageFileExt:(NSData *)data;
-
-- (NSString *)getMD5FromFileData:(NSData *)fileData;
-
-/**
- 获取图片size
- 
- @param imgSize 原图片size
- @return 缩略图size
- */
-- (CGSize)getFitSizeForImgSize:(CGSize)imgSize;
-
-- (NSString *)qim_cachedFileNameForKey:(NSString *)key;
 
 //拷贝文件
 - (void)uploadFileForData:(NSData *)fileData

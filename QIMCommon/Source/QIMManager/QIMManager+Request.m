@@ -187,7 +187,7 @@
     }];
 }
 
-- (void)uploadFileRequest:(NSString *)uploadUrl withFileData:(NSData *)fileData withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+- (void)uploadFileRequest:(NSString *)uploadUrl withFileData:(NSData *)fileData withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:uploadUrl]];
     [request setShouldASynchronous:YES];
 
@@ -201,7 +201,11 @@
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
-    [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+        if (pCallback) {
+            pCallback(progressValue);
+        }
+    } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
             __typeof(self) strongSelf = weakSelf;
             if (!strongSelf) {
@@ -228,7 +232,7 @@
     }];
 }
 
-- (void)uploadFileRequest:(NSString *)uploadUrl withFileData:(NSData *)fileData withPOSTBody:(NSDictionary *)bodyDic withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+- (void)uploadFileRequest:(NSString *)uploadUrl withFileData:(NSData *)fileData withPOSTBody:(NSDictionary *)bodyDic withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:uploadUrl]];
     [request setShouldASynchronous:YES];
 
@@ -243,7 +247,11 @@
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
-    [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+        if (pCallback) {
+            pCallback(progressValue);
+        }
+    } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
             __typeof(self) strongSelf = weakSelf;
             if (!strongSelf) {
@@ -270,7 +278,7 @@
     }];
 }
 
-- (void)uploadFileRequest:(NSString *)uploadUrl withFilePath:(NSString *)filePath withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+- (void)uploadFileRequest:(NSString *)uploadUrl withFilePath:(NSString *)filePath withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:uploadUrl]];
     [request setShouldASynchronous:YES];
 
@@ -284,7 +292,11 @@
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
-    [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+        if (pCallback) {
+            pCallback(progressValue);
+        }
+    } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
             __typeof(self) strongSelf = weakSelf;
             if (!strongSelf) {
@@ -311,7 +323,7 @@
     }];
 }
 
-- (void)uploadFileRequest:(NSString *)uploadUrl withFilePath:(NSString *)filePath withPOSTBody:(NSDictionary *)bodyDic withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+- (void)uploadFileRequest:(NSString *)uploadUrl withFilePath:(NSString *)filePath withPOSTBody:(NSDictionary *)bodyDic withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:uploadUrl]];
     [request setShouldASynchronous:YES];
 
@@ -326,7 +338,11 @@
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
-    [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+        if (pCallback) {
+            pCallback(progressValue);
+        }
+    } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
             __typeof(self) strongSelf = weakSelf;
             if (!strongSelf) {
@@ -353,7 +369,7 @@
     }];
 }
 
-- (void)sendFormatRequest:(NSString *)destUrl withPOSTBody:(NSDictionary *)bodyDic withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+- (void)sendFormatRequest:(NSString *)destUrl withPOSTBody:(NSDictionary *)bodyDic withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
     [request setShouldASynchronous:YES];
     
@@ -368,7 +384,11 @@
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
-    [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+        if (pCallback) {
+            pCallback(progressValue);
+        }
+    } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
             __typeof(self) strongSelf = weakSelf;
             if (!strongSelf) {

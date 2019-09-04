@@ -38,17 +38,9 @@ static QIMDataController *__globalDataController = nil;
 }
 
 - (NSData *)getResourceData:(NSString *)key{
-    return [[QIMFileManager sharedInstance] getFileDataFromUrl:key forCacheType:QIMFileCacheTypeColoction];
-    
-    
-    if (![key qim_isStringSafe])
-    {
-        return nil;
-    }
-    UIImage *resource = nil;
-    NSString *fileName = [NSString qim_hashString:key withSalt:kHashSalt];
-    NSData *data = [self getResourceWithFileName:fileName];
-    return data;
+    //mark by newfile
+    return nil;
+//    return [[QIMFileManager sharedInstance] getFileDataFromUrl:key forCacheType:QIMFileCacheTypeColoction];
 }
 
 - (UIImage *)getResourceImage:(NSString *)key {

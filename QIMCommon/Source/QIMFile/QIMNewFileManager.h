@@ -40,6 +40,10 @@ typedef void(^QIMKitCheckFileCallBack)(NSString *fileUrl);
 
 - (void)qim_uploadVideoPath:(NSString *)LocalVideoOutPath forMessage:(QIMMessageModel *)message;
 
+- (NSString *)qim_specialMd5fromUrl:(NSString *) url;
+
+- (NSString *)qim_specialGetFileExtFromUrl:(NSString *)url;
+
 - (void)qim_uploadFile:(NSString *)localFilePath forMessage:(QIMMessageModel *)message;
 
 - (void)qim_uploadFile:(NSString *)localFilePath WithCallback:(QIMKitUploadFileNewRequesSuccessedBlock)callback;

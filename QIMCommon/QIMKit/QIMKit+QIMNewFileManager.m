@@ -52,6 +52,14 @@
     [[QIMNewFileManager sharedInstance] qim_uploadVideoPath:LocalVideoOutPath forMessage:message];
 }
 
+- (NSString *)qim_specialMd5fromUrl:(NSString *) url {
+    return [[QIMNewFileManager sharedInstance] qim_specialMd5fromUrl:url];
+}
+
+- (NSString *)qim_specialGetFileExtFromUrl:(NSString *)url {
+    return [[QIMNewFileManager sharedInstance] qim_specialGetFileExtFromUrl:url];
+}
+
 - (void)qim_uploadFile:(NSString *)localFilePath forMessage:(QIMMessageModel *)message {
     [[QIMNewFileManager sharedInstance] qim_uploadFile:localFilePath forMessage:message];
 }

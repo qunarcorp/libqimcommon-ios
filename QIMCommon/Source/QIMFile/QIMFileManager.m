@@ -204,9 +204,6 @@ typedef enum {
                     NSString *onlineUrl = [resultVideoData objectForKey:@"onlineUrl"];
                     NSMutableDictionary *videoContentDic = [NSMutableDictionary dictionaryWithCapacity:1];
                     
-                    /*
-                     {\"Duration\":\"11050\",\"FileName\":\"20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.mp4\",\"FileSize\":\"739546\",\"FileUrl\":\"http://osd.corp.qunar.com/vs_cricle_camel_vs_cricle_camel/20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.mp4\",\"Height\":\"1920\",\"ThumbName\":\"20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.png\",\"ThumbUrl\":\"http://osd.corp.qunar.com/vs_cricle_camel_vs_cricle_camel/20190730165813439_SbEIV4_Screenrecorder-2018-12-12-19-_trans_F.png\",\"Width\":\"1080\"}
-                     */
                     NSMutableDictionary *newVideoDic = [NSMutableDictionary dictionaryWithCapacity:1];
                     [newVideoDic setQIMSafeObject:@(Duration) forKey:@"Duration"];
                     [newVideoDic setQIMSafeObject:videoName forKey:@"FileName"];
@@ -444,59 +441,6 @@ typedef enum {
     }
 }
 
-- (UIImage *)thumbnailWithImageWithoutScale:(UIImage *)image size:(CGSize)asize
-{
-    UIImage *newimage;
-    if (nil == image) {
-        newimage = nil;
-    }
-    else{
-        
-        CGSize oldsize = image.size;
-        
-        CGRect rect;
-        
-        if (asize.width/asize.height > oldsize.width/oldsize.height) {
-            
-            rect.size.width = asize.height*oldsize.width/oldsize.height;
-            
-            rect.size.height = asize.height;
-            
-            rect.origin.x = (asize.width - rect.size.width)/2;
-            
-            rect.origin.y = 0;
-            
-        }
-        
-        else{
-            
-            rect.size.width = asize.width;
-            
-            rect.size.height = asize.width*oldsize.height/oldsize.width;
-            
-            rect.origin.x = 0;
-            
-            rect.origin.y = (asize.height - rect.size.height)/2;
-            
-        }
-        
-        UIGraphicsBeginImageContext(asize);
-        
-        CGContextRef context = UIGraphicsGetCurrentContext();
-        
-        CGContextSetFillColorWithColor(context, [[UIColor clearColor] CGColor]);
-        
-        UIRectFill(CGRectMake(0, 0, asize.width, asize.height));//clear background
-        
-        [image drawInRect:rect];
-        
-        newimage = UIGraphicsGetImageFromCurrentImageContext();
-        
-        UIGraphicsEndImageContext();
-    }
-    return newimage;
-}
-
 #pragma mark - asi http request progress delegate
 
 -(void)setProgress:(float)newProgress
@@ -559,9 +503,6 @@ typedef enum {
         monitor = [[QIMFileManager alloc] init];
     });
     return monitor;
-}
-+ (NSString *) urlpathExtension:(NSString *) url {
-    return [[NSURL URLWithString:url] pathExtension];
 }
 
 + (NSString *) documentsofPath:(QIMFileCacheType) type {
@@ -649,7 +590,7 @@ typedef enum {
     
     
     NSString * fileKey = [self getMD5FromFileData:fileData];
-    NSString * fileExt = flag?nil:[self getImageFileExt:fileData];
+    NSString * fileExt = flag?nil:[UIImage qim_contentTypeForImageData:fileData];
     NSDictionary *msgInfoDic = [[QIMJSONSerializer sharedInstance] deserializeObject:message.message error:nil];
     if ([msgInfoDic[@"FileName"] length]) {
         fileExt = [msgInfoDic[@"FileName"] pathExtension];
@@ -906,7 +847,7 @@ typedef enum {
     }];
 }
 - (void)uploadFileForData:(NSData *)fileData forCacheType:(QIMFileCacheType)type isFile:(BOOL)flag completionBlock:(QIMFileManagerUploadCompletionBlock)completionBlock {
-    [self uploadFileForData:fileData forCacheType:type isFile:flag fileExt:flag?nil:[self getImageFileExt:fileData] completionBlock:completionBlock];
+    [self uploadFileForData:fileData forCacheType:type isFile:flag fileExt:flag?nil:[UIImage qim_contentTypeForImageData:fileData] completionBlock:completionBlock];
 }
 
 - (void)uploadFileForData:(NSData *)fileData forCacheType:(QIMFileCacheType)type isFile:(BOOL)flag fileExt:(NSString *)fileExt completionBlock:(QIMFileManagerUploadCompletionBlock)completionBlock {
@@ -955,147 +896,6 @@ typedef enum {
     });
 }
 
--(void)downloadImage:(NSString *)url
-               width:(CGFloat) width
-              height:(CGFloat) height
-        forCacheType:(QIMFileCacheType)type
-          complation:(void(^)(NSData *)) complation {
-    if ([url containsString:@"null"] || !url) {
-        return;
-    }
-    __weak typeof(self) weakSelf = self;
-    NSString *urlStr = [url stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *md5 = [self getFileNameFromUrl:url width:width height:height];
-    if (height > 0.0 && width > 0.0) {
-        
-        if ([url rangeOfString:@"?"].location != NSNotFound) {
-            
-            urlStr = [url stringByAppendingFormat:@"&u=%@&k=%@&w=%d&h=%d",
-                      [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                      [[QIMManager sharedInstance] myRemotelogginKey],
-                      (int)width,
-                      (int)height];
-        } else {
-            urlStr = [url stringByAppendingFormat:@"?u=%@&k=%@&w=%d&h=%d",
-                      [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                      [[QIMManager sharedInstance] myRemotelogginKey],
-                      (int)width,
-                      (int)height];
-        }
-    } else {
-        
-        if ([url rangeOfString:@"?"].location != NSNotFound) {
-            urlStr = [url stringByAppendingFormat:@"&u=%@&k=%@",
-                      [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                      [[QIMManager sharedInstance] myRemotelogginKey]];
-        } else {
-            urlStr = [url stringByAppendingFormat:@"?u=%@&k=%@",
-                      [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                      [[QIMManager sharedInstance] myRemotelogginKey]];
-        }
-    }
-    [[QIMHttpRequestMonitor sharedInstance] runblock:^{
-
-        NSString *filePath = [[QIMFileManager documentsofPath:type] stringByAppendingPathComponent:md5];
-        if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-            if (!complation) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[NSNotificationCenter defaultCenter] postNotificationName:KDownloadFileFinishedNotificationName object:nil userInfo:@{@"url":urlStr ? urlStr:@"",@"md5":md5 ? md5:@"",@"type":@(type)}];
-                });
-            } else {
-                NSData *data = [NSData dataWithContentsOfFile:filePath];
-                complation(data);
-            }
-        } else {
-            NSURL *requestUrl = [[NSURL alloc] initWithString:[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-           QIMMessageModel *msg = [QIMMessageModel new];
-            msg.messageId = [weakSelf getFileNameFromUrl:url width:width height:height];
-            QIMFileRequest *fileRequest = [weakSelf.file_dic objectForKey:msg.messageId];
-            if (!fileRequest) {
-                fileRequest = [[QIMFileRequest alloc] init];
-                [fileRequest setFileReuqestType:FileRequest_Download];
-                [fileRequest setFileCacheType:type];
-                [fileRequest setMessage:msg];
-                [weakSelf.file_dic setObject:fileRequest forKey:msg.messageId];
-            }
-            ASIHTTPRequest *formRequest = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-            [formRequest setDelegate:fileRequest];
-            formRequest.showAccurateProgress = YES;
-            [formRequest setDownloadProgressDelegate:fileRequest];
-            [formRequest startAsynchronous];
-        }
-    } url:urlStr];
-}
-
--(void)downloadImage:(NSString *)url width:(CGFloat) width height:(CGFloat) height forCacheType:(QIMFileCacheType)type {
-    
-    [self downloadImage:url width:width height:height forCacheType:type complation:nil];
-}
-
-/**
- *  根据URL下载文件
- *
- *  @param url  文件URL
- *  @param flag
- */
-
--(void)downloadFileWithUrl:(NSString *)url isFile:(BOOL)flag forCacheType:(QIMFileCacheType)type {
-
-    NSString *urlStr = [url stringByAppendingFormat:@"&u=%@&k=%@",
-                     [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                     [[QIMManager sharedInstance] myRemotelogginKey]];
-    __weak typeof(self) weakSelf = self;
-
-    [[QIMHttpRequestMonitor sharedInstance] runblock:^{
-
-        NSURL *requestUrl = [[NSURL alloc] initWithString:[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-        ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-        [request startAsynchronous];
-        NSError *error = [request error];
-        if (!error && [request responseStatusCode] == 200) {
-            NSData *responseData = [request responseData];
-            if (responseData != nil) {
-
-                NSString *fileName = nil;
-                if (flag == NO) {
-                    float width = 0;
-                    float height = 0;
-                    NSURL *tempUrl = [NSURL URLWithString:urlStr];
-                    NSString *query = [tempUrl query];
-                    if (query) {
-                        NSArray *parameters = [query componentsSeparatedByString:@"&"];
-                        for (NSString *item in parameters) {
-                            NSArray *value = [item componentsSeparatedByString:@"="];
-                            if ([value count] == 2) {
-                                NSString *key = [value objectAtIndex:0];
-                                if ([key isEqualToString:@"w"]) {
-                                    width = [[value objectAtIndex:1] floatValue];
-                                }else if ([key isEqualToString:@"h"]) {
-                                    height = [[value objectAtIndex:1] floatValue];
-                                }
-                            }
-                        }
-                    }
-                    fileName = [weakSelf saveImageData:responseData withFileName:[weakSelf getFileNameFromUrl:urlStr] width:width height:height forCacheType:type];
-                }else{
-                    fileName = [weakSelf saveFileData:responseData withFileName:[weakSelf getFileNameFromUrl:urlStr] forCacheType:type];
-                }
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[NSNotificationCenter defaultCenter] postNotificationName:KDownloadFileFinishedNotificationName object:nil userInfo:@{@"url":url?url:@"",@"md5":fileName?fileName:@"",@"type":@(type)}];
-                });
-            }else{
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[NSNotificationCenter defaultCenter] postNotificationName:KDownloadFileFailedNotificationName object:nil userInfo:@{@"url":url?url:@"",@"md5":@"",@"type":@(type)}];
-                });
-            }
-        } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[NSNotificationCenter defaultCenter] postNotificationName:KDownloadFileFailedNotificationName object:nil userInfo:@{@"url":url?url:@"",@"md5":@"",@"type":@(type)}];
-            });
-        }
-    } url:urlStr];
-}
-
 - (NSString *)getNewMd5ForMd5:(NSString *)oldMd5 withWidth:(float)width height:(float)height {
     NSUInteger intWidth = (NSUInteger)(width + 0.5);
     NSUInteger intHeight = (NSUInteger)(height + 0.5);
@@ -1104,133 +904,6 @@ typedef enum {
         newMd5 = [[NSString stringWithFormat:@"%@_w%@_h%@", oldMd5, @(intWidth), @(intHeight)] qim_getMD5];
     }
     return newMd5;
-}
-
-/**
- *  根据MD5获取Data
- *
- *  @param md5  md5
- *  @param type 图片来源类型
- */
-- (NSData *) getFileDataForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type {
-    if (![fileName qim_isStringSafe])
-    {
-        return nil;
-    }
-    NSData *data = [self getResourceWithFileName:fileName forCacheType:type];
-    if ([data isEqualToData:[NSData dataWithBytes:"\0" length:2]])
-    {
-        data = nil;
-    }
-    
-    return data;
-}
-
-/**
- *  根据文件Url获取文件data
- *
- *  @param url  文件URL
- *  @param type 文件来源路径
- */
-- (NSData *) getFileDataFromUrl:(NSString *)url forCacheType:(QIMFileCacheType)type {
-    CGSize size = [self getImageSizeFromUrl:url];
-    return [self getFileDataFromUrl:url width:size.width height:size.height forCacheType:type];
-}
-
-- (NSData *) getFileDataFromUrl:(NSString *)url forCacheType:(QIMFileCacheType)type needUpdate:(BOOL)update {
-    CGSize size = [self getImageSizeFromUrl:url];
-    return [self getFileDataFromUrl:url width:size.width height:size.height forCacheType:type needUpdate:update];
-}
-
-- (NSData *) getFileDataFromUrl:(NSString *)url width:(float)width height:(float)height forCacheType:(QIMFileCacheType)type {
-    return [self getFileDataFromUrl:url width:width height:height forCacheType:type needUpdate:YES];
-}
-
-- (NSData *) getFileDataFromUrl:(NSString *)url width:(float)width height:(float)height forCacheType:(QIMFileCacheType)type needUpdate:(BOOL)needUpdate {
-    NSString * fileName = [self getFileNameFromUrl:url width:width height:height];
-    //1.根据fileName取本地image
-    __block NSData *data = [self getFileDataForFileName:fileName forCacheType:type];
-    __weak typeof(self) weakSelf = self;
-    if (!data.length && needUpdate) {
-        //2.下载image
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            [weakSelf downloadImage:url width:width height:height forCacheType:type complation:^(NSData *imageData) {
-                data = imageData;
-            }];
-        });
-    }
-    //3.返回imageData
-    return data;
-}
-
-
-/**
- *  根据文件名获取文件data
- *
- *  @param fileName 文件名
- *  @param type     文件来源类型
- */
-- (NSData *)getResourceWithFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type
-{
-    NSData *data = nil;
-    if (nil == fileName || [fileName length] == 0)
-    {
-        return nil;
-    }
-    
-    // cache文件夹
-    
-    NSString * resourceDir = kResourceCachePath;
-    if (type == QIMFileCacheTypeColoction) {
-        resourceDir = kCollectionCacheKey;
-    }
-    NSString *cachePath = [UserCachesPath stringByAppendingPathComponent:resourceDir];
-    
-    // 获取resource文件路径
-    NSString *resourcePath = [cachePath stringByAppendingPathComponent:fileName];
-    if ([[NSFileManager defaultManager] fileExistsAtPath:resourcePath])
-    {
-        data = [[NSFileManager defaultManager] contentsAtPath:resourcePath];
-    }
-    return data;
-}
-
-- (BOOL)isFileExistForUrl:(NSString *)url width:(float)width height:(float)height forCacheType:(QIMFileCacheType)type {
-    NSString *localFilePath = [self fileExistLocalPathForUrl:url width:width height:height forCacheType:type];
-    return [[NSFileManager defaultManager] fileExistsAtPath:localFilePath];
-}
-
-- (NSString *)fileExistLocalPathForUrl:(NSString *)url width:(float)width height:(float)height forCacheType:(QIMFileCacheType)type {
-    NSString * fileName = [self getFileNameFromUrl:url width:width height:height];
-    NSString *filePath = [[QIMFileManager documentsofPath:type] stringByAppendingPathComponent:fileName];
-    return filePath;
-}
-
-- (NSString *) getFilePathForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type careExist:(BOOL) careExist {
-    // cache文件夹
-    NSString * resourceDir = kResourceCachePath;
-    if (type == QIMFileCacheTypeColoction) {
-        resourceDir = kCollectionCacheKey;
-    }
-    NSString *cachePath = [UserCachesPath stringByAppendingPathComponent:resourceDir];
-    
-    // 获取resource文件路径
-    NSString *resourcePath = [cachePath stringByAppendingPathComponent:fileName];
-    if (!careExist || [[NSFileManager defaultManager] fileExistsAtPath:resourcePath])
-    {
-        return resourcePath;
-    }
-    return nil;
-}
-
-/**
- *  根据文件名获取文件路径
- *
- *  @param fileName 文件名
- *  @param type     文件来源类型
- */
-- (NSString *) getFilePathForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type {
-    return [self getFilePathForFileName:fileName forCacheType:type careExist:YES];
 }
 
 /**
@@ -1255,8 +928,8 @@ typedef enum {
 
 - (NSString *) saveFileData:(NSData *)data url:(NSString *)httpUrl  width:(CGFloat) width height:(CGFloat) height forCacheType:(QIMFileCacheType)type {
     
-    NSString *md5 = [self getFileNameFromUrl:httpUrl width:width height:height];
-    
+//    NSString *md5 = [self getFileNameFromUrl:httpUrl width:width height:height];
+    NSString *md5 = nil;
     return [self saveFileData:data withFileName:md5 forCacheType:type];
 }
 
@@ -1297,84 +970,6 @@ typedef enum {
     return fileName;
 }
 
-- (NSString *) getFileExtFromUrl:(NSString *) url {
-    NSURL *tempUrl = [NSURL URLWithString:url];
-    NSString *extent = [[[tempUrl pathExtension] componentsSeparatedByString:@"&"] firstObject];
-    return extent;
-    
-    NSString *query = [tempUrl query];
-    if (query) {
-        NSArray *parameters = [query componentsSeparatedByString:@"&"];
-        for (NSString *item in parameters) {
-            NSArray *value = [item componentsSeparatedByString:@"="];
-            if ([value count] == 2) {
-                NSString *key = [value objectAtIndex:0];
-                if ([key isEqualToString:@"file"] ||
-                    [key isEqualToString:@"fileurl"] ||
-                    [key isEqualToString:@"md5"]||
-                    [key isEqualToString:@"FileName"]||
-                    [key isEqualToString:@"name"]) {
-                    return [[[value objectAtIndex:1] componentsSeparatedByString:@"/"].lastObject pathExtension];
-                }
-            }
-        }
-    }
-    
-    
-    NSString * urlStr = [tempUrl.absoluteString componentsSeparatedByString:@"?"].firstObject;
-    if ([urlStr rangeOfString:@"?"].location == NSNotFound) {
-        NSArray *pathComponents = [urlStr pathComponents];
-        NSString * tempKey = [pathComponents.lastObject componentsSeparatedByString:@"."].firstObject;
-        return (tempKey.length  == 32 ) ? [pathComponents.lastObject pathExtension]:nil;
-    }
-    return nil;
-}
-
-- (NSString *) md5fromUrl:(NSString *) url {
-    if ([url isKindOfClass:[NSString class]]) {
-        NSURL *tempUrl = [NSURL URLWithString:url];
-        NSString *tempKey = nil;
-        NSString *query = [tempUrl query];
-        NSString *path = [tempUrl path];
-        if (path.length > 0) {
-            NSString *lastPathComponent = [path lastPathComponent];
-            NSString *firstComponent = [[lastPathComponent componentsSeparatedByString:@"="] lastObject];
-            NSString *lastComponent = [firstComponent stringByDeletingPathExtension];
-            if (lastComponent.length > 0) {
-                tempKey = lastComponent;
-            }
-            tempKey = [tempKey stringByDeletingPathExtension];
-            return tempKey;
-        }
-        /*
-        if (query) {
-            NSArray *parameters = [query componentsSeparatedByString:@"&"];
-            for (NSString *item in parameters) {
-                NSArray *value = [item componentsSeparatedByString:@"="];
-                if ([value count] == 2) {
-                    NSString *key = [value objectAtIndex:0];
-                    if ([key isEqualToString:@"file"] ||
-                        [key isEqualToString:@"fileurl"] ||
-                        [key isEqualToString:@"md5"]||
-                        [key isEqualToString:@"FileName"]||
-                        [key isEqualToString:@"name"]) {
-                        tempKey = [[[value objectAtIndex:1] componentsSeparatedByString:@"/"].lastObject componentsSeparatedByString:@"."].firstObject;
-                        return tempKey;
-                    }
-                }
-            }
-        }
-        NSString * urlStr = [tempUrl.absoluteString componentsSeparatedByString:@"?"].firstObject;
-        if ([urlStr rangeOfString:@"?"].location == NSNotFound) {
-            NSArray *pathComponents = [urlStr pathComponents];
-            tempKey = [pathComponents.lastObject componentsSeparatedByString:@"."].firstObject;
-            return (tempKey.length  == 32) ? tempKey:nil;
-        } */
-    }
-    
-    return nil;
-}
-
 - (CGSize)getImageSizeFromUrl:(NSString *)url {
     float width = 0;
     float height = 0;
@@ -1398,91 +993,12 @@ typedef enum {
 }
 
 /**
- *  根据URL获得文件名
- *
- *  @param url URL
- */
-
-- (NSString *) getFileNameFromKey:(NSString *)url {
-    CGSize size = [self getImageSizeFromUrl:url];
-    return [self getFileNameFromUrl:url width:size.width height:size.height];
-}
-
-- (NSString *)getFileNameFromUrl:(NSString *)key {
-    return [self getFileNameFromKey:key];
-}
-
-/**
- *  根据URL获得文件名
- *
- *  @param url URL
- */
-- (NSString *) getFileNameFromUrl:(NSString *)url width:(CGFloat) width height:(CGFloat) height {
-    NSString * oldMd5 = [self md5fromUrl:url];
-    NSString * newMd5 = [self getNewMd5ForMd5:oldMd5 withWidth:width height:height];
-    NSString * fileExt = [self getFileExtFromUrl:url];
-    NSString * fileName = newMd5;
-    if (fileExt.length) {
-        if ([[fileExt lowercaseString] isEqualToString:@"gif"]) {
-            fileName = [oldMd5 stringByAppendingPathExtension:fileExt];
-        }else{
-            fileName = [newMd5 stringByAppendingPathExtension:fileExt];
-        }
-    }
-    return fileName;
-}
-
-/**
  *  根据文件data获取md5
  *
  *  @param fileData 文件data
  */
 - (NSString *)getMD5FromFileData:(NSData *)fileData{
     return [[fileData mutableCopy] qim_md5String];
-}
-
-/**
- *  根据文件data获取文件格式
- *
- *  @param data 文件data
- */
-- (NSString *)getImageFileExt:(NSData *)data{
-    const uint8_t *p = [data bytes];
-    if ([data length] > 8) {
-        if (p[0] == 0xff && p[1] == 0xd8) {
-            
-            /* JPEG */
-            
-            return @"jpg";
-            
-        } else if (p[0] == 'G' && p[1] == 'I' && p[2] == 'F' && p[3] == '8'
-                   && p[5] == 'a')
-        {
-            if (p[4] == '9' || p[4] == '7') {
-                /* GIF */
-                return @"gif";
-            }
-            
-        } else if (p[0] == 0x89 && p[1] == 'P' && p[2] == 'N' && p[3] == 'G'
-                   && p[4] == 0x0d && p[5] == 0x0a && p[6] == 0x1a && p[7] == 0x0a)
-        {
-            /* PNG */
-            
-            return @"png";
-        }
-    }
-    return nil;
-}
-
-- (BOOL) isImageOrGifWithData:(NSData *)data {
-    
-    BOOL isImage = NO;
-    NSString *imageFileExt = [self getImageFileExt:data];
-    if ([imageFileExt isEqualToString:@"gif"] || [imageFileExt isEqualToString:@"png"] || [imageFileExt isEqualToString:@"jpg"]) {
-        
-        isImage = YES;
-    }
-    return isImage;
 }
 
 - (CGSize)getFitSizeForImgSize:(CGSize)imgSize {
@@ -1493,20 +1009,6 @@ typedef enum {
         fitSize.height = imgSize.height * scale;
     }
     return fitSize;
-}
-
-- (NSString *)qim_cachedFileNameForKey:(NSString *)key {
-    const char *str = [key UTF8String];
-    if (str == NULL) {
-        str = "";
-    }
-    unsigned char r[CC_MD5_DIGEST_LENGTH];
-    CC_MD5(str, (CC_LONG)strlen(str), r);
-    NSString *filename = [NSString stringWithFormat:@"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%@",
-                          r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10],
-                          r[11], r[12], r[13], r[14], r[15], [[key pathExtension] isEqualToString:@""] ? @"" : [NSString stringWithFormat:@".%@", [key pathExtension]]];
-    
-    return filename;
 }
 
 @end

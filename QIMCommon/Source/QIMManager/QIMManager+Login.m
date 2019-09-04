@@ -276,7 +276,7 @@
     [bodyDic setQIMSafeObject:userName forKey:@"rtx_id"];
     [bodyDic setQIMSafeObject:verifCode forKey:@"verify_code"];
     
-    [[QIMManager sharedInstance] sendFormatRequest:destUrl withPOSTBody:bodyDic withSuccessCallBack:^(NSData *responseData) {
+    [[QIMManager sharedInstance] sendFormatRequest:destUrl withPOSTBody:bodyDic withProgressBlock:nil withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         if (callback) {
             callback(result);
@@ -295,7 +295,7 @@
     NSMutableDictionary *bodyDic = [[NSMutableDictionary alloc] init];
     [bodyDic setQIMSafeObject:userName forKey:@"rtx_id"];
     
-    [[QIMManager sharedInstance] sendFormatRequest:destUrl withPOSTBody:bodyDic withSuccessCallBack:^(NSData *responseData) {
+    [[QIMManager sharedInstance] sendFormatRequest:destUrl withPOSTBody:bodyDic withProgressBlock:nil withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         if (callback) {
             callback(result);
@@ -318,6 +318,8 @@
     [bodyDic setQIMSafeObject:userName forKey:@"u"];
     [bodyDic setQIMSafeObject:[[QIMManager sharedInstance] getDomain] forKey:@"h"];
     [bodyDic setQIMSafeObject:base64Result forKey:@"p"];
+    [bodyDic setQIMSafeObject:[QIMUUIDTools deviceUUID] forKey:@"mk"];
+    [bodyDic setQIMSafeObject:@"iOS" forKey:@"plat"];
     
     NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
     
@@ -325,17 +327,6 @@
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         if (callback) {
             callback(result);
-        }
-        BOOL ret = [[result objectForKey:@"ret"] boolValue];
-        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
-        if (ret && errcode == 0) {
-            if (callback) {
-                callback(result);
-            }
-        } else {
-            if (callback) {
-                callback(result);
-            }
         }
     } withFailedCallBack:^(NSError *error) {
         if (callback) {
