@@ -216,20 +216,17 @@
     if (groupId.length > 0) {
         [paramDic setObject:groupId ? groupId : @"" forKey:@"muc_name"];
     }
-    if (nickName.length > 0) {
+    if (nickName.length) {
         [paramDic setObject:nickName forKey:@"nick"];
     }
-    if (title.length > 0) {
+    if (title.length) {
         [paramDic setObject:title forKey:@"title"];
     }
-    if (desc.length > 0) {
+    if (desc.length) {
         [paramDic setObject:desc forKey:@"desc"];
     }
-    if (headerSrc.length > 0) {
+    if (headerSrc.length) {
         [paramDic setObject:headerSrc forKey:@"pic"];
-    }
-    if (paramDic.count < 2) {
-        return NO;
     }
     NSString *destUrl = [NSString stringWithFormat:@"%@/setmucvcard?u=%@&k=%@&platform=iphone&version=%@", [[QIMNavConfigManager sharedInstance] httpHost], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
     
