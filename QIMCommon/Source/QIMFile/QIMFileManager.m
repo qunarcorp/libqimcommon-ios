@@ -287,10 +287,12 @@ typedef enum {
                 [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyFileManagerUpdate object:[NSDictionary dictionaryWithObjectsAndKeys:self.message,@"message",@"1.1",@"propress",@"uploading",@"status", nil]];
             }else if (self.message.messageType == QIMMessageType_CommonTrdInfo) {
                 NSMutableDictionary * mulDic = [NSMutableDictionary dictionaryWithDictionary:infoDic];
-                NSString * jDataStr = [[[[QIMNavConfigManager sharedInstance].innerFileHttpHost stringByAppendingString:[NSString stringWithFormat:@"/%@",httpUrl]] dataUsingEncoding:NSUTF8StringEncoding] base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
-                jDataStr = [jDataStr stringByReplacingOccurrencesOfString:@"/" withString:@"_"];
-                jDataStr = [jDataStr stringByReplacingOccurrencesOfString:@"+" withString:@"-"];
-                NSString *shareurl = [NSString stringWithFormat:@"%@?jdata=%@", [[QIMNavConfigManager sharedInstance] shareUrl], jDataStr];
+                if (![httpUrl qim_hasPrefixHttpHeader]) {
+                    httpUrl = [NSString stringWithFormat:@"%@/%@", [QIMNavConfigManager sharedInstance].innerFileHttpHost, httpUrl];
+                }
+                NSString * jDataStr = [[httpUrl dataUsingEncoding:NSUTF8StringEncoding] base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
+                
+                NSString *shareurl = [NSString stringWithFormat:@"%@?jdata=%@", [[QIMNavConfigManager sharedInstance] shareUrl], [jDataStr qim_URLEncodedString]];
                 [mulDic setQIMSafeObject:shareurl forKey:@"linkurl"];
                 NSString *msgExtendInfoStr = [[QIMJSONSerializer sharedInstance] serializeObject:mulDic];
                 //QIMSDKTODO

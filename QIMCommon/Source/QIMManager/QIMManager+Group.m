@@ -77,21 +77,21 @@
 - (NSDictionary *)getGroupCardByGroupId:(NSString *)groupId {
     
     __block NSDictionary *groupVCard = nil;
-    if (!self.groupVCardDict) {
-        self.groupVCardDict = [[NSMutableDictionary alloc] initWithCapacity:3];
-    }
-    groupVCard = [self.groupVCardDict objectForKey:groupId];
-    if (!groupVCard.count) {
-        groupVCard = [[IMDataManager sharedInstance] getGroupCardByGroupId:groupId];
-        dispatch_block_t block = ^{
-
-            [self.groupVCardDict setQIMSafeObject:groupVCard forKey:groupId];
-        };
-        if (dispatch_get_specific(self.cacheTag))
-            block();
-        else
-            dispatch_sync(self.cacheQueue, block);
-    }
+    dispatch_block_t block = ^{
+        if (!self.groupVCardDict) {
+            self.groupVCardDict = [[NSMutableDictionary alloc] initWithCapacity:3];
+        }
+        groupVCard = [self.groupVCardDict objectForKey:groupId];
+        if (!groupVCard.count) {
+            groupVCard = [[IMDataManager sharedInstance] getGroupCardByGroupId:groupId];
+        }
+        
+        [self.groupVCardDict setQIMSafeObject:groupVCard forKey:groupId];
+    };
+    if (dispatch_get_specific(self.cacheTag))
+        block();
+    else
+        dispatch_sync(self.cacheQueue, block);
     return groupVCard;
 }
 
@@ -216,13 +216,13 @@
     if (groupId.length > 0) {
         [paramDic setObject:groupId ? groupId : @"" forKey:@"muc_name"];
     }
-    if (nickName.length) {
+    if (nickName) {
         [paramDic setObject:nickName forKey:@"nick"];
     }
-    if (title.length) {
+    if (title) {
         [paramDic setObject:title forKey:@"title"];
     }
-    if (desc.length) {
+    if (desc) {
         [paramDic setObject:desc forKey:@"desc"];
     }
     if (headerSrc.length) {
@@ -248,11 +248,10 @@
             NSString *groupId = [resultDic objectForKey:@"Set Muc-Vcard"];
             NSString *version = [resultDic objectForKey:@"version"];
             [[IMDataManager sharedInstance] updateGroup:groupId WihtNickName:nickName WithTopic:title WithDesc:desc WithHeaderSrc:headerSrc WithVersion:version];
+            [self.groupVCardDict removeAllObjects];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:kGroupCardChanged object:@[groupId]];
-                if (nickName.length > 0) {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kGroupNickNameChanged object:@[groupId] userInfo:nil];
-                }
+                [[NSNotificationCenter defaultCenter] postNotificationName:kGroupNickNameChanged object:@[groupId] userInfo:nil];
             });
             return YES;
         }
