@@ -77,11 +77,6 @@
     return [QIMManager defaultCommonTrdInfoImagePath];
 }
 
-- (NSDictionary *)getUserInfoByRTX:(NSString *)rtxId {
-    
-    return [[QIMManager sharedInstance] getUserInfoByRTX:rtxId];
-}
-
 - (void)updateUserSignature:(NSString *)signature withCallBack:(QIMKitUpdateSignatureBlock)callback {
     
     [[QIMManager sharedInstance] updateUserSignature:signature withCallBack:callback];

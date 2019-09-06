@@ -10,11 +10,10 @@
 #import "NSString+QIMUtility.h"
 #import "QIMUtility.h"
 #import "QIMFileManager.h"
+#import "QIMNewFileManager.h"
 #import "QIMManager.h"
-#define kResourceCachePath                          @"Resource"
 #define kImageCahce                                 @"QIMImageCache"
 #define kHashSalt                                   @"iqunar"
-#define kResourceEmptyValue                             "\0"
 
 static QIMDataController *__globalDataController = nil;
 @implementation QIMDataController
@@ -23,52 +22,25 @@ static QIMDataController *__globalDataController = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         __globalDataController = [[QIMDataController alloc] init];
+        [__globalDataController initCachePath];
     });
     return __globalDataController;
 }
 
-// 保存
-- (void)save {
-
-}
-
-// 销毁
-- (void)destroy {
-
-}
-
-- (NSData *)getResourceData:(NSString *)key{
-    //mark by newfile
-    return nil;
-//    return [[QIMFileManager sharedInstance] getFileDataFromUrl:key forCacheType:QIMFileCacheTypeColoction];
-}
-
-- (UIImage *)getResourceImage:(NSString *)key {
-    if (![key qim_isStringSafe])
+- (void)initCachePath {
+    //本地文件缓存
+    NSString *localCachePath = [UserCachesPath stringByAppendingPathComponent:QIMLocalFileCache];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:localCachePath])
     {
-        return nil;
+        [[NSFileManager defaultManager] createDirectoryAtPath:localCachePath withIntermediateDirectories:NO attributes:nil error:nil];
     }
     
-    UIImage *resource = nil;
-    NSString *fileName = [NSString qim_hashString:key withSalt:kHashSalt];
-    NSData *data = [self getResourceWithFileName:fileName];
-    if ([data isEqualToData:[NSData dataWithBytes:kResourceEmptyValue length:2]])
+    //远程文件缓存
+    NSString *remoteCachePath = [UserCachesPath stringByAppendingPathComponent:QIMRemoteFileCache];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:remoteCachePath])
     {
-        // 无效数据
+        [[NSFileManager defaultManager] createDirectoryAtPath:remoteCachePath withIntermediateDirectories:NO attributes:nil error:nil];
     }
-    else
-    {
-        UIImage *image = [UIImage imageWithData:data];
-        if (nil == image)
-        {
-            // 非图片数据
-        }
-        else
-        {
-            resource = image;
-        }
-    }
-    return resource;
 }
 
 - (long long) sizeofImagePath {
@@ -83,27 +55,6 @@ static QIMDataController *__globalDataController = nil;
 - (long long)sizeOfDBPath {
     NSString *dbPath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/QIMNewDataBase/"]];
     return [QIMUtility sizeofPath:dbPath];
-}
-
-- (NSString *)transfromTotalSize:(long long)totalSize {
-    NSString *str = nil;
-    if (totalSize < 1048576) {
-        // 1024 * 1024
-        double total = (double)totalSize;
-        float result = total / 1024.0;
-        str = [NSString stringWithFormat:@"%.2fKB", result];
-    } else if (totalSize < 1073741824) {
-        // 1024 * 1024 * 1024
-        double total = (double)totalSize;
-        float result = total / 1048576.0;
-        str = [NSString stringWithFormat:@"%.2fMB", result];
-    } else if (totalSize < 1099511627776) {
-        // 1024 * 1024 * 1024
-        double total = (double)totalSize;
-        float result = total / 1073741824.0;
-        str = [NSString stringWithFormat:@"%.2fGB", result];
-    }
-    return str;
 }
 
 - (void) deleteAllFilesAtPath:(NSString *) cachePath {
@@ -132,24 +83,6 @@ static QIMDataController *__globalDataController = nil;
 - (void)clearLogFiles {
     NSString *logDirectory = [UserCachesPath stringByAppendingPathComponent:@"Logs"];
     [[NSFileManager defaultManager] removeItemAtPath:logDirectory error:nil];
-}
-
-- (NSData *)getResourceWithFileName:(NSString *)fileName {
-    NSData *data = nil;
-    if (nil == fileName || [fileName length] == 0)
-    {
-        return nil;
-    }
-    // cache文件夹
-    NSString *cachePath = [UserCachesPath stringByAppendingPathComponent:kImageCahce];
-    
-    // 获取resource文件路径
-    NSString *resourcePath = [cachePath stringByAppendingPathComponent:fileName];
-    if ([[NSFileManager defaultManager] fileExistsAtPath:resourcePath])
-    {
-        data = [[NSFileManager defaultManager] contentsAtPath:resourcePath];
-    }
-    return data;
 }
 
 -(NSString *)getSourcePath:(NSString *)fileName {
@@ -184,6 +117,7 @@ static QIMDataController *__globalDataController = nil;
 
 - (void)saveResourceWithFileName:(NSString *)fileName data:(NSData *)data {
     
+//    [QIMNewFileManager sharedInstance]
      fileName = [NSString qim_hashString:fileName withSalt:kHashSalt];
     
     if (nil == fileName || [fileName length] == 0) {
@@ -199,23 +133,6 @@ static QIMDataController *__globalDataController = nil;
     NSString *resourcePath = [cachePath stringByAppendingPathComponent:fileName];
     [data writeToFile:resourcePath atomically:YES];
     
-}
-
-// 添加资源
-- (void)addResource:(id)resource withKey:(NSString *)key {
-    if (![key qim_isStringSafe])
-    {
-        return;
-    }
-    if (resource == [NSNull null])
-    {
-        resource = [NSData dataWithBytes:kResourceEmptyValue length:2];
-    }
-    dispatch_block_t block = ^{
-        NSString *fileName = [NSString qim_hashString:key withSalt:kHashSalt];
-        [self saveResourceWithFileName:fileName data:resource];
-    };
-    [QIMUtility performInBackground:block];
 }
 
 @end

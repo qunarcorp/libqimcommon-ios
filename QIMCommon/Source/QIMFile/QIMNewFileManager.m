@@ -9,6 +9,15 @@
 #import "QIMStringTransformTools.h"
 #import "ASIFormDataRequest.h"
 
+#define kNewFileHashSalt    @"kNewFileHashSalt"
+
+@interface QIMNewFileManager ()
+
+@property (nonatomic, copy) NSString *localCachePath;
+@property (nonatomic, copy) NSString *remoteCachePath;
+
+@end
+
 @implementation QIMNewFileManager
 
 static QIMNewFileManager *_newfileManager = nil;
@@ -16,8 +25,27 @@ static QIMNewFileManager *_newfileManager = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         _newfileManager = [[QIMNewFileManager alloc] init];
+        [_newfileManager initCachePath];
     });
     return _newfileManager;
+}
+
+- (void)initCachePath {
+    //本地文件缓存
+    NSString *localCachePath = [UserCachesPath stringByAppendingPathComponent:QIMLocalFileCache];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:localCachePath])
+    {
+        [[NSFileManager defaultManager] createDirectoryAtPath:localCachePath withIntermediateDirectories:NO attributes:nil error:nil];
+    }
+    self.localCachePath = localCachePath;
+    
+    //远程文件缓存
+    NSString *remoteCachePath = [UserCachesPath stringByAppendingPathComponent:QIMRemoteFileCache];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:remoteCachePath])
+    {
+        [[NSFileManager defaultManager] createDirectoryAtPath:remoteCachePath withIntermediateDirectories:NO attributes:nil error:nil];
+    }
+    self.remoteCachePath = remoteCachePath;
 }
 
 #pragma mark - 图片
@@ -551,8 +579,8 @@ static QIMNewFileManager *_newfileManager = nil;
                          [[QIMAppInfo sharedInstance] AppBuildVersion]];
     [[QIMManager sharedInstance] sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        BOOL ret = [[result objectForKey:@"ret"] boolValue];
-        if (ret) {
+//        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+//        if (ret) {
             NSString *resultUrl = [result objectForKey:@"data"];
             if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
                 if (callback) {
@@ -563,7 +591,7 @@ static QIMNewFileManager *_newfileManager = nil;
                     callback(nil);
                 }
             }
-        }
+//        }
     } withFailedCallBack:^(NSError *error) {
         if (callback) {
             callback(nil);
@@ -584,7 +612,7 @@ static QIMNewFileManager *_newfileManager = nil;
     NSString *fileName = fileExt.length ? [fileKey stringByAppendingPathExtension:fileExt] : fileKey;
     [self checkFileKeyWithKey:fileKey WithFileLength:size WithPathExtension:fileExt withCallBack:^(NSString * _Nonnull fileUrl) {
         if (fileUrl) {
-            
+            [self qim_sendFileMessageWithFileUrl:fileUrl forMessage:message];
         } else {
             NSString *method = @"file/v2/upload/file";
             NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=ios&u=%@&k=%@&v=%@&key=%@&size=%lld",
@@ -801,6 +829,49 @@ static QIMNewFileManager *_newfileManager = nil;
     } else {
         
     }
+}
+
+- (NSString *)qim_getLocalFileDataWithFileName:(NSString *)fileName {
+    if (nil == fileName || [fileName length] == 0) {
+        return nil;
+    }
+    // 获取resource文件路径
+    NSString *resourcePath = [self.localCachePath stringByAppendingPathComponent:fileName];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:resourcePath]) {
+        return resourcePath;
+    }
+    return nil;
+}
+
+- (NSString *)qim_saveLocalFileData:(NSData *)fileData withFileName:(NSString *)fileName {
+    
+//    fileName = [NSString qim_hashString:fileName withSalt:kNewFileHashSalt];
+    
+    if (nil == fileName || [fileName length] == 0) {
+        return nil;
+    }
+    // 获取resource文件路径
+    NSString *resourcePath = [self.localCachePath stringByAppendingPathComponent:fileName];
+    BOOL suc = [fileData writeToFile:resourcePath atomically:YES];
+    if (suc == YES) {
+        NSLog(@"write YES");
+    } else {
+        NSLog(@"write Faild");
+    }
+    return fileName;
+}
+
+- (NSString *)qim_saveRemoteFileData:(NSData *)fileData withFileName:(NSString *)fileName {
+    
+//    fileName = [NSString qim_hashString:fileName withSalt:kNewFileHashSalt];
+    
+    if (nil == fileName || [fileName length] == 0) {
+        return nil;
+    }
+    // 获取resource文件路径
+    NSString *resourcePath = [self.remoteCachePath stringByAppendingPathComponent:fileName];
+    [fileData writeToFile:resourcePath atomically:YES];
+    return fileName;
 }
 
 @end

@@ -410,18 +410,6 @@ typedef enum {
                 [[NSNotificationCenter defaultCenter] postNotificationName:KDownloadFileFailedNotificationName object:nil userInfo:@{@"url":url?url:@"",@"md5":@"",@"type":@(fileCacheType)}];
             });
         }
-        /*
-        if ([request responseStatusCode] == 200) {
-            NSData * data = nil;
-            if ([request isResponseCompressed] && [request shouldWaitToInflateCompressedResponses]) {
-                data = [ASIDataDecompressor uncompressData:_receiveData error:NULL];
-            } else {
-                data = _receiveData;
-            }
-//            [[QIMDataController getInstance] saveResourceWithFileName:self.fileUrl data:[_fileHandle readDataToEndOfFile]];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyFileManagerUpdate object:[NSDictionary dictionaryWithObjectsAndKeys:self.message,@"message",@"1.1",@"propress",@"success",@"status", nil]];
-            
-        } */
     }
     if (fileId) {
         [[QIMFileManager sharedInstance] removeFileId:fileId];

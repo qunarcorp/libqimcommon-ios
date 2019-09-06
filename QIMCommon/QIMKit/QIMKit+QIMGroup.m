@@ -106,14 +106,6 @@
     return [QIMManager defaultGroupHeaderImage];
 }
 
-- (void)getGroupHeaderImageFromRemoteWithGroupId:(NSString *)groupId {
-    [[QIMManager sharedInstance] getGroupHeaderImageFromRemoteWithGroupId:groupId];
-}
-
-- (UIImage *)getGroupImageFromLocalByGroupId:(NSString *)groupId {
-    return [[QIMManager sharedInstance] getGroupImageFromLocalByGroupId:groupId];
-}
-
 #pragma mark - 群消息设置
 
 - (BOOL)groupPushState:(NSString *)groupId {

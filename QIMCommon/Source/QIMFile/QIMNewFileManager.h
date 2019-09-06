@@ -50,6 +50,14 @@ typedef void(^QIMKitCheckFileCallBack)(NSString *fileUrl);
 
 - (void)qim_uploadFileWithFileData:(NSData *)fileData WithCallback:(QIMKitUploadFileNewRequesSuccessedBlock)callback;
 
+- (NSString *)qim_saveFileData:(NSData *)imageData;
+
+- (NSString *)qim_getLocalFileDataWithFileName:(NSString *)fileName;
+
+- (NSString *)qim_saveLocalFileData:(NSData *)fileData withFileName:(NSString *)fileName;
+
+- (NSString *)qim_saveRemoteFileData:(NSData *)fileData withFileName:(NSString *)fileName;
+
 @end
 
 NS_ASSUME_NONNULL_END

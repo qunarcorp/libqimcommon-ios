@@ -72,4 +72,16 @@
     [[QIMNewFileManager sharedInstance] qim_uploadFileWithFileData:fileData WithCallback:callback];
 }
 
+- (NSString *)qim_getLocalFileDataWithFileName:(NSString *)fileName {
+    return [[QIMNewFileManager sharedInstance] qim_getLocalFileDataWithFileName:fileName];
+}
+
+- (NSString *)qim_saveLocalFileData:(NSData *)fileData withFileName:(NSString *)fileName {
+   return [[QIMNewFileManager sharedInstance] qim_saveLocalFileData:fileData withFileName:fileName];
+}
+
+- (NSString *)qim_saveRemoteFileData:(NSData *)fileData withFileName:(NSString *)fileName {
+   return [[QIMNewFileManager sharedInstance] qim_saveRemoteFileData:fileData withFileName:fileName];
+}
+
 @end

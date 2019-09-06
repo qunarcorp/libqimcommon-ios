@@ -181,36 +181,6 @@
 
 #pragma mark - 用户名片
 
-- (NSDictionary *)getUserInfoByRTX:(NSString *)rtxId {
-    
-    __block NSDictionary *result = nil;
-    __weak __typeof(self) weakSelf = self;
-    dispatch_block_t block = ^{
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
-        NSDictionary *tempDic = [[IMDataManager qimDB_SharedInstance] qimDB_selectUserByID:rtxId];
-        if (tempDic) {
-            NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithDictionary:tempDic];
-            if ([[QIMAppInfo sharedInstance] appType] != QIMProjectTypeQChat) {
-                NSString *rtxId = [dic objectForKey:@"UserId"];
-                NSString *desc = [strongSelf.friendDescDic objectForKey:rtxId];
-                if (desc) {
-                    [dic setObject:desc forKey:@"DescInfo"];
-                }
-            }
-            result = dic;
-        }
-    };
-    
-    if (dispatch_get_specific(self.cacheTag))
-        block();
-    else
-        dispatch_sync(self.cacheQueue, block);
-    return result;
-}
-
 - (NSDictionary *)getUserInfoByUserId:(NSString *)myId {
     if (myId.length <= 0) {
         return nil;
