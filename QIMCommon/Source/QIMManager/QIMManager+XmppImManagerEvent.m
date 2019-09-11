@@ -343,6 +343,10 @@
                 //            [[QTalkNotifyManager shareNotifyManager] showChatNotifyWithMessage:notifyMsg];
             }
                 break;
+            case QIMCategoryNotifyMsgTypeHotLineSync:{
+                [[QIMManager sharedInstance] getRemoteHotlineShopList];
+            }
+                break;
             case QIMCategoryNotifyMsgTypeTickUserWorkWorldNotice: {
                 NSString *onlineListStr = [msgDic objectForKey:@"bodyValue"];
                 NSDictionary *onlineDict = [[QIMJSONSerializer sharedInstance] deserializeObject:onlineListStr error:nil];
