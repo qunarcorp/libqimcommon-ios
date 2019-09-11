@@ -1045,6 +1045,7 @@ static QIMManager *__IMManager = nil;
     [bodyProperties setObject:@"ios" forKey:@"p"];
     NSInteger clientVersion = [[[QIMUserCacheManager sharedInstance] userObjectForKey:kCheckConfigVersion] integerValue];
     [bodyProperties setObject:[NSString stringWithFormat:@"%lld", (clientVersion > 0) ? clientVersion : 0] forKey:@"cv"];
+    [bodyProperties setQIMSafeObject:[[QIMAppSetting sharedInstance] currentLanguage] forKey:@"i18N"];
     
     [request setHTTPMethod:QIMHTTPMethodPOST];
     [request setHTTPBody:[[QIMJSONSerializer sharedInstance] serializeObject:bodyProperties error:nil]];
