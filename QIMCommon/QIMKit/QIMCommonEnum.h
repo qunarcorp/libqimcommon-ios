@@ -202,6 +202,8 @@ typedef enum {
     QIMMessageTypeRobotQuestionList = 65536,
     QIMMessageTypeRobotTurnToUser = 65537,
     QIMMessageTypeWebRtcMsgTypeVideoMeeting = 5001,
+    QIMMessageTypeQChatRobotQuestionList = 65538,
+    
     
     QIMMessageType_TransChatToCustomer = 1001,
     QIMMessageType_TransChatToCustomer_Feedback = 1003,
@@ -345,6 +347,7 @@ typedef enum : NSUInteger {
     QIMCategoryNotifyMsgTypeDesignatedNotification = 99, //指定通知
     QIMCategoryNotifyMsgTypeTickUser = 100,             //踢
     QIMCategoryNotifyMsgTypeTickUserWorkWorldNotice = 12, //驼圈
+    QIMCategoryNotifyMsgTypeHotLineSync = 13,
 } QIMCategoryNotifyMsgType;
 
 typedef enum : NSUInteger {
