@@ -23,6 +23,10 @@
     [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:url withChatId:chatId withRealJid:realJid withChatType:chatType];
 }
 
+- (void)sendTPGetRequestWithUrl:(NSString *)url withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    [[QIMManager sharedInstance] sendTPGetRequestWithUrl:url withSuccessCallBack:sCallback withFailedCallBack:fCallback];
+}
+
 - (void)synchronizeDujiaWarningWithJid:(NSString *)dujiaJid {
     [[QIMManager sharedInstance] synchronizeDujiaWarningWithJid:dujiaJid];
 }
