@@ -212,7 +212,7 @@
 
 - (NSArray *)availableUserSeatStatus {
     
-    NSArray *serviceStatus = @[@{@"StatusTitle":@"标准模式", @"StatusDesc":@"（在线时才接收咨询，默认）", @"Status":@(0)}, @{@"StatusTitle":@"超人模式", @"StatusDesc":@"（不在线也接受咨询）", @"Status":@(4)}, @{@"StatusTitle":@"勿扰模式", @"StatusDesc":@"（在线也不接受咨询）", @"Status":@(1)}];
+    NSArray *serviceStatus = @[@{@"StatusTitle":[NSBundle qim_localizedStringForKey:@"Standard Mode"], @"StatusDesc":[NSBundle qim_localizedStringForKey:@"Give consultation while online (defaulted)"], @"Status":@(0)}, @{@"StatusTitle":[NSBundle qim_localizedStringForKey:@"Super Mode"], @"StatusDesc":[NSBundle qim_localizedStringForKey:@"Give consultation while offline"], @"Status":@(4)}, @{@"StatusTitle":[NSBundle qim_localizedStringForKey:@"Snooze Mode"], @"StatusDesc":[NSBundle qim_localizedStringForKey:@"Give consultation while online (defaulted)"], @"Status":@(1)}];
     return serviceStatus;
 }
 
