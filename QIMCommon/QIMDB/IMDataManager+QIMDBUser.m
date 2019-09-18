@@ -36,7 +36,7 @@
          withParameters:nil];
          */
         
-        NSString *sql = @"insert or Replace into IM_Users(UserId, XmppId, Name, DescInfo, HeaderSrc, SearchIndex, UserInfo, LastUpdateTime, Sex, UType, Email) values(:UserID, :XmppId, :Name, :DescInfo, :HeaderSrc, :SearchIndex, :UserInfo, :LastUpdateTime, :Sex, :UType, :Email);";
+        NSString *sql = @"insert or Replace into IM_Users(UserId, XmppId, Name, DescInfo, HeaderSrc, SearchIndex, UserInfo, LastUpdateTime, Sex, UType, Email, visibleFlag) values(:UserID, :XmppId, :Name, :DescInfo, :HeaderSrc, :SearchIndex, :UserInfo, :LastUpdateTime, :Sex, :UType, :Email, :visibleFlag);";
         NSMutableArray *params = [[NSMutableArray alloc] init];
         for (NSDictionary *infoDic in userInfos) {
             NSString *userId = [infoDic objectForKey:@"U"];
@@ -51,6 +51,7 @@
             NSNumber *sex = [infoDic objectForKey:@"sex"];
             NSString *uType = [infoDic objectForKey:@"uType"];
             NSString *email = [infoDic objectForKey:@"email"];
+            BOOL visibleFlag = [[infoDic objectForKey:@"visibleFlag"] boolValue];
             
             NSMutableArray *param = [[NSMutableArray alloc] initWithCapacity:11];
             [param addObject:userId];
@@ -64,6 +65,7 @@
             [param addObject:sex];
             [param addObject:uType];
             [param addObject:(email.length > 0) ? email : @":NULL"];
+            [param addObject:@(visibleFlag)];
             [params addObject:param];
         }
         [database executeBulkInsert:sql withParameters:params];

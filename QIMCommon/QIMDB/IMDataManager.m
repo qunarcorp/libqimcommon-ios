@@ -153,7 +153,7 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (NSInteger)qim_dbVersion {
-    return 1;
+    return 2;
 }
 
 - (NSInteger)upgradeDB:(NSInteger)oldVersion {
@@ -167,6 +167,11 @@ static dispatch_once_t _onceDBToken;
         case 0: {
             result = [self upgradeFrom0To1];
             currentOldVersion = 0;
+        }
+            break;
+        case 1: {
+            result = [self upgradeFrom1To2];
+            currentOldVersion = 1;
         }
             break;
         default: {
@@ -194,6 +199,19 @@ static dispatch_once_t _onceDBToken;
     [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
         if ([database columnExists:@"IM_Group" columnName:@"UTLastUpdateTime"] == NO) {
             result = [database executeNonQuery:@"ALTER TABLE IM_Group ADD UTLastUpdateTime INTEGER;" withParameters:nil];
+        } else {
+            result = YES;
+        }
+    }];
+    return result;
+}
+
+- (BOOL)upgradeFrom1To2 {
+    QIMVerboseLog(@"upgradeFrom1To2");
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+        if ([database columnExists:@"IM_Users" columnName:@"visibleFlag"] == NO) {
+            result = [database executeNonQuery:@"ALTER TABLE IM_Users ADD visibleFlag INTEGER DEFAULT 1;" withParameters:nil];
         } else {
             result = YES;
         }

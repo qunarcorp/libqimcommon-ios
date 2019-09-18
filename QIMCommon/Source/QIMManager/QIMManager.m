@@ -515,6 +515,9 @@ static QIMManager *__IMManager = nil;
     QIMVerboseLog(@"开始Check组织架构2");
     CFAbsoluteTime startTime9 = [[QIMWatchDog sharedInstance] startTime];
     [self updateOrganizationalStructure];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"kNotifyNotificationReloadOrganizationalStructure" object:nil];
+    });
     QIMVerboseLog(@"Check组织架构2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime9]);
     QIMVerboseLog(@"Check组织架构结束2");
 
