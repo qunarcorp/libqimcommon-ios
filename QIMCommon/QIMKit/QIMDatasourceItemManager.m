@@ -32,6 +32,7 @@ static dispatch_once_t _onceQIMDatasourceItemManager;
 //监听退出登录通知
 - (void)listenLogoutNotify {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logoutNotify:) name:kNotificationLogout object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clearDatasourceItemManager) name:@"kNotifyNotificationReloadOrganizationalStructure" object:nil];
 }
 
 - (void)logoutNotify:(NSNotification *)notify {
@@ -39,6 +40,12 @@ static dispatch_once_t _onceQIMDatasourceItemManager;
     _manager = nil;
     _onceQIMDatasourceItemManager = 0;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)clearDatasourceItemManager {
+    _childItems = nil;
+    _onceQIMDatasourceItemManager = nil;
+    _mergedRootBranch = nil;
 }
 
 - (NSMutableDictionary *)childItems {
@@ -172,6 +179,11 @@ static dispatch_once_t _onceQIMDatasourceItemManager;
         NSString *xmppId = [userInfo objectForKey:@"XmppId"];
         NSString *userName = [userInfo objectForKey:@"Name"];
         NSString *department = [userInfo objectForKey:@"DescInfo"];
+        BOOL visibleFlag = [[userInfo objectForKey:@"visibleFlag"] boolValue];
+        if (visibleFlag == NO) {
+            //不展示
+            continue;
+        }
         if (department.length <= 0) {
             continue;
         }
@@ -250,6 +262,10 @@ static dispatch_once_t _onceQIMDatasourceItemManager;
             }
         }
     }
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 @end

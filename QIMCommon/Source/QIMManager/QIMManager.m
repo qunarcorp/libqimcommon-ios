@@ -515,6 +515,9 @@ static QIMManager *__IMManager = nil;
     QIMVerboseLog(@"开始Check组织架构2");
     CFAbsoluteTime startTime9 = [[QIMWatchDog sharedInstance] startTime];
     [self updateOrganizationalStructure];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"kNotifyNotificationReloadOrganizationalStructure" object:nil];
+    });
     QIMVerboseLog(@"Check组织架构2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime9]);
     QIMVerboseLog(@"Check组织架构结束2");
 
@@ -1045,6 +1048,7 @@ static QIMManager *__IMManager = nil;
     [bodyProperties setObject:@"ios" forKey:@"p"];
     NSInteger clientVersion = [[[QIMUserCacheManager sharedInstance] userObjectForKey:kCheckConfigVersion] integerValue];
     [bodyProperties setObject:[NSString stringWithFormat:@"%lld", (clientVersion > 0) ? clientVersion : 0] forKey:@"cv"];
+    [bodyProperties setQIMSafeObject:[[QIMAppSetting sharedInstance] currentLanguage] forKey:@"language"];
     
     [request setHTTPMethod:QIMHTTPMethodPOST];
     [request setHTTPBody:[[QIMJSONSerializer sharedInstance] serializeObject:bodyProperties error:nil]];
@@ -1214,7 +1218,19 @@ static QIMManager *__IMManager = nil;
 
 - (void)updateAtMeMessageWithJid:(NSString *)groupId withMsgIds:(NSArray *)msgIds withReadState:(QIMAtMsgReadState)readState {
     dispatch_block_t block = ^{
-        [_hasAtMeDic removeObjectForKey:groupId];
+        NSArray *groupAtArray = [_hasAtMeDic objectForKey:groupId];
+        NSMutableArray *groupAtTempArray = [NSMutableArray arrayWithArray:groupAtArray];
+        for (NSInteger i = 0; i < groupAtArray.count; i++) {
+            NSDictionary *atMsgDic = [groupAtArray objectAtIndex:i];
+            NSString *MsgId = [atMsgDic objectForKey:@"MsgId"];
+            for (NSString *msgId in msgIds) {
+                if ([MsgId isEqualToString:msgId]) {
+                    [groupAtTempArray removeObjectAtIndex:i];
+                }
+            }
+        }
+        [_hasAtMeDic setQIMSafeObject:groupAtTempArray forKey:groupId];
+//        [_hasAtMeDic removeObjectForKey:groupId];
         [[IMDataManager qimDB_SharedInstance] qimDB_UpdateAtMessageReadStateWithGroupId:groupId withMsgIds:msgIds withReadState:readState];
         dispatch_async(dispatch_get_main_queue(), ^{
             
