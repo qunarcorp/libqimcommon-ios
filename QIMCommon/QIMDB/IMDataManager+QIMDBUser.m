@@ -496,7 +496,7 @@
 - (NSArray *)qimDB_getOrganUserList {
     __block NSMutableArray *list = nil;
     [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-        NSString *sql = @"Select UserId, XmppId, Name, DescInfo, HeaderSrc, SearchIndex, UserInfo, Mood, LastUpdateTime From IM_Users;";
+        NSString *sql = @"Select UserId, XmppId, Name, DescInfo, HeaderSrc, SearchIndex, UserInfo, Mood, LastUpdateTime, visibleFlag From IM_Users;";
         DataReader *reader = [database executeReader:sql withParameters:nil];
         while ([reader read]) {
             if (list == nil) {
@@ -508,8 +508,11 @@
             NSString *descInfo = [reader objectForColumnIndex:3];
             NSString *headerSrc = [reader objectForColumnIndex:4];
             NSString *searchIndex = [reader objectForColumnIndex:5];
-            NSNumber *dateTime = [reader objectForColumnIndex:6];
+            NSString *UserInfo = [reader objectForColumnIndex:6];
             NSString *mood = [reader objectForColumnIndex:7];
+            NSNumber *dateTime = [reader objectForColumnIndex:8];
+            NSNumber *visibleFlag = [reader objectForColumnIndex:9];
+            
             
             NSMutableDictionary *user = [[NSMutableDictionary alloc] init];
             [IMDataManager safeSaveForDic:user setObject:userId forKey:@"UserId"];
@@ -518,8 +521,10 @@
             [IMDataManager safeSaveForDic:user setObject:descInfo forKey:@"DescInfo"];
             [IMDataManager safeSaveForDic:user setObject:headerSrc forKey:@"HeaderSrc"];
             [IMDataManager safeSaveForDic:user setObject:searchIndex forKey:@"SearchIndex"];
-            [IMDataManager safeSaveForDic:user setObject:dateTime forKey:@"LastUpdateTime"];
+            [IMDataManager safeSaveForDic:user setObject:UserInfo forKey:@"UserInfo"];
             [IMDataManager safeSaveForDic:user setObject:mood forKey:@"Mood"];
+            [IMDataManager safeSaveForDic:user setObject:dateTime forKey:@"LastUpdateTime"];
+            [IMDataManager safeSaveForDic:user setObject:visibleFlag forKey:@"visibleFlag"];
             
             [list addObject:user];
         }
