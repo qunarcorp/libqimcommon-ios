@@ -1218,7 +1218,19 @@ static QIMManager *__IMManager = nil;
 
 - (void)updateAtMeMessageWithJid:(NSString *)groupId withMsgIds:(NSArray *)msgIds withReadState:(QIMAtMsgReadState)readState {
     dispatch_block_t block = ^{
-        [_hasAtMeDic removeObjectForKey:groupId];
+        NSArray *groupAtArray = [_hasAtMeDic objectForKey:groupId];
+        NSMutableArray *groupAtTempArray = [NSMutableArray arrayWithArray:groupAtArray];
+        for (NSInteger i = 0; i < groupAtArray.count; i++) {
+            NSDictionary *atMsgDic = [groupAtArray objectAtIndex:i];
+            NSString *MsgId = [atMsgDic objectForKey:@"MsgId"];
+            for (NSString *msgId in msgIds) {
+                if ([MsgId isEqualToString:msgId]) {
+                    [groupAtTempArray removeObjectAtIndex:i];
+                }
+            }
+        }
+        [_hasAtMeDic setQIMSafeObject:groupAtTempArray forKey:groupId];
+//        [_hasAtMeDic removeObjectForKey:groupId];
         [[IMDataManager qimDB_SharedInstance] qimDB_UpdateAtMessageReadStateWithGroupId:groupId withMsgIds:msgIds withReadState:readState];
         dispatch_async(dispatch_get_main_queue(), ^{
             
