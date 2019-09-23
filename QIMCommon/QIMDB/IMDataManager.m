@@ -235,7 +235,7 @@ static dispatch_once_t _onceDBToken;
                   userId                TEXT,\
                   medalStatus           INTEGER,\
                   mappingVersion        INTEGER,\
-                  updateTime            TEXT,\
+                  updateTime            INTEGER,\
                   primary key  (medalId,userId));"];
     }];
     return result;

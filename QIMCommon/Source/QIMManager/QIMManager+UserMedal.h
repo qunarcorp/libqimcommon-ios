@@ -38,12 +38,16 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param
  * @param callback
  */
-- (void)getRemoteUserMedalList;
+- (void)getRemoteUserMedalListWithUserId:(NSString *)userId;
 
 /**
  获取远程勋章列表
  */
 - (void)getRemoteMedalList;
+
+#pragma mark - Local UserMedal
+
+- (NSArray *)getUserWearMedalStatusByUserid:(NSString *)userId;
 
 @end
 

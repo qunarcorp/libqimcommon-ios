@@ -46,6 +46,11 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param medalList 勋章列表List
 - (void)qimDB_bulkInsertMedalList:(NSArray *)medalList;
 
+
+/// 插入用户勋章
+/// @param medalList 用户勋章列表List
+- (void)qimDB_bulkInsertUserMedalList:(NSArray *)medalList;
+
 /**
  * 查询勋章列表版本号
  *

@@ -146,7 +146,7 @@
               NSString *bigGrayIcon = [iconDic objectForKey:@"bigGray"];
               NSString *bigLockIcon = [iconDic objectForKey:@"bigLock"];
               
-              NSInteger status = [[iconDic objectForKey:@"status"] integerValue];
+              NSInteger status = [[dic objectForKey:@"status"] integerValue];
               
               NSMutableArray *param = [[NSMutableArray alloc] initWithCapacity:11];
               [param addObject:@(medalId)];
@@ -163,18 +163,52 @@
     }];
 }
 
-/**
- * 查询勋章列表版本号
- *
- * @return
- */
+- (void)qimDB_bulkInsertUserMedalList:(NSArray *)medalList {
+    if (!medalList.count) {
+        return;
+    }
+    [[self dbInstance] syncUsingTransaction:^(QIMDataBase * _Nonnull db, BOOL * _Nonnull rollback) {
+       NSMutableArray *params = [[NSMutableArray alloc] init];
+        /*
+         CREATE TABLE IF NOT EXISTS IM_User_Status_Medal(\
+         medalId               INTEGER,\
+         userId                TEXT,\
+         medalStatus           INTEGER,\
+         mappingVersion        INTEGER,\
+         updateTime            TEXT,\
+         primary key  (medalId,userId));
+         */
+          NSString *sql = [NSString stringWithFormat:@"insert or Replace into IM_User_Status_Medal(medalId, userId, medalStatus, mappingVersion, updateTime) values(:medalId, :userId, :medalStatus, :mappingVersion, :updateTime);"];
+          for (NSDictionary *dic in medalList) {
+              
+              NSInteger medalId = [[dic objectForKey:@"medalId"] integerValue];
+              NSString *userId = [dic objectForKey:@"userId"];
+              if (userId.length <= 0) {
+                  continue;
+              }
+              NSInteger medalStatus = [[dic objectForKey:@"medalStatus"] integerValue];
+              NSInteger mappingVersion = [[dic objectForKey:@"mappingVersion"] integerValue];
+              NSInteger updateTime = [[dic objectForKey:@"updateTime"] integerValue];
+                            
+              NSMutableArray *param = [[NSMutableArray alloc] initWithCapacity:11];
+              [param addObject:@(medalId)];
+              [param addObject:userId ? userId : @":NULL"];
+              [param addObject:@(medalStatus)];
+              [param addObject:@(mappingVersion)];
+              [param addObject:@(updateTime)];
+              [params addObject:param];
+          }
+          [db executeBulkInsert:sql withParameters:params];
+    }];
+}
+
 - (NSArray *)qimDB_selectUserHaveMedalStatus:(NSString *)userId {
     if (userId.length <= 0) {
         return nil;
     }
     __block NSMutableArray *resultList = nil;
     [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-        NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), COALESCE(medalStatus, 0) from IM_Medal_List as a left join im_user_status_medal as b on a.medalid  = b.medalid and b.UserId = ? where  a.status = 1 order by b.medalStatus desc, b.updateTime";
+        NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), COALESCE(medalStatus, 0) from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid  = b.medalid and b.UserId = ? where  a.status = 1 order by b.medalStatus desc, b.updateTime";
         NSMutableArray *param = [[NSMutableArray alloc] init];
         [param addObject:userId];
         [param addObject:userId];
@@ -214,7 +248,7 @@
     }
     __block NSMutableArray *resultList = nil;
     [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-        NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), b.medalStatus, 0 from IM_Medal_List as a left join im_user_status_medal as b on a.medalid  = b.medalid and b.UserId = ? where a.status = 1 and (b.medalStatus & 0x02 = 0x02) order by b.medalStatus desc, b.updateTime";
+        NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), b.medalStatus, 0 from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid  = b.medalid and b.UserId = ? where a.status = 1 and (b.medalStatus & 0x02 = 0x02) order by b.medalStatus desc, b.updateTime";
         NSMutableArray *param = [[NSMutableArray alloc] init];
         [param addObject:userId];
         [param addObject:userId];

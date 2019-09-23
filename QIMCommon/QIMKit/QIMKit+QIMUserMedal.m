@@ -19,4 +19,10 @@
     [[QIMManager sharedInstance] getRemoteUserMedalWithXmppJid:xmppId];
 }
 
+#pragma mark - Local UserMedal
+
+- (NSArray *)getUserWearMedalStatusByUserid:(NSString *)userId {
+    [[QIMManager sharedInstance] getUserWearMedalStatusByUserid:userId];
+}
+
 @end

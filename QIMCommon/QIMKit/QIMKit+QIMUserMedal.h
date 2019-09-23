@@ -14,4 +14,8 @@
 
 - (void)getRemoteUserMedalWithXmppJid:(NSString *)xmppId;
 
+#pragma mark - Local UserMedal
+
+- (NSArray *)getUserWearMedalStatusByUserid:(NSString *)userId;
+
 @end

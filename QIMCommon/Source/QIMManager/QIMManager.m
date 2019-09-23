@@ -611,7 +611,7 @@ static QIMManager *__IMManager = nil;
         [self getRemoteMedalList];
         
         QIMVerboseLog(@"登录之后获取我的勋章列表");
-        [self getRemoteUserMedalList];
+        [self getRemoteUserMedalListWithUserId:[QIMManager getLastUserName]];
     }
     if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
         QIMVerboseLog(@"登录之后请求一下骆驼帮未读数");
