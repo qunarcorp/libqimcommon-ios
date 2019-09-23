@@ -600,15 +600,23 @@ static QIMManager *__IMManager = nil;
         QIMVerboseLog(@"登录之后请求一下驼圈未读消息");
         [self getupdateRemoteWorkNoticeMsgs];
         
-        QIMVerboseLog(@"登录之后请求一下骆驼帮未读数");
-
-        [[QIMManager sharedInstance] getExploreNotReaderCount];
-        
+    
         QIMVerboseLog(@"登录之后请求热线账户列表");
         [self getRemoteHotlineShopList];
         
         QIMVerboseLog(@"登录之后获取发现页应用列表");
         [self getRemoteFoundNavigation];
+        
+        QIMVerboseLog(@"登录之后获取勋章列表");
+        [self getRemoteMedalList];
+        
+        QIMVerboseLog(@"登录之后获取我的勋章列表");
+        [self getRemoteUserMedalList];
+    }
+    if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
+        QIMVerboseLog(@"登录之后请求一下骆驼帮未读数");
+        
+        [[QIMManager sharedInstance] getExploreNotReaderCount];
     }
     
     if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeStartalk && [[QIMAppInfo sharedInstance] applicationState] == QIMApplicationStateLaunch) {

@@ -219,25 +219,24 @@ static dispatch_once_t _onceDBToken;
         
         //新增勋章列表
         result = [database executeUpdate: @"CREATE TABLE IF NOT EXISTS IM_Medal_List(\
-                  medalId               INTEGER,\
+                  medalId               INTEGER PRIMARY KEY,\
                   medalName             TEXT,\
                   obtainCondition       TEXT,\
                   smallIcon             TEXT,\
                   bigLightIcon          TEXT,\
                   bigGrayIcon           TEXT,\
                   bigLockIcon           BLOB,\
-                  status                TEXT,\
-                  primary key           (medalId)\
+                  status                INTEGER\
                   );"];
         
+        //用户勋章表
         result = [database executeUpdate: @"CREATE TABLE IF NOT EXISTS IM_User_Status_Medal(\
                   medalId               INTEGER,\
                   userId                TEXT,\
                   medalStatus           INTEGER,\
                   mappingVersion        INTEGER,\
                   updateTime            TEXT,\
-                  primary key  (medalId,userId)\
-                  );"];
+                  primary key  (medalId,userId));"];
     }];
     return result;
 }

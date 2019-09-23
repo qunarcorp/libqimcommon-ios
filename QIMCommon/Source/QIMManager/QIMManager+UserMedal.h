@@ -17,6 +17,34 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)getRemoteUserMedalWithXmppJid:(NSString *)xmppId;
 
+
+/**************************************新版勋章********************************/
+
+/**
+ 修改勋章佩戴状态
+ 
+ @param status 勋章佩戴状态
+ @param medalId 勋章Id
+ */
+- (void)userMedalStatusModifyWithStatus:(NSInteger)status withMedalId:(NSInteger)medalId;
+
+/**
+ 获取这个勋章下的所有用户
+ */
+- (void)getAllMedalUser;
+
+/**
+ * 获取用户勋章列表
+ *  @param
+ * @param callback
+ */
+- (void)getRemoteUserMedalList;
+
+/**
+ 获取远程勋章列表
+ */
+- (void)getRemoteMedalList;
+
 @end
 
 NS_ASSUME_NONNULL_END

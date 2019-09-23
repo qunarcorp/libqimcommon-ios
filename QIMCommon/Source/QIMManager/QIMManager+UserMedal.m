@@ -40,4 +40,96 @@
     }];
 }
 
+/**************************************新版勋章********************************/
+
+
+/**
+ 修改勋章佩戴状态
+
+ @param status 勋章佩戴状态
+ @param medalId 勋章Id
+ */
+- (void)userMedalStatusModifyWithStatus:(NSInteger)status withMedalId:(NSInteger)medalId {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/medal/userMedalStatusModify.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    destUrl = @"https://03682da0-c9cb-4f53-a918-22903cb93bc3.mock.pstmn.io/medal/userMedalStatusModify.qunar";
+    NSDictionary *bodyDic = @{@"userId":[[QIMManager sharedInstance] getLastJid], @"medalStatus":@(status), @"medalId":@(medalId)};
+    NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:bodyData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        QIMVerboseLog(@"修改勋章佩戴状态 : %@", responseDic);
+    } withFailedCallBack:^(NSError *error) {
+        
+    }];
+}
+
+/**
+ 获取这个勋章下的所有用户
+ */
+- (void)getAllMedalUser {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/medal/allMedalUser.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    destUrl = @"https://03682da0-c9cb-4f53-a918-22903cb93bc3.mock.pstmn.io/medal/allMedalUser.qunar";
+    NSDictionary *bodyDic = @{@"medalId":@(0), @"offset":@(0), @"limit":@(10)};
+    NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:bodyData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        QIMVerboseLog(@"获取这个勋章下的所有用户 : %@", responseDic);
+    } withFailedCallBack:^(NSError *error) {
+        
+    }];
+}
+
+/**
+ * 获取用户勋章列表
+ *  @param
+ * @param callback
+ */
+- (void)getRemoteUserMedalList {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/medal/userMedalList.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    destUrl = @"https://03682da0-c9cb-4f53-a918-22903cb93bc3.mock.pstmn.io/medal/userMedalList.qunar";
+    NSDictionary *bodyDic = @{@"userId":[[QIMManager sharedInstance] getLastJid], @"version":@(0)};
+    NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:bodyData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[responseDic objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[responseDic objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [responseDic objectForKey:@"data"];
+            NSArray *userMedals = [data objectForKey:@"userMedals"];
+            if ([userMedals isKindOfClass:[NSArray class]]) {
+                
+            }
+        }
+        QIMVerboseLog(@"responseDic : %@", responseDic);
+    } withFailedCallBack:^(NSError *error) {
+        
+    }];
+}
+
+/**
+ 获取远程勋章列表
+ */
+- (void)getRemoteMedalList {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/medal/medalList.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    destUrl = @"https://03682da0-c9cb-4f53-a918-22903cb93bc3.mock.pstmn.io/medal/medalList.qunar";
+    NSDictionary *bodyDic = @{@"version":@([[IMDataManager qimDB_SharedInstance] qimDB_selectMedalListVersion])};
+    NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:bodyData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[responseDic objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[responseDic objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [responseDic objectForKey:@"data"];
+            NSArray *medalList = [data objectForKey:@"medalList"];
+            if ([medalList isKindOfClass:[NSArray class]]) {
+                [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertMedalList:medalList];
+            }
+            NSInteger version = [[data objectForKey:@"version"] integerValue];
+            [[IMDataManager qimDB_SharedInstance] qimDB_updateMedalListVersion:version];
+        }
+        QIMVerboseLog(@"responseDic : %@", responseDic);
+    } withFailedCallBack:^(NSError *error) {
+        
+    }];
+}
+
 @end
