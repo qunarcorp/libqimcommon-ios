@@ -28,6 +28,7 @@
 
 - (NSString *)qimNav_webAppUrl; //注册登陆
 - (NSString *)qimNav_getManagerAppUrl;//管理页面
+- (NSString *)qimNav_AppWebHostUrl; //web页host地址
 /**
  文件服务HTTP接口 Host
  
