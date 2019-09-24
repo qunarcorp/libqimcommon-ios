@@ -22,7 +22,7 @@
 #pragma mark - Local UserMedal
 
 - (NSArray *)getUserWearMedalStatusByUserid:(NSString *)userId {
-    [[QIMManager sharedInstance] getUserWearMedalStatusByUserid:userId];
+    return [[QIMManager sharedInstance] getUserWearMedalStatusByUserid:userId];
 }
 
 @end

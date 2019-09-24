@@ -273,7 +273,7 @@
             [IMDataManager safeSaveForDic:paramDic setObject:obtainCondition forKey:@"obtainCondition"];
             [IMDataManager safeSaveForDic:paramDic setObject:smallIcon forKey:@"smallIcon"];
             [IMDataManager safeSaveForDic:paramDic setObject:bigLightIcon forKey:@"bigLightIcon"];
-            [IMDataManager safeSaveForDic:paramDic setObject:BigGrayIcon forKey:@"BigGrayIcon"];
+            [IMDataManager safeSaveForDic:paramDic setObject:BigGrayIcon forKey:@"bigGrayIcon"];
             [IMDataManager safeSaveForDic:paramDic setObject:bigLockIcon forKey:@"bigLockIcon"];
             
             [resultList addObject:paramDic];
