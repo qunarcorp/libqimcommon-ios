@@ -98,6 +98,8 @@
 @property (nonatomic, strong) NSMutableDictionary *userMarkupNameDic;    //用户备注信息
 @property (nonatomic, strong) NSMutableDictionary *stickJidDic;          //置顶Id列表
 
+@property (nonatomic, strong) NSString *defaultUserAgent;
+
 //Group
 @property (nonatomic, strong) NSMutableDictionary *notMindGroupDic;       //接收但不提醒消息的群
 
@@ -320,6 +322,8 @@
 - (NSString *)redPackageBalanceUrl;
 
 - (NSString *)myRedpackageUrl;
+
+- (NSString *)getDefaultUserAgentString;
 
 //新消息提醒
 - (BOOL)isNewMsgNotify;
