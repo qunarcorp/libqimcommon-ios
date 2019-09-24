@@ -188,6 +188,9 @@
  */
 - (NSString *)myRedpackageUrl;
 
+#pragma mark get user agent
+- (NSString *)getDefaultUserAgentString;
+
 /**
  新消息通知？
  

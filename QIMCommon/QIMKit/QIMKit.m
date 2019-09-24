@@ -222,6 +222,11 @@ static QIMKit *__global_QIMKit = nil;
     return [[QIMManager sharedInstance] myRedpackageUrl];
 }
 
+#pragma mark get user agent
+- (NSString *)getDefaultUserAgentString {
+    return [[QIMManager sharedInstance] getDefaultUserAgentString];
+}
+
 - (BOOL)isNewMsgNotify {
     return [[QIMManager sharedInstance] isNewMsgNotify];
 }

@@ -83,6 +83,7 @@
 
 #endif
 
+@property (nonatomic, strong) NSString *defaultUserAgent;   //默认的UA
 @property (nonatomic) void *cacheTag;             // cache 线程锁
 
 @property (nonatomic) void *atMeCacheTag;
@@ -320,6 +321,9 @@
 - (NSString *)redPackageBalanceUrl;
 
 - (NSString *)myRedpackageUrl;
+
+#pragma mark get user agent
+- (NSString *)getDefaultUserAgentString;
 
 //新消息提醒
 - (BOOL)isNewMsgNotify;
