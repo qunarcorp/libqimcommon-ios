@@ -265,16 +265,21 @@
             NSString *BigGrayIcon = [reader objectForColumnIndex:5];
             NSString *bigLockIcon = [reader objectForColumnIndex:6];
             NSNumber *status = [reader objectForColumnIndex:7];
-            
+            NSString *userId = [reader objectForColumnIndex:8];
+            NSNumber *medalStatus = [reader objectForColumnIndex:9];
             
             NSMutableDictionary *paramDic = [[NSMutableDictionary alloc] init];
             [IMDataManager safeSaveForDic:paramDic setObject:medalid forKey:@"medalid"];
             [IMDataManager safeSaveForDic:paramDic setObject:medalName forKey:@"medalName"];
             [IMDataManager safeSaveForDic:paramDic setObject:obtainCondition forKey:@"obtainCondition"];
             [IMDataManager safeSaveForDic:paramDic setObject:smallIcon forKey:@"smallIcon"];
+            [IMDataManager safeSaveForDic:paramDic setObject:@"http:\/\/l-im1.vc.beta.cn0.qunar.com:9090\/file\/v2\/download\/temp\/new\/48c774c0cad68ff209c0ce887ec9abff.png?name=48c774c0cad68ff209c0ce887ec9abff.png" forKey:@"smallIcon"];
             [IMDataManager safeSaveForDic:paramDic setObject:bigLightIcon forKey:@"bigLightIcon"];
             [IMDataManager safeSaveForDic:paramDic setObject:BigGrayIcon forKey:@"bigGrayIcon"];
             [IMDataManager safeSaveForDic:paramDic setObject:bigLockIcon forKey:@"bigLockIcon"];
+            [IMDataManager safeSaveForDic:paramDic setObject:status forKey:@"status"];
+            [IMDataManager safeSaveForDic:paramDic setObject:userId forKey:@"medalUserId"];
+            [IMDataManager safeSaveForDic:paramDic setObject:medalStatus forKey:@"medalUserStatus"];
             
             [resultList addObject:paramDic];
         }
