@@ -933,7 +933,7 @@
 }
 
 - (NSString *)getManagerAppUrl {
-    return [NSString stringWithFormat:@"%@/manage#/nav_code?domain=%@", self.appWeb, self.domain];
+    return [NSString stringWithFormat:@"%@/manage#/audit_user?domain=%@", self.appWeb, self.domain];
 }
 
 - (NSString *)getNewResetPwdUrl {
