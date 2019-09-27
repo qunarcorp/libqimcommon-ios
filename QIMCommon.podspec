@@ -74,6 +74,5 @@ Pod::Spec.new do |s|
   s.dependency 'WCDB'
 
   s.frameworks = 'Foundation', 'CoreTelephony', 'SystemConfiguration', 'AudioToolbox', 'AVFoundation', 'UserNotifications', 'CoreTelephony','QuartzCore', 'CoreGraphics', 'Security'
-    s.libraries = 'stdc++', 'bz2'
-
+  s.libraries = 'stdc++','bz2'
 end
