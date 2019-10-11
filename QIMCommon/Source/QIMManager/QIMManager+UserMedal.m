@@ -49,16 +49,31 @@
  @param status 勋章佩戴状态
  @param medalId 勋章Id
  */
-- (void)userMedalStatusModifyWithStatus:(NSInteger)status withMedalId:(NSInteger)medalId {
+- (void)userMedalStatusModifyWithStatus:(NSInteger)status withMedalId:(NSInteger)medalId withCallBack:(QIMKitUpdateMedalStatusCallBack)callback {
     NSString *destUrl = [NSString stringWithFormat:@"%@/medal/userMedalStatusModify.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
-    destUrl = @"https://03682da0-c9cb-4f53-a918-22903cb93bc3.mock.pstmn.io/medal/userMedalStatusModify.qunar";
-    NSDictionary *bodyDic = @{@"userId":[[QIMManager sharedInstance] getLastJid], @"medalStatus":@(status), @"medalId":@(medalId)};
+    NSDictionary *bodyDic = @{@"userId":[QIMManager getLastUserName], @"host" : [[QIMManager sharedInstance] getDomain], @"medalStatus":@(status), @"medalId":@(medalId)};
     NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:bodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[responseDic objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[responseDic objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *data = [responseDic objectForKey:@"data"];
+            [[IMDataManager qimDB_SharedInstance] qimDB_updateUserMedalStatus:data];
+            if (callback) {
+                callback(YES, nil);
+            }
+        } else {
+            NSString *errmsg = [responseDic objectForKey:@"errmsg"];
+            if (callback) {
+                callback(NO, errmsg);
+            }
+        }
         QIMVerboseLog(@"修改勋章佩戴状态 : %@", responseDic);
     } withFailedCallBack:^(NSError *error) {
-        
+        if (callback) {
+            callback(NO, @"修改状态失败");
+        }
     }];
 }
 
@@ -67,7 +82,6 @@
  */
 - (void)getAllMedalUser {
     NSString *destUrl = [NSString stringWithFormat:@"%@/medal/allMedalUser.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
-    destUrl = @"https://03682da0-c9cb-4f53-a918-22903cb93bc3.mock.pstmn.io/medal/allMedalUser.qunar";
     NSDictionary *bodyDic = @{@"medalId":@(0), @"offset":@(0), @"limit":@(10)};
     NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:bodyData withSuccessCallBack:^(NSData *responseData) {
@@ -88,8 +102,7 @@
         return;
     }
     NSString *destUrl = [NSString stringWithFormat:@"%@/medal/userMedalList.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
-    destUrl = @"https://03682da0-c9cb-4f53-a918-22903cb93bc3.mock.pstmn.io/medal/userMedalList.qunar";
-    NSDictionary *bodyDic = @{@"userId":userId, @"version":@(0)};
+    NSDictionary *bodyDic = @{@"userId":[[userId componentsSeparatedByString:@"@"] firstObject], @"host" : [[userId componentsSeparatedByString:@"@"] lastObject], @"version":@(0)};
     NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:bodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
@@ -101,7 +114,6 @@
             if ([userMedals isKindOfClass:[NSArray class]]) {
                 [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertUserMedalList:userMedals];
             }
-            
         }
         QIMVerboseLog(@"responseDic : %@", responseDic);
     } withFailedCallBack:^(NSError *error) {
@@ -114,7 +126,6 @@
  */
 - (void)getRemoteMedalList {
     NSString *destUrl = [NSString stringWithFormat:@"%@/medal/medalList.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
-    destUrl = @"https://03682da0-c9cb-4f53-a918-22903cb93bc3.mock.pstmn.io/medal/medalList.qunar";
     NSDictionary *bodyDic = @{@"version":@([[IMDataManager qimDB_SharedInstance] qimDB_selectMedalListVersion])};
     NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:bodyData withSuccessCallBack:^(NSData *responseData) {
@@ -138,8 +149,20 @@
 
 #pragma mark - Local UserMedal
 
+/// 获取某用户下的某勋章
+/// @param medalId 勋章Id
+/// @param userId 用户Id
+/// @param host 用户Host
+- (NSDictionary *)getUserMedalWithMedalId:(NSInteger)medalId withUserId:(NSString *)userId {
+    return [[IMDataManager qimDB_SharedInstance] qimDB_getUserMedalWithMedalId:medalId withUserId:userId];
+}
+
 - (NSArray *)getUserWearMedalStatusByUserid:(NSString *)userId {
     return [[IMDataManager qimDB_SharedInstance] qimDB_selectUserWearMedalStatusByUserid:userId];
+}
+
+- (NSArray *)getUsersInMedal:(NSInteger)medalId withLimit:(NSInteger)limit withOffset:(NSInteger)offset {
+    return [[IMDataManager qimDB_SharedInstance] qimDB_getUsersInMedal:medalId withLimit:limit withOffset:offset];
 }
 
 @end

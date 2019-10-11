@@ -69,7 +69,6 @@
 
 /**************************************新版勋章********************************/
 
-
 /**
  查询勋章列表版本号
  */
@@ -120,19 +119,6 @@
     
     [[self dbInstance] syncUsingTransaction:^(QIMDataBase * _Nonnull db, BOOL * _Nonnull rollback) {
        NSMutableArray *params = [[NSMutableArray alloc] init];
-        /*
-         
-         medalId               INTEGER,\
-         medalName             TEXT,\
-         obtainCondition       TEXT,\
-         smallIcon             TEXT,\
-         bigLightIcon          TEXT,\
-         bigGrayIcon           TEXT,\
-         bigLockIcon           BLOB,\
-         status                INTEGER,\
-         primary key           (medalId)
-         */
-        
           NSString *sql = [NSString stringWithFormat:@"insert or Replace into IM_Medal_List(medalId, medalName, obtainCondition, smallIcon, bigLightIcon, bigGrayIcon, bigLockIcon, status) values(:medalId, :medalName, :obtainCondition, :smallIcon, :bigLightIcon, :bigGrayIcon, :bigLockIcon, :status);"];
           for (NSDictionary *dic in medalList) {
               
@@ -163,27 +149,25 @@
     }];
 }
 
+
+/// 插入用户勋章列表
+/// @param medalList 用户的勋章列表
 - (void)qimDB_bulkInsertUserMedalList:(NSArray *)medalList {
     if (!medalList.count) {
         return;
     }
     [[self dbInstance] syncUsingTransaction:^(QIMDataBase * _Nonnull db, BOOL * _Nonnull rollback) {
        NSMutableArray *params = [[NSMutableArray alloc] init];
-        /*
-         CREATE TABLE IF NOT EXISTS IM_User_Status_Medal(\
-         medalId               INTEGER,\
-         userId                TEXT,\
-         medalStatus           INTEGER,\
-         mappingVersion        INTEGER,\
-         updateTime            TEXT,\
-         primary key  (medalId,userId));
-         */
-          NSString *sql = [NSString stringWithFormat:@"insert or Replace into IM_User_Status_Medal(medalId, userId, medalStatus, mappingVersion, updateTime) values(:medalId, :userId, :medalStatus, :mappingVersion, :updateTime);"];
+          NSString *sql = [NSString stringWithFormat:@"insert or Replace into IM_User_Status_Medal(medalId, userId, host, medalStatus, mappingVersion, updateTime) values(:medalId, :userId, :host, :medalStatus, :mappingVersion, :updateTime);"];
           for (NSDictionary *dic in medalList) {
               
               NSInteger medalId = [[dic objectForKey:@"medalId"] integerValue];
               NSString *userId = [dic objectForKey:@"userId"];
               if (userId.length <= 0) {
+                  continue;
+              }
+              NSString *host = [dic objectForKey:@"host"];
+              if (host.length <= 0) {
                   continue;
               }
               NSInteger medalStatus = [[dic objectForKey:@"medalStatus"] integerValue];
@@ -193,6 +177,7 @@
               NSMutableArray *param = [[NSMutableArray alloc] initWithCapacity:11];
               [param addObject:@(medalId)];
               [param addObject:userId ? userId : @":NULL"];
+              [param addObject:host ? host : @":NULL"];
               [param addObject:@(medalStatus)];
               [param addObject:@(mappingVersion)];
               [param addObject:@(updateTime)];
@@ -202,56 +187,105 @@
     }];
 }
 
-- (NSArray *)qimDB_selectUserHaveMedalStatus:(NSString *)userId {
-    if (userId.length <= 0) {
-        return nil;
-    }
-    __block NSMutableArray *resultList = nil;
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-        NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), COALESCE(medalStatus, 0) from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid  = b.medalid and b.UserId = ? where  a.status = 1 order by b.medalStatus desc, b.updateTime";
-        NSMutableArray *param = [[NSMutableArray alloc] init];
-        [param addObject:userId];
-        [param addObject:userId];
-        DataReader *reader = [database executeReader:sql withParameters:param];
-        while ([reader read]) {
-            if (resultList == nil) {
-                resultList = [[NSMutableArray alloc] init];
-            }
-            NSString *medalid = [reader objectForColumnIndex:0];
-            NSString *medalName = [reader objectForColumnIndex:1];
-            NSString *obtainCondition = [reader objectForColumnIndex:2];
-            NSString *smallIcon = [reader objectForColumnIndex:3];
-            NSString *bigLightIcon = [reader objectForColumnIndex:4];
-            NSString *BigGrayIcon = [reader objectForColumnIndex:5];
-            NSString *bigLockIcon = [reader objectForColumnIndex:6];
-            NSNumber *status = [reader objectForColumnIndex:7];
-            
-            
-            NSMutableDictionary *paramDic = [[NSMutableDictionary alloc] init];
-            [IMDataManager safeSaveForDic:paramDic setObject:medalid forKey:@"medalid"];
-            [IMDataManager safeSaveForDic:paramDic setObject:medalName forKey:@"medalName"];
-            [IMDataManager safeSaveForDic:paramDic setObject:obtainCondition forKey:@"obtainCondition"];
-            [IMDataManager safeSaveForDic:paramDic setObject:smallIcon forKey:@"smallIcon"];
-            [IMDataManager safeSaveForDic:paramDic setObject:bigLightIcon forKey:@"bigLightIcon"];
-            [IMDataManager safeSaveForDic:paramDic setObject:BigGrayIcon forKey:@"BigGrayIcon"];
-            [IMDataManager safeSaveForDic:paramDic setObject:bigLockIcon forKey:@"bigLockIcon"];
 
-            [resultList addObject:paramDic];
-        }
+/// 更新某个勋章的佩戴状态
+/// @param userMedalDic 勋章佩戴状态
+- (void)qimDB_updateUserMedalStatus:(NSDictionary *)userMedalDic {
+    if (userMedalDic.count <= 0) {
+        return;
+    }
+    [[self dbInstance] syncUsingTransaction:^(QIMDataBase * _Nonnull db, BOOL * _Nonnull rollback) {
+        NSString *sql = [NSString stringWithFormat:@"update IM_User_Status_Medal set mappingVersion=:mappingVersion, medalStatus=:medalStatus, updateTime=:updateTime where userId=:userId and host=:host and medalId=:medalId"];
+        
+        NSString *userId = [userMedalDic objectForKey:@"userId"];
+        NSString *host = [userMedalDic objectForKey:@"host"];
+        NSInteger medalId = [[userMedalDic objectForKey:@"medalId"] integerValue];
+        NSInteger medalStatus = [[userMedalDic objectForKey:@"medalStatus"] integerValue];
+        NSInteger mappingVersion = [[userMedalDic objectForKey:@"mappingVersion"] integerValue];
+        long long updateTime = [[userMedalDic objectForKey:@"updateTime"] longLongValue];
+        
+        NSMutableArray *params = [[NSMutableArray alloc] init];
+        NSMutableArray *param = [[NSMutableArray alloc] initWithCapacity:11];
+        [param addObject:@(mappingVersion)];
+        [param addObject:@(medalStatus)];
+        [param addObject:@(updateTime)];
+        [param addObject:userId ? userId : @":NULL"];
+        [param addObject:host ? host : @":NULL"];
+        [param addObject:@(medalId)];
+        [params addObject:param];
+        [db executeBulkInsert:sql withParameters:params];
     }];
-    return resultList;
 }
 
+/// 获取某用户下的某勋章详情
+/// @param medalId 勋章Id
+/// @param userId 用户Id
+/// @param host 用户Host
+- (NSDictionary *)qimDB_getUserMedalWithMedalId:(NSInteger)medalId withUserId:(NSString *)userId {
+    if (userId.length <= 0) {
+         return nil;
+     }
+     __block NSMutableDictionary *paramDic = [[NSMutableDictionary alloc] init];
+     [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+         NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), COALESCE(host, ?), b.medalStatus, (select count(*) from IM_User_Status_Medal where medalId=b.medalId) as userCount from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid  = b.medalid and b.medalid = ? and b.UserId = ? and b.host = ? where a.status = 1 and (b.medalStatus & 0x02 = 0x02 or b.medalStatus & 0x01 = 0x01) order by b.medalStatus desc, b.updateTime;";
+         NSMutableArray *param = [[NSMutableArray alloc] init];
+         NSString *userName = [[userId componentsSeparatedByString:@"@"] firstObject];
+         NSString *userHost = [[userId componentsSeparatedByString:@"@"] lastObject];
+         [param addObject:userName];
+         [param addObject:userHost];
+         [param addObject:@(medalId)];
+         [param addObject:userName];
+         [param addObject:userHost];
+         DataReader *reader = [database executeReader:sql withParameters:param];
+         if ([reader read]) {
+             NSString *medalid = [reader objectForColumnIndex:0];
+             NSString *medalName = [reader objectForColumnIndex:1];
+             NSString *obtainCondition = [reader objectForColumnIndex:2];
+             NSString *smallIcon = [reader objectForColumnIndex:3];
+             NSString *bigLightIcon = [reader objectForColumnIndex:4];
+             NSString *BigGrayIcon = [reader objectForColumnIndex:5];
+             NSString *bigLockIcon = [reader objectForColumnIndex:6];
+             NSNumber *status = [reader objectForColumnIndex:7];
+             NSString *userId = [reader objectForColumnIndex:8];
+             NSString *host = [reader objectForColumnIndex:9];
+             NSNumber *medalStatus = [reader objectForColumnIndex:10];
+             NSNumber *userCount = [reader objectForColumnIndex:11];
+             
+             [IMDataManager safeSaveForDic:paramDic setObject:medalid forKey:@"medalId"];
+             [IMDataManager safeSaveForDic:paramDic setObject:medalName forKey:@"medalName"];
+             [IMDataManager safeSaveForDic:paramDic setObject:obtainCondition forKey:@"obtainCondition"];
+             [IMDataManager safeSaveForDic:paramDic setObject:smallIcon forKey:@"smallIcon"];
+             [IMDataManager safeSaveForDic:paramDic setObject:bigLightIcon forKey:@"bigLightIcon"];
+             [IMDataManager safeSaveForDic:paramDic setObject:BigGrayIcon forKey:@"bigGrayIcon"];
+             [IMDataManager safeSaveForDic:paramDic setObject:bigLockIcon forKey:@"bigLockIcon"];
+             [IMDataManager safeSaveForDic:paramDic setObject:status forKey:@"status"];
+             [IMDataManager safeSaveForDic:paramDic setObject:userId forKey:@"medalUserId"];
+             [IMDataManager safeSaveForDic:paramDic setObject:host forKey:@"medalUserHost"];
+             [IMDataManager safeSaveForDic:paramDic setObject:medalStatus forKey:@"medalUserStatus"];
+             [IMDataManager safeSaveForDic:paramDic setObject:userCount forKey:@"userCount"];
+         }
+         [reader close];
+     }];
+     return paramDic;
+}
+
+
+/// 获取用户所拥有的所有勋章列表
+/// @param userId 用户Id
 - (NSArray *)qimDB_selectUserWearMedalStatusByUserid:(NSString *)userId {
     if (userId.length <= 0) {
         return nil;
     }
     __block NSMutableArray *resultList = nil;
     [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-        NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), b.medalStatus, 0 from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid  = b.medalid and b.UserId = ? where a.status = 1 and (b.medalStatus & 0x02 = 0x02) order by b.medalStatus desc, b.updateTime";
+        NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), COALESCE(host, ?), COALESCE(b.medalStatus, 0), (select count(*) from IM_User_Status_Medal where medalId=b.medalId) as userCount from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid  = b.medalid and b.UserId = ? and b.Host = ? where a.status = 1 order by b.medalStatus desc, b.updateTime;";
         NSMutableArray *param = [[NSMutableArray alloc] init];
-        [param addObject:userId];
-        [param addObject:userId];
+        NSString *userName = [[userId componentsSeparatedByString:@"@"] firstObject];
+        NSString *userHost = [[userId componentsSeparatedByString:@"@"] lastObject];
+        [param addObject:userName];
+        [param addObject:userHost];
+        [param addObject:userName];
+        [param addObject:userHost];
         DataReader *reader = [database executeReader:sql withParameters:param];
         while ([reader read]) {
             if (resultList == nil) {
@@ -266,20 +300,23 @@
             NSString *bigLockIcon = [reader objectForColumnIndex:6];
             NSNumber *status = [reader objectForColumnIndex:7];
             NSString *userId = [reader objectForColumnIndex:8];
-            NSNumber *medalStatus = [reader objectForColumnIndex:9];
+            NSString *userHost = [reader objectForColumnIndex:9];
+            NSNumber *medalStatus = [reader objectForColumnIndex:10];
+            NSNumber *userCount = [reader objectForColumnIndex:11];
             
             NSMutableDictionary *paramDic = [[NSMutableDictionary alloc] init];
-            [IMDataManager safeSaveForDic:paramDic setObject:medalid forKey:@"medalid"];
+            [IMDataManager safeSaveForDic:paramDic setObject:medalid forKey:@"medalId"];
             [IMDataManager safeSaveForDic:paramDic setObject:medalName forKey:@"medalName"];
             [IMDataManager safeSaveForDic:paramDic setObject:obtainCondition forKey:@"obtainCondition"];
             [IMDataManager safeSaveForDic:paramDic setObject:smallIcon forKey:@"smallIcon"];
-            [IMDataManager safeSaveForDic:paramDic setObject:@"http:\/\/l-im1.vc.beta.cn0.qunar.com:9090\/file\/v2\/download\/temp\/new\/48c774c0cad68ff209c0ce887ec9abff.png?name=48c774c0cad68ff209c0ce887ec9abff.png" forKey:@"smallIcon"];
             [IMDataManager safeSaveForDic:paramDic setObject:bigLightIcon forKey:@"bigLightIcon"];
             [IMDataManager safeSaveForDic:paramDic setObject:BigGrayIcon forKey:@"bigGrayIcon"];
             [IMDataManager safeSaveForDic:paramDic setObject:bigLockIcon forKey:@"bigLockIcon"];
             [IMDataManager safeSaveForDic:paramDic setObject:status forKey:@"status"];
             [IMDataManager safeSaveForDic:paramDic setObject:userId forKey:@"medalUserId"];
+            [IMDataManager safeSaveForDic:paramDic setObject:userHost forKey:@"medalUserHost"];
             [IMDataManager safeSaveForDic:paramDic setObject:medalStatus forKey:@"medalUserStatus"];
+            [IMDataManager safeSaveForDic:paramDic setObject:userCount forKey:@"userCount"];
             
             [resultList addObject:paramDic];
         }
@@ -301,6 +338,41 @@
         [params addObject:param];
         [database executeBulkInsert:sql withParameters:params];
     }];
+}
+
+/// 获取某个勋章下的用户list
+/// @param medalId 勋章Id
+/// @param limit limit
+/// @param offset offset
+- (NSArray *)qimDB_getUsersInMedal:(NSInteger)medalId withLimit:(NSInteger)limit withOffset:(NSInteger)offset {
+    __block NSMutableArray *resultList = nil;
+    [[self dbInstance] inDatabase:^(QIMDataBase * _Nonnull database) {
+        NSString *sql = [NSString stringWithFormat:@"select d.UserId, d.XmppId, d.Name, d.DescInfo, d.headersrc from im_users as d left join (select b.UserId||'@'||b.host as XmppId from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid = b.medalId where b.medalId = ? and a.status = 1 order by b.updateTime desc LIMIT ? OFFSET ?) as c where d.XmppId = c.XmppId;"];
+        NSMutableArray *param = [[NSMutableArray alloc] init];
+        [param addObject:@(medalId)];
+        [param addObject:@(limit)];
+        [param addObject:@(offset)];
+        DataReader *reader = [database executeReader:sql withParameters:param];
+        while ([reader read]) {
+            if (resultList == nil) {
+                resultList = [[NSMutableArray alloc] init];
+            }
+            NSString *userId = [reader objectForColumnIndex:0];
+            NSString *xmppId = [reader objectForColumnIndex:1];
+            NSString *userName = [reader objectForColumnIndex:2];
+            NSString *DescInfo = [reader objectForColumnIndex:3];
+            NSString *headersrc = [reader objectForColumnIndex:4];
+            
+            NSMutableDictionary *paramDic = [[NSMutableDictionary alloc] init];
+            [IMDataManager safeSaveForDic:paramDic setObject:userId forKey:@"UserId"];
+            [IMDataManager safeSaveForDic:paramDic setObject:xmppId forKey:@"XmppId"];
+            [IMDataManager safeSaveForDic:paramDic setObject:userName forKey:@"Name"];
+            [IMDataManager safeSaveForDic:paramDic setObject:DescInfo forKey:@"DescInfo"];
+            [IMDataManager safeSaveForDic:paramDic setObject:headersrc forKey:@"HeaderSrc"];
+            [resultList addObject:paramDic];
+        }
+    }];
+    return resultList;
 }
 
 @end

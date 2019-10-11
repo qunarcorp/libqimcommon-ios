@@ -401,6 +401,8 @@ typedef void(^QIMKitGetTripMemberCheckBlock)(BOOL isConform);   //isConform å†²ç
 typedef void(^QIMKitCreateTripBlock)(BOOL success, NSString *errMsg);
 typedef void(^QIMCloseSessionBlock)(NSString *closeMsg);
 
+typedef void(^QIMKitUpdateMedalStatusCallBack)(BOOL success, NSString *errmsg);
+
 typedef void(^QIMKitLikeMomentSuccessedBlock)(NSDictionary *responseDic);
 typedef void(^QIMKitWorkCommentBlock)(NSArray *comments);
 typedef void(^QIMKitWorkCommentDeleteSuccessBlock)(BOOL success, NSInteger superParentStatus);

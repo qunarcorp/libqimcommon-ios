@@ -26,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param status 勋章佩戴状态
  @param medalId 勋章Id
  */
-- (void)userMedalStatusModifyWithStatus:(NSInteger)status withMedalId:(NSInteger)medalId;
+- (void)userMedalStatusModifyWithStatus:(NSInteger)status withMedalId:(NSInteger)medalId withCallBack:(QIMKitUpdateMedalStatusCallBack)callback;
 
 /**
  获取这个勋章下的所有用户
@@ -47,7 +47,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Local UserMedal
 
+- (NSDictionary *)getUserMedalWithMedalId:(NSInteger)medalId withUserId:(NSString *)userId;
+
 - (NSArray *)getUserWearMedalStatusByUserid:(NSString *)userId;
+
+- (NSArray *)getUsersInMedal:(NSInteger)medalId withLimit:(NSInteger)limit withOffset:(NSInteger)offset;
 
 @end
 

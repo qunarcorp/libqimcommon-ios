@@ -233,6 +233,7 @@ static dispatch_once_t _onceDBToken;
         result = [database executeUpdate: @"CREATE TABLE IF NOT EXISTS IM_User_Status_Medal(\
                   medalId               INTEGER,\
                   userId                TEXT,\
+                  host                  TEXT,\
                   medalStatus           INTEGER,\
                   mappingVersion        INTEGER,\
                   updateTime            INTEGER,\

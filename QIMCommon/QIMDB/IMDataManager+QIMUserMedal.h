@@ -51,16 +51,22 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param medalList 用户勋章列表List
 - (void)qimDB_bulkInsertUserMedalList:(NSArray *)medalList;
 
-/**
- * 查询勋章列表版本号
- *
- * @return
- */
+- (void)qimDB_updateUserMedalStatus:(NSDictionary *)userMedalDic;
+
+
 - (NSArray *)qimDB_selectUserHaveMedalStatus:(NSString *)userId;
+
+/// 获取某用户下的某勋章
+/// @param medalId 勋章Id
+/// @param userId 用户Id
+/// @param host 用户Host
+- (NSDictionary *)qimDB_getUserMedalWithMedalId:(NSInteger)medalId withUserId:(NSString *)userId;
 
 - (NSArray *)qimDB_selectUserWearMedalStatusByUserid:(NSString *)userId;
 
 - (void)qimDB_updateMedalListVersion:(NSInteger)value;
+
+- (NSArray *)qimDB_getUsersInMedal:(NSInteger)medalId withLimit:(NSInteger)limit withOffset:(NSInteger)offset;
 
 @end
 
