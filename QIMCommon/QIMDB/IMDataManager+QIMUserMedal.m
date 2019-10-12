@@ -278,7 +278,7 @@
     }
     __block NSMutableArray *resultList = nil;
     [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-        NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), COALESCE(host, ?), COALESCE(b.medalStatus, 0), (select count(*) from IM_User_Status_Medal where medalId=b.medalId) as userCount from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid  = b.medalid and b.UserId = ? and b.Host = ? where a.status = 1 order by b.medalStatus desc, b.updateTime;";
+        NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), COALESCE(host, ?), COALESCE(b.medalStatus, 0), (select count(*) from IM_User_Status_Medal where medalId=a.medalId) as userCount from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid  = b.medalid and b.UserId = ? and b.Host = ? where a.status = 1 order by b.medalStatus desc, b.updateTime;";
         NSMutableArray *param = [[NSMutableArray alloc] init];
         NSString *userName = [[userId componentsSeparatedByString:@"@"] firstObject];
         NSString *userHost = [[userId componentsSeparatedByString:@"@"] lastObject];

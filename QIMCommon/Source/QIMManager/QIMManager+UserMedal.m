@@ -102,7 +102,7 @@
         return;
     }
     NSString *destUrl = [NSString stringWithFormat:@"%@/medal/userMedalList.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
-    NSDictionary *bodyDic = @{@"userId":[[userId componentsSeparatedByString:@"@"] firstObject], @"host" : [[userId componentsSeparatedByString:@"@"] lastObject], @"version":@(0)};
+    NSDictionary *bodyDic = @{/*@"userId":[[userId componentsSeparatedByString:@"@"] firstObject], @"host" : [[userId componentsSeparatedByString:@"@"] lastObject],*/ @"version":@(0)};
     NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:bodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
