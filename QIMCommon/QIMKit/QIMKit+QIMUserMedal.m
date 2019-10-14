@@ -43,4 +43,8 @@
     return [[QIMManager sharedInstance] getUsersInMedal:medalId withLimit:limit withOffset:offset];
 }
 
+- (NSArray *)getUserWearMedalSmallIconListByUserid:(NSString *)xmppId {
+    return [[QIMManager sharedInstance] getUserWearMedalSmallIconListByUserid:xmppId];
+}
+
 @end

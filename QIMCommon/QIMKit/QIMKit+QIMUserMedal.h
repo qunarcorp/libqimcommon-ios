@@ -30,4 +30,6 @@
 
 - (NSArray *)getUsersInMedal:(NSInteger)medalId withLimit:(NSInteger)limit withOffset:(NSInteger)offset;
 
+- (NSArray *)getUserWearMedalSmallIconListByUserid:(NSString *)xmppId;
+
 @end

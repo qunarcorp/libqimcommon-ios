@@ -49,6 +49,7 @@
 @property (nonatomic, strong) YYDispatchQueuePool *load_session_unreadcount;
 @property (nonatomic, strong) YYDispatchQueuePool *load_groupDB_VCard;
 @property (nonatomic, strong) YYDispatchQueuePool *load_msgNickName;
+@property (nonatomic, strong) YYDispatchQueuePool *load_msgMedalList;
 @property (nonatomic, strong) YYDispatchQueuePool *load_msgHeaderImage;
 
 @property (nonatomic, strong) dispatch_queue_t update_group_member_queue;

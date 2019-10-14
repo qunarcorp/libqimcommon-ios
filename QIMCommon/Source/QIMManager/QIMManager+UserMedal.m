@@ -165,4 +165,20 @@
     return [[IMDataManager qimDB_SharedInstance] qimDB_getUsersInMedal:medalId withLimit:limit withOffset:offset];
 }
 
+- (NSArray *)getUserWearMedalSmallIconListByUserid:(NSString *)xmppId {
+    NSArray *localUserMedals = [self getUserWearMedalStatusByUserid:xmppId];
+    NSMutableArray *tempArray = [[NSMutableArray alloc] initWithCapacity:2];
+    for (NSDictionary *medalDic in localUserMedals) {
+       
+        NSInteger medalStatus = [[medalDic objectForKey:@"medalUserStatus"] integerValue];
+        NSString *medalSmallIcon = [medalDic objectForKey:@"smallIcon"];
+        if (medalStatus & 0x02 == 0x02) {
+            if (medalSmallIcon.length > 0) {
+                [tempArray addObject:medalSmallIcon];
+            }
+        }
+    }
+    return tempArray;
+}
+
 @end

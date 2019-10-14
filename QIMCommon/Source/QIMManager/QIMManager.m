@@ -201,6 +201,7 @@ static QIMManager *__IMManager = nil;
     self.load_session_unreadcount = [[YYDispatchQueuePool alloc] initWithName:@"load_session_unreadcount" queueCount:2 qos:NSQualityOfServiceBackground];
     self.load_groupDB_VCard = [[YYDispatchQueuePool alloc] initWithName:@"load group card from DB" queueCount:2 qos:NSQualityOfServiceBackground];
     self.load_msgNickName = [[YYDispatchQueuePool alloc] initWithName:@"load msg nickName" queueCount:2 qos:NSQualityOfServiceBackground];
+    self.load_msgMedalList = [[YYDispatchQueuePool alloc] initWithName:@"load msg medalList" queueCount:2 qos:NSQualityOfServiceBackground];
     self.load_msgHeaderImage = [[YYDispatchQueuePool alloc] initWithName:@"load msg headerImage" queueCount:2 qos:NSQualityOfServiceBackground];
 
 //    dispatch_queue_create("Load Session Content", DISPATCH_QUEUE_PRIORITY_DEFAULT);

@@ -53,6 +53,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSArray *)getUsersInMedal:(NSInteger)medalId withLimit:(NSInteger)limit withOffset:(NSInteger)offset;
 
+- (NSArray *)getUserWearMedalSmallIconListByUserid:(NSString *)xmppId;
+
 @end
 
 NS_ASSUME_NONNULL_END
