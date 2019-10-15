@@ -11,7 +11,7 @@
 @implementation QIMManager (DB)
 
 - (NSString *)getDBPathWithUserXmppId:(NSString *)userJid {
-    NSString *dbPath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/QIMNewDataBase/%@%@/", [userJid lowercaseString], UserPath]];
+    NSString *dbPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/QIMNewDataBase/%@%@/", [userJid lowercaseString], UserPath]];
     if (![[NSFileManager defaultManager] fileExistsAtPath:dbPath]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:dbPath withIntermediateDirectories:YES attributes:nil error:nil];
     }

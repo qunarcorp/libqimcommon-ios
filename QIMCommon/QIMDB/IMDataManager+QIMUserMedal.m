@@ -69,6 +69,25 @@
 
 /**************************************新版勋章********************************/
 
+
+/// 插入勋章列表增量更新版本号
+/// @param medalListVersion 版本号
+- (void)qimDB_updateMedalListVersion:(NSInteger)medalListVersion {
+    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+        NSMutableArray *params = [[NSMutableArray alloc] init];
+        
+        NSString *sql = @"insert or replace into IM_Cache_Data(key, type, value, valueInt) Values(?, ?, ?, ?);";
+        NSMutableArray *param = [[NSMutableArray alloc] init];
+        [param addObject:@"medalListVersionValue"];
+        [param addObject:@(10)];
+        [param addObject:@"勋章列表增量版本"];
+        [param addObject:@(medalListVersion)];
+        
+        [params addObject:param];
+        [database executeBulkInsert:sql withParameters:params];
+    }];
+}
+
 /**
  查询勋章列表版本号
  */
@@ -87,6 +106,25 @@
         
     }];
     return result;
+}
+
+
+/// 插入用户勋章更新增量版本号
+/// @param medalListVersion 版本号
+- (void)qimDB_updateUserMedalStatusVersion:(NSInteger)userMedalStatusVersion {
+    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+        NSMutableArray *params = [[NSMutableArray alloc] init];
+        
+        NSString *sql = @"insert or replace into IM_Cache_Data(key, type, value, valueInt) Values(?, ?, ?, ?);";
+        NSMutableArray *param = [[NSMutableArray alloc] init];
+        [param addObject:@"medalUserStatusValue"];
+        [param addObject:@(10)];
+        [param addObject:@"用户勋章列表增量版本"];
+        [param addObject:@(userMedalStatusVersion)];
+        
+        [params addObject:param];
+        [database executeBulkInsert:sql withParameters:params];
+    }];
 }
 
 /**
@@ -322,22 +360,6 @@
         }
     }];
     return resultList;
-}
-
-- (void)qimDB_updateMedalListVersion:(NSInteger)medalListVersion {
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-        NSMutableArray *params = [[NSMutableArray alloc] init];
-        
-        NSString *sql = @"insert or replace into IM_Cache_Data(key, type, value, valueInt) Values(?, ?, ?, ?);";
-        NSMutableArray *param = [[NSMutableArray alloc] init];
-        [param addObject:@"medalListVersionValue"];
-        [param addObject:@(10)];
-        [param addObject:@"勋章列表增量版本"];
-        [param addObject:@(medalListVersion)];
-        
-        [params addObject:param];
-        [database executeBulkInsert:sql withParameters:params];
-    }];
 }
 
 /// 获取某个勋章下的用户list

@@ -212,7 +212,7 @@
                     [self getRemoteQuickReply];
                 } else if (forceRNUpdate) {
                     QIMVerboseLog(@"收到RN包清除通知");
-                    NSString *path = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
+                    NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
                     //内置包版本
                     NSString *latestJSCodeURLString = [path stringByAppendingPathComponent:@"rnRes"];
                     BOOL removeSussess = [[NSFileManager defaultManager] removeItemAtPath:latestJSCodeURLString error:nil];
@@ -343,7 +343,7 @@
                 //            [[QTalkNotifyManager shareNotifyManager] showChatNotifyWithMessage:notifyMsg];
             }
                 break;
-            case QIMCategoryNotifyMsgTypeTickUserWorkWorldNotice: {
+            case QIMCategoryNotifyMsgTypeWorkWorldNotice: {
                 NSString *onlineListStr = [msgDic objectForKey:@"bodyValue"];
                 NSDictionary *onlineDict = [[QIMJSONSerializer sharedInstance] deserializeObject:onlineListStr error:nil];
                 [[IMDataManager qimDB_SharedInstance] qimDB_bulkinsertNoticeMessage:@[onlineDict]];
@@ -390,6 +390,18 @@
                 } else {
                     QIMVerboseLog(@"online 驼圈其他通知 : %@", onlineDict);
                 }
+            }
+                break;
+            case QIMCategoryNotifyMsgTypeMedalListUpdateNotice: {
+                QIMVerboseLog(@"online 更新勋章列表");
+                NSInteger version = [[notifyMsg objectForKey:@"medalVersion"] integerValue];
+                [[QIMManager sharedInstance] getRemoteMedalList];
+            }
+                break;
+            case QIMCategoryNotifyMsgTypeUserMedalUpdateNotice: {
+                QIMVerboseLog(@"online 更新用户的勋章");
+                NSInteger version = [[notifyMsg objectForKey:@"userMedalVersion"] integerValue];
+                [[QIMManager sharedInstance] getRemoteUserMedalListWithUserId:nil];
             }
                 break;
             default: {
