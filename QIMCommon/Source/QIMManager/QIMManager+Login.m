@@ -31,7 +31,6 @@
 }
 
 - (void)loginWithUserName:(NSString *)userName WithPassWord:(NSString *)pwd {
-    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         if (![[QIMUUIDTools deviceUUID] isEqualToString:[QIMUUIDTools getUUIDFromKeyChain]] || ![QIMUUIDTools getUUIDFromKeyChain]) {
             [QIMUUIDTools setUUID:[QIMUUIDTools deviceUUID]];

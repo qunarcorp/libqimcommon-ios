@@ -63,6 +63,9 @@
             if (callback) {
                 callback(YES, nil);
             }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kUpdateNewUserMedalList object:[[QIMManager sharedInstance] getLastJid]];
+            });
         } else {
             NSString *errmsg = [responseDic objectForKey:@"errmsg"];
             if (callback) {
@@ -174,7 +177,7 @@
        
         NSInteger medalStatus = [[medalDic objectForKey:@"medalUserStatus"] integerValue];
         NSString *medalSmallIcon = [medalDic objectForKey:@"smallIcon"];
-        if (medalStatus & 0x02 == 0x02) {
+        if ((medalStatus & 0x02) == 0x02) {
             if (medalSmallIcon.length > 0) {
                 [tempArray addObject:medalSmallIcon];
             }
