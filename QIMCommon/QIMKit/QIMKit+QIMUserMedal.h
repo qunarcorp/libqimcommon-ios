@@ -32,4 +32,6 @@
 
 - (NSArray *)getUserWearMedalSmallIconListByUserid:(NSString *)xmppId;
 
+- (NSArray *)getUserHaveMedalSmallIconListByUserid:(NSString *)xmppId;
+
 @end

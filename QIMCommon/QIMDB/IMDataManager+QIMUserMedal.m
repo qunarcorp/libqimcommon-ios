@@ -265,7 +265,7 @@
      }
      __block NSMutableDictionary *paramDic = [[NSMutableDictionary alloc] init];
      [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-         NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), COALESCE(host, ?), b.medalStatus, (select count(*) from IM_User_Status_Medal where medalId=b.medalId) as userCount from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid  = b.medalid and b.medalid = ? and b.UserId = ? and b.host = ? where a.status = 1 and (b.medalStatus & 0x02 = 0x02 or b.medalStatus & 0x01 = 0x01) order by b.medalStatus desc, b.updateTime;";
+         NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), COALESCE(host, ?), b.medalStatus, (select count(*) from IM_User_Status_Medal where medalId=a.medalId and (medalStatus & 0x02 = 0x02 or medalStatus & 0x01 = 0x01)) as userCount from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid  = b.medalid and b.medalid = ? and b.UserId = ? and b.host = ? where a.status = 1 and (b.medalStatus & 0x02 = 0x02 or b.medalStatus & 0x01 = 0x01) order by b.medalStatus desc, b.updateTime;";
          NSMutableArray *param = [[NSMutableArray alloc] init];
          NSString *userName = [[userId componentsSeparatedByString:@"@"] firstObject];
          NSString *userHost = [[userId componentsSeparatedByString:@"@"] lastObject];
@@ -316,7 +316,7 @@
     }
     __block NSMutableArray *resultList = nil;
     [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-        NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), COALESCE(host, ?), COALESCE(b.medalStatus, 0), (select count(*) from IM_User_Status_Medal where medalId=a.medalId) as userCount from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid  = b.medalid and b.UserId = ? and b.Host = ? where a.status = 1 order by b.medalStatus desc, b.updateTime;";
+        NSString *sql = @"select a.medalid ,a.medalName, a.obtainCondition,a.smallIcon,a.bigLightIcon, a.BigGrayIcon,a.bigLockIcon,a.status, COALESCE(userid, ?), COALESCE(host, ?), COALESCE(b.medalStatus, 0), (select count(*) from IM_User_Status_Medal as e where e.medalId=a.medalId and (e.medalstatus & 0x01 = 0x01 or e.medalStatus & 0x02 = 0x02)) as userCount from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid  = b.medalid and b.UserId = ? and b.Host = ? where a.status = 1 order by b.medalStatus desc, b.updateTime;";
         NSMutableArray *param = [[NSMutableArray alloc] init];
         NSString *userName = [[userId componentsSeparatedByString:@"@"] firstObject];
         NSString *userHost = [[userId componentsSeparatedByString:@"@"] lastObject];
@@ -369,7 +369,7 @@
 - (NSArray *)qimDB_getUsersInMedal:(NSInteger)medalId withLimit:(NSInteger)limit withOffset:(NSInteger)offset {
     __block NSMutableArray *resultList = nil;
     [[self dbInstance] inDatabase:^(QIMDataBase * _Nonnull database) {
-        NSString *sql = [NSString stringWithFormat:@"select d.UserId, d.XmppId, d.Name, d.DescInfo, d.headersrc from im_users as d left join (select b.UserId||'@'||b.host as XmppId from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid = b.medalId where b.medalId = ? and a.status = 1 order by b.updateTime desc LIMIT ? OFFSET ?) as c where d.XmppId = c.XmppId;"];
+        NSString *sql = [NSString stringWithFormat:@"select d.UserId, d.XmppId, d.Name, d.DescInfo, d.headersrc from im_users as d left join (select b.UserId||'@'||b.host as XmppId from IM_Medal_List as a left join IM_User_Status_Medal as b on a.medalid = b.medalId where b.medalId = ? and a.status = 1 and (b.medalstatus & 0x01 = 0x01 or b.medalStatus & 0x02 = 0x02) order by b.updateTime desc LIMIT ? OFFSET ?) as c where d.XmppId = c.XmppId;"];
         NSMutableArray *param = [[NSMutableArray alloc] init];
         [param addObject:@(medalId)];
         [param addObject:@(limit)];

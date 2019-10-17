@@ -47,4 +47,8 @@
     return [[QIMManager sharedInstance] getUserWearMedalSmallIconListByUserid:xmppId];
 }
 
+- (NSArray *)getUserHaveMedalSmallIconListByUserid:(NSString *)xmppId {
+    return [[QIMManager sharedInstance] getUserHaveMedalSmallIconListByUserid:xmppId];
+}
+
 @end

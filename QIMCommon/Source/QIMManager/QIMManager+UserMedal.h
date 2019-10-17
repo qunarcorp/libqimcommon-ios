@@ -55,6 +55,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSArray *)getUserWearMedalSmallIconListByUserid:(NSString *)xmppId;
 
+- (NSArray *)getUserHaveMedalSmallIconListByUserid:(NSString *)xmppId;
+
 @end
 
 NS_ASSUME_NONNULL_END

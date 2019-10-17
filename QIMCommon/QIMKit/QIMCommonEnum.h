@@ -173,6 +173,7 @@ typedef enum {
     QIMMessageType_CardShare = 1 << 8,
     QIMMessageTypeMeetingRemind = 257,
     QIMMessageTypeWorkMomentRemind = 258,
+    QIMMessageTypeUserMedalRemind = 259,
     QIMMessageType_RedPack = 1 << 9,
     QIMMessageType_AA = (1 << 9) + 1,
     QIMMessageType_RedPackInfo = 1 << 10,

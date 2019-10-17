@@ -186,4 +186,20 @@
     return tempArray;
 }
 
+- (NSArray *)getUserHaveMedalSmallIconListByUserid:(NSString *)xmppId {
+    NSArray *localUserMedals = [self getUserWearMedalStatusByUserid:xmppId];
+    NSMutableArray *tempArray = [[NSMutableArray alloc] initWithCapacity:2];
+    for (NSDictionary *medalDic in localUserMedals) {
+       
+        NSInteger medalStatus = [[medalDic objectForKey:@"medalUserStatus"] integerValue];
+        NSString *medalSmallIcon = [medalDic objectForKey:@"smallIcon"];
+        if ((medalStatus & 0x02) == 0x02 || (medalStatus & 0x01) == 0x01) {
+            if (medalSmallIcon.length > 0) {
+                [tempArray addObject:medalSmallIcon];
+            }
+        }
+    }
+    return tempArray;
+}
+
 @end
