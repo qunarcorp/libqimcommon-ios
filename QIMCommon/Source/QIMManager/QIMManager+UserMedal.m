@@ -101,9 +101,6 @@
  * @param callback
  */
 - (void)getRemoteUserMedalListWithUserId:(NSString *)userId {
-    if (userId.length <= 0) {
-        return;
-    }
     NSString *destUrl = [NSString stringWithFormat:@"%@/medal/userMedalList.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     NSDictionary *bodyDic = @{/*@"userId":[[userId componentsSeparatedByString:@"@"] firstObject], @"host" : [[userId componentsSeparatedByString:@"@"] lastObject],*/ @"version":@([[IMDataManager qimDB_SharedInstance] qimDB_selectUserMedalStatusVersion])};
     NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
