@@ -125,6 +125,8 @@ static NSString *MAPAPIKEY = nil;
         BOOL moveSuccess = [[NSFileManager defaultManager] moveItemAtPath:rnOldPath toPath:rnNewPath error:&error];
         if (moveSuccess == YES && error == nil) {
             [[NSFileManager defaultManager] removeItemAtURL:rnOldPath error:nil];
+        } else {
+            QIMVerboseLog(@"move RN缓存文件报错 : %@", error);
         }
     }
     
