@@ -193,10 +193,6 @@ static QIMKit *__global_QIMKit = nil;
     return [[QIMManager sharedInstance] getServerTimeDiff];
 }
 
-- (NSHTTPCookie *)cookie {
-    return [[QIMManager sharedInstance] cookie];
-}
-
 // 更新导航配置
 - (void)updateNavigationConfig {
     [[QIMManager sharedInstance] updateNavigationConfig];

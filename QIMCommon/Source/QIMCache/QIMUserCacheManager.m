@@ -457,8 +457,8 @@ static NSString *const QTalkDiskCacheException = @"QTalkDiskCacheException";
 
 - (void)saveUserDefault {
     
-    NSMutableDictionary *appSettingDict = [[NSMutableDictionary alloc] initWithDictionary:self.appSettingCache copyItems:YES];
     dispatch_block_t saveUserDefaultBlock = ^{
+        NSMutableDictionary *appSettingDict = [[NSMutableDictionary alloc] initWithDictionary:self.appSettingCache copyItems:YES];
         [_appUserDefaults setObject:appSettingDict forKey:kUserCacheKey];
 #warning 下一版本迁移数据
         [_appUserDefaults setObject:appSettingDict forKey:kAppCacheKey];

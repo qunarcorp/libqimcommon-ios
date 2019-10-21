@@ -295,10 +295,7 @@
 
 - (long long)getCurrentServerTime;
 
-
 - (int)getServerTimeDiff;
-
-- (NSHTTPCookie *)cookie;
 
 - (NSString *)getWlanRequestURL;
 

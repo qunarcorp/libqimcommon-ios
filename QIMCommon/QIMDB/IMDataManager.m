@@ -95,9 +95,9 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (void)openDB {
-    
+
     BOOL dataBaseExist = [[NSFileManager defaultManager] fileExistsAtPath:_dbPath];
-    
+
     NSInteger oldDbVersion = [self qim_dbOldVersion];
     NSInteger currentDBVersion = [self qim_dbVersion];
     if (dataBaseExist == NO) {
@@ -110,11 +110,13 @@ static dispatch_once_t _onceDBToken;
         if (result) {
             QIMVerboseLog(@"创建DB文件成功");
             [self insertUserCacheData];
+            [[NSUserDefaults standardUserDefaults] setObject:@(currentDBVersion) forKey:@"qimDbVersion"];
+            [[NSUserDefaults standardUserDefaults] synchronize];
         } else {
             QIMVerboseLog(@"创建DB文件失败");
         }
     }
-    
+
     if (oldDbVersion != currentDBVersion) {
         //数据库升级
         NSInteger upgradeResultVersion = [self upgradeDB:oldDbVersion];
@@ -190,10 +192,10 @@ static dispatch_once_t _onceDBToken;
         return currentOldVersion;
     }
     oldVersion ++;
-    
+
     // 递归判断是否需要升级
     if (oldVersion >= currentNewVersion) {
-        return oldVersion;
+        return currentNewVersion;
     } else {
         [self upgradeDB:oldVersion];
     }
@@ -216,7 +218,7 @@ static dispatch_once_t _onceDBToken;
     QIMVerboseLog(@"upgradeFrom2To3");
     __block BOOL result = YES;
     [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
-        
+
         //新增勋章列表
         result = [database executeUpdate: @"CREATE TABLE IF NOT EXISTS IM_Medal_List(\
                   medalId               INTEGER PRIMARY KEY,\
@@ -228,7 +230,7 @@ static dispatch_once_t _onceDBToken;
                   bigLockIcon           BLOB,\
                   status                INTEGER\
                   );"];
-        
+
         //用户勋章表
         result = [database executeUpdate: @"CREATE TABLE IF NOT EXISTS IM_User_Status_Medal(\
                   medalId               INTEGER,\
@@ -239,7 +241,6 @@ static dispatch_once_t _onceDBToken;
                   updateTime            INTEGER,\
                   primary key  (medalId,userId));"];
     }];
-    return result;
 }
 
 - (void)initSQLiteLog {
@@ -1020,13 +1021,9 @@ static dispatch_once_t _onceDBToken;
 - (void)qimDB_closeDataBase {
     __global_data_manager = nil;
     _onceDBToken = 0;
-    /*
-    BOOL result = [DatabaseManager CloseByFullPath:_dbPath];
-    if (result) {
-        __global_data_manager = nil;
-        _onceDBToken = 0;
-    }
-     */
+    [[self dbInstance] syncUsingTransaction:^(QIMDataBase * _Nonnull db, BOOL * _Nonnull rollback) {
+        [db close];
+    }];
 }
 
 + (void)qimDB_clearDataBaseCache{

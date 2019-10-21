@@ -8,6 +8,7 @@
 #import "QIMManager+Login.h"
 #import <objc/runtime.h>
 #import "QIMPrivateHeader.h"
+#import "QIMRSACoder.h"
 
 @implementation QIMManager (Login)
  
@@ -261,6 +262,76 @@
     BOOL bValue = [[XmppImManager sharedInstance] forgelogin];
     
     return bValue;
+}
+
+#pragma mark - 验证码
+
+- (void)getUserTokenWithUserName:(NSString *)userName WithVerifyCode:(NSString *)verifCode withCallback:(QIMKitGetUserTokenSuccessBlock)callback {
+    
+    NSDictionary *result = nil;
+    NSString *destUrl = [[QIMNavConfigManager sharedInstance] tokenSmsUrl];
+    
+    NSMutableDictionary *bodyDic = [[NSMutableDictionary alloc] init];
+    [bodyDic setQIMSafeObject:userName forKey:@"rtx_id"];
+    [bodyDic setQIMSafeObject:verifCode forKey:@"verify_code"];
+    
+    [[QIMManager sharedInstance] sendFormatRequest:destUrl withPOSTBody:bodyDic withProgressBlock:nil withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        if (callback) {
+            callback(result);
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
+}
+
+- (void)getVerifyCodeWithUserName:(NSString *)userName withCallback:(QIMKitGetVerifyCodeSuccessBlock)callback {
+    NSDictionary *result = nil;
+    NSString *destUrl = [[QIMNavConfigManager sharedInstance] takeSmsUrl];
+    
+    NSMutableDictionary *bodyDic = [[NSMutableDictionary alloc] init];
+    [bodyDic setQIMSafeObject:userName forKey:@"rtx_id"];
+    
+    [[QIMManager sharedInstance] sendFormatRequest:destUrl withPOSTBody:bodyDic withProgressBlock:nil withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        if (callback) {
+            callback(result);
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
+}
+
+- (void)getNewUserTokenWithUserName:(NSString *)userName WithPassword:(NSString *)password withCallback:(QIMKitGetUserNewTokenSuccessBlock)callback {
+    NSDictionary *result = nil;
+    NSString *destUrl = [NSString stringWithFormat:@"%@/nck/qtlogin.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    
+    NSString *rsaPwd = [QIMRSACoder encryptByRsa:password];
+    NSString *base64Result = [rsaPwd qim_base64EncodedString];
+    
+    NSMutableDictionary *bodyDic = [[NSMutableDictionary alloc] init];
+    [bodyDic setQIMSafeObject:userName forKey:@"u"];
+    [bodyDic setQIMSafeObject:[[QIMManager sharedInstance] getDomain] forKey:@"h"];
+    [bodyDic setQIMSafeObject:base64Result forKey:@"p"];
+    [bodyDic setQIMSafeObject:[QIMUUIDTools deviceUUID] forKey:@"mk"];
+    [bodyDic setQIMSafeObject:@"iOS" forKey:@"plat"];
+    
+    NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
+    
+    [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:bodyData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        if (callback) {
+            callback(result);
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
 }
 
 @end

@@ -294,7 +294,7 @@
 }
 
 - (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId willSave:(BOOL)willSave {
-    return [self createMessageWithMsg:msg extenddInfo:extendInfo userId:userId realJid:nil userType:userType msgType:msgType forMsgId:mId willSave:willSave];
+    return [self createMessageWithMsg:msg extenddInfo:extendInfo userId:userId realJid:userId userType:userType msgType:msgType forMsgId:mId willSave:willSave];
 }
 
 - (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId realJid:(NSString *)realJid userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId msgState:(QIMMessageSendState)msgState willSave:(BOOL)willSave {
@@ -314,9 +314,6 @@
     } else {
         [mesg setRealJid:realJid?realJid:userId];
     }
-//    if (userType == ChatType_GroupChat) {
-//        [mesg setNickName:[[QIMManager sharedInstance] getLastJid]];
-//    }
     [mesg setMessageDate:msgDate];
     if (msgState) {
         [mesg setMessageSendState:msgState];
@@ -1114,24 +1111,25 @@
 }
 
 - (void)synchronizeChatSessionWithUserId:(NSString *)userId WithChatType:(ChatType)chatType WithRealJid:(NSString *)realJid {
-    
-    NSMutableDictionary *msgDict = [NSMutableDictionary dictionaryWithCapacity:5];
-    [msgDict setQIMSafeObject:userId forKey:@"id"];
-    [msgDict setQIMSafeObject:@([NSDate timeIntervalSinceReferenceDate]) forKey:@"timestamp"];
-    [msgDict setQIMSafeObject:realJid forKey:@"realjid"];
-    [msgDict setQIMSafeObject:[self getChatTypeStr:chatType] forKey:@"type"];
-    if (chatType == ChatType_Consult) {
-        [msgDict setQIMSafeObject:@"4" forKey:@"qchatid"];
-    } else if (chatType == ChatType_ConsultServer) {
-        [msgDict setQIMSafeObject:@"5" forKey:@"qchatid"];
-    } else {
-        
-    }
-    NSString *msg = [[QIMJSONSerializer sharedInstance] serializeObject:msgDict];
-    NSMutableDictionary *presenceMsgDict = [NSMutableDictionary dictionaryWithCapacity:5];
-    [presenceMsgDict setQIMSafeObject:@(QIMCategoryNotifyMsgTypeSession) forKey:@"PresenceMsgType"];
-    [presenceMsgDict setQIMSafeObject:msg forKey:@"PresenceMsg"];
-    [[XmppImManager sharedInstance] sendNotifyPresenceMsg:presenceMsgDict ToJid:[[QIMManager sharedInstance] getLastJid]];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+        NSMutableDictionary *msgDict = [NSMutableDictionary dictionaryWithCapacity:5];
+        [msgDict setQIMSafeObject:userId forKey:@"id"];
+        [msgDict setQIMSafeObject:@([NSDate timeIntervalSinceReferenceDate]) forKey:@"timestamp"];
+        [msgDict setQIMSafeObject:realJid forKey:@"realjid"];
+        [msgDict setQIMSafeObject:[self getChatTypeStr:chatType] forKey:@"type"];
+        if (chatType == ChatType_Consult) {
+            [msgDict setQIMSafeObject:@"4" forKey:@"qchatid"];
+        } else if (chatType == ChatType_ConsultServer) {
+            [msgDict setQIMSafeObject:@"5" forKey:@"qchatid"];
+        } else {
+            
+        }
+        NSString *msg = [[QIMJSONSerializer sharedInstance] serializeObject:msgDict];
+        NSMutableDictionary *presenceMsgDict = [NSMutableDictionary dictionaryWithCapacity:5];
+        [presenceMsgDict setQIMSafeObject:@(QIMCategoryNotifyMsgTypeSession) forKey:@"PresenceMsgType"];
+        [presenceMsgDict setQIMSafeObject:msg forKey:@"PresenceMsg"];
+        [[XmppImManager sharedInstance] sendNotifyPresenceMsg:presenceMsgDict ToJid:[[QIMManager sharedInstance] getLastJid]];
+    });
 }
 
 #pragma mark - 数据库更新 或者 保存消息

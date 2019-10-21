@@ -123,17 +123,6 @@
 - (void)revokeMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid;
 
 /**
- 发送语音消息
- 
- @param voiceUrl 语音文件地址
- @param voiceName 语音文件名
- @param seconds 语音时长
- @param userId 接收方Id
- */
-- (QIMMessageModel *)sendVoiceUrl:(NSString *)voiceUrl withVoiceName:(NSString *)voiceName withSeconds:(int)seconds ToUserId:(NSString *)userId;
-
-
-/**
  发送消息
  
  @param msg 消息Message对象

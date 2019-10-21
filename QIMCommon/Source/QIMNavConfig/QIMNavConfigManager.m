@@ -384,8 +384,15 @@
     }
     NSDictionary *loginDict = [navConfig objectForKey:@"Login"];
     NSString *loginType = [loginDict objectForKey:@"loginType"];
-    BOOL pwdLogin = [loginType isEqualToString:@"password"];
-    _loginType = pwdLogin ? QTLoginTypePwd : QTLoginTypeSms;
+    if ([loginType isEqualToString:@"password"]) {
+        _loginType = QTLoginTypePwd;
+    } else if ([loginType isEqualToString:@"newpassword"]) {
+        _loginType = QTLoginTypeNewPwd;
+    } else {
+        _loginType = QTLoginTypeSms;
+    }
+//    BOOL pwdLogin = [loginType isEqualToString:@"password"];
+//    _loginType = pwdLogin ? QTLoginTypePwd : QTLoginTypeSms;
     [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"QC_UserWillSaveNavDict"];
     NSDictionary *abilityDict = [navConfig objectForKey:@"ability"];
     if (abilityDict.count) {
@@ -790,6 +797,7 @@
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:requestUrl];
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
+            /* mark by newfile
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
                 NSData *responseData = response.data;
                 NSString *filePath = [self qimNav_getAdvertImageFilePath];
@@ -797,8 +805,9 @@
                 filePath = [filePath stringByAppendingPathComponent:advertFileName];
                 [responseData writeToFile:filePath atomically:YES];
             });
+            */
         }
-    }                  failure:^(NSError *error) {
+    } failure:^(NSError *error) {
 
     }];
 }

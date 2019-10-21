@@ -50,6 +50,17 @@
 #define kTransToBusiness        @"kTransToBusiness"
 #define kReceiveTransFromUser   @"kReceiveTransFromUser"
 
+
+#define QIMLocalFileCache           @"QIMLocalFileCache"    //缓存本地要发送的视频，语音，文件以及背景图片
+
+#define QIMRemoteFileCache            @"QIMRemoteFileCache" //缓存除图片外的
+
+#define QIMVideoCache           @"QIMVideoCache"    //视频缓存
+
+#define QIMAudioCache           @"QIMAudioCache"    //语音缓存
+
+#define QIMFileCache            @"QIMFileCache"     //文件缓存
+
 #define DEFAULT_DELAY_TIMES 0.1
 
 #endif /* QIMConfigKeys_h */

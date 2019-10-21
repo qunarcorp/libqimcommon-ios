@@ -42,6 +42,7 @@
 #import "QIMJSONSerializer.h"
 
 #import "QIMFileManager.h"
+#import "QIMNewFileManager.h"
 #import "QIMDESHelper.h"
 
 #import <SystemConfiguration/CaptiveNetwork.h>
@@ -242,11 +243,6 @@ static QIMManager *__IMManager = nil;
     if (![[NSFileManager defaultManager] fileExistsAtPath:_downLoadFile]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:_downLoadFile withIntermediateDirectories:YES attributes:nil error:nil];
     }
-
-    _groupHeaderImageCachePath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/imageCache/"]];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:_groupHeaderImageCachePath]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:_groupHeaderImageCachePath withIntermediateDirectories:YES attributes:nil error:nil];
-    }
 }
 
 - (void)initUserDicts {
@@ -432,11 +428,6 @@ static QIMManager *__IMManager = nil;
 
     if (![[NSFileManager defaultManager] fileExistsAtPath:_downLoadFile]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:_downLoadFile withIntermediateDirectories:YES attributes:nil error:nil];
-    }
-
-    _groupHeaderImageCachePath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/imageCache/"]];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:_groupHeaderImageCachePath]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:_groupHeaderImageCachePath withIntermediateDirectories:YES attributes:nil error:nil];
     }
 
     QIMVerboseLog(@"开始获取单人历史记录2");
@@ -655,7 +646,7 @@ static QIMManager *__IMManager = nil;
             for (NSDictionary *dic in valueArray) {
                 NSString *configKey = [self transformClientConfigKeyWithType:type];
                 NSString *configValue = dic[@"httpUrl"];
-                NSString *subKey = [[QIMFileManager sharedInstance] md5fromUrl:configValue];
+                NSString *subKey = [[QIMNewFileManager sharedInstance] qim_specialMd5fromUrl:configValue];
                 NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:3];
                 [dict setQIMSafeObject:configKey forKey:@"key"];
                 [dict setQIMSafeObject:configValue forKey:@"value"];
@@ -900,16 +891,6 @@ static QIMManager *__IMManager = nil;
 
 - (int)getServerTimeDiff {
     return _serverTimeDiff;
-}
-
-- (NSHTTPCookie *)cookie {
-    NSDictionary *properties = [[NSMutableDictionary alloc] init];
-    [properties setValue:[[QIMManager sharedInstance] thirdpartKeywithValue] forKey:NSHTTPCookieValue];
-    [properties setValue:@"q_ckey" forKey:NSHTTPCookieName];
-    [properties setValue:@".qunar" forKey:NSHTTPCookieDomain];
-    [properties setValue:@"/" forKey:NSHTTPCookiePath];
-    NSHTTPCookie *cookie = [[NSHTTPCookie alloc] initWithProperties:properties];
-    return cookie;
 }
 
 - (NSString *)getWlanRequestURL {

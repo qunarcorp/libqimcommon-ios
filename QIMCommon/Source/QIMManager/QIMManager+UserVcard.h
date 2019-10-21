@@ -146,13 +146,6 @@
 + (NSString *)defaultCommonTrdInfoImagePath;
 
 /**
- 根据用户rtxId获取用户名片信息
-
- @param rtxId 用户Id
- */
-- (NSDictionary *)getUserInfoByRTX:(NSString *)rtxId ;
-
-/**
  更新用户签名
 
  @param userId 用户Id
