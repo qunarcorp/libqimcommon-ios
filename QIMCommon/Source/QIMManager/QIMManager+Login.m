@@ -311,7 +311,7 @@
     NSString *destUrl = [NSString stringWithFormat:@"%@/nck/qtlogin.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     
     NSString *rsaPwd = [QIMRSACoder encryptByRsa:password];
-    NSString *base64Result = [rsaPwd qim_base64EncodedString];
+    NSString *base64Result = rsaPwd;
     
     NSMutableDictionary *bodyDic = [[NSMutableDictionary alloc] init];
     [bodyDic setQIMSafeObject:userName forKey:@"u"];

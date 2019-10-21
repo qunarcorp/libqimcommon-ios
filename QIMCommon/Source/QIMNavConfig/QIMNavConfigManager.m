@@ -709,6 +709,9 @@
         if (![navConfigUrl containsString:@"u="] && userName.length > 0) {
             navConfigUrl = [navConfigUrl stringByAppendingFormat:@"&u=%@", userName];
         }
+        if (![navConfigUrl containsString:@"nauth="]) {
+            navConfigUrl = [navConfigUrl stringByAppendingFormat:@"&nauth=true"];
+        }
         BOOL resultSuccess = [self qimNav_updateNavigationConfigWithNavDict:navDict NavStr:navConfigUrl Check:check];
         if (resultSuccess) {
             [self addLocalNavDict:navDict];
