@@ -307,7 +307,6 @@
 }
 
 - (void)getNewUserTokenWithUserName:(NSString *)userName WithPassword:(NSString *)password withCallback:(QIMKitGetUserNewTokenSuccessBlock)callback {
-    NSDictionary *result = nil;
     NSString *destUrl = [NSString stringWithFormat:@"%@/nck/qtlogin.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     
     NSString *rsaPwd = [QIMRSACoder encryptByRsa:password];
