@@ -397,12 +397,15 @@ typedef void(^QIMKitSendTPRequesSuccessedBlock)(NSData *responseData);
 typedef void(^QIMKitSendTPRequesFailedBlock)(NSError *error);
 typedef void(^QIMKitSendTPRequesProgressBlock)(float progressValue);
 
-typedef void(^QIMKitUploadVideoRequesSuccessedBlock)(NSDictionary *videoDic);
+typedef void(^QIMKitUploadVideoRequestSuccessedBlock)(NSDictionary *videoDic);
 
-typedef void(^QIMKitUploadVideoNewRequesSuccessedBlock)(NSDictionary *videoDic, BOOL needTrans);    //新版本上传视频callback
-typedef void(^QIMKitUploadImageNewRequesSuccessedBlock)(NSString *imageUrl);    //新版本上传图片callback
-typedef void(^QIMKitUploadFileNewRequesSuccessedBlock)(NSString *fileUrl);      //新版本上传文件callback
-typedef void(^QIMKitUploadMyPhotoNewRequesSuccessedBlock)(NSString *imageUrl);      //新版本上传头像callback
+typedef void(^QIMKitUploadVideoNewRequestSuccessedBlock)(NSDictionary *videoDic, BOOL needTrans);    //新版本上传视频callback
+
+typedef void(^QIMKitUploadImageNewRequestProgessSuccessedBlock)(float progressValue);   //新版本上传图片进度callback
+
+typedef void(^QIMKitUploadImageNewRequestSuccessedBlock)(NSString *imageUrl);    //新版本上传图片callback
+typedef void(^QIMKitUploadFileNewRequestSuccessedBlock)(NSString *fileUrl);      //新版本上传文件callback
+typedef void(^QIMKitUploadMyPhotoNewRequestSuccessedBlock)(NSString *imageUrl);      //新版本上传头像callback
 
 
 typedef void(^QIMKitGetTripAreaAvailableRoomBlock)(NSArray *availableRooms);

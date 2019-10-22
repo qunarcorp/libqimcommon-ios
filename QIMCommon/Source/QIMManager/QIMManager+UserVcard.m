@@ -402,7 +402,7 @@ static NSMutableArray *cacheUserCardHttpList = nil;
     });
 }
 
-- (NSString *)updateMyPhoto:(NSData *)imageData withCallback:(QIMKitUploadMyPhotoNewRequesSuccessedBlock)callback {
+- (NSString *)updateMyPhoto:(NSData *)imageData withCallback:(QIMKitUploadMyPhotoNewRequestSuccessedBlock)callback {
     
     NSString *fileKey = [[imageData mutableCopy] qim_md5String];
     NSString *fileExt = @"png";

@@ -185,12 +185,13 @@ static QIMNewFileManager *_newfileManager = nil;
     }];
 }
 
-- (void)qim_uploadImageWithImageData:(NSData *)imageData withCallback:(QIMKitUploadImageNewRequesSuccessedBlock)callback {
+- (void)qim_uploadImageWithImageData:(NSData *)imageData withProgressCallBack:(QIMKitUploadImageNewRequestProgessSuccessedBlock)proCallback withCallback:(QIMKitUploadImageNewRequestSuccessedBlock)callback {
     if (imageData.length <= 0) {
         return;
     }
     
-    NSString *localImagePath = [[QIMNewFileManager sharedInstance] qim_saveImageData:imageData];
+    NSString *localImageKey = [[QIMNewFileManager sharedInstance] qim_saveImageData:imageData];
+    NSString *localImagePath = [[QIMImageManager sharedInstance] defaultCachePathForKey:localImageKey];
     
     NSString *fileKey = [[imageData mutableCopy] qim_md5String];
     NSString *fileExt = [UIImage qim_contentTypeForImageData:imageData];
@@ -214,7 +215,9 @@ static QIMNewFileManager *_newfileManager = nil;
                                  [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
             
             [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:localImagePath withProgressBlock:^(float progressValue) {
-                
+                if (proCallback) {
+                    proCallback(progressValue);
+                }
             } withSuccessCallBack:^(NSData *responseData) {
                 NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
                 BOOL ret = [[result objectForKey:@"ret"] boolValue];
@@ -239,7 +242,7 @@ static QIMNewFileManager *_newfileManager = nil;
     }];
 }
 
-- (void)qim_uploadImage:(NSString *)localImagePath withCallback:(QIMKitUploadImageNewRequesSuccessedBlock)callback {
+- (void)qim_uploadImage:(NSString *)localImagePath withCallback:(QIMKitUploadImageNewRequestSuccessedBlock)callback {
     NSData *imageData = [NSData dataWithContentsOfFile:localImagePath];
     if (imageData.length <= 0) {
         return;
@@ -403,7 +406,7 @@ static QIMNewFileManager *_newfileManager = nil;
     return nil;
 }
 
-- (void)qim_uploadVideo:(NSString *)videoPath videoDic:(NSDictionary *)videoExt withCallBack:(QIMKitUploadVideoNewRequesSuccessedBlock)callback {
+- (void)qim_uploadVideo:(NSString *)videoPath videoDic:(NSDictionary *)videoExt withCallBack:(QIMKitUploadVideoNewRequestSuccessedBlock)callback {
     BOOL videoConfigUseAble = [[[QIMUserCacheManager sharedInstance] userObjectForKey:@"VideoConfigUseAble"] boolValue];
     if (videoConfigUseAble == YES) {
         
@@ -640,7 +643,7 @@ static QIMNewFileManager *_newfileManager = nil;
     }];
 }
 
-- (void)qim_uploadFile:(NSString *)localFilePath WithCallback:(QIMKitUploadFileNewRequesSuccessedBlock)callback {
+- (void)qim_uploadFile:(NSString *)localFilePath WithCallback:(QIMKitUploadFileNewRequestSuccessedBlock)callback {
     NSData *fileData = [NSData dataWithContentsOfFile:localFilePath];
     if (fileData.length <= 0) {
         return;
@@ -688,7 +691,7 @@ static QIMNewFileManager *_newfileManager = nil;
     }];
 }
 
-- (void)qim_uploadFileWithFileData:(NSData *)fileData WithCallback:(QIMKitUploadFileNewRequesSuccessedBlock)callback {
+- (void)qim_uploadFileWithFileData:(NSData *)fileData WithCallback:(QIMKitUploadFileNewRequestSuccessedBlock)callback {
     if (fileData.length <= 0) {
         return;
     }

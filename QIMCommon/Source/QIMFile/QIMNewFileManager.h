@@ -25,9 +25,9 @@ typedef void(^QIMKitCheckFileCallBack)(NSString *fileUrl);
 
 - (void)qim_uploadImage:(NSString *)localImagePath forMessage:(QIMMessageModel *)message;
 
-- (void)qim_uploadImage:(NSString *)localImagePath withCallback:(QIMKitUploadImageNewRequesSuccessedBlock)callback;
+- (void)qim_uploadImage:(NSString *)localImagePath withCallback:(QIMKitUploadImageNewRequestSuccessedBlock)callback;
 
-- (void)qim_uploadImageWithImageData:(NSData *)imageData withCallback:(QIMKitUploadImageNewRequesSuccessedBlock)callback;
+- (void)qim_uploadImageWithImageData:(NSData *)imageData withProgressCallBack:(QIMKitUploadImageNewRequestProgessSuccessedBlock)proCallback withCallback:(QIMKitUploadImageNewRequestSuccessedBlock)callback;
 
 #pragma mark - sync Check
 - (NSString *)qim_syncCheckFileKey:(NSString *)fileKey WithFileLength:(long long)fileLength WithPathExtension:(NSString *)extension;
@@ -36,7 +36,7 @@ typedef void(^QIMKitCheckFileCallBack)(NSString *fileUrl);
 
 - (NSString *)qim_syncUploadImage:(NSData *)fileData;
 
-- (void)qim_uploadVideo:(NSString *)videoPath videoDic:(NSDictionary *)videoExt withCallBack:(QIMKitUploadVideoNewRequesSuccessedBlock)callback;
+- (void)qim_uploadVideo:(NSString *)videoPath videoDic:(NSDictionary *)videoExt withCallBack:(QIMKitUploadVideoNewRequestSuccessedBlock)callback;
 
 - (void)qim_uploadVideoPath:(NSString *)LocalVideoOutPath forMessage:(QIMMessageModel *)message;
 
@@ -46,9 +46,9 @@ typedef void(^QIMKitCheckFileCallBack)(NSString *fileUrl);
 
 - (void)qim_uploadFile:(NSString *)localFilePath forMessage:(QIMMessageModel *)message;
 
-- (void)qim_uploadFile:(NSString *)localFilePath WithCallback:(QIMKitUploadFileNewRequesSuccessedBlock)callback;
+- (void)qim_uploadFile:(NSString *)localFilePath WithCallback:(QIMKitUploadFileNewRequestSuccessedBlock)callback;
 
-- (void)qim_uploadFileWithFileData:(NSData *)fileData WithCallback:(QIMKitUploadFileNewRequesSuccessedBlock)callback;
+- (void)qim_uploadFileWithFileData:(NSData *)fileData WithCallback:(QIMKitUploadFileNewRequestSuccessedBlock)callback;
 
 - (NSString *)qim_saveFileData:(NSData *)imageData;
 

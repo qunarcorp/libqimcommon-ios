@@ -15,7 +15,7 @@
     return [[QIMNewFileManager sharedInstance] qim_saveImageData:imageData];
 }
 
-- (void)qim_uploadVideo:(NSString *)videoPath videoDic:(NSDictionary *)videoExt withCallBack:(QIMKitUploadVideoNewRequesSuccessedBlock)callback {
+- (void)qim_uploadVideo:(NSString *)videoPath videoDic:(NSDictionary *)videoExt withCallBack:(QIMKitUploadVideoNewRequestSuccessedBlock)callback {
     [[QIMNewFileManager sharedInstance] qim_uploadVideo:videoPath videoDic:videoExt withCallBack:callback];
 }
 
@@ -27,12 +27,12 @@
     [[QIMNewFileManager sharedInstance] qim_uploadImage:localImagePath forMessage:message];
 }
 
-- (void)qim_uploadImage:(NSString *)localImagePath withCallback:(QIMKitUploadImageNewRequesSuccessedBlock)callback {
+- (void)qim_uploadImage:(NSString *)localImagePath withCallback:(QIMKitUploadImageNewRequestSuccessedBlock)callback {
     [[QIMNewFileManager sharedInstance] qim_uploadImage:localImagePath withCallback:callback];
 }
 
-- (void)qim_uploadImageWithImageData:(NSData *)imageData withCallback:(QIMKitUploadImageNewRequesSuccessedBlock)callback {
-    [[QIMNewFileManager sharedInstance] qim_uploadImageWithImageData:imageData withCallback:callback];
+- (void)qim_uploadImageWithImageData:(NSData *)imageData withProgressCallBack:(QIMKitUploadImageNewRequestProgessSuccessedBlock)proCallback withCallback:(QIMKitUploadImageNewRequestSuccessedBlock)callback {
+    [[QIMNewFileManager sharedInstance] qim_uploadImageWithImageData:imageData withProgressCallBack:proCallback withCallback:callback];
 }
 
 #pragma mark - sync Check
@@ -64,11 +64,11 @@
     [[QIMNewFileManager sharedInstance] qim_uploadFile:localFilePath forMessage:message];
 }
 
-- (void)qim_uploadFile:(NSString *)localFilePath WithCallback:(QIMKitUploadFileNewRequesSuccessedBlock)callback {
+- (void)qim_uploadFile:(NSString *)localFilePath WithCallback:(QIMKitUploadFileNewRequestSuccessedBlock)callback {
     [[QIMNewFileManager sharedInstance] qim_uploadFile:localFilePath WithCallback:callback];
 }
 
-- (void)qim_uploadFileWithFileData:(NSData *)fileData WithCallback:(QIMKitUploadFileNewRequesSuccessedBlock)callback {
+- (void)qim_uploadFileWithFileData:(NSData *)fileData WithCallback:(QIMKitUploadFileNewRequestSuccessedBlock)callback {
     [[QIMNewFileManager sharedInstance] qim_uploadFileWithFileData:fileData WithCallback:callback];
 }
 
