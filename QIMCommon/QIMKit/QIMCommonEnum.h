@@ -173,6 +173,7 @@ typedef enum {
     QIMMessageType_CardShare = 1 << 8,
     QIMMessageTypeMeetingRemind = 257,
     QIMMessageTypeWorkMomentRemind = 258,
+    QIMMessageTypeUserMedalRemind = 259,
     QIMMessageType_RedPack = 1 << 9,
     QIMMessageType_AA = (1 << 9) + 1,
     QIMMessageType_RedPackInfo = 1 << 10,
@@ -203,8 +204,8 @@ typedef enum {
     QIMMessageTypeRobotTurnToUser = 65537,
     QIMMessageTypeWebRtcMsgTypeVideoMeeting = 5001,
     QIMMessageTypeQChatRobotQuestionList = 65538,
-    
-    
+
+
     QIMMessageType_TransChatToCustomer = 1001,
     QIMMessageType_TransChatToCustomer_Feedback = 1003,
     QIMMessageType_TransChatToCustomerService = 1002,
@@ -348,6 +349,8 @@ typedef enum : NSUInteger {
     QIMCategoryNotifyMsgTypeTickUser = 100,             //踢
     QIMCategoryNotifyMsgTypeTickUserWorkWorldNotice = 12, //驼圈
     QIMCategoryNotifyMsgTypeHotLineSync = 13,
+    QIMCategoryNotifyMsgTypeMedalListUpdateNotice = 14, //勋章更新版本
+    QIMCategoryNotifyMsgTypeUserMedalUpdateNotice = 15, //用户勋章更新版本
 } QIMCategoryNotifyMsgType;
 
 typedef enum : NSUInteger {
@@ -403,6 +406,8 @@ typedef void(^QIMKitGetTripAllCitysBlock)(NSArray *allCitys);   //获取所有�
 typedef void(^QIMKitGetTripMemberCheckBlock)(BOOL isConform);   //isConform 冲突
 typedef void(^QIMKitCreateTripBlock)(BOOL success, NSString *errMsg);
 typedef void(^QIMCloseSessionBlock)(NSString *closeMsg);
+
+typedef void(^QIMKitUpdateMedalStatusCallBack)(BOOL success, NSString *errmsg);
 
 typedef void(^QIMKitLikeMomentSuccessedBlock)(NSDictionary *responseDic);
 typedef void(^QIMKitWorkCommentBlock)(NSArray *comments);

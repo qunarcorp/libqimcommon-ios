@@ -93,6 +93,10 @@ static QIMKit *__global_QIMKit = nil;
     return [[[QIMManager sharedInstance] load_msgNickName] queue];
 }
 
+- (dispatch_queue_t)getLoadMsgMedalListQueue {
+    return [[[QIMManager sharedInstance] load_msgMedalList] queue];
+}
+
 - (dispatch_queue_t)getLoad_msgHeaderImageQueue {
     return [[[QIMManager sharedInstance] load_msgHeaderImage] queue];
 }
@@ -222,6 +226,7 @@ static QIMKit *__global_QIMKit = nil;
     return [[QIMManager sharedInstance] myRedpackageUrl];
 }
 
+#pragma mark get user agent
 - (NSString *)getDefaultUserAgentString {
     return [[QIMManager sharedInstance] getDefaultUserAgentString];
 }

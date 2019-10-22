@@ -33,6 +33,8 @@
 
 - (dispatch_queue_t)getLoadMsgNickNameQueue;
 
+- (dispatch_queue_t)getLoadMsgMedalListQueue;
+
 - (dispatch_queue_t)getLoad_msgHeaderImageQueue;
 
 - (NSString *)getOpsFoundRNDebugUrl;
@@ -188,6 +190,7 @@
  */
 - (NSString *)myRedpackageUrl;
 
+#pragma mark get user agent
 - (NSString *)getDefaultUserAgentString;
 
 /**
