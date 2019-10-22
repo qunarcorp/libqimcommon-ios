@@ -31,6 +31,7 @@
 @property(nonatomic, readonly, copy) NSString *domainHost; //种Cookie的domain
 @property(nonatomic, readonly, copy) NSString *resetPwdUrl;
 @property(nonatomic, readonly, copy) NSString *appWeb;
+@property(nonatomic, readonly, copy) NSString *videourl;
 
 //hosts
 @property(nonatomic, readonly, copy) NSString *hashHosts;

@@ -281,6 +281,10 @@
     return [[QIMNavConfigManager sharedInstance] videoApiHost];
 }
 
+-(NSString *)qimNav_VideoUrl{
+    return [[QIMNavConfigManager sharedInstance] videourl];
+}
+
 //Versions
 - (long long)qimNav_NavVersion {
     return [[QIMNavConfigManager sharedInstance] navVersion];

@@ -145,6 +145,7 @@
 - (NSString *)qimNav_Signal_host;
 - (NSString *)qimNav_WssHost;
 - (NSString *)qimNav_VideoApiHost;
+- (NSString *)qimNav_VideoUrl;
 
 //Versions
 - (long long)qimNav_NavVersion;
