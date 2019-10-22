@@ -36,11 +36,11 @@
     return [QIMHttpApi updateLoadFile:fileData WithMsgId:key WithMsgType:type WithPathExtension:extension];
 }
 
-+ (void)uploadVideo:(NSData *)fileData withCallBack:(QIMKitUploadVideoRequesSuccessedBlock)callback {
++ (void)uploadVideo:(NSData *)fileData withCallBack:(QIMKitUploadVideoRequestSuccessedBlock)callback {
     [QIMHttpApi uploadVideo:fileData withCallBack:callback];
 }
 
-+ (void)uploadVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequesSuccessedBlock)callback {
++ (void)uploadVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequestSuccessedBlock)callback {
     [QIMHttpApi uploadVideoPath:filePath withCallBack:callback];
 }
 

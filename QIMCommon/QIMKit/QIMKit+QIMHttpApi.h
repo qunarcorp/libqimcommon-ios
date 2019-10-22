@@ -22,9 +22,9 @@
 
 + (NSString *)updateLoadFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension;
 
-+ (void)uploadVideo:(NSData *)fileData withCallBack:(QIMKitUploadVideoRequesSuccessedBlock)callback;
++ (void)uploadVideo:(NSData *)fileData withCallBack:(QIMKitUploadVideoRequestSuccessedBlock)callback;
 
-+ (void)uploadVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequesSuccessedBlock)callback;
++ (void)uploadVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequestSuccessedBlock)callback;
 
 + (NSString *)updateLoadVoiceFile:(NSData *)voiceFileData WithFilePath:(NSString *)filePath;
 

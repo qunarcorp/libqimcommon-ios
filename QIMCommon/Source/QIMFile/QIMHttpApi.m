@@ -346,7 +346,7 @@ done:
     return nil;
 }
 
-+ (void)uploadVideo:(NSData *)fileData withCallBack:(QIMKitUploadVideoRequesSuccessedBlock)callback {
++ (void)uploadVideo:(NSData *)fileData withCallBack:(QIMKitUploadVideoRequestSuccessedBlock)callback {
     NSString *fileMd5 = [[fileData mutableCopy] qim_md5String];
     if (fileMd5.length > 0) {
         NSDictionary *checkResultDic = [self checkVideo:fileMd5];
@@ -356,7 +356,7 @@ done:
             }
         } else {
             NSString *destUrl = [NSString stringWithFormat:@"%@/video/upload", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
-            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFileData:fileData withSuccessCallBack:^(NSData *responseData) {
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFileData:fileData withProgressBlock:nil withSuccessCallBack:^(NSData *responseData) {
                 NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
                 NSLog(@"resultDic : %@", resultDic);
                 BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
@@ -379,7 +379,7 @@ done:
     }
 }
 
-+ (void)uploadVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequesSuccessedBlock)callback {
++ (void)uploadVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequestSuccessedBlock)callback {
     NSData *fileData = [NSData dataWithContentsOfFile:filePath];
     NSString *fileMd5 = [[fileData mutableCopy] qim_md5String];
     if (fileMd5.length > 0) {
@@ -390,7 +390,7 @@ done:
             }
         } else {
             NSString *destUrl = [NSString stringWithFormat:@"%@/video/upload", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
-            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:filePath withSuccessCallBack:^(NSData *responseData) {
+            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:filePath withProgressBlock:nil withSuccessCallBack:^(NSData *responseData) {
                 NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
                 NSLog(@"resultDic : %@", resultDic);
                 BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];

@@ -37,7 +37,8 @@ typedef enum {
 typedef enum {
     QTLoginTypeSms = 0,
     QTLoginTypePwd = 1,
-    QTLoginTypeNone = 2,
+    QTLoginTypeNewPwd = 2,
+    QTLoginTypeNone = 3,
 } QTLoginType;
 
 typedef enum {
@@ -397,7 +398,17 @@ typedef void(^QIMKitGetUserWorkInfoBlock)(NSDictionary *userWorkInfo);
 
 typedef void(^QIMKitSendTPRequesSuccessedBlock)(NSData *responseData);
 typedef void(^QIMKitSendTPRequesFailedBlock)(NSError *error);
-typedef void(^QIMKitUploadVideoRequesSuccessedBlock)(NSDictionary *videoDic);
+typedef void(^QIMKitSendTPRequesProgressBlock)(float progressValue);
+
+typedef void(^QIMKitUploadVideoRequestSuccessedBlock)(NSDictionary *videoDic);
+
+typedef void(^QIMKitUploadVideoNewRequestSuccessedBlock)(NSDictionary *videoDic, BOOL needTrans);    //新版本上传视频callback
+
+typedef void(^QIMKitUploadImageNewRequestProgessSuccessedBlock)(float progressValue);   //新版本上传图片进度callback
+
+typedef void(^QIMKitUploadImageNewRequestSuccessedBlock)(NSString *imageUrl);    //新版本上传图片callback
+typedef void(^QIMKitUploadFileNewRequestSuccessedBlock)(NSString *fileUrl);      //新版本上传文件callback
+typedef void(^QIMKitUploadMyPhotoNewRequestSuccessedBlock)(NSString *imageUrl);      //新版本上传头像callback
 
 
 typedef void(^QIMKitGetTripAreaAvailableRoomBlock)(NSArray *availableRooms);
@@ -429,5 +440,10 @@ typedef void(^QIMKitUpdateSignatureBlock)(BOOL successed);
 
 typedef void(^QIMKitSearchSuccessBlock)(BOOL successed, NSString *responseJson);
 typedef void(^QIMKitSearchFaildBlock)(BOOL successed, NSString *errmsg);
+
+//Login
+typedef void(^QIMKitGetUserTokenSuccessBlock)(NSDictionary *result);
+typedef void(^QIMKitGetUserNewTokenSuccessBlock)(NSDictionary *result);
+typedef void(^QIMKitGetVerifyCodeSuccessBlock)(NSDictionary *result);
 
 #endif /* QIMCommonEnum_h */

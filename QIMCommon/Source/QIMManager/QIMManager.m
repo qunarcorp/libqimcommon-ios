@@ -242,11 +242,6 @@ static QIMManager *__IMManager = nil;
     if (![[NSFileManager defaultManager] fileExistsAtPath:_downLoadFile]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:_downLoadFile withIntermediateDirectories:YES attributes:nil error:nil];
     }
-
-    _groupHeaderImageCachePath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/imageCache/"]];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:_groupHeaderImageCachePath]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:_groupHeaderImageCachePath withIntermediateDirectories:YES attributes:nil error:nil];
-    }
 }
 
 - (void)initUserDicts {
@@ -432,11 +427,6 @@ static QIMManager *__IMManager = nil;
 
     if (![[NSFileManager defaultManager] fileExistsAtPath:_downLoadFile]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:_downLoadFile withIntermediateDirectories:YES attributes:nil error:nil];
-    }
-
-    _groupHeaderImageCachePath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/imageCache/"]];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:_groupHeaderImageCachePath]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:_groupHeaderImageCachePath withIntermediateDirectories:YES attributes:nil error:nil];
     }
 
     QIMVerboseLog(@"开始获取单人历史记录2");
