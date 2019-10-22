@@ -442,7 +442,7 @@
         _email = [imConfigDic objectForKey:@"mail"];
         _uploadLog = [imConfigDic objectForKey:@"uploadLog"];
         _foundConfigUrl = [imConfigDic objectForKey:@"foundConfigUrl"];
-        _isToC = [imConfigDic objectForKey:@"isToC"];
+        _isToC = [[imConfigDic objectForKey:@"isToC"] boolValue];
     } else {
         _showOA = NO;
         _showOrganizational = NO;
@@ -938,9 +938,8 @@
 }
 
 - (NSString *)getManagerAppUrl {
-    return [NSString stringWithFormat:@"%@/manage#/nav_code?domain=%@", self.appWeb, self.domain];
+    return [NSString stringWithFormat:@"%@/manage#/audit_user?domain=%@", self.appWeb, self.domain];
 }
-
 
 - (NSString *)getNewResetPwdUrl {
 

@@ -188,6 +188,8 @@
  */
 - (NSString *)myRedpackageUrl;
 
+- (NSString *)getDefaultUserAgentString;
+
 /**
  新消息通知？
  

@@ -358,6 +358,11 @@
     return [[QIMNavConfigManager sharedInstance] getManagerAppUrl];
 }
 
+- (NSString *)qimNav_AppWebHostUrl{
+  //web页host地址
+    return [[QIMNavConfigManager sharedInstance] appWeb];
+}
+
 -(BOOL)qimNav_isToC{
     return [[QIMNavConfigManager sharedInstance] isToC];
 }
