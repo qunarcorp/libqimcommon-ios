@@ -71,6 +71,10 @@
     [[QIMManager sharedInstance] clearLogginUser];
 }
 
+- (void)clearUserToken {
+    [[QIMManager sharedInstance] clearUserToken];
+}
+
 - (void)saveUserInfoWithName:(NSString *)userName passWord:(NSString *)pwd {
     [[QIMManager sharedInstance] saveUserInfoWithName:userName passWord:pwd];
 }

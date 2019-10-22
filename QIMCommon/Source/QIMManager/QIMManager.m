@@ -398,7 +398,8 @@ static QIMManager *__IMManager = nil;
         [[QIMUserCacheManager sharedInstance] setUserObject:userFullJid forKey:@"kFullUserJid"];
         QIMVerboseLog(@"LoginComplate 之后的userFullJid : %@", userFullJid);
         NSString *tempUserToken = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"kTempUserToken"];
-        [[QIMUserCacheManager sharedInstance] setUserObject:tempUserToken?tempUserToken:@"" forKey:@"userToken"];
+//        [[QIMUserCacheManager sharedInstance] setUserObject:tempUserToken?tempUserToken:@"" forKey:@"userToken"];
+        [self updateLastUserToken:tempUserToken];
         QIMVerboseLog(@"LoginComplate 之后的tempUserToken : %@", tempUserToken);
 #warning NavDict NavConfig
         NSDictionary *currentLoginNavConfig = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"NavConfig"];
@@ -800,6 +801,22 @@ static QIMManager *__IMManager = nil;
  */
 + (NSString *)getLastUserName {
     return [[[QIMUserCacheManager sharedInstance] userObjectForKey:kLastUserId] lowercaseString];
+}
+
+- (void)updateLastTempUserToken:(NSString *)token {
+    [[QIMUserCacheManager sharedInstance] setUserObject:token forKey:@"kTempUserToken"];
+}
+
+- (NSString *)getLastTempUserToken {
+    return [[QIMUserCacheManager sharedInstance] userObjectForKey:@"kTempUserToken"];
+}
+
+- (void)updateLastUserToken:(NSString *)tempUserToken {
+    [[QIMUserCacheManager sharedInstance] setUserObject:tempUserToken?tempUserToken:@"" forKey:@"userToken"];
+}
+
+- (NSString *)getLastUserToken {
+    return [[QIMUserCacheManager sharedInstance] userObjectForKey:@"userToken"];
 }
 
 /**

@@ -74,6 +74,8 @@
  */
 - (void)clearLogginUser;
 
+- (void)clearUserToken;
+
 /**
  save 用户名 and 密码
  

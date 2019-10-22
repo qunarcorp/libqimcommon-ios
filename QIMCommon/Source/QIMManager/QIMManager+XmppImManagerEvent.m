@@ -1606,9 +1606,7 @@
         QIMErrorLog(@"LoginFaild: %@", errDic);
         if ([[errDic objectForKey:@"errMsg"] isEqualToString:@"out_of_date"]) {
             
-//            [self sendNoPush];
-            [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"kTempUserToken"];
-            [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"userToken"];
+            [self clearUserToken];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"kNotificationOutOfDate" object:nil];
             });

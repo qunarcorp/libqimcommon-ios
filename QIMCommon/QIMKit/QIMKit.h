@@ -113,6 +113,35 @@
 + (NSString *)getLastUserName;
 
 /**
+ 更新最后一个登录用户的临时Token
+ 
+ @param token 用户token
+ */
+- (void)updateLastTempUserToken:(NSString *)token;
+
+/**
+ 获取最后一个登录用户的临时Token
+ 
+ @return 用户token
+ */
+- (NSString *)getLastTempUserToken;
+
+/**
+ 更新最后一个登录用户的token
+ 
+ @param tempUserToken 用户token
+ */
+- (void)updateLastUserToken:(NSString *)tempUserToken;
+
+
+/**
+ 获取最后一个登录用户的token
+ 
+ @return 用户token
+ */
+- (NSString *)getLastUserToken;
+
+/**
  *  PWD
  *
  *  @return 无用

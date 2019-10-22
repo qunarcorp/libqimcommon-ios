@@ -44,6 +44,7 @@
  */
 - (void)clearLogginUser;
 
+- (void)clearUserToken;
 
 - (void)saveUserInfoWithName:(NSString *)userName passWord:(NSString *)pwd;
 

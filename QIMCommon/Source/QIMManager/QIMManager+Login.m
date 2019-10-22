@@ -78,18 +78,18 @@
     if ([[lastUserName lowercaseString] isEqualToString:@"appstore"] || [[lastUserName lowercaseString] isEqualToString:@"ctrip"]) {
         token = lastUserName;
         QIMVerboseLog(@"token : %@", token);
-        [[QIMUserCacheManager sharedInstance] setUserObject:token forKey:@"kTempUserToken"];
+        [self updateLastTempUserToken:token];
     } else if ([[lastUserName lowercaseString] isEqualToString:@"qtalktest"]) {
         token = pwd;
         QIMVerboseLog(@"token : %@", token);
-        [[QIMUserCacheManager sharedInstance] setUserObject:token forKey:@"kTempUserToken"];
+        [self updateLastTempUserToken:token];
     } else {
         if ([lastUserName length] > 0 && [token length] > 0 && [[QIMNavConfigManager sharedInstance] loginType] == QTLoginTypeSms) {
             QIMVerboseLog(@"token : %@", token);
-            [[QIMUserCacheManager sharedInstance] setUserObject:token forKey:@"kTempUserToken"];
+            [self updateLastTempUserToken:token];
             token = [NSString stringWithFormat:@"%@@%@",[QIMUUIDTools deviceUUID],token];
         } else {
-            [[QIMUserCacheManager sharedInstance] setUserObject:token forKey:@"kTempUserToken"];
+            [self updateLastTempUserToken:token];
         }
     }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -98,7 +98,7 @@
 }
 
 - (void)addUserCacheWithUserId:(NSString *)userId WithUserFullJid:(NSString *)userFullJid WithNavDict:(NSDictionary *)navDict {
-    NSString *token = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"userToken"];
+    NSString *token = [self getLastUserToken];
     NSDictionary *userDict = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"Users"];
     if ([userDict isKindOfClass:[NSDictionary class]]) {
         NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:userDict];
@@ -156,6 +156,11 @@
     [QIMUUIDTools setUUIDToolsMyGroupList:nil];
     [QIMUUIDTools setUUIDToolsSessionList:nil];
     [QIMUUIDTools setRecentSharedList:nil];
+}
+
+- (void)clearUserToken {
+    [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"kTempUserToken"];
+    [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"userToken"];
 }
 
 - (void)saveUserInfoWithName:(NSString *)userName passWord:(NSString *)pwd {
