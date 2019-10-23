@@ -450,4 +450,6 @@
 
 - (void)checkClearCache;
 
+- (void)checkMsTimeInterval:(NSInteger *)time;
+
 @end

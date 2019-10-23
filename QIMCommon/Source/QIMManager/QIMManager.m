@@ -1726,4 +1726,11 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
     }];
 }
 
+- (void)checkMsTimeInterval:(long long *)time {
+    NSString *timeStr = [NSString stringWithFormat:@"%lld", *time];
+    if (timeStr.length <= 10) {
+        *time = (*time) * 1000;
+    }
+}
+
 @end
