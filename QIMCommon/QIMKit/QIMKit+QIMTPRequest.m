@@ -23,6 +23,12 @@
     [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:url withChatId:chatId withRealJid:realJid withChatType:chatType];
 }
 
+- (void)sendTPGetRequestWithUrl:(NSString *)url
+           withProgressCallBack:(QIMKitSendTPRequesProgressBlock)pCallback
+            withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    [[QIMManager sharedInstance] sendTPGetRequestWithUrl:url withProgressCallBack:pCallback withSuccessCallBack:sCallback withFailedCallBack:fCallback];
+}
+
 - (void)sendTPGetRequestWithUrl:(NSString *)url withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
     [[QIMManager sharedInstance] sendTPGetRequestWithUrl:url withSuccessCallBack:sCallback withFailedCallBack:fCallback];
 }
