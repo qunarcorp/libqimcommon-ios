@@ -1626,7 +1626,7 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
     BOOL sendServerSuccess = NO;
     NSString *url = @"";
     if ([[QIMNavConfigManager sharedInstance] newPush] == NO) {
-        url = [NSString stringWithFormat:@"%@/push/qtapi/token/setpersonmackey.qunar?username=%@&domain=%@&mac_key=%@&platname=%@&pkgname=%@&os=%@&version=%@&show_content=%@", [[QIMNavConfigManager sharedInstance] javaurl], [userInfo objectAtIndex:0], [userInfo objectAtIndex:1], notificationToken, [[[QIMAppInfo sharedInstance] deviceName] stringByReplacingOccurrencesOfString:@" " withString:@""], [[NSBundle mainBundle] bundleIdentifier], @"ios", [[QIMAppInfo sharedInstance] AppBuildVersion], @(YES)];
+        url = [NSString stringWithFormat:@"%@/push/qtapi/token/setpersonmackey.qunar?username=%@&domain=%@&mac_key=%@&platname=%@_%@_%@&pkgname=%@&os=%@&version=%@&show_content=%@", [[QIMNavConfigManager sharedInstance] javaurl], [userInfo objectAtIndex:0], [userInfo objectAtIndex:1], notificationToken, [[[QIMAppInfo sharedInstance] deviceName] stringByReplacingOccurrencesOfString:@" " withString:@""], [[[NSLocale preferredLanguages][0] componentsSeparatedByString:@"-"] firstObject], [[NSLocale currentLocale] countryCode], [[NSBundle mainBundle] bundleIdentifier], @"ios", [[QIMAppInfo sharedInstance] AppBuildVersion], @(YES)];
     } else {
         url = [NSString stringWithFormat:@"%@/qtapi/token/setpersonmackey.qunar?username=%@&domain=%@&mackey=%@&os=%@&version=%@", [[QIMNavConfigManager sharedInstance] javaurl], [userInfo objectAtIndex:0], [userInfo objectAtIndex:1], notificationToken, @"ios", [[QIMAppInfo sharedInstance] AppBuildVersion]];
     }

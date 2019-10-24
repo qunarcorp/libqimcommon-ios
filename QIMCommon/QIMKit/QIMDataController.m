@@ -89,7 +89,7 @@ static QIMDataController *__globalDataController = nil;
 }
 
 - (long long)sizeOfDBPath {
-    NSString *dbPath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/QIMNewDataBase/"]];
+    NSString *dbPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/QIMNewDataBase/"]];
     return [QIMUtility sizeofPath:dbPath];
 }
 
