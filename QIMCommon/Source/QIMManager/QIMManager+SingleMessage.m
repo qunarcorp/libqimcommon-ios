@@ -167,7 +167,6 @@
             if (self.lastSingleMsgTime <= 0) {
                 self.lastSingleMsgTime = ([[NSDate date] timeIntervalSince1970] - 3600 * 24 * 3) * 1000;
             }
-            self.lastSingleMsgTime = ([[NSDate date] timeIntervalSince1970] - 3600 * 24 * 30) * 1000;
 
             QIMVerboseLog(@"self.lastSingleMsgTime : %f", self.lastSingleMsgTime);
             retryCount ++;
