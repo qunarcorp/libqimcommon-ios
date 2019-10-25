@@ -44,6 +44,7 @@
 #import "QIMManager+Found.h"
 #import "QIMManager+Search.h"
 #import "QIMManager+XmppImManagerEvent.h"
+#import "QIMManager+Pay.h"
 
 #import "QIMMessageModel.h"
 #import "QIMMessageManager.h"

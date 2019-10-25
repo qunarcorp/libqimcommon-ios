@@ -425,4 +425,12 @@ typedef void(^QIMKitUpdateSignatureBlock)(BOOL successed);
 typedef void(^QIMKitSearchSuccessBlock)(BOOL successed, NSString *responseJson);
 typedef void(^QIMKitSearchFaildBlock)(BOOL successed, NSString *errmsg);
 
+typedef void(^QIMKitPayCheckAccountBlock)(BOOL successed);
+typedef void(^QIMKitPayCreateRedEnvelopBlock)(BOOL successed,NSString *payParams);
+typedef void(^QIMKitPayRedEnvelopDetailBlock)(NSDictionary *data);
+typedef void(^QIMKitPayRedEnvelopReceiveBlock)(NSDictionary* data);
+typedef void(^QIMKitPayRedEnvelopSendBlock)(NSDictionary* data);
+typedef void(^QIMkitPayRedEnvelopOpenBlock)(NSDictionary* status,NSInteger errcode);
+typedef void(^QIMKitPayRedEnvelopGrapBlock)(NSString* rid);
+
 #endif /* QIMCommonEnum_h */

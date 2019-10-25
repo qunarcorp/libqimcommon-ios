@@ -325,6 +325,12 @@
 //更新App
 #define kNotifyUpdateAppVersion                    @"kNotifyUpdateAppVersion"
 
+//发送红包
+#define kSendRedPack @"kNotifySendRedPack"
+#define kAlipayAuth @"kNotifyAlipayAuth"
+#define kAlipaySuccess @"kNotifyAlipaySuccess"
+#define kSendRedPackRNView @"kNotifySendRedPackRNView"
+
 static const NSString *kGetIncrementMucListVersion = @"kGetIncrementMucListVersion";
 static const NSString *kGetIncrementMucGroupCardVersion = @"kGetIncrementMucGroupCardVersion";
 static const NSString *kGetUpdateUsersV2Version = @"kGetUpdateUsersV2Version";
