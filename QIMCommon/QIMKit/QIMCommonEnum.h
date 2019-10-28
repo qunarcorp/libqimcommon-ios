@@ -205,8 +205,9 @@ typedef enum {
     QIMMessageTypeRobotTurnToUser = 65537,
     QIMMessageTypeWebRtcMsgTypeVideoMeeting = 5001,
     QIMMessageTypeQChatRobotQuestionList = 65538,
-
-
+    QIMMessageTypeWebRtcMsgTypeVideoGroup = 65534,
+    QIMMessageType_WebRTC_Vedio = 65505,
+    QIMMessageType_WebRTC_Audio = 65506,
     QIMMessageType_TransChatToCustomer = 1001,
     QIMMessageType_TransChatToCustomer_Feedback = 1003,
     QIMMessageType_TransChatToCustomerService = 1002,

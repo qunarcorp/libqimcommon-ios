@@ -50,6 +50,7 @@ Pod::Spec.new do |s|
     puts 'debug QIMCommon依赖第三方库'
     s.dependency 'QIMOpenSSL'
     s.default_subspecs = 'Base'
+    # s.default_subspecs = 'Base', 'QIMPrivatePBCommon'
 
   else
   
@@ -74,6 +75,5 @@ Pod::Spec.new do |s|
   s.dependency 'WCDB'
 
   s.frameworks = 'Foundation', 'CoreTelephony', 'SystemConfiguration', 'AudioToolbox', 'AVFoundation', 'UserNotifications', 'CoreTelephony','QuartzCore', 'CoreGraphics', 'Security'
-    s.libraries = 'stdc++', 'bz2'
-
+  s.libraries = 'stdc++','bz2'
 end

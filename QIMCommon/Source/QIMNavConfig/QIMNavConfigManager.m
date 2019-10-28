@@ -34,6 +34,7 @@
     NSString *_protobufPort;   //Pb端口
     NSString *_resetPwdUrl; //重设密码
     NSString *_hashHosts;
+    NSString * _videourl;
 
     NSArray *_adItems;
     int _adSec;
@@ -156,6 +157,7 @@
             _uploadLog = [self.defaultSettings objectForKey:@"uploadLog"];
             _resetPwdUrl = [self.defaultSettings objectForKey:@"resetPwdUrl"];
             _isToC = [[self.defaultSettings objectForKey:@"isToC"] boolValue];
+            _videourl = [self.defaultSettings objectForKey:@"videourl"];
         } else if ([[QIMAppInfo sharedInstance] appType] != QIMProjectTypeQChat) {
             _xmppHost = [self.defaultSettings objectForKey:@"xmppHost"];
             _httpHost = [self.defaultSettings objectForKey:@"httpHost"];
@@ -180,6 +182,7 @@
             _resetPwdUrl = [self.defaultSettings objectForKey:@"resetPwdUrl"];
             _qSearchUrl = [self.defaultSettings objectForKey:@"qSearchUrl"];
             _isToC = [[self.defaultSettings objectForKey:@"isToC"] boolValue];
+            _videourl = [self.defaultSettings objectForKey:@"videourl"];
         }
     }
 
@@ -561,6 +564,7 @@
         _shareUrl = [baseAddess objectForKey:@"shareurl"];
         _resetPwdUrl = [baseAddess objectForKey:@"resetPwdUrl"];
         _appWeb = [baseAddess objectForKey:@"appWeb"];
+        _videourl = [baseAddess objectForKey:@"videourl"];
         NSString *domainHost = [baseAddess objectForKey:@"domainhost"];
         if (domainHost.length > 0) {
             _domainHost = domainHost;
@@ -608,6 +612,7 @@
                 _takeSmsUrl = [baseAddess objectForKey:@"sms_verify"];
                 _resetPwdUrl = [baseAddess objectForKey:@"resetPwdUrl"];
                 _appWeb = [baseAddess objectForKey:@"appWeb"];
+                _videourl = [baseAddess objectForKey:@"videourl"];
             }
         }
     }                  failure:^(NSError *error) {
