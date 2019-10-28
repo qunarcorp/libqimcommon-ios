@@ -212,7 +212,7 @@
                     [self getRemoteQuickReply];
                 } else if (forceRNUpdate) {
                     QIMVerboseLog(@"收到RN包清除通知");
-                    NSString *path = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
+                    NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
                     //内置包版本
                     NSString *latestJSCodeURLString = [path stringByAppendingPathComponent:@"rnRes"];
                     BOOL removeSussess = [[NSFileManager defaultManager] removeItemAtPath:latestJSCodeURLString error:nil];
@@ -394,6 +394,18 @@
                 } else {
                     QIMVerboseLog(@"online 驼圈其他通知 : %@", onlineDict);
                 }
+            }
+                break;
+            case QIMCategoryNotifyMsgTypeMedalListUpdateNotice: {
+                QIMVerboseLog(@"online 更新勋章列表");
+                NSInteger version = [[notifyMsg objectForKey:@"medalVersion"] integerValue];
+                [[QIMManager sharedInstance] getRemoteMedalList];
+            }
+                break;
+            case QIMCategoryNotifyMsgTypeUserMedalUpdateNotice: {
+                QIMVerboseLog(@"online 更新用户的勋章");
+                NSInteger version = [[notifyMsg objectForKey:@"userMedalVersion"] integerValue];
+                [[QIMManager sharedInstance] getRemoteUserMedalListWithUserId:nil];
             }
                 break;
             default: {
@@ -1594,9 +1606,7 @@
         QIMErrorLog(@"LoginFaild: %@", errDic);
         if ([[errDic objectForKey:@"errMsg"] isEqualToString:@"out_of_date"]) {
             
-//            [self sendNoPush];
-            [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"kTempUserToken"];
-            [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"userToken"];
+            [self clearUserToken];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"kNotificationOutOfDate" object:nil];
             });
@@ -1615,10 +1625,10 @@
     });
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        
+
         [self updateChatRoomList];
     });
-    
+
 }
 
 @end

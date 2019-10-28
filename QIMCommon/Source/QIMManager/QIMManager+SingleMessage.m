@@ -62,7 +62,7 @@
                          [[QIMAppInfo sharedInstance] AppBuildVersion]];
     
     if (self.lastSingleMsgTime <= 0) {
-        self.lastSingleMsgTime = [[NSDate date] timeIntervalSince1970] - 3600 * 24 * 3;
+        self.lastSingleMsgTime = ([[NSDate date] timeIntervalSince1970] - 3600 * 24 * 3) * 1000;
     }
     NSDictionary *jsonDic = @{
                               @"domain": [self getDomain],
@@ -165,8 +165,9 @@
                 [self updateRemoteLoginKey];
             }
             if (self.lastSingleMsgTime <= 0) {
-                self.lastSingleMsgTime = [[NSDate date] timeIntervalSince1970] - 3600 * 24 * 3;
+                self.lastSingleMsgTime = ([[NSDate date] timeIntervalSince1970] - 3600 * 24 * 3) * 1000;
             }
+
             QIMVerboseLog(@"self.lastSingleMsgTime : %f", self.lastSingleMsgTime);
             retryCount ++;
             QIMVerboseLog(@"第%d次尝试获取个人历史记录", retryCount);
@@ -224,6 +225,7 @@
         if (time <= 0) {
             time = ([[NSDate date] timeIntervalSince1970] - self.serverTimeDiff - 3600 * 24 * 3) * 1000;
         }
+        [self checkMsTimeInterval:&time];
         NSDictionary *jsonDic = @{@"user": [QIMManager getLastUserName],
                                   @"domain": [self getDomain],
                                   @"host": [self getDomain],

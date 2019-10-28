@@ -123,7 +123,8 @@
     NSString *destUrl = [NSString stringWithFormat:@"%@/warning/nck/sendtips", [[QIMNavConfigManager sharedInstance] javaurl]];
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
     [request setHTTPMethod:QIMHTTPMethodPOST];
-    
+    [request setShouldASynchronous:YES];
+
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
@@ -147,11 +148,12 @@
     }];
 }
 
-- (void)sendTPGetRequestWithUrl:(NSString *)url withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback{
-    
+- (void)sendTPGetRequestWithUrl:(NSString *)url
+           withProgressCallBack:(QIMKitSendTPRequesProgressBlock)pCallback
+            withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:url]];
     [request setHTTPMethod:QIMHTTPMethodGET];
-    
+    [request setShouldASynchronous:YES];
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
@@ -159,7 +161,11 @@
     
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
-    [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+        if (pCallback) {
+            pCallback(progressValue);
+        }
+    } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
             __typeof(self) strongSelf = weakSelf;
             if (!strongSelf) {
@@ -186,8 +192,14 @@
     }];
 }
 
-- (void)uploadFileRequest:(NSString *)uploadUrl withFileData:(NSData *)fileData withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+- (void)sendTPGetRequestWithUrl:(NSString *)url withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback{
+    
+    [self sendTPGetRequestWithUrl:url withProgressCallBack:nil withSuccessCallBack:sCallback withFailedCallBack:fCallback];
+}
+
+- (void)uploadFileRequest:(NSString *)uploadUrl withFileData:(NSData *)fileData withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:uploadUrl]];
+    [request setShouldASynchronous:YES];
 
     QIMHTTPUploadComponent *uploadComponent = [[QIMHTTPUploadComponent alloc] initWithDataKey:@"file" fileData:fileData];
     request.uploadComponents = @[uploadComponent];
@@ -199,7 +211,11 @@
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
-    [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+        if (pCallback) {
+            pCallback(progressValue);
+        }
+    } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
             __typeof(self) strongSelf = weakSelf;
             if (!strongSelf) {
@@ -226,8 +242,55 @@
     }];
 }
 
-- (void)uploadFileRequest:(NSString *)uploadUrl withFilePath:(NSString *)filePath withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+- (void)uploadFileRequest:(NSString *)uploadUrl withFileData:(NSData *)fileData withPOSTBody:(NSDictionary *)bodyDic withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:uploadUrl]];
+    [request setShouldASynchronous:YES];
+
+    QIMHTTPUploadComponent *uploadComponent = [[QIMHTTPUploadComponent alloc] initWithDataKey:@"file" fileData:fileData];
+    uploadComponent.bodyDic = bodyDic;
+    request.uploadComponents = @[uploadComponent];
+    [request setHTTPMethod:QIMHTTPMethodPOST];
+
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+    [request setHTTPRequestHeaders:cookieProperties];
+    __weak __typeof(self) weakSelf = self;
+    [request setTimeoutInterval:600];
+    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+        if (pCallback) {
+            pCallback(progressValue);
+        }
+    } complete:^(QIMHTTPResponse *response) {
+        if (response.code == 200) {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        } else {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        }
+    } failure:^(NSError *error) {
+        if (fCallback) {
+            fCallback(error);
+        }
+    }];
+}
+
+- (void)uploadFileRequest:(NSString *)uploadUrl withFilePath:(NSString *)filePath withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:uploadUrl]];
+    [request setShouldASynchronous:YES];
 
     QIMHTTPUploadComponent *uploadComponent = [[QIMHTTPUploadComponent alloc] initWithDataKey:@"file" filePath:filePath];
     request.uploadComponents = @[uploadComponent];
@@ -239,7 +302,103 @@
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
-    [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+        if (pCallback) {
+            pCallback(progressValue);
+        }
+    } complete:^(QIMHTTPResponse *response) {
+        if (response.code == 200) {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        } else {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        }
+    } failure:^(NSError *error) {
+        if (fCallback) {
+            fCallback(error);
+        }
+    }];
+}
+
+- (void)uploadFileRequest:(NSString *)uploadUrl withFilePath:(NSString *)filePath withPOSTBody:(NSDictionary *)bodyDic withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:uploadUrl]];
+    [request setShouldASynchronous:YES];
+
+    QIMHTTPUploadComponent *uploadComponent = [[QIMHTTPUploadComponent alloc] initWithDataKey:@"file" filePath:filePath];
+    uploadComponent.bodyDic = bodyDic;
+    request.uploadComponents = @[uploadComponent];
+    [request setHTTPMethod:QIMHTTPMethodPOST];
+
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+    [request setHTTPRequestHeaders:cookieProperties];
+    __weak __typeof(self) weakSelf = self;
+    [request setTimeoutInterval:600];
+    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+        if (pCallback) {
+            pCallback(progressValue);
+        }
+    } complete:^(QIMHTTPResponse *response) {
+        if (response.code == 200) {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        } else {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        }
+    } failure:^(NSError *error) {
+        if (fCallback) {
+            fCallback(error);
+        }
+    }];
+}
+
+- (void)sendFormatRequest:(NSString *)destUrl withPOSTBody:(NSDictionary *)bodyDic withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
+    [request setShouldASynchronous:YES];
+
+    QIMHTTPUploadComponent *uploadComponent = [[QIMHTTPUploadComponent alloc] init];
+    uploadComponent.bodyDic = bodyDic;
+    request.uploadComponents = @[uploadComponent];
+    [request setHTTPMethod:QIMHTTPMethodPOST];
+
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+    [request setHTTPRequestHeaders:cookieProperties];
+    __weak __typeof(self) weakSelf = self;
+    [request setTimeoutInterval:600];
+    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+        if (pCallback) {
+            pCallback(progressValue);
+        }
+    } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
             __typeof(self) strongSelf = weakSelf;
             if (!strongSelf) {

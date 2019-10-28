@@ -201,6 +201,7 @@ static QIMManager *__IMManager = nil;
     self.load_session_unreadcount = [[YYDispatchQueuePool alloc] initWithName:@"load_session_unreadcount" queueCount:2 qos:NSQualityOfServiceBackground];
     self.load_groupDB_VCard = [[YYDispatchQueuePool alloc] initWithName:@"load group card from DB" queueCount:2 qos:NSQualityOfServiceBackground];
     self.load_msgNickName = [[YYDispatchQueuePool alloc] initWithName:@"load msg nickName" queueCount:2 qos:NSQualityOfServiceBackground];
+    self.load_msgMedalList = [[YYDispatchQueuePool alloc] initWithName:@"load msg medalList" queueCount:2 qos:NSQualityOfServiceBackground];
     self.load_msgHeaderImage = [[YYDispatchQueuePool alloc] initWithName:@"load msg headerImage" queueCount:2 qos:NSQualityOfServiceBackground];
 
 //    dispatch_queue_create("Load Session Content", DISPATCH_QUEUE_PRIORITY_DEFAULT);
@@ -240,11 +241,6 @@ static QIMManager *__IMManager = nil;
 
     if (![[NSFileManager defaultManager] fileExistsAtPath:_downLoadFile]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:_downLoadFile withIntermediateDirectories:YES attributes:nil error:nil];
-    }
-
-    _groupHeaderImageCachePath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/imageCache/"]];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:_groupHeaderImageCachePath]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:_groupHeaderImageCachePath withIntermediateDirectories:YES attributes:nil error:nil];
     }
 }
 
@@ -402,7 +398,8 @@ static QIMManager *__IMManager = nil;
         [[QIMUserCacheManager sharedInstance] setUserObject:userFullJid forKey:@"kFullUserJid"];
         QIMVerboseLog(@"LoginComplate 之后的userFullJid : %@", userFullJid);
         NSString *tempUserToken = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"kTempUserToken"];
-        [[QIMUserCacheManager sharedInstance] setUserObject:tempUserToken?tempUserToken:@"" forKey:@"userToken"];
+//        [[QIMUserCacheManager sharedInstance] setUserObject:tempUserToken?tempUserToken:@"" forKey:@"userToken"];
+        [self updateLastUserToken:tempUserToken];
         QIMVerboseLog(@"LoginComplate 之后的tempUserToken : %@", tempUserToken);
 #warning NavDict NavConfig
         NSDictionary *currentLoginNavConfig = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"NavConfig"];
@@ -431,11 +428,6 @@ static QIMManager *__IMManager = nil;
 
     if (![[NSFileManager defaultManager] fileExistsAtPath:_downLoadFile]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:_downLoadFile withIntermediateDirectories:YES attributes:nil error:nil];
-    }
-
-    _groupHeaderImageCachePath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/imageCache/"]];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:_groupHeaderImageCachePath]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:_groupHeaderImageCachePath withIntermediateDirectories:YES attributes:nil error:nil];
     }
 
     QIMVerboseLog(@"开始获取单人历史记录2");
@@ -603,15 +595,23 @@ static QIMManager *__IMManager = nil;
         QIMVerboseLog(@"登录之后请求一下驼圈未读消息");
         [self getupdateRemoteWorkNoticeMsgs];
         
-        QIMVerboseLog(@"登录之后请求一下骆驼帮未读数");
-
-        [[QIMManager sharedInstance] getExploreNotReaderCount];
-        
+    
         QIMVerboseLog(@"登录之后请求热线账户列表");
         [self getRemoteHotlineShopList];
         
         QIMVerboseLog(@"登录之后获取发现页应用列表");
         [self getRemoteFoundNavigation];
+        
+        QIMVerboseLog(@"登录之后获取勋章列表");
+        [self getRemoteMedalList];
+        
+        QIMVerboseLog(@"登录之后获取我的勋章列表");
+        [self getRemoteUserMedalListWithUserId:[[QIMManager sharedInstance] getLastJid]];
+    }
+    if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeQTalk) {
+        QIMVerboseLog(@"登录之后请求一下骆驼帮未读数");
+        
+        [[QIMManager sharedInstance] getExploreNotReaderCount];
     }
     
     if ([[QIMAppInfo sharedInstance] appType] == QIMProjectTypeStartalk && [[QIMAppInfo sharedInstance] applicationState] == QIMApplicationStateLaunch) {
@@ -801,6 +801,22 @@ static QIMManager *__IMManager = nil;
  */
 + (NSString *)getLastUserName {
     return [[[QIMUserCacheManager sharedInstance] userObjectForKey:kLastUserId] lowercaseString];
+}
+
+- (void)updateLastTempUserToken:(NSString *)token {
+    [[QIMUserCacheManager sharedInstance] setUserObject:token forKey:@"kTempUserToken"];
+}
+
+- (NSString *)getLastTempUserToken {
+    return [[QIMUserCacheManager sharedInstance] userObjectForKey:@"kTempUserToken"];
+}
+
+- (void)updateLastUserToken:(NSString *)tempUserToken {
+    [[QIMUserCacheManager sharedInstance] setUserObject:tempUserToken?tempUserToken:@"" forKey:@"userToken"];
+}
+
+- (NSString *)getLastUserToken {
+    return [[QIMUserCacheManager sharedInstance] userObjectForKey:@"userToken"];
 }
 
 /**
@@ -1610,7 +1626,7 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
     BOOL sendServerSuccess = NO;
     NSString *url = @"";
     if ([[QIMNavConfigManager sharedInstance] newPush] == NO) {
-        url = [NSString stringWithFormat:@"%@/push/qtapi/token/setpersonmackey.qunar?username=%@&domain=%@&mac_key=%@&platname=%@&pkgname=%@&os=%@&version=%@&show_content=%@", [[QIMNavConfigManager sharedInstance] javaurl], [userInfo objectAtIndex:0], [userInfo objectAtIndex:1], notificationToken, [[[QIMAppInfo sharedInstance] deviceName] stringByReplacingOccurrencesOfString:@" " withString:@""], [[NSBundle mainBundle] bundleIdentifier], @"ios", [[QIMAppInfo sharedInstance] AppBuildVersion], @(YES)];
+        url = [NSString stringWithFormat:@"%@/push/qtapi/token/setpersonmackey.qunar?username=%@&domain=%@&mac_key=%@&platname=%@_%@_%@&pkgname=%@&os=%@&version=%@&show_content=%@", [[QIMNavConfigManager sharedInstance] javaurl], [userInfo objectAtIndex:0], [userInfo objectAtIndex:1], notificationToken, [[[QIMAppInfo sharedInstance] deviceName] stringByReplacingOccurrencesOfString:@" " withString:@""], [[[NSLocale preferredLanguages][0] componentsSeparatedByString:@"-"] firstObject], [[NSLocale currentLocale] countryCode], [[NSBundle mainBundle] bundleIdentifier], @"ios", [[QIMAppInfo sharedInstance] AppBuildVersion], @(YES)];
     } else {
         url = [NSString stringWithFormat:@"%@/qtapi/token/setpersonmackey.qunar?username=%@&domain=%@&mackey=%@&os=%@&version=%@", [[QIMNavConfigManager sharedInstance] javaurl], [userInfo objectAtIndex:0], [userInfo objectAtIndex:1], notificationToken, @"ios", [[QIMAppInfo sharedInstance] AppBuildVersion]];
     }
@@ -1708,6 +1724,13 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
     } withFailedCallBack:^(NSError *error) {
         
     }];
+}
+
+- (void)checkMsTimeInterval:(long long *)time {
+    NSString *timeStr = [NSString stringWithFormat:@"%lld", *time];
+    if (timeStr.length <= 10) {
+        *time = (*time) * 1000;
+    }
 }
 
 @end

@@ -115,10 +115,10 @@ static dispatch_once_t _onceDBToken;
         }
     }
     
-    if (oldDbVersion < currentDBVersion) {
+    if (oldDbVersion != currentDBVersion) {
         //数据库升级
         NSInteger upgradeResultVersion = [self upgradeDB:oldDbVersion];
-        if (upgradeResultVersion == currentDBVersion) {
+        if (upgradeResultVersion >= currentDBVersion) {
             QIMVerboseLog(@"DB文件升级成功");
             NSString *currentDBVersionStr = [NSString stringWithFormat:@"%ld", currentDBVersion];
             BOOL writeSucc = [currentDBVersionStr writeToFile:[self qim_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
@@ -153,7 +153,7 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (NSInteger)qim_dbVersion {
-    return 2;
+    return 3;
 }
 
 - (NSInteger)upgradeDB:(NSInteger)oldVersion {
@@ -174,7 +174,13 @@ static dispatch_once_t _onceDBToken;
             currentOldVersion = 1;
         }
             break;
+        case 2: {
+            result = [self upgradeFrom2To3];
+            currentOldVersion = 2;
+        }
+            break;
         default: {
+            currentOldVersion = 0;
             [[NSUserDefaults standardUserDefaults] setObject:@(oldVersion) forKey:@"dBUpdateVersion"];
             [[NSUserDefaults standardUserDefaults] synchronize];
         }
@@ -187,7 +193,7 @@ static dispatch_once_t _onceDBToken;
     
     // 递归判断是否需要升级
     if (oldVersion >= currentNewVersion) {
-        return currentNewVersion;
+        return oldVersion;
     } else {
         [self upgradeDB:oldVersion];
     }
@@ -215,6 +221,36 @@ static dispatch_once_t _onceDBToken;
         } else {
             result = YES;
         }
+    }];
+    return result;
+}
+
+- (BOOL)upgradeFrom2To3 {
+    QIMVerboseLog(@"upgradeFrom2To3");
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+
+        //新增勋章列表
+        result = [database executeUpdate: @"CREATE TABLE IF NOT EXISTS IM_Medal_List(\
+                  medalId               INTEGER PRIMARY KEY,\
+                  medalName             TEXT,\
+                  obtainCondition       TEXT,\
+                  smallIcon             TEXT,\
+                  bigLightIcon          TEXT,\
+                  bigGrayIcon           TEXT,\
+                  bigLockIcon           BLOB,\
+                  status                INTEGER\
+                  );"];
+
+        //用户勋章表
+        result = [database executeUpdate: @"CREATE TABLE IF NOT EXISTS IM_User_Status_Medal(\
+                  medalId               INTEGER,\
+                  userId                TEXT,\
+                  host                  TEXT,\
+                  medalStatus           INTEGER,\
+                  mappingVersion        INTEGER,\
+                  updateTime            INTEGER,\
+                  primary key  (medalId,userId));"];
     }];
     return result;
 }

@@ -71,6 +71,10 @@
     [[QIMManager sharedInstance] clearLogginUser];
 }
 
+- (void)clearUserToken {
+    [[QIMManager sharedInstance] clearUserToken];
+}
+
 - (void)saveUserInfoWithName:(NSString *)userName passWord:(NSString *)pwd {
     [[QIMManager sharedInstance] saveUserInfoWithName:userName passWord:pwd];
 }
@@ -95,6 +99,20 @@
 
 - (BOOL)forgelogin {
     return [[QIMManager sharedInstance] forgelogin];
+}
+
+#pragma mark - 验证码
+
+- (void)getUserTokenWithUserName:(NSString *)userName WithVerifyCode:(NSString *)verifCode withCallback:(QIMKitGetUserTokenSuccessBlock)callback {
+    [[QIMManager sharedInstance] getUserTokenWithUserName:userName WithVerifyCode:verifCode withCallback:callback];
+}
+
+- (void)getVerifyCodeWithUserName:(NSString *)userName withCallback:(QIMKitGetVerifyCodeSuccessBlock)callback {
+    [[QIMManager sharedInstance] getVerifyCodeWithUserName:userName withCallback:callback];
+}
+
+- (void)getNewUserTokenWithUserName:(NSString *)userName WithPassword:(NSString *)password withCallback:(QIMKitGetUserNewTokenSuccessBlock)callback {
+    [[QIMManager sharedInstance] getNewUserTokenWithUserName:userName WithPassword:password withCallback:callback];
 }
 
 @end

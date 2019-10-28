@@ -163,6 +163,8 @@
 
 #define kUpdateUserMedal                    @"kUpdateUserMedal"
 
+#define kUpdateNewUserMedalList             @"kUpdateNewUserMedalList"
+
 #define kRightCardRemindNotification        @"kRightCardRemindNotification"
 
 #define kUpdateMyPersonalSignature          @"kUpdateMyPersonalSignature"

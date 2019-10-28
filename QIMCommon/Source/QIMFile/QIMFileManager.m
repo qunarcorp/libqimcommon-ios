@@ -326,7 +326,9 @@ typedef enum {
                         }
                     }
                 }
-                [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyFileManagerUpdate object:[NSDictionary dictionaryWithObjectsAndKeys:self.message,@"message",@"1.1",@"propress",@"uploading",@"status", nil]];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyFileManagerUpdate object:[NSDictionary dictionaryWithObjectsAndKeys:self.message,@"message",@"1.1",@"propress",@"uploading",@"status", nil]];
+                });
             } else if (self.message.messageType == QIMMessageType_LocalShare){
                 NSDictionary *dic = [[QIMJSONSerializer sharedInstance] deserializeObject:self.message.originalExtendedInfo error:nil];
                 NSMutableDictionary * mulDic = [NSMutableDictionary dictionaryWithDictionary:dic];
@@ -350,7 +352,9 @@ typedef enum {
                 } else{
                     [[QIMManager sharedInstance] sendMessage:self.message ToUserId:self.toJid];
                 }
-                [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyFileManagerUpdate object:[NSDictionary dictionaryWithObjectsAndKeys:self.message,@"message",@"1.1",@"propress",@"uploading",@"status", nil]];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyFileManagerUpdate object:[NSDictionary dictionaryWithObjectsAndKeys:self.message,@"message",@"1.1",@"propress",@"uploading",@"status", nil]];
+                });
             }else if (self.message.messageType == QIMMessageType_CommonTrdInfo) {
                 NSMutableDictionary * mulDic = [NSMutableDictionary dictionaryWithDictionary:infoDic];
                 if (![httpUrl qim_hasPrefixHttpHeader]) {
@@ -444,7 +448,9 @@ typedef enum {
                     } else {
                         [[QIMManager sharedInstance] sendMessage:self.message ToUserId:self.toJid];
                     }
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyFileManagerUpdate object:[NSDictionary dictionaryWithObjectsAndKeys:self.message,@"message",@"1.1",@"propress",@"uploading",@"status", nil]];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyFileManagerUpdate object:[NSDictionary dictionaryWithObjectsAndKeys:self.message,@"message",@"1.1",@"propress",@"uploading",@"status", nil]];
+                    });
                 }
             }
         }
@@ -493,8 +499,10 @@ typedef enum {
     
     if (self.fileReuqestType == FileRequest_Upload) {
         self.message.messageSendState = QIMMessageSendState_Faild;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyFileManagerUpdate object:[NSDictionary dictionaryWithObjectsAndKeys:self.message,@"message",@"1.1",@"propress", @"failed",@"status",nil]];
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"kXmppStreamSendMessageFailed" object:@{@"messageId":self.message.messageId}];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyFileManagerUpdate object:[NSDictionary dictionaryWithObjectsAndKeys:self.message,@"message",@"1.1",@"propress", @"failed",@"status",nil]];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"kXmppStreamSendMessageFailed" object:@{@"messageId":self.message.messageId}];
+        });
     } else if (self.fileReuqestType == FileRequest_Download) {
     }
     if (self.fileId) {

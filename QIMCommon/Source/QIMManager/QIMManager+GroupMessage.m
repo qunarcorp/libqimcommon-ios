@@ -108,6 +108,8 @@
             self.lastGroupMsgTime = ([[NSDate date] timeIntervalSince1970] - self.serverTimeDiff - 3600 * 24 * 3) * 1000;
         }
         long long lastMsgTime = self.lastGroupMsgTime;
+        [self checkMsTimeInterval:&lastMsgTime];
+        
         destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         
         CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];

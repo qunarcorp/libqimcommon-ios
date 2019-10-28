@@ -93,6 +93,10 @@ static QIMKit *__global_QIMKit = nil;
     return [[[QIMManager sharedInstance] load_msgNickName] queue];
 }
 
+- (dispatch_queue_t)getLoadMsgMedalListQueue {
+    return [[[QIMManager sharedInstance] load_msgMedalList] queue];
+}
+
 - (dispatch_queue_t)getLoad_msgHeaderImageQueue {
     return [[[QIMManager sharedInstance] load_msgHeaderImage] queue];
 }
@@ -165,6 +169,42 @@ static QIMKit *__global_QIMKit = nil;
     return [QIMManager getLastUserName];
 }
 
+/**
+ 更新最后一个登录用户的临时Token
+ 
+ @param token 用户token
+ */
+- (void)updateLastTempUserToken:(NSString *)token {
+    [[QIMManager sharedInstance] updateLastTempUserToken:token];
+}
+
+/**
+ 获取最后一个登录用户的临时Token
+ 
+ @return 用户token
+ */
+- (NSString *)getLastTempUserToken {
+    return [[QIMManager sharedInstance] getLastTempUserToken];
+}
+
+/**
+ 更新最后一个登录用户的token
+ 
+ @param tempUserToken 用户token
+ */
+- (void)updateLastUserToken:(NSString *)tempUserToken {
+    [[QIMManager sharedInstance] updateLastUserToken:tempUserToken];
+}
+
+/**
+ 获取最后一个登录用户的token
+ 
+ @return 用户token
+ */
+- (NSString *)getLastUserToken {
+    return [[QIMManager sharedInstance] getLastUserToken];
+}
+
 - (NSString *)getLastPassword {
     return [[QIMManager sharedInstance] getLastPassword];
 }
@@ -222,6 +262,7 @@ static QIMKit *__global_QIMKit = nil;
     return [[QIMManager sharedInstance] myRedpackageUrl];
 }
 
+#pragma mark get user agent
 - (NSString *)getDefaultUserAgentString {
     return [[QIMManager sharedInstance] getDefaultUserAgentString];
 }

@@ -49,6 +49,7 @@
 @property (nonatomic, strong) YYDispatchQueuePool *load_session_unreadcount;
 @property (nonatomic, strong) YYDispatchQueuePool *load_groupDB_VCard;
 @property (nonatomic, strong) YYDispatchQueuePool *load_msgNickName;
+@property (nonatomic, strong) YYDispatchQueuePool *load_msgMedalList;
 @property (nonatomic, strong) YYDispatchQueuePool *load_msgHeaderImage;
 
 @property (nonatomic, strong) dispatch_queue_t update_group_member_queue;
@@ -83,6 +84,7 @@
 
 #endif
 
+@property (nonatomic, strong) NSString *defaultUserAgent;   //默认的UA
 @property (nonatomic) void *cacheTag;             // cache 线程锁
 
 @property (nonatomic) void *atMeCacheTag;
@@ -97,8 +99,6 @@
 
 @property (nonatomic, strong) NSMutableDictionary *userMarkupNameDic;    //用户备注信息
 @property (nonatomic, strong) NSMutableDictionary *stickJidDic;          //置顶Id列表
-
-@property (nonatomic, strong) NSString *defaultUserAgent;
 
 //Group
 @property (nonatomic, strong) NSMutableDictionary *notMindGroupDic;       //接收但不提醒消息的群
@@ -267,6 +267,36 @@
  */
 + (NSString *)getLastUserName;
 
+
+/**
+ 更新最后一个登录用户的临时Token
+
+ @param token 用户token
+ */
+- (void)updateLastTempUserToken:(NSString *)token;
+
+/**
+ 获取最后一个登录用户的临时Token
+
+ @return 用户token
+ */
+- (NSString *)getLastTempUserToken;
+
+/**
+ 更新最后一个登录用户的token
+
+ @param tempUserToken 用户token
+ */
+- (void)updateLastUserToken:(NSString *)tempUserToken;
+
+
+/**
+ 获取最后一个登录用户的token
+
+ @return 用户token
+ */
+- (NSString *)getLastUserToken;
+
 /**
  *  PWD
  *
@@ -323,6 +353,7 @@
 
 - (NSString *)myRedpackageUrl;
 
+#pragma mark get user agent
 - (NSString *)getDefaultUserAgentString;
 
 //新消息提醒
@@ -418,5 +449,7 @@
 - (void)findNewestClient;
 
 - (void)checkClearCache;
+
+- (void)checkMsTimeInterval:(NSInteger *)time;
 
 @end

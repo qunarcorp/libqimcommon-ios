@@ -387,8 +387,15 @@
     }
     NSDictionary *loginDict = [navConfig objectForKey:@"Login"];
     NSString *loginType = [loginDict objectForKey:@"loginType"];
-    BOOL pwdLogin = [loginType isEqualToString:@"password"];
-    _loginType = pwdLogin ? QTLoginTypePwd : QTLoginTypeSms;
+    if ([loginType isEqualToString:@"password"]) {
+        _loginType = QTLoginTypePwd;
+    } else if ([loginType isEqualToString:@"newpassword"]) {
+        _loginType = QTLoginTypeNewPwd;
+    } else {
+        _loginType = QTLoginTypeSms;
+    }
+//    BOOL pwdLogin = [loginType isEqualToString:@"password"];
+//    _loginType = pwdLogin ? QTLoginTypePwd : QTLoginTypeSms;
     [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"QC_UserWillSaveNavDict"];
     NSDictionary *abilityDict = [navConfig objectForKey:@"ability"];
     if (abilityDict.count) {
@@ -707,6 +714,9 @@
         if (![navConfigUrl containsString:@"u="] && userName.length > 0) {
             navConfigUrl = [navConfigUrl stringByAppendingFormat:@"&u=%@", userName];
         }
+        if (![navConfigUrl containsString:@"nauth="]) {
+            navConfigUrl = [navConfigUrl stringByAppendingFormat:@"&nauth=true"];
+        }
         BOOL resultSuccess = [self qimNav_updateNavigationConfigWithNavDict:navDict NavStr:navConfigUrl Check:check];
         if (resultSuccess) {
             [self addLocalNavDict:navDict];
@@ -940,6 +950,7 @@
 - (NSString *)getManagerAppUrl {
     return [NSString stringWithFormat:@"%@/manage#/audit_user?domain=%@", self.appWeb, self.domain];
 }
+
 
 - (NSString *)getNewResetPwdUrl {
 
