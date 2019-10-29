@@ -126,7 +126,6 @@ typedef NS_ENUM(SInt32, MessageType) {
   MessageTypeMessageTypeCardShare = 256,
   MessageTypeMessageTypeMeetingRemind = 257,
   MessageTypeMessageTypeWorkWorldAtRemind = 258,
-  MessageTypeMessageTypeMedalRemind = 259,
   MessageTypeMessageTypeEncrypt = 404,
   MessageTypeMessageTypeActivity = 511,
   MessageTypeMessageTypeRedPack = 512,
@@ -226,7 +225,6 @@ typedef NS_ENUM(SInt32, IQMessageKeyType) {
   IQMessageKeyTypeIqkeySetUserSubScribeV2 = 13,
   IQMessageKeyTypeIqkeyGetUserSubScribeV2 = 14,
   IQMessageKeyTypeIqkeyGetUserFriend = 16,
-  IQMessageKeyTypeIqkeyGetRequest = 17,
   IQMessageKeyTypeIqkeyDelUserFriend = 18,
   IQMessageKeyTypeIqkeyGetUserKey = 20,
   IQMessageKeyTypeIqkeyGetUserMask = 22,
@@ -277,8 +275,6 @@ typedef NS_ENUM(SInt32, CategoryType) {
   CategoryTypeCategorySpecifyNotification = 99,
   CategoryTypeCategoryWorkWorldNotice = 12,
   CategoryTypeCategoryHotLineSync = 13,
-  CategoryTypeCategoryMedalListSync = 14,
-  CategoryTypeCategoryMedalUserStatusListSync = 15,
 };
 
 BOOL CategoryTypeIsValidValue(CategoryType value);
