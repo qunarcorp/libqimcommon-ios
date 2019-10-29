@@ -576,7 +576,6 @@
         [self qimDB_revokeMessageByMsgList:updateMsgList];
     }
     CFAbsoluteTime end = CFAbsoluteTimeGetCurrent();
-    insertSuccessed = NO;
     QIMVerboseLog(@"插入群消息历史记录%ld条，耗时%fs，成功与否:%d", msgList.count, end - start, insertSuccessed); //s
     if (insertSuccessed == YES) {
         return lastTime;
