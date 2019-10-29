@@ -82,7 +82,7 @@
     [request setHTTPRequestHeaders:cookieProperties];
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         
-        NSDictionary *logDic = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":jsonDic, @"requestHeaders":requestHeaders, @"describtion":@"请求单人离线消息"};
+        NSDictionary *logDic = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":jsonDic, @"requestHeaders":requestHeaders, @"describtion":@"请求单人离线消息阅读状态"};
         
         Class autoManager = NSClassFromString(@"QIMAutoTrackerManager");
         id autoManagerObject = [[autoManager alloc] init];

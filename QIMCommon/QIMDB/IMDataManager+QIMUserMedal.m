@@ -294,7 +294,7 @@
              [IMDataManager safeSaveForDic:paramDic setObject:obtainCondition forKey:@"obtainCondition"];
              [IMDataManager safeSaveForDic:paramDic setObject:smallIcon forKey:@"smallIcon"];
              [IMDataManager safeSaveForDic:paramDic setObject:bigLightIcon forKey:@"bigLightIcon"];
-             [IMDataManager safeSaveForDic:paramDic setObject:BigGrayIcon forKey:@"bigGrayIcon"];
+             [IMDataManager safeSaveForDic:paramDic setObject:(BigGrayIcon.length > 0) ? BigGrayIcon : bigLightIcon forKey:@"bigGrayIcon"];
              [IMDataManager safeSaveForDic:paramDic setObject:bigLockIcon forKey:@"bigLockIcon"];
              [IMDataManager safeSaveForDic:paramDic setObject:status forKey:@"status"];
              [IMDataManager safeSaveForDic:paramDic setObject:userId forKey:@"medalUserId"];
@@ -348,7 +348,7 @@
             [IMDataManager safeSaveForDic:paramDic setObject:obtainCondition forKey:@"obtainCondition"];
             [IMDataManager safeSaveForDic:paramDic setObject:smallIcon forKey:@"smallIcon"];
             [IMDataManager safeSaveForDic:paramDic setObject:bigLightIcon forKey:@"bigLightIcon"];
-            [IMDataManager safeSaveForDic:paramDic setObject:BigGrayIcon forKey:@"bigGrayIcon"];
+            [IMDataManager safeSaveForDic:paramDic setObject:(BigGrayIcon.length > 0) ? BigGrayIcon : bigLightIcon forKey:@"bigGrayIcon"];
             [IMDataManager safeSaveForDic:paramDic setObject:bigLockIcon forKey:@"bigLockIcon"];
             [IMDataManager safeSaveForDic:paramDic setObject:status forKey:@"status"];
             [IMDataManager safeSaveForDic:paramDic setObject:userId forKey:@"medalUserId"];

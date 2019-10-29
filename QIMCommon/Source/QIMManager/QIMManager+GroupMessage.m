@@ -169,7 +169,7 @@
                     self.latestGroupMessageFlag = NO;
                 }
 
-                NSDictionary *logDic4 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"是否还要继续拉取群离线消息":@(self.latestGroupMessageFlag), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"是否还要继续拉取群离线消息"};
+                NSDictionary *logDic4 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"ext":@{@"是否还要继续拉取群离线消息":@(self.latestGroupMessageFlag)},@"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"是否还要继续拉取群离线消息"};
 
                 Class autoManager4 = NSClassFromString(@"QIMAutoTrackerManager");
                 id autoManagerObject4 = [[autoManager4 alloc] init];
