@@ -34,6 +34,8 @@
 - (long long)sizeofImagePath;
 
 - (long long)sizeOfDBPath;
+    
+- (long long)sizeOfDBWALPath;
 
 - (NSString *)transfromTotalSize:(long long)totalSize;
 

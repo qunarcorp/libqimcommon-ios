@@ -291,7 +291,7 @@
                         [self updateRemoteLoginKey];
                     }
 
-                    NSDictionary *logDic4 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":jsonDic, @"requestHeaders":cookieProperties, @"describtion":@"获取单人历史JSON记录请求失败", @"ext":@{@"error":result?result:@""}};
+                    NSDictionary *logDic4 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":jsonDic, @"requestHeaders":cookieProperties, @"describtion":@"获取单人历史JSON记录请求失败", @"ext":@{@"Error":result?result:@""}};
                     Class autoManager4 = NSClassFromString(@"QIMAutoTrackerManager");
                     id autoManagerObject4 = [[autoManager4 alloc] init];
                     [autoManagerObject4 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic4];
@@ -310,7 +310,7 @@
                 QIMErrorLog(@"获取单人历史JSON记录失败");
             }
 
-            NSDictionary *logDic5 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":jsonDic, @"requestHeaders":cookieProperties, @"describtion":@"获取单人历史JSON记录请求失败", @"ext":@{@"hError":error?error:@""}};
+            NSDictionary *logDic5 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":jsonDic, @"requestHeaders":cookieProperties, @"describtion":@"获取单人历史JSON记录请求失败", @"ext":@{@"Error":error?error:@""}};
             Class autoManager5 = NSClassFromString(@"QIMAutoTrackerManager");
             id autoManagerObject5 = [[autoManager5 alloc] init];
             [autoManagerObject5 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic5];

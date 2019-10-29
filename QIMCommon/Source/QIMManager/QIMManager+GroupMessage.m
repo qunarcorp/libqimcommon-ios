@@ -52,6 +52,13 @@
 
 - (void)updateOfflineGroupMessages {
     QIMVerboseLog(@"updateOfflineGroupMessages");
+    
+    NSDictionary *logDic1 = @{@"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"methodParams":@"", @"requestHeaders":@"", @"describtion":@"准备开始获取群离线历史消息", @"ext":@{@"lastGroupMsgTime":@(self.lastGroupMsgTime)}};
+    
+    Class autoManager1 = NSClassFromString(@"QIMAutoTrackerManager");
+    id autoManagerObject1 = [[autoManager1 alloc] init];
+    [autoManagerObject1 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic1];
+
     int count = 0;
     BOOL getMucHistotySuccess = NO;
     NSTimeInterval timeOut = 6;
@@ -71,10 +78,16 @@
         } while (!getMucHistotySuccess && retryCount < 3);
     } while (self.latestGroupMessageFlag);
     if (!getMucHistotySuccess) {
+        
+        NSDictionary *logDic = @{@"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"methodParams":@"", @"requestHeaders":@"", @"describtion":@"获取群离线历史消息失败了，设置本地群最后消息时间戳", @"ext":@{@"lastGroupMsgTime":@(self.lastGroupMsgTime)}};
+        
+        Class autoManager = NSClassFromString(@"QIMAutoTrackerManager");
+        id autoManagerObject = [[autoManager alloc] init];
+        [autoManagerObject performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic];
+
         QIMVerboseLog(@"获取群历史记录失败了");
         QIMWarnLog(@"拉历史失败之后set本地群最后消息时间戳为 : %lf", self.lastGroupMsgTime);
         [[QIMUserCacheManager sharedInstance] setUserObject:@(self.lastGroupMsgTime) forKey:kGetNewGroupHistoryMsgError];
-        return;
     } else {
         QIMVerboseLog(@"获取群历史记录成功了");
         QIMVerboseLog(@"remove本地群最后消息时间戳");
@@ -84,7 +97,6 @@
 
 //拉取离线群历史记录
 - (BOOL)getMucHistoryV2WithTimeOut:(NSTimeInterval)timeOut {
-
     if (self.remoteKey.length <= 0) {
         NSDictionary *logDic = @{@"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"describtion":@"当前remoteKey为空，不要拉群历史了"};
         Class autoManager = NSClassFromString(@"QIMAutoTrackerManager");
@@ -150,7 +162,7 @@
         } else {
             getMucHistorySuccess == NO;
 
-            NSDictionary *logDic3 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"获取群离线消息失败了", @"ext":@{@"HTTPStatusCode":@([request responseStatusCode])}};
+            NSDictionary *logDic3 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"获取群离线消息失败了", @"ext":@{@"HTTPStatusCode":@([request responseStatusCode]), @"Error": error ? error : @""}};
 
             Class autoManager3 = NSClassFromString(@"QIMAutoTrackerManager");
             id autoManagerObject3 = [[autoManager3 alloc] init];
@@ -194,6 +206,7 @@
             }
         } else {
             getMucHistorySuccess == NO;
+            
             QIMErrorLog(@"获取群历史记录失败了了了, 没有result");
         }
     }
@@ -210,7 +223,6 @@
             self.lastGroupMsgTime = lastTime;
             *flag = YES;
         } else {
-            self.lastGroupMsgTime = 0;
             *flag = NO;
         }
         for (NSDictionary *infoDic in atAllMsgList) {

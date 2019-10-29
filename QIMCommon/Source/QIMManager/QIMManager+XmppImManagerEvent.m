@@ -110,6 +110,10 @@
 
 - (void)updateOfflineTime:(NSDictionary *)infoDic {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        QIMVerboseLog(@"登录之前数据库进行checkPoint");
+        [[IMDataManager qimDB_SharedInstance] qimDB_dbCheckpoint];
+        QIMVerboseLog(@"登录之前数据库完成checkPoint");
+        
         QIMVerboseLog(@"登录之前初始化数据库文件之后更新各种时间戳开始 : %@", infoDic);
         [self updateLastMsgTime];
         [self updateLastGroupMsgTime];

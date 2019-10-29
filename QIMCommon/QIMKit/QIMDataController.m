@@ -89,8 +89,29 @@ static QIMDataController *__globalDataController = nil;
 }
 
 - (long long)sizeOfDBPath {
-    NSString *dbPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/QIMNewDataBase/"]];
-    return [QIMUtility sizeofPath:dbPath];
+    NSString *dbPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/QIMNewDataBase/%@%@/", [[QIMManager sharedInstance] getLastJid], UserPath]];
+    [[QIMManager sharedInstance] addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:[dbPath stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    dbPath = [dbPath stringByAppendingPathComponent:@"data.dat"];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:dbPath]) {
+        
+        return [[[NSFileManager defaultManager] attributesOfItemAtPath:dbPath error:nil] fileSize];
+        
+    }
+    return 0;
+}
+    
+- (long long)sizeOfDBWALPath {
+    NSString *dbWalPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/QIMNewDataBase/%@%@/", [[QIMManager sharedInstance] getLastJid], UserPath]];
+    [[QIMManager sharedInstance] addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:[dbWalPath stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+
+    dbWalPath = [dbWalPath stringByAppendingPathComponent:@"data.dat-wal"];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:dbWalPath]) {
+        
+        return [[[NSFileManager defaultManager] attributesOfItemAtPath:dbWalPath error:nil] fileSize];
+        
+    }
+    return 0;
 }
 
 - (NSString *)transfromTotalSize:(long long)totalSize {

@@ -1048,8 +1048,8 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (void)qimDB_dbCheckpoint {
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-        [database checkpoint:QIMDBCheckpointModeFull error:nil];
+    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+        [database checkpoint:QIMDBCheckpointModeTruncate error:nil];
     }];
 }
 
