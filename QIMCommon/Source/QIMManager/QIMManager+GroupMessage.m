@@ -257,6 +257,8 @@
             [msg setMessageDate:[[infoDic objectForKey:@"MsgDateTime"] longLongValue]];
             [self addOfflineAtMeMessageByJid:groupId withType:QIMAtTypeSP withMsgId:[infoDic objectForKey:@"MsgId"] withMsgTime:[[infoDic objectForKey:@"MsgDateTime"] longLongValue]];
         }
+    } else {
+        *flag = YES;
     }
     CFAbsoluteTime end = CFAbsoluteTimeGetCurrent();
     QIMVerboseLog(@"处理群离线消息历史记录%ld条，耗时%fs", data.count, end - start); //s
