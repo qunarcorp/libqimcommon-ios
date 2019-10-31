@@ -42,4 +42,8 @@
     [[QIMManager sharedInstance] grapRedEnvelop:xmppid RedRid:rid IsChatRoom:isRoom withCallBack:callBack];
 }
 
+- (void)getAlipayLoginParams {
+    [[QIMManager sharedInstance] getAlipayLoginParams];
+}
+
 @end

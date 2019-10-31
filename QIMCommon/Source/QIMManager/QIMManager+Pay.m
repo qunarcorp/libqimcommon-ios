@@ -157,8 +157,16 @@ const NSString *payHost = @"http://10.86.219.183:5000";
         if ([result isKindOfClass:[NSDictionary class]]) {
             NSInteger errCode = [[result objectForKey:@"error_code"] intValue];
             if(errCode == 200){
-                callBack(rid);
-            }else{
+                if (callBack) {
+                    callBack(rid);
+                }
+            } else{
+                if (callBack) {
+                    callBack(@"");
+                }
+            }
+        } else {
+            if (callBack) {
                 callBack(@"");
             }
         }
@@ -174,10 +182,18 @@ const NSString *payHost = @"http://10.86.219.183:5000";
     [self sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         if ([result isKindOfClass:[NSDictionary class]]) {
-            callBack(result);
+            if (callBack) {
+                callBack(result);
+            }
+        } else {
+            if (callBack) {
+                callBack(nil);
+            }
         }
     } withFailedCallBack:^(NSError *error) {
-        callBack(nil);
+        if (callBack) {
+            callBack(nil);
+        }
     }];
 }
 
@@ -188,10 +204,18 @@ const NSString *payHost = @"http://10.86.219.183:5000";
     [self sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         if ([result isKindOfClass:[NSDictionary class]]) {
-            callBack(result);
+            if (callBack) {
+                callBack(result);
+            }
+        } else {
+            if (callBack) {
+                callBack(nil);
+            }
         }
     } withFailedCallBack:^(NSError *error) {
-        callBack(nil);
+        if (callBack) {
+            callBack(nil);
+        }
     }];
 }
 

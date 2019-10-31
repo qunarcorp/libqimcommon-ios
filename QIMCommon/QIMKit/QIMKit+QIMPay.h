@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)grapRedEnvelop:(NSString *)xmppid RedRid:(NSString *)rid IsChatRoom:(NSInteger) isRoom withCallBack:(QIMKitPayRedEnvelopGrapBlock)callBack;
 - (void)redEnvelopReceive:(NSInteger)page PageSize:(NSInteger)pageSize WithYear:(NSInteger) year withCallBack:(QIMKitPayRedEnvelopReceiveBlock)callBack;
 - (void)redEnvelopSend:(NSInteger)page PageSize:(NSInteger)pageSize WithYear:(NSInteger) year withCallBack:(QIMKitPayRedEnvelopSendBlock)callBack;
+- (void)getAlipayLoginParams;
 @end
 
 NS_ASSUME_NONNULL_END
