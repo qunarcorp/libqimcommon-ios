@@ -161,9 +161,10 @@
     
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
-    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
+        //mark by AFN
         if (pCallback) {
-            pCallback(progressValue);
+//            pCallback(progressValue);
         }
     } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
@@ -211,9 +212,10 @@
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
-    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
-            pCallback(progressValue);
+            //mark by AFN
+//            pCallback(progressValue);
         }
     } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
@@ -257,9 +259,10 @@
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
-    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
-            pCallback(progressValue);
+            //mark by AFN
+//            pCallback(progressValue);
         }
     } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
@@ -302,9 +305,10 @@
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
-    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
-            pCallback(progressValue);
+            //mark by AFN
+//            pCallback(progressValue);
         }
     } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
@@ -348,9 +352,10 @@
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
-    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
-            pCallback(progressValue);
+            //mark by AFN
+//            pCallback(progressValue);
         }
     } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
@@ -394,9 +399,10 @@
     [request setHTTPRequestHeaders:cookieProperties];
     __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
-    [QIMHTTPClient sendRequest:request progressBlock:^(float progressValue) {
+    [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
-            pCallback(progressValue);
+            //mark by AFN
+//            pCallback(progressValue);
         }
     } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {

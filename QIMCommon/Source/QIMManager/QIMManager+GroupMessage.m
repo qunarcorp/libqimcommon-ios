@@ -334,6 +334,7 @@
         NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:params error:nil];
         NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
         NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+        [cookieProperties setObject:@"application/json" forKey:@"content-type"];
         [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
         QIMVerboseLog(@"JSON请求群ReadMark阅读指针Ckey为 : %@", cookieProperties);
         
