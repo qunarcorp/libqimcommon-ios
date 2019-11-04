@@ -7,7 +7,7 @@
 
 #import "QIMManager+Pay.h"
 
-const NSString *payHost = @"http://10.86.219.183:5000";
+const NSString *payHost = @"http://150.242.184.16:8080/redpackage";
 
 @implementation QIMManager (Pay)
 //获取绑定的支付宝账户信息
