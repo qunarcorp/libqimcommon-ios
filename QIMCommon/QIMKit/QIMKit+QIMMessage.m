@@ -95,6 +95,10 @@
     [[QIMManager sharedInstance] revokeMessageWithMessageId:messageId message:message ToJid:jid];
 }
 
+- (void)revokeConsultMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid realToJid:(NSString *)realToJid chatType:(int)chatType{
+    [[QIMManager sharedInstance] revokeConsultMessageWithMessageId:messageId message:message ToJid:jid realToJid:realToJid chatType:chatType];
+}
+
 - (QIMMessageModel *)sendVoiceUrl:(NSString *)voiceUrl withVoiceName:(NSString *)voiceName withSeconds:(int)seconds ToUserId:(NSString *)userId {
     return [[QIMManager sharedInstance] sendVoiceUrl:voiceUrl withVoiceName:voiceName withSeconds:seconds ToUserId:userId];
 }

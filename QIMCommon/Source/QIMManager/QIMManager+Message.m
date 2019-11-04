@@ -468,6 +468,19 @@
     [[XmppImManager sharedInstance] revokeMessageId:messageId WithMessage:message ToJid:jid];
 }
 
+
+/**
+ 撤销consult消息
+ @param messageId messageId
+ @param message message
+ @param jid jid
+ 
+ */
+
+- (void)revokeConsultMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid realToJid:(NSString *)realToJid chatType:(int)chatType{
+    [[XmppImManager sharedInstance] revokeConsultMessageId:messageId WithMessage:message ToJid:jid realToJid:realToJid chatType:chatType];
+}
+
 /**
  撤销群消息
  
