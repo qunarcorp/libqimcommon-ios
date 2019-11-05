@@ -55,7 +55,7 @@
 #pragma mark - 用户备注
 
 - (void)updateUserMarkupNameWithUserId:(NSString *)userId WithMarkupName:(NSString *)markUpName {
-    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKMarkupNames WithSubKey:userId WithConfigValue:markUpName WithDel:(markUpName.length > 0) ? NO : YES];
+    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKMarkupNames WithSubKey:userId WithConfigValue:markUpName WithDel:(markUpName.length > 0) ? NO : YES withCallback:nil];
 }
 
 - (NSString *)getUserMarkupNameWithUserId:(NSString *)userId {

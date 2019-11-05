@@ -1201,7 +1201,7 @@ static QIMManager *__IMManager = nil;
 }
 
 - (void)setNewMsgNotify:(BOOL)flag {
-    [self setMsgNotifySettingWithIndex:QIMMSGSETTINGSOUND_INAPP WithSwitchOn:flag];
+    [self setMsgNotifySettingWithIndex:QIMMSGSETTINGSOUND_INAPP WithSwitchOn:flag withCallBack:nil];
 }
 
 //新消息震动
@@ -1211,7 +1211,7 @@ static QIMManager *__IMManager = nil;
 }
 
 - (void)setNewMsgVibrate:(BOOL)flag {
-    [self setMsgNotifySettingWithIndex:QIMMSGSETTINGVIBRATE_INAPP WithSwitchOn:flag];
+    [self setMsgNotifySettingWithIndex:QIMMSGSETTINGVIBRATE_INAPP WithSwitchOn:flag withCallBack:nil];
 }
 
 //相册是否发送原图
@@ -1429,12 +1429,32 @@ static QIMManager *__IMManager = nil;
     }
 }
 
-- (NSDictionary *)getQChatTokenWithBusinessLineName:(NSString *)businessLineName {
+- (void)getQChatTokenWithBusinessLineName:(NSString *)businessLineName withCallBack:(QIMKitGetQChatTokenSuccessBlock)callback {
     
     NSString *desturl = [[QIMNavConfigManager sharedInstance] getQChatGetTKUrl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:desturl]];
     NSDictionary *params = @{@"macCode": [[QIMAppInfo sharedInstance] macAddress], @"plat": (businessLineName.length > 0) ? businessLineName : @"app"};
     NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:params error:nil];
+    //mark by AFN
+    [self sendTPPOSTRequestWithUrl:desturl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
+        if (ret) {
+            if (callback) {
+                callback([resultDic objectForKey:@"data"]);
+            }
+        } else {
+            if (callback) {
+                callback(nil);
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
+    
+    /*
+    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:desturl]];
     [request addRequestHeader:@"content-type" value:@"application/json"];
     [request appendPostData:data];
     [request startSynchronous];
@@ -1446,6 +1466,7 @@ static QIMManager *__IMManager = nil;
         }
     }
     return nil;
+    */
 }
 
 - (NSDictionary *)getQVTForQChat {
@@ -1473,13 +1494,23 @@ static QIMManager *__IMManager = nil;
     
     NSDictionary *dict = @{@"topType":@(1), @"chatType":@(chatType)};
     NSString *value = [[QIMJSONSerializer sharedInstance] serializeObject:dict];
-    return [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKStickJidDic WithSubKey:combineJid WithConfigValue:value WithDel:NO];
+    //mark by AFN
+    __block BOOL success = NO;
+    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKStickJidDic WithSubKey:combineJid WithConfigValue:value WithDel:NO withCallback:^(BOOL successed) {
+        success = successed;
+    }];
+    return success;
 }
 
 - (BOOL)removeStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType {
     NSDictionary *infoDic = @{@"chatType":@(chatType), @"topType":@(0)};
     NSString *infoStr = [[QIMJSONSerializer sharedInstance] serializeObject:infoDic];
-    return [self updateRemoteClientConfigWithType:QIMClientConfigTypeKStickJidDic WithSubKey:combineJid WithConfigValue:infoStr WithDel:YES];
+    //mark by AFN
+    __block BOOL success = NO;
+    [self updateRemoteClientConfigWithType:QIMClientConfigTypeKStickJidDic WithSubKey:combineJid WithConfigValue:infoStr WithDel:YES withCallback:^(BOOL successed) {
+        success = successed;
+    }];
+    return success;
 }
 
 - (BOOL)isStickWithCombineJid:(NSString *)combineJid {
@@ -1528,7 +1559,7 @@ static QIMManager *__IMManager = nil;
     return [[QIMManager sharedInstance] getClientConfigDicWithType:QIMClientConfigTypeKStickJidDic];
 }
 
-- (BOOL)setMsgNotifySettingWithIndex:(QIMMSGSETTING)setting WithSwitchOn:(BOOL)switchOn {
+- (void)setMsgNotifySettingWithIndex:(QIMMSGSETTING)setting WithSwitchOn:(BOOL)switchOn withCallBack:(QIMKitSetMsgNotifySettingSuccessBlock)callback{
     /*
 http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhost1&os=android&version=205&index=1&status=0‘
     
@@ -1541,6 +1572,28 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
     status=0//开关状态  0：关 1、开
 */
     NSString *str = [NSString stringWithFormat:@"%@/push/qtapi/token/setmsgsettings.qunar?username=%@&domain=%@&os=ios&version=%@&index=%@&status=%@", [[QIMNavConfigManager sharedInstance] javaurl], [QIMManager getLastUserName], [[QIMNavConfigManager sharedInstance] domain], [[QIMAppInfo sharedInstance] AppBuildVersion], @(setting), @(switchOn)];
+    [self sendTPGetRequestWithUrl:str withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSInteger localPushFlag = [[[QIMUserCacheManager sharedInstance] userObjectForKey:@"MsgSettings"] integerValue];
+            localPushFlag = localPushFlag ^ setting;
+            [[QIMUserCacheManager sharedInstance] setUserObject:@(localPushFlag) forKey:@"MsgSettings"];
+            if (callback) {
+                callback(YES);
+            }
+        } else {
+            if (callback) {
+                callback(NO);
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(NO);
+        }
+    }];
+    /*
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:str]];
     [request setRequestMethod:@"GET"];
     [request setUseCookiePersistence:NO];
@@ -1563,6 +1616,7 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
         }
     }
     return NO;
+    */
 }
 
 - (BOOL)getLocalMsgNotifySettingWithIndex:(QIMMSGSETTING)setting {
@@ -1616,7 +1670,7 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
     [[QIMAppInfo sharedInstance] setPushToken:nil];
 }
 
-- (BOOL)sendServer:(NSString *)notificationToken withUsername:(NSString *)username withParamU:(NSString *)paramU withParamK:(NSString *)paramK WithDelete:(BOOL)deleteFlag {
+- (void)sendServer:(NSString *)notificationToken withUsername:(NSString *)username withParamU:(NSString *)paramU withParamK:(NSString *)paramK WithDelete:(BOOL)deleteFlag withCallback:(QIMKitRegisterPushTokenSuccessBlock)callback {
     
     QIMVerboseLog(@"准备向帆哥服务器发送Push Token . Token : %@, 用户名 : %@, U = %@, K = %@", notificationToken, username, paramU, paramK);
     if (paramK.length <= 0 || !paramK) {
@@ -1634,8 +1688,33 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
         url = [url stringByReplacingOccurrencesOfString:@"set" withString:@"del"];
     }
     QIMVerboseLog(@"帆哥更新Token地址 : %@", url);
-    NSURL *requestUrl = [[NSURL alloc] initWithString:url];
+    [self sendTPGetRequestWithUrl:url withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        NSInteger ret = [[result objectForKey:@"ret"] integerValue];
+        NSString *errmsg = [result objectForKey:@"errmsg"];
+        if (errcode == 0 && ret) {
+            QIMVerboseLog(@"=== 向帆哥服务器发送PushToken成功 === %@", result);
+//            sendServerSuccess = YES;
+            if (callback) {
+                callback(YES);
+            }
+        } else {
+            if (callback) {
+                callback(NO);
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(NO);
+        }
+    }];
     
+    
+//    NSURL *requestUrl = [[NSURL alloc] initWithString:url];
+    
+    
+    /*
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
     [request setUseCookiePersistence:NO];
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
@@ -1666,29 +1745,34 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
         QIMErrorLog(@"=== 向帆哥服务器发送PushToken失败 === %@,  %@ ", error, errmsg);
     }
     return sendServerSuccess;
+    */
 }
 
 - (BOOL)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag {
+    __block BOOL result = NO;
     if ([QIMManager getLastUserName].length > 0) {
         if (self.remoteKey.length <= 0) {
             [self updateRemoteLoginKey];
         }
         if (self.remoteKey.length > 0) {
-            BOOL result = [self sendServer:myToken
-                              withUsername:[self getLastJid]
-                                withParamU:[self getLastJid]
-                                withParamK:self.remoteKey
-                                WithDelete:deleteFlag];
-            
-            if (result) {
-                QIMVerboseLog(@"更新后的PushToken为%@", myToken);
-            } else {
-                QIMErrorLog(@"更新PushToken失败");
-            }
-            return result;
+            [self sendServer:myToken
+                withUsername:[self getLastJid]
+                  withParamU:[self getLastJid]
+                  withParamK:self.remoteKey
+                  WithDelete:deleteFlag
+                withCallback:^(BOOL successed) {
+                    if (successed) {
+                        result = YES;
+                        QIMVerboseLog(@"更新后的PushToken为%@", myToken);
+                    } else {
+                        result = NO;
+                        QIMErrorLog(@"更新PushToken失败");
+                    }
+                }
+             ];
         }
     }
-    return NO;
+    return result;
 }
 
 - (void)checkClearCache {

@@ -447,4 +447,13 @@ typedef void(^QIMKitGetUserTokenSuccessBlock)(NSDictionary *result);
 typedef void(^QIMKitGetUserNewTokenSuccessBlock)(NSDictionary *result);
 typedef void(^QIMKitGetVerifyCodeSuccessBlock)(NSDictionary *result);
 
+
+typedef void(^QIMKitGetQChatTokenSuccessBlock)(NSDictionary *result);
+typedef void (^QIMKitSetMsgNotifySettingSuccessBlock)(BOOL successed);
+
+typedef void(^QIMKitRegisterPushTokenSuccessBlock)(BOOL successed);
+
+typedef void(^QIMKitGetQChatBetaLoginTokenDic)(NSDictionary *loginDic);
+
+typedef void(^QIMKitUpdateRemoteClientConfig)(BOOL successed);
 #endif /* QIMCommonEnum_h */

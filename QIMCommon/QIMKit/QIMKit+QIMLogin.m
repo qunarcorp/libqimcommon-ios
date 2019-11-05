@@ -84,8 +84,8 @@
     [[QIMManager sharedInstance] quitLogin];
 }
 
-- (NSDictionary *)QChatLoginWithUserId:(NSString *)userId rsaPassword:(NSString *)password type:(NSString *)type {
-    return [[QIMManager sharedInstance] QChatLoginWithUserId:userId rsaPassword:password type:type];
+- (void)QChatLoginWithUserId:(NSString *)userId rsaPassword:(NSString *)password type:(NSString *)type withCallback:(QIMKitGetQChatBetaLoginTokenDic)callback {
+    [[QIMManager sharedInstance] QChatLoginWithUserId:userId rsaPassword:password type:type withCallback:callback];
 }
 
 - (NSString *)getFormStringByDiction:(NSDictionary *)diction {

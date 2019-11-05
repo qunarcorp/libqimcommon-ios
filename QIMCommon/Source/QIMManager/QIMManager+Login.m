@@ -203,7 +203,7 @@
     });
 }
 
-- (NSDictionary *)QChatLoginWithUserId:(NSString *)userId rsaPassword:(NSString *)password type:(NSString *)type {
+- (void)QChatLoginWithUserId:(NSString *)userId rsaPassword:(NSString *)password type:(NSString *)type withCallback:(QIMKitGetQChatBetaLoginTokenDic)callback {
     //    NSString * postDataStr = [NSString stringWithFormat:@"strid=%@&password=%@&type=%@",userId,password,type];
     //    loginsource   1 PC  2 APP  3  TOUCH   4  WAP
     //    devicename   机器名
@@ -225,6 +225,17 @@
     NSMutableData *tempPostData = [NSMutableData dataWithData:[postDataStr dataUsingEncoding:NSUTF8StringEncoding]];
     
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/get_power?v=%@&p=iphone", [[QIMNavConfigManager sharedInstance] httpHost], [[QIMAppInfo sharedInstance] AppBuildVersion]]];
+    [self sendTPPOSTRequestWithUrl:[url absoluteString] withRequestBodyData:tempPostData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *resDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        if (callback) {
+            callback(resDic);
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
+    /*
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:url];
     [request addRequestHeader:@"Content-type" value:@"application/x-www-form-urlencoded;"];
     [request setRequestMethod:@"POST"];
@@ -239,6 +250,7 @@
         return resDic;
     }
     return nil;
+    */
 }
 
 - (NSString *)getFormStringByDiction:(NSDictionary *)diction {

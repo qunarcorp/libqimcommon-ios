@@ -115,7 +115,7 @@
  @param type 用户名的类型，值为：@"username"、@"email"、@"mobile"
  @return 返回结果
  */
-- (NSDictionary *)QChatLoginWithUserId:(NSString *)userId rsaPassword:(NSString *)password type:(NSString *)type;
+- (void)QChatLoginWithUserId:(NSString *)userId rsaPassword:(NSString *)password type:(NSString *)type withCallback:(QIMKitGetQChatBetaLoginTokenDic)callback;
 
 - (NSString *)getFormStringByDiction:(NSDictionary *)diction;
 

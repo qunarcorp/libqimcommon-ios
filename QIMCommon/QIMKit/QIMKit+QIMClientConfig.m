@@ -39,12 +39,12 @@
     [[QIMManager sharedInstance] insertNewClientConfigInfoWithData:result];
 }
 
-- (BOOL)updateRemoteClientConfigWithType:(QIMClientConfigType)type BatchProcessConfigInfo:(NSArray *)configInfoArray WithDel:(BOOL)delFlag {
-    return [[QIMManager sharedInstance] updateRemoteClientConfigWithType:type BatchProcessConfigInfo:configInfoArray WithDel:delFlag];
+- (void)updateRemoteClientConfigWithType:(QIMClientConfigType)type BatchProcessConfigInfo:(NSArray *)configInfoArray WithDel:(BOOL)delFlag withCallback:(QIMKitUpdateRemoteClientConfig)callback {
+    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:type BatchProcessConfigInfo:configInfoArray WithDel:delFlag withCallback:callback];
 }
 
-- (BOOL)updateRemoteClientConfigWithType:(QIMClientConfigType)type WithSubKey:(NSString *)subKey WithConfigValue:(NSString *)configValue WithDel:(BOOL)delFlag {
-    return [[QIMManager sharedInstance] updateRemoteClientConfigWithType:type WithSubKey:subKey WithConfigValue:configValue WithDel:delFlag];
+- (void)updateRemoteClientConfigWithType:(QIMClientConfigType)type WithSubKey:(NSString *)subKey WithConfigValue:(NSString *)configValue WithDel:(BOOL)delFlag withCallback:(QIMKitUpdateRemoteClientConfig)callback {
+    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:type WithSubKey:subKey WithConfigValue:configValue WithDel:delFlag withCallback:callback];
 }
 
 - (void)getRemoteClientConfig {

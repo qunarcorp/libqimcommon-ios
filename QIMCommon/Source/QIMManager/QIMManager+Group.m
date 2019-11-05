@@ -204,12 +204,15 @@
         return NO;
     }
     NSString *configValue = (on == YES) ? @"0" : @"1";
-    BOOL success = [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKNoticeStickJidDic WithSubKey:groupId WithConfigValue:configValue WithDel:on];
-    if (success) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:kRemindStateChange object:groupId];
-        });
-    }
+    __block BOOL success = NO;
+    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKNoticeStickJidDic WithSubKey:groupId WithConfigValue:configValue WithDel:on withCallback:^(BOOL successed) {
+        success = successed;
+        if (successed) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kRemindStateChange object:groupId];
+            });
+        }
+    }];
     return success;
 }
 

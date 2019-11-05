@@ -72,7 +72,7 @@
 
 - (void)sendHeartBeat;
 
-- (NSDictionary *)QChatLoginWithUserId:(NSString *)userId rsaPassword:(NSString *)password type:(NSString *)type;
+- (void)QChatLoginWithUserId:(NSString *)userId rsaPassword:(NSString *)password type:(NSString *)type withCallback:(QIMKitGetQChatBetaLoginTokenDic)callback;
 
 #pragma mark - 验证码
 
