@@ -298,6 +298,7 @@
     QIMHTTPUploadComponent *uploadComponent = [[QIMHTTPUploadComponent alloc] initWithDataKey:@"file" filePath:filePath];
     request.uploadComponents = @[uploadComponent];
     [request setHTTPMethod:QIMHTTPMethodPOST];
+    [request setHttpRequestType:QIMHTTPRequestTypeUpload];
 
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
