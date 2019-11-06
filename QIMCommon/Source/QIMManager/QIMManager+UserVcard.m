@@ -610,10 +610,32 @@ static NSMutableArray *cacheUserCardHttpList = nil;
 
 #pragma mark - 跨域搜索
 
-- (NSArray *)searchQunarUserBySearchStr:(NSString *)searchStr {
+- (void)searchQunarUserBySearchStr:(NSString *)searchStr withCallback:(QIMKitSearchQunarUserBlock)callback {
     if (searchStr.length > 0) {
-        NSString *destUrl = [NSString stringWithFormat:@"%@/domain/search_vcard?keyword=%@&server=%@&c=qtalk&u=%@&k=%@&p=iphone&v=%@", searchStr, [[QIMNavConfigManager sharedInstance] httpHost], [[XmppImManager sharedInstance] domain], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
+        NSString *destUrl = [NSString stringWithFormat:@"%@/domain/search_vcard?keyword=%@&server=%@&c=qtalk&u=%@&k=%@&p=iphone&v=%@", searchStr, [[QIMNavConfigManager sharedInstance] httpHost], [self getDomain], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
         destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        
+        //mark by AFN
+        [self sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
+            NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+            BOOL ret = [[result objectForKey:@"ret"] boolValue];
+            if (ret) {
+                NSArray *msgList = [result objectForKey:@"data"];
+                if (callback) {
+                    callback(msgList);
+                }
+            } else {
+                if (callback) {
+                    callback(nil);
+                }
+            }
+        } withFailedCallBack:^(NSError *error) {
+            if (callback) {
+                callback(nil);
+            }
+        }];
+        
+        /*
         NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
         ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
         [request startSynchronous];
@@ -628,8 +650,9 @@ static NSMutableArray *cacheUserCardHttpList = nil;
                 return msgList;
             }
         }
+         */
     }
-    return nil;
+//    return nil;
 }
 
 - (NSArray *)searchUserListBySearchStr:(NSString *)searchStr {
@@ -702,7 +725,7 @@ static NSMutableArray *cacheUserCardHttpList = nil;
 }
 
 //好友页面搜索
-- (NSArray *)searchUserListBySearchStr:(NSString *)searchStr Url:(NSString *)searchURL id:(NSString *)Id limit:(NSInteger)limitNum offset:(NSInteger)offset {
+- (void)searchUserListBySearchStr:(NSString *)searchStr Url:(NSString *)searchURL id:(NSString *)Id limit:(NSInteger)limitNum offset:(NSInteger)offset withCallBack:(QIMKitSearchUserListCallBack)callback {
     
     if (searchStr.length > 0) {
         
@@ -719,6 +742,43 @@ static NSMutableArray *cacheUserCardHttpList = nil;
         NSString *ckey = [[newString dataUsingEncoding:NSUTF8StringEncoding] base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
         NSDictionary *paramDic = @{@"ckey": ckey, @"id": Id, @"key": searchStr, @"limit": limitNumber, @"offset": offsetNumber};
         NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:paramDic error:nil];
+        [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
+            NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+            BOOL ret = [[result objectForKey:@"errcode"] boolValue];
+            if (!ret) {
+                
+                NSMutableArray *userList = [NSMutableArray arrayWithCapacity:20];
+                NSArray *users = [result objectForKey:@"data"][@"users"];
+                for (NSDictionary *user in users) {
+                    
+                    NSString *icon = user[@"icon"];
+                    NSString *label = user[@"label"];
+                    NSString *content = user[@"content"];
+                    NSString *uri = user[@"uri"];
+                    if (icon && label && content && uri) {
+                        
+                        NSDictionary *userDict = @{@"icon": icon, @"Name": label, @"DescInfo": content, @"XmppId": uri};
+                        if (userDict) {
+                            
+                            [userList addObject:userDict];
+                        }
+                    }
+                }
+                if (callback) {
+                    callback(userList);
+                }
+            } else {
+                if (callback) {
+                    callback(nil);
+                }
+            }
+        } withFailedCallBack:^(NSError *error) {
+            if (callback) {
+                callback(nil);
+            }
+        }];
+        
+        /*
         ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
         [request appendPostData:requestData];
         [request setRequestMethod:@"POST"];
@@ -750,8 +810,9 @@ static NSMutableArray *cacheUserCardHttpList = nil;
                 return userList;
             }
         }
+        */
     }
-    return nil;
+//    return nil;
 }
 
 @end

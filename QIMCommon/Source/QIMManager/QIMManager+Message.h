@@ -282,7 +282,7 @@
 /**
  获取QChat商家未回复留言数
  */
-- (NSInteger)getLeaveMsgNotReaderCount;
+- (void)getLeaveMsgNotReaderCountWithCallBack:(QIMKitGetLeaveMsgNotReaderCountBlock)callback;
 
 - (void)updateNotReadCountCacheByJid:(NSString *)jid WithRealJid:(NSString *)realJid;
 - (void)updateMessageControlStateWithNewState:(QIMMessageSendState)state ByMsgIdList:(NSArray *)MsgIdList;

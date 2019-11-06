@@ -25,9 +25,22 @@
 
 #pragma mark - 网络状态监测
 
-- (BOOL)checkNetworkCanUser{
+- (void)checkNetWorkWithCallBack:(QIMKitCheckNetWorkBlock)callback {
     NSString *checkUrl = [[QIMNavConfigManager sharedInstance] healthcheckUrl];
+    if (checkUrl.length > 0) {
+        [self sendTPGetRequestWithUrl:checkUrl withSuccessCallBack:^(NSData *responseData) {
+            if (callback) {
+                callback(YES);
+            }
+        } withFailedCallBack:^(NSError *error) {
+            if (callback) {
+                callback(NO);
+            }
+        }];
+    }
+    //Mark by AFN
     QIMVerboseLog(@"网络检测，检测地址:%@...", checkUrl);
+    /*
     if (checkUrl.length > 0) {
         ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:checkUrl]];
         [request setTimeOutSeconds:2];
@@ -42,13 +55,28 @@
     } else {
         return YES;
     }
+    */
 }
 
 
 - (void)checkNetworkStatus{
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkNetworkStatus) object:nil];
     QIMWarnLog(@" _needTryRelogin = %d", self.needTryRelogin);
+    __weak __typeof(self)weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self checkNetWorkWithCallBack:^(BOOL successed) {
+            __strong __typeof(weakSelf) strongSelf = weakSelf;
+            if (strongSelf.notNeedCheckNetwotk == NO) {
+                if ([strongSelf isLogin] == NO) {
+                    [strongSelf relogin];
+                }
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self performSelector:@selector(checkNetworkStatus) withObject:nil afterDelay:3];
+                });
+            }
+        }];
+        /*
         if ([self checkNetworkCanUser] && self.notNeedCheckNetwotk == NO) {
             if ([self isLogin] == NO) {
                 [self relogin];
@@ -58,6 +86,7 @@
                 [self performSelector:@selector(checkNetworkStatus) withObject:nil afterDelay:3];
             });
         }
+        */
     });
 }
 

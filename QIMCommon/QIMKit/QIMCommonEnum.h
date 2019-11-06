@@ -456,4 +456,16 @@ typedef void(^QIMKitRegisterPushTokenSuccessBlock)(BOOL successed);
 typedef void(^QIMKitGetQChatBetaLoginTokenDic)(NSDictionary *loginDic);
 
 typedef void(^QIMKitUpdateRemoteClientConfig)(BOOL successed);
+
+typedef void(^QIMKitGetSeatSeStatusBlock)(NSArray *list);
+typedef void(^QIMKitUpdateSeatSeStatusBlock)(BOOL res);
+
+typedef void(^QIMKitGetLeaveMsgNotReaderCountBlock)(NSInteger count);
+
+typedef void(^QIMKitCheckNetWorkBlock)(BOOL successed);
+
+typedef void(^QIMKitSearchQunarUserBlock)(NSArray *list);
+
+typedef void(^QIMKitSearchUserListCallBack)(NSArray *list);
+
 #endif /* QIMCommonEnum_h */

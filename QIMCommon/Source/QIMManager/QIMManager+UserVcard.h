@@ -162,7 +162,7 @@
 
 #pragma mark - 跨域
 
-- (NSArray *)searchQunarUserBySearchStr:(NSString *)searchStr;
+- (void)searchQunarUserBySearchStr:(NSString *)searchStr withCallback:(QIMKitSearchQunarUserBlock)callback;
 
 - (NSArray *)searchUserListBySearchStr:(NSString *)searchStr;
 
@@ -173,6 +173,6 @@
 - (NSArray *)searchUserListBySearchStr:(NSString *)searchStr WithLimit:(NSInteger)limit WithOffset:(NSInteger)offset;
 
 //好友页面搜索
-- (NSArray *)searchUserListBySearchStr:(NSString *)searchStr Url:(NSString *)searchURL id:(NSString *)Id limit:(NSInteger)limitNum offset:(NSInteger)offset;
+- (void)searchUserListBySearchStr:(NSString *)searchStr Url:(NSString *)searchURL id:(NSString *)Id limit:(NSInteger)limitNum offset:(NSInteger)offset withCallBack:(QIMKitSearchUserListCallBack)callback;
 
 @end

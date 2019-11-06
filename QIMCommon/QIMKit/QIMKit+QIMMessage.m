@@ -256,8 +256,8 @@
     [[QIMManager sharedInstance] getExploreNotReaderCount];
 }
 
-- (NSInteger)getLeaveMsgNotReaderCount {
-    return [[QIMManager sharedInstance] getLeaveMsgNotReaderCount];
+- (void)getLeaveMsgNotReaderCountWithCallBack:(QIMKitGetLeaveMsgNotReaderCountBlock)callback {
+    [[QIMManager sharedInstance] getLeaveMsgNotReaderCountWithCallBack:callback];
 }
 
 - (void)updateNotReadCountCacheByJid:(NSString *)jid WithRealJid:(NSString *)realJid {

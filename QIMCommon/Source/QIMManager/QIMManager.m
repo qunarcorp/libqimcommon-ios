@@ -1453,6 +1453,7 @@ static QIMManager *__IMManager = nil;
         }
     }];
     
+    //Mark by AFN
     /*
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:desturl]];
     [request addRequestHeader:@"content-type" value:@"application/json"];
@@ -1593,6 +1594,8 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
             callback(NO);
         }
     }];
+    
+    //Mark by AFN
     /*
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:str]];
     [request setRequestMethod:@"GET"];
@@ -1713,7 +1716,7 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
     
 //    NSURL *requestUrl = [[NSURL alloc] initWithString:url];
     
-    
+    //Mark by AFN
     /*
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
     [request setUseCookiePersistence:NO];

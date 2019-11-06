@@ -140,12 +140,38 @@
 }
 
 //V2版获取客服坐席列表：支持多店铺
-- (NSArray *)getSeatSeStatus {
+- (void)getSeatSeStatusWithCallback:(QIMKitGetSeatSeStatusBlock)callback {
     NSString *urlHost = @"https://qcadmin.qunar.com";
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/api/seat/getSeatSeStatusWithSid.qunar", urlHost]];
     NSString *postDataStr = [NSString stringWithFormat:@"qName=%@", [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     NSMutableData *postData = [NSMutableData dataWithData:[postDataStr dataUsingEncoding:NSUTF8StringEncoding]];
+    [self sendTPPOSTFormUrlEncodedRequestWithUrl:url.absoluteString withRequestBodyData:postData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *resDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[resDic objectForKey:@"ret"] boolValue];
+        if (ret) {
+            NSArray *data = [resDic objectForKey:@"data"];
+            if (data.count > 0) {
+                if (callback) {
+                    callback(data);
+                }
+            } else {
+                if (callback) {
+                    callback(nil);
+                }
+            }
+        } else {
+            if (callback) {
+                callback(nil);
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
     
+    //Mark by AFN
+    /*
     ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
     [request addRequestHeader:@"Content-type" value:@"application/x-www-form-urlencoded"];
     [request setRequestMethod:@"POST"];
@@ -164,14 +190,28 @@
         }
     }
     return nil;
+    */
 }
 
 //V2版区别Shop来设置服务模式upSeatSeStatusWithSid.qunar
-- (BOOL)updateSeatSeStatusWithShopId:(NSInteger)shopId WithStatus:(NSInteger)shopServiceStatus {
+- (void)updateSeatSeStatusWithShopId:(NSInteger)shopId WithStatus:(NSInteger)shopServiceStatus withCallBack:(QIMKitUpdateSeatSeStatusBlock)callback {
     NSString *urlHost = @"https://qcadmin.qunar.com";
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/api/seat/upSeatSeStatusWithSid.qunar", urlHost]];
     NSString *postDataStr = [NSString stringWithFormat:@"qName=%@&st=%ld&sid=%ld", [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], shopServiceStatus, shopId];
     NSMutableData *postData = [NSMutableData dataWithData:[postDataStr dataUsingEncoding:NSUTF8StringEncoding]];
+    [self sendTPPOSTFormUrlEncodedRequestWithUrl:url.absoluteString withRequestBodyData:postData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *resDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[resDic objectForKey:@"ret"] boolValue];
+        if (callback) {
+            callback(ret);
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(NO);
+        }
+    }];
+    //AFN
+    /*
     ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
     [request addRequestHeader:@"Content-type" value:@"application/x-www-form-urlencoded"];
     [request setRequestMethod:@"POST"];
@@ -185,6 +225,7 @@
         return ret;
     }
     return NO;
+     */
 }
 
 - (NSDictionary *)userSeatStatusDict:(int)userStatus {

@@ -16,8 +16,8 @@
 
 #pragma mark - 网络状态监测
 
-- (BOOL)checkNetworkCanUser{
-    return [[QIMManager sharedInstance] checkNetworkCanUser];
+- (void)checkNetWorkWithCallBack:(QIMKitCheckNetWorkBlock)callback {
+    [[QIMManager sharedInstance] checkNetWorkWithCallBack:callback];
 }
 
 

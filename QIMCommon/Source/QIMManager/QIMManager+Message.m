@@ -907,7 +907,29 @@
     }];
 }
 
-- (int)getLeaveMsgNotReaderCount {
+- (void)getLeaveMsgNotReaderCountWithCallBack:(QIMKitGetLeaveMsgNotReaderCountBlock)callback {
+    
+    NSString *url = @"http://u.package.qunar.com/user/message/countUnreply.json";
+    [self sendTPGETFormUrlEncodedRequestWithUrl:url withSuccessCallBack:^(NSData *responseData) {
+        NSError *errol = nil;
+        NSDictionary *resDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
+        if ([resDic objectForKey:@"data"] != [NSNull null]) {
+            int count = [[[resDic objectForKey:@"data"] objectForKey:@"count"] boolValue];
+            if (callback) {
+                callback(count);
+            }
+        } else {
+            if (callback) {
+                callback(0);
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(0);
+        }
+    }];
+    //Mark by AFN
+    /*
     NSURL *url = [NSURL URLWithString:@"http://u.package.qunar.com/user/message/countUnreply.json"];
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:url];
     [request addRequestHeader:@"Content-type" value:@"application/x-www-form-urlencoded;"];
@@ -925,6 +947,7 @@
         }
     }
     return 0;
+    */
 }
 
 - (void)clearSystemMsgNotReadWithJid:(NSString *)jid {

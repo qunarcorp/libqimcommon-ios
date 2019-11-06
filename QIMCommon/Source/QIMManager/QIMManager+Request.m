@@ -432,4 +432,88 @@
     }];
 }
 
+- (void)sendTPPOSTFormUrlEncodedRequestWithUrl:(NSString *)url withRequestBodyData:(NSData *)bodyData withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    
+    QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:url]];
+    [request setHTTPMethod:QIMHTTPMethodPOST];
+    [request setHTTPBody:bodyData];
+    [request setShouldASynchronous:YES];
+    [request setTimeoutInterval:10];
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+    [cookieProperties setObject:@"application/x-www-form-urlencoded" forKey:@"Content-type"];
+    
+    [request setHTTPRequestHeaders:cookieProperties];
+    
+    __weak __typeof(self) weakSelf = self;
+    [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+        if (response.code == 200) {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        } else {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        }
+    } failure:^(NSError *error) {
+        if (fCallback) {
+            fCallback(error);
+        }
+    }];
+}
+
+- (void)sendTPGETFormUrlEncodedRequestWithUrl:(NSString *)url withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    
+    QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:url]];
+    [request setHTTPMethod:QIMHTTPMethodPOST];
+//    [request setHTTPBody:bodyData];
+    [request setShouldASynchronous:YES];
+    [request setTimeoutInterval:10];
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+    [cookieProperties setObject:@"application/x-www-form-urlencoded" forKey:@"Content-type"];
+    
+    [request setHTTPRequestHeaders:cookieProperties];
+    
+    __weak __typeof(self) weakSelf = self;
+    [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
+        if (response.code == 200) {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        } else {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        }
+    } failure:^(NSError *error) {
+        if (fCallback) {
+            fCallback(error);
+        }
+    }];
+}
+
 @end

@@ -150,7 +150,7 @@
  @param searchStr 关键词
  @return 返回用户列表
  */
-- (NSArray *)searchQunarUserBySearchStr:(NSString *)searchStr;
+- (void)searchQunarUserBySearchStr:(NSString *)searchStr withCallback:(QIMKitSearchQunarUserBlock)callback;
 
 /**
  搜索用户
@@ -174,6 +174,6 @@
  @param offset 偏移量
  @return 返回用户列表
  */
-- (NSArray *)searchUserListBySearchStr:(NSString *)searchStr Url:(NSString *)searchURL id:(NSString *)Id limit:(NSInteger)limitNum offset:(NSInteger)offset;
+- (void)searchUserListBySearchStr:(NSString *)searchStr Url:(NSString *)searchURL id:(NSString *)Id limit:(NSInteger)limitNum offset:(NSInteger)offset withCallBack:(QIMKitSearchUserListCallBack)callback;
 
 @end
