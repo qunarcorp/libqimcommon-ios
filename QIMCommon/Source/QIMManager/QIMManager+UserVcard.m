@@ -777,7 +777,7 @@ static NSMutableArray *cacheUserCardHttpList = nil;
                 callback(nil);
             }
         }];
-        
+        //Mark by AFN
         /*
         ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
         [request appendPostData:requestData];

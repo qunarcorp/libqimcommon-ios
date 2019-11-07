@@ -851,6 +851,17 @@
     NSDictionary *dic = [self getPublicNumberCardByJid:publicNumberId];
     if (dic == nil) {
         NSString *enName = [publicNumberId componentsSeparatedByString:@"@"].firstObject;
+        [self updatePublicNumberCardByIds:@[@{@"robot_name": enName, @"version": @(0)}] WithNeedUpdate:YES withCallBack:^(NSArray *cardList) {
+            if (cardList.count <= 0) {
+                NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+                [dic setObject:@(0) forKey:@"rbt_ver"];
+                [dic setObject:enName forKey:@"robotEnName"];
+                [dic setObject:enName forKey:@"robotCnName"];
+                [dic setObject:enName forKey:@"searchIndex"];
+                [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertPublicNumbers:@[dic]];
+            }
+        }];
+        /*
         NSArray *cardList = [self updatePublicNumberCardByIds:@[@{@"robot_name": enName, @"version": @(0)}] WithNeedUpdate:YES];
         if (cardList.count <= 0) {
             NSMutableDictionary *dic = [NSMutableDictionary dictionary];
@@ -860,6 +871,7 @@
             [dic setObject:enName forKey:@"searchIndex"];
             [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertPublicNumbers:@[dic]];
         }
+        */
     }
     QIMMessageModel *c2bFeedBackMessage = [QIMMessageModel new];
     QIMMessageModel *message = [QIMMessageModel new];

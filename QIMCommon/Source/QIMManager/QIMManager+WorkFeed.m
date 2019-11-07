@@ -277,17 +277,12 @@
     [bodyDic setQIMSafeObject:[NSString stringWithFormat:@"2-%@", [QIMUUIDTools UUID]] forKey:@"likeId"];
     
     NSData *momentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
-    __weak __typeof(self) weakSelf = self;
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
         NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
         if (ret && errcode == 0) {
             NSDictionary *data = [result objectForKey:@"data"];
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             if ([data isKindOfClass:[NSDictionary class]]) {
                 [[IMDataManager qimDB_SharedInstance] qimDB_updateMomentLike:@[data]];
                 dispatch_async(dispatch_get_main_queue(), ^{

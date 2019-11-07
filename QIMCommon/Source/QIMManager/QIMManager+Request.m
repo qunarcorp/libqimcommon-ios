@@ -21,22 +21,13 @@
     [cookieProperties setObject:@"application/json;" forKey:@"Content-type"];
 
     [request setHTTPRequestHeaders:cookieProperties];
-    __weak __typeof(self) weakSelf = self;
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
@@ -55,30 +46,20 @@
     [request setHTTPMethod:QIMHTTPMethodPOST];
     [request setHTTPBody:bodyData];
     [request setShouldASynchronous:YES];
-    [request setTimeoutInterval:10];
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [cookieProperties setObject:@"application/json;" forKey:@"Content-type"];
 
     [request setHTTPRequestHeaders:cookieProperties];
-    
-    __weak __typeof(self) weakSelf = self;
+
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
@@ -160,7 +141,6 @@
     [cookieProperties setObject:@"application/json;" forKey:@"Content-type"];
     
     [request setHTTPRequestHeaders:cookieProperties];
-    __weak __typeof(self) weakSelf = self;
     [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         //mark by AFN
         if (pCallback) {
@@ -168,19 +148,11 @@
         }
     } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
@@ -210,7 +182,6 @@
     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [request setHTTPRequestHeaders:cookieProperties];
-    __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
     [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
@@ -219,19 +190,11 @@
         }
     } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
@@ -257,7 +220,6 @@
     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [request setHTTPRequestHeaders:cookieProperties];
-    __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
     [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
@@ -266,19 +228,11 @@
         }
     } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
@@ -304,7 +258,6 @@
     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [request setHTTPRequestHeaders:cookieProperties];
-    __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
     [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
@@ -313,19 +266,11 @@
         }
     } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
@@ -351,7 +296,6 @@
     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [request setHTTPRequestHeaders:cookieProperties];
-    __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
     [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
@@ -360,19 +304,11 @@
         }
     } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
@@ -392,13 +328,13 @@
     QIMHTTPUploadComponent *uploadComponent = [[QIMHTTPUploadComponent alloc] init];
     uploadComponent.bodyDic = bodyDic;
     request.uploadComponents = @[uploadComponent];
-    [request setHTTPMethod:QIMHTTPMethodPOST];
+    [request setHttpRequestType:QIMHTTPRequestTypeUpload];
 
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+//    [cookieProperties setObject:@"application/json;" forKey:@"Content-type"];
     [request setHTTPRequestHeaders:cookieProperties];
-    __weak __typeof(self) weakSelf = self;
     [request setTimeoutInterval:600];
     [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
@@ -407,19 +343,11 @@
         }
     } complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
@@ -446,22 +374,13 @@
     
     [request setHTTPRequestHeaders:cookieProperties];
     
-    __weak __typeof(self) weakSelf = self;
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
@@ -488,22 +407,13 @@
     
     [request setHTTPRequestHeaders:cookieProperties];
     
-    __weak __typeof(self) weakSelf = self;
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             if (sCallback) {
                 sCallback(responseData);

@@ -496,12 +496,13 @@ static QIMManager *__IMManager = nil;
         CFAbsoluteTime startTime7 = [[QIMWatchDog sharedInstance] startTime];
         [self getRemoteCollectionAccountList];
         QIMVerboseLog(@"获取我的关联账户2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime7]);
-        
+        /* 暂时屏蔽公众号
         QIMVerboseLog(@"开始同步公众号列表2");
         CFAbsoluteTime startTime8 = [[QIMWatchDog sharedInstance] startTime];
         [self updatePublicNumberList];
         QIMVerboseLog(@"同步公众号列表2loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime8]);
         QIMVerboseLog(@"同步公众号列表完成2");
+         */
     }
     
     QIMVerboseLog(@"开始Check组织架构2");

@@ -468,4 +468,13 @@ typedef void(^QIMKitSearchQunarUserBlock)(NSArray *list);
 
 typedef void(^QIMKitSearchUserListCallBack)(NSArray *list);
 
+//公众号
+typedef void(^QIMKitSearchRobotByKeyStrCallBack)(NSArray *list);
+typedef void(^QIMKitCancelFocusPublicNumberCallBack)(BOOL res);
+typedef void(^QIMKitFocusPublicNumberCallBack)(BOOL res);
+typedef void(^QIMKitUpdatePublicNumberCardCallBack)(NSArray *list);
+
+typedef void(^QIMKitDownloadQIMRNExternalAppBundleSuccessCallBack)(BOOL res);
+typedef void(^QIMKitOPSRNBundlePatchDownloadHelperHandle)(BOOL res);
+
 #endif /* QIMCommonEnum_h */

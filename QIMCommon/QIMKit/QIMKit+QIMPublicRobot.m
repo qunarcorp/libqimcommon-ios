@@ -33,8 +33,8 @@
     return [[QIMManager sharedInstance] getPublicNumberCardByJid:publicNumberId];
 }
 
-- (NSArray *)updatePublicNumberCardByIds:(NSArray *)publicNumberIdList WithNeedUpdate:(BOOL)flag {
-    return [[QIMManager sharedInstance] updatePublicNumberCardByIds:publicNumberIdList WithNeedUpdate:flag];
+- (void)updatePublicNumberCardByIds:(NSArray *)publicNumberIdList WithNeedUpdate:(BOOL)flag withCallBack:(QIMKitUpdatePublicNumberCardCallBack)callback {
+    [[QIMManager sharedInstance] updatePublicNumberCardByIds:publicNumberIdList WithNeedUpdate:flag withCallBack:callback];
 }
 
 #pragma mark - sss
@@ -47,12 +47,12 @@
     [[QIMManager sharedInstance] updatePublicNumberList];
 }
 
-- (BOOL)focusOnPublicNumberId:(NSString *)publicNumberId {
-    return [[QIMManager sharedInstance] focusOnPublicNumberId:publicNumberId];
+- (void)focusOnPublicNumberId:(NSString *)publicNumberId withCallBack:(QIMKitFocusPublicNumberCallBack)callback {
+    [[QIMManager sharedInstance] focusOnPublicNumberId:publicNumberId withCallBack:callback];
 }
 
-- (BOOL)cancelFocusOnPublicNumberId:(NSString *)publicNumberId {
-    return [[QIMManager sharedInstance] cancelFocusOnPublicNumberId:publicNumberId];
+- (void)cancelFocusOnPublicNumberId:(NSString *)publicNumberId withCallBack:(QIMKitCancelFocusPublicNumberCallBack)callback {
+    [[QIMManager sharedInstance] cancelFocusOnPublicNumberId:publicNumberId withCallBack:callback];
 }
 
 #pragma mark - 公众号消息
@@ -85,8 +85,8 @@
     [[QIMManager sharedInstance] checkPNMsgTimeWithJid:jid WithMsgDate:msgDate];
 }
 
-- (NSArray *)searchRobotByKeyStr:(NSString *)keyStr {
-    return [[QIMManager sharedInstance] searchRobotByKeyStr:keyStr];
+- (void)searchRobotByKeyStr:(NSString *)keyStr withCallBack:(QIMKitSearchRobotByKeyStrCallBack)callback {
+    [[QIMManager sharedInstance] searchRobotByKeyStr:keyStr withCallBack:callback];
 }
 
 @end

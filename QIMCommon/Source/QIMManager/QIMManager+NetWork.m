@@ -37,6 +37,10 @@
                 callback(NO);
             }
         }];
+    } else {
+        if (callback) {
+            callback(NO);
+        }
     }
     //Mark by AFN
     QIMVerboseLog(@"网络检测，检测地址:%@...", checkUrl);
