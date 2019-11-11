@@ -8,9 +8,7 @@
 #import "QIMHttpApi.h"
 #import "QIMAppInfo.h"
 #import "QIMJSONSerializer.h"
-#import "ASIHTTPRequest.h"
-#import "zlib.h" 
-#import "ASIFormDataRequest.h"
+#import "zlib.h"
 #import "QIMManager.h"
 #import "QIMManager+Request.h"
 #import "QIMHttpAPIBlock.h"
@@ -39,60 +37,7 @@
 
 #define FileHashDefaultChunkSizeForReadingData 1024*8
 
-@interface QIMHttpApi(PrivateCommonMethod)
-
-+ (NSData *)uncompress:(NSData *)data withUncompressedDataLength:(NSUInteger)length;
-
-@end
-
-
 @implementation QIMHttpApi
-+ (NSString *)checkFileKeyForFile:(NSString *)fileKey WithFileLength:(long long)fileLength WithPathExtension:(NSString *)extension{
-    NSString *method = @"file/v2/inspection/file";
-
-    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?key=%@&size=%lld&name=%@&platform=iphone&u=%@&k=%@&version=%@",
-                         [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileKey, (long long)ceil(fileLength / 1024.0 / 1024.0), [NSString stringWithFormat:@"%@.%@",fileKey,extension],
-                         [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                         [[QIMManager sharedInstance] myRemotelogginKey],
-                         [[QIMAppInfo sharedInstance] AppBuildVersion]];
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-    [request startSynchronous];
-    if ([request responseStatusCode] == 200) {
-        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:request.responseData error:nil];
-        BOOL ret = [[result objectForKey:@"ret"] boolValue];
-        if (ret) {
-            NSString *resultUrl = [result objectForKey:@"data"];
-            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
-                return resultUrl;
-            }
-        }
-    }
-    return nil;
-}
-
-+ (NSString *)checkFileKey:(NSString *)fileKey WithFileLength:(long long)fileLength WithPathExtension:(NSString *)extension{
-    NSString *method = @"file/v2/inspection/img";
-    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?key=%@&size=%lld&name=%@&platform=iphone&u=%@&k=%@&version=%@",
-                         [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileKey, (long long)ceil(fileLength / 1024.0 / 1024.0), [NSString stringWithFormat:@"%@.%@",fileKey,extension],
-                         [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                         [[QIMManager sharedInstance] myRemotelogginKey],
-                         [[QIMAppInfo sharedInstance] AppBuildVersion]];
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-    [request startSynchronous];
-    if ([request responseStatusCode] == 200) {
-        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:request.responseData error:nil];
-        BOOL ret = [[result objectForKey:@"ret"] boolValue];
-        if (ret) {
-            NSString *resultUrl = [result objectForKey:@"data"];
-            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
-                return resultUrl;
-            }
-        }
-    }
-    return nil;
-}
 
 +(NSString *)getFileDataMD5WithFileData:(NSData *)fileData{
     return (__bridge_transfer NSString *)QIMFileMD5HashCreateWithData([fileData bytes], fileData.length);
@@ -171,99 +116,95 @@ done:
     return result;
 }
 
-+ (NSDictionary *)checkUserToken:(NSString *)token{
-    NSDictionary *result = nil;
-    NSString *destUrl = [[QIMNavConfigManager sharedInstance] checkSmsUrl];
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIFormDataRequest *request = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
-    [request addPostValue:token forKey:@"token"];
-    [request startSynchronous];
++ (void)checkFileKeyForFile:(NSString *)fileKey WithFileLength:(long long)fileLength WithPathExtension:(NSString *)extension withCallBack:(QIMKitCheckFileKeyForFileCallBack)callback{
+    NSString *method = @"file/v2/inspection/file";
     
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSData *responseData = [request responseData];
-        result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-    }
-    
-    return result;
+    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?key=%@&size=%lld&name=%@&platform=iphone&u=%@&k=%@&version=%@",
+                         [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileKey, (long long)ceil(fileLength / 1024.0 / 1024.0), [NSString stringWithFormat:@"%@.%@",fileKey,extension],
+                         [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
+                         [[QIMManager sharedInstance] myRemotelogginKey],
+                         [[QIMAppInfo sharedInstance] AppBuildVersion]];
+    [[QIMManager sharedInstance] sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        if (ret) {
+            NSString *resultUrl = [result objectForKey:@"data"];
+            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
+                //Callback resultUrl
+                if (callback) {
+                    callback(resultUrl);
+                }
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        
+    }];
 }
 
-+ (NSDictionary *)getUserTokenWithUserName:(NSString *)userName WithVerifyCode:(NSString *)verifCode{
-    NSDictionary *result = nil;
-    NSString *destUrl = [[QIMNavConfigManager sharedInstance] tokenSmsUrl];
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIFormDataRequest *request = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
-    [request addPostValue:userName forKey:@"rtx_id"];
-    [request addPostValue:verifCode forKey:@"verify_code"];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSData *responseData = [request responseData];
-        result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-    }
-    return result;
++ (NSString *)checkImageKeyForImage:(NSString *)fileKey WithFileLength:(long long)fileLength WithPathExtension:(NSString *)extension withCallBack:(QIMKitCheckImageKeyForImageCallBack)callback {
+    NSString *method = @"file/v2/inspection/img";
+    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?key=%@&size=%lld&name=%@&platform=iphone&u=%@&k=%@&version=%@",
+                         [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileKey, (long long)ceil(fileLength / 1024.0 / 1024.0), [NSString stringWithFormat:@"%@.%@",fileKey,extension],
+                         [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
+                         [[QIMManager sharedInstance] myRemotelogginKey],
+                         [[QIMAppInfo sharedInstance] AppBuildVersion]];
+    [[QIMManager sharedInstance] sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        if (ret) {
+            NSString *resultUrl = [result objectForKey:@"data"];
+            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
+                if (callback) {
+                    callback(resultUrl);
+                }
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        
+    }];
 }
 
-+ (NSDictionary *)getVerifyCodeWithUserName:(NSString *)userName{
-    NSDictionary *result = nil;
-    NSString *destUrl = [[QIMNavConfigManager sharedInstance] takeSmsUrl];
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIFormDataRequest *request = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
-    [request addPostValue:userName forKey:@"rtx_id"];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSData *responseData = [request responseData];
-        result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-    }
-    
-    return result;
-}
-
-+ (NSString *)updateLoadMomentImage:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension{
++ (NSString *)privateUpLoadImage:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension withCallBack:(QIMKitUploadImageCallBack)callback {
     NSString *method = @"file/v2/upload/img";
     NSString *fileName =  [NSString stringWithFormat:@"%@.%@",key,extension];
     long long size = ceil(fileData.length / 1024.0 / 1024.0);
-    
+
     NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=ios&u=%@&k=%@&v=%@&key=%@&size=%lld",
                          [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileName,
                          [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
                          [[QIMManager sharedInstance] myRemotelogginKey],
                          [[QIMAppInfo sharedInstance] AppBuildVersion],key,size];
     NSLog(@"上传图片destUrl : %@", destUrl);
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIFormDataRequest *formRequest = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
-    [formRequest setResponseEncoding:NSISOLatin1StringEncoding];
-    [formRequest setPostFormat:ASIMultipartFormDataPostFormat];
-    [formRequest addData:fileData withFileName:fileName andContentType:nil forKey:@"file"];
-    [formRequest startSynchronous];
-    if ([formRequest responseStatusCode] == 200) {
-        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:formRequest.responseData error:nil];
+    [[QIMManager sharedInstance] uploadFileRequest:destUrl withFileData:fileData withProgressBlock:^(float progressValue) {
+        NSLog(@"privateUpLoadImage : %lf", progressValue);
+    } withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         NSLog(@"上传图片返回结果 : %@", result);
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
         if (ret) {
             NSString *resultUrl = [result objectForKey:@"data"];
             if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl) {
-                return resultUrl;
+//                return resultUrl;
+                if (callback) {
+                    callback(resultUrl);
+                }
+            } else {
+                if (callback) {
+                    callback(nil);
+                }
+            }
+        } else {
+            if (callback) {
+                callback(nil);
             }
         }
-    }
-    return nil;
-}
-
-+ (NSString *)updateLoadImage:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension{
-    NSString *method = @"file/v2/upload/img";
-    NSString *fileName =  [NSString stringWithFormat:@"%@.%@",key,extension];
-    long long size = ceil(fileData.length / 1024.0 / 1024.0);
-
-    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=ios&u=%@&k=%@&v=%@&key=%@&size=%lld",
-                         [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileName,
-                         [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                         [[QIMManager sharedInstance] myRemotelogginKey],
-                         [[QIMAppInfo sharedInstance] AppBuildVersion],key,size];
-    NSLog(@"上传图片destUrl : %@", destUrl);
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
+    
+    /*
     NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
     ASIFormDataRequest *formRequest = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
     [formRequest setResponseEncoding:NSISOLatin1StringEncoding];
@@ -284,106 +225,201 @@ done:
         }
     }
     return nil;
+    */
 }
 
-+ (NSString *) updateLoadMomentFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension{
+/**
+ 上传图片
+
+ @param fileData 图片二进制
+ @param key fileKey
+ @param type type
+ @param extension 文件后缀
+ @return 返回图片地址
+ */
++ (void)qim_uploadImage:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension withCallBack:(QIMKitUploadImageCallBack)callback {
     NSString *fileKey = [self getFileDataMD5WithFileData:fileData];
     NSString *fileExt = [self getFileExt:fileData];
     if (fileExt.length > 0) {
         extension = fileExt;
     }
-    NSString *httpUrl = [self checkFileKey:fileKey WithFileLength:fileData.length WithPathExtension:extension];
+    [self checkImageKeyForImage:fileKey WithFileLength:fileData.length WithPathExtension:extension withCallBack:^(NSString *httpUrl) {
+        if (httpUrl == nil) {
+            [QIMHttpApi privateUpLoadImage:fileData
+                                 WithMsgId:fileKey
+                               WithMsgType:type
+                         WithPathExtension:extension
+                              withCallBack:^(NSString *result) {
+                                  if (callback) {
+                                      callback(nil);
+                                  }
+                              }];
+        } else {
+            if (callback) {
+                callback(httpUrl);
+            }
+        }
+    }];
+    /*
     if (httpUrl == nil) {
-        return [QIMHttpApi updateLoadMomentImage:fileData WithMsgId:fileKey WithMsgType:type WithPathExtension:extension];
+        return [QIMHttpApi privateUpLoadImage:fileData
+                                    WithMsgId:fileKey
+                                  WithMsgType:type
+                            WithPathExtension:extension];
     }
     return httpUrl;
+    */
 }
 
-+ (NSString *) updateLoadFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension{
++ (void)privateUpLoadFile:(NSData *)fileData WithMsgId:(NSString *)fileKey WithMsgType:(int)type WithPathExtension:(NSString *)extension withCallBack:(QIMKitUploadFileCallBack)callBack {
+    NSString *method = @"file/v2/upload/file";
+    NSString *fileName =  [NSString stringWithFormat:@"%@.%@",fileKey, extension];
+    long long size = ceil(fileData.length / 1024.0 / 1024.0);
+    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=ios&u=%@&k=%@&v=%@&key=%@&size=%lld",
+                         [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileName,
+                         [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
+                         [[QIMManager sharedInstance] myRemotelogginKey],
+                         [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
+    [[QIMManager sharedInstance] uploadFileRequest:destUrl withFileData:fileData withProgressBlock:^(float progressValue) {
+        NSLog(@"privateUpLoadFile : %lf", progressValue);
+    } withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        if (ret) {
+            NSString *resultUrl = [result objectForKey:@"data"];
+            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
+                if (callBack) {
+                    callBack(resultUrl);
+                }
+            } else {
+                if (callBack) {
+                    callBack(nil);
+                }
+            }
+        } else {
+            if (callBack) {
+                callBack(nil);
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callBack) {
+            callBack(nil);
+        }
+    }];
+    /*
+    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
+    ASIFormDataRequest *formRequest = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
+    [formRequest setResponseEncoding:NSISOLatin1StringEncoding];
+    [formRequest setPostFormat:ASIMultipartFormDataPostFormat];
+    [formRequest addData:fileData withFileName:fileName andContentType:nil forKey:@"file"];
+    [formRequest startSynchronous];
+    if ([formRequest responseStatusCode] == 200) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:formRequest.responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        if (ret) {
+            NSString *resultUrl = [result objectForKey:@"data"];
+            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
+                return resultUrl;
+            }
+        }
+    }
+    return nil;
+    */
+//    return nil;
+}
+
+
+/**
+ 上传文件
+
+ @param fileData 文件二进制
+ @param key 文件key
+ @param type 类型
+ @param extension 文件后缀
+ @return 文件url
+ */
++ (void)qim_uploadFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension withCallBack:(QIMKitUploadFileCallBack)callback {
     NSString *fileKey = [self getFileDataMD5WithFileData:fileData];
     NSString *fileExt = [self getFileExt:fileData];
     if (fileExt.length > 0) {
         extension = fileExt;
     }
-    NSString *httpUrl = [self checkFileKey:fileKey WithFileLength:fileData.length WithPathExtension:extension];
-    if (httpUrl == nil) {
-        return [QIMHttpApi updateLoadImage:fileData
-                                WithMsgId:fileKey
-                              WithMsgType:type
-                        WithPathExtension:extension];
-    }
-    return httpUrl;
+    [self checkFileKeyForFile:fileKey WithFileLength:fileData.length WithPathExtension:extension withCallBack:^(NSString *result) {
+        if (result.length > 0) {
+            if (callback) {
+                callback(result);
+            }
+        } else {
+            [QIMHttpApi privateUpLoadFile:fileData WithMsgId:key WithMsgType:type WithPathExtension:extension withCallBack:^(NSString *result) {
+                if (callback) {
+                    callback(result);
+                }
+            }];
+        }
+    }];
 }
 
-+ (NSDictionary *)checkVideo:(NSString *)fileMd5 {
++ (void)checkVideo:(NSString *)fileMd5 withCallBack:(QIMKitCheckVideoCallBack)callback {
     NSString *destUrl = [NSString stringWithFormat:@"%@/video/check", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     NSDictionary *bodyDic = @{@"videoMd5":fileMd5};
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-    [request setRequestMethod:@"POST"];
-    [request setUseCookiePersistence:NO];
-    [request addRequestHeader:@"Content-type" value:@"application/json;"];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
-    [request addRequestHeader:@"Cookie" value:requestHeaders];
-    NSMutableData *postData = [NSMutableData dataWithData:[[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil]];
-    [request setPostBody:postData];
-    [request startSynchronous];
-    if ([request responseStatusCode] == 200) {
-        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:request.responseData error:nil];
+    NSData *postData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
+    [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:postData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:postData error:nil];
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
         if (ret) {
             NSDictionary *resultDic = [result objectForKey:@"data"];
             if ([resultDic isEqual:[NSNull null]] == NO && resultDic.count > 0) {
                 BOOL ready = [[resultDic objectForKey:@"ready"] boolValue];
                 if (ready == YES) {
-                    return resultDic;
-                } else {
-                    return nil;
-                }
-            }
-        }
-    }
-    return nil;
-}
-
-+ (void)uploadVideo:(NSData *)fileData withCallBack:(QIMKitUploadVideoRequestSuccessedBlock)callback {
-    NSString *fileMd5 = [[fileData mutableCopy] qim_md5String];
-    if (fileMd5.length > 0) {
-        NSDictionary *checkResultDic = [self checkVideo:fileMd5];
-        if (checkResultDic) {
-            if (callback) {
-                callback(checkResultDic);
-            }
-        } else {
-            NSString *destUrl = [NSString stringWithFormat:@"%@/video/upload", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
-            [[QIMManager sharedInstance] uploadFileRequest:destUrl withFileData:fileData withProgressBlock:nil withSuccessCallBack:^(NSData *responseData) {
-                NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-                NSLog(@"resultDic : %@", resultDic);
-                BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
-                if (ret) {
-                    NSDictionary *data = [resultDic objectForKey:@"data"];
                     if (callback) {
-                        callback(data);
+                        callback(resultDic);
                     }
                 } else {
                     if (callback) {
                         callback(nil);
                     }
                 }
-            } withFailedCallBack:^(NSError *error) {
-                if (callback) {
-                    callback(nil);
-                }
-            }];
+            }
         }
-    }
+    } withFailedCallBack:^(NSError *error) {
+        
+    }];
 }
 
-+ (void)uploadVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequestSuccessedBlock)callback {
++ (void)qim_uploadNewVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequestSuccessedBlock)callback {
     NSData *fileData = [NSData dataWithContentsOfFile:filePath];
     NSString *fileMd5 = [[fileData mutableCopy] qim_md5String];
     if (fileMd5.length > 0) {
-        NSDictionary *checkResultDic = [self checkVideo:fileMd5];
+        [self checkVideo:fileMd5 withCallBack:^(NSDictionary *checkResultDic) {
+            if (checkResultDic) {
+                if (callback) {
+                    callback(checkResultDic);
+                }
+            } else {
+                NSString *destUrl = [NSString stringWithFormat:@"%@/video/upload", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+                [[QIMManager sharedInstance] uploadFileRequest:destUrl withFilePath:filePath withProgressBlock:nil withSuccessCallBack:^(NSData *responseData) {
+                    NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+                    NSLog(@"resultDic : %@", resultDic);
+                    BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
+                    if (ret) {
+                        NSDictionary *data = [resultDic objectForKey:@"data"];
+                        if (callback) {
+                            callback(data);
+                        }
+                    } else {
+                        if (callback) {
+                            callback(nil);
+                        }
+                    }
+                } withFailedCallBack:^(NSError *error) {
+                    if (callback) {
+                        callback(nil);
+                    }
+                }];
+            }
+        }];
+        //Mark by AFN
+        /*
         if (checkResultDic) {
             if (callback) {
                 callback(checkResultDic);
@@ -410,46 +446,25 @@ done:
                 }
             }];
         }
+        */
     }
-}
- 
-#pragma mark -load voice file return url -add by dan.zheng 15/4/24
-+ (NSString *)updateLoadVoiceFile_New:(NSData *)voiceFileData WithFilePath:(NSString *)filePath WithFileKey:(NSString *)fileKey {
-    NSString *method = @"file/v2/upload/file";
-    NSString *fileName =  [NSString stringWithFormat:@"%@.amr",fileKey];
-    long long size = ceil(voiceFileData.length / 1024.0 / 1024.0);
-    NSString *destUrl = [NSString stringWithFormat:@"%@/%@?name=%@&p=ios&u=%@&k=%@&v=%@&key=%@&size=%lld",
-                         [QIMNavConfigManager sharedInstance].innerFileHttpHost, method, fileName,
-                         [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
-                         [[QIMManager sharedInstance] myRemotelogginKey],
-                         [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIFormDataRequest *formRequest = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
-    [formRequest setResponseEncoding:NSISOLatin1StringEncoding];
-    [formRequest setPostFormat:ASIMultipartFormDataPostFormat];
-    [formRequest addData:voiceFileData withFileName:fileName andContentType:nil forKey:@"file"];
-    [formRequest startSynchronous];
-    if ([formRequest responseStatusCode] == 200) {
-        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:formRequest.responseData error:nil];
-        BOOL ret = [[result objectForKey:@"ret"] boolValue];
-        if (ret) {
-            NSString *resultUrl = [result objectForKey:@"data"];
-            if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
-                return resultUrl;
-            }
-        }
-    }
-    return nil;
 }
 
-//将voice文件提交到网络上并获取到文件存储的url
-+ (NSString *)updateLoadVoiceFile:(NSData *)voiceFileData WithFilePath:(NSString *)filePath {
++ (void)qim_updateLoadVoiceFile:(NSData *)voiceFileData withFilePath:(NSString *)filePath withCallBack:(QIMKitUpdateLoadVoiceFileCallBack)callback {
     NSString *fileKey = [self getFileDataMD5WithFileData:voiceFileData];
-    NSString *httpUrl = [self checkFileKeyForFile:fileKey WithFileLength:voiceFileData.length WithPathExtension:@"amr"];
-    if (httpUrl == nil) {
-        return [QIMHttpApi updateLoadVoiceFile_New:voiceFileData WithFilePath:filePath WithFileKey:fileKey];
-    }
-    return httpUrl;
+    [self checkFileKeyForFile:fileKey WithFileLength:voiceFileData.length WithPathExtension:@"amr" withCallBack:^(NSString *httpUrl) {
+        if (httpUrl == nil) {
+            [QIMHttpApi privateUpLoadFile:voiceFileData WithMsgId:filePath WithMsgType:QIMMessageType_Voice WithPathExtension:@"amr" withCallBack:^(NSString *result) {
+                if (callback) {
+                    callback(result);
+                }
+            }];
+        } else {
+            if (callback) {
+                callback(httpUrl);
+            }
+        }
+    }];
 }
 
 + (NSString *)getFileExt:(NSData *)data {
@@ -457,7 +472,7 @@ done:
     [data getBytes:&c length:1];
     switch (c) {
         case 0xFF:
-            return @"jpeg";
+            return @"jpg";
         case 0x89:
             return @"png";
         case 0x47:
@@ -480,7 +495,7 @@ done:
     return nil;
 }
 
-+ (NSString *)updateMyPhoto:(NSData *)headerData{
++ (void)qim_uploadMyPhotoData:(NSData *)headerData withCallBack:(QIMKitUploadMyPhotoCallBack)callback {
     NSString *fileKey = [self getFileDataMD5WithFileData:headerData];
     NSString *method = @"file/v2/upload/avatar";
     NSString *fileName = [fileKey stringByAppendingPathExtension:[self getFileExt:headerData]];
@@ -492,230 +507,24 @@ done:
                          [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
                          [[QIMManager sharedInstance] myRemotelogginKey],
                          [[QIMAppInfo sharedInstance] AppBuildVersion],fileKey,size];
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    
-    ASIFormDataRequest *formRequest = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
-    [formRequest setResponseEncoding:NSISOLatin1StringEncoding];
-    [formRequest setPostFormat:ASIMultipartFormDataPostFormat];
-    [formRequest addData:headerData withFileName:fileName andContentType:nil forKey:@"file"];
-    [formRequest startSynchronous];
-    if (formRequest.responseStatusCode == 200) {
-        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:formRequest.responseData error:nil];
+    [[QIMManager sharedInstance] uploadFileRequest:destUrl withFileData:headerData withProgressBlock:^(float progressValue) {
+        NSLog(@"progressValue : %lf", progressValue);
+    } withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
         if (ret) {
             NSString *resultUrl = [result objectForKey:@"data"];
             if ([resultUrl isEqual:[NSNull null]] == NO && resultUrl.length > 0) {
-                return resultUrl;
-            }
-        }
-    }
-    return nil;
-}
-
-@end
-
-@implementation QIMHttpApi(CommonMethod)
-
-
-+ (NSString *) OriginalUUID {
-    CFUUIDRef UUID = CFUUIDCreate(kCFAllocatorDefault);
-    CFStringRef UUIDString = CFUUIDCreateString(kCFAllocatorDefault, UUID);
-    NSString *result = [[NSString alloc] initWithString:(__bridge NSString*)UUIDString];
-    if (UUID)
-        CFRelease(UUID);
-    if (UUIDString)
-        CFRelease(UUIDString);
-    return result;
-}
-
-+ (NSString *)UUID {
-    return [[self OriginalUUID] stringByReplacingOccurrencesOfString:@"-" withString:@""];
-}
-
-
-
-+ (NSDictionary *)deserializeAsDictionary:(NSData *)data
-{
-    NSDictionary* dictionary = nil;
-    
-    if((data == nil) || ([data length] < kMinPackageDataSize))
-    {
-        return nil;
-    }
-    
-    NSUInteger dataLen = [data length];
-    NSUInteger curIndex = 0;
-    
-    int dataValid;
-    [data getBytes:&dataValid range:NSMakeRange(curIndex, sizeof(int))];
-    curIndex += sizeof(int);
-    
-    if(dataValid != 0)
-    {
-        return nil;
-    }
-    
-    int serviceType;
-    [data getBytes:&serviceType range:NSMakeRange(curIndex, sizeof(int))];
-    curIndex += sizeof(int);
-    
-    int errorCode;
-    [data getBytes:&errorCode range:NSMakeRange(curIndex, sizeof(int))];
-    curIndex += sizeof(int);
-    
-    //    if(errorCode != 0)
-    //    {
-    //        return nil;
-    //    }
-    
-    if(curIndex >= dataLen)
-    {
-        return nil;
-    }
-    
-    int dataCompressed;
-    [data getBytes:&dataCompressed range:NSMakeRange(curIndex, sizeof(int))];
-    curIndex += sizeof(int);
-    
-    int jsonLen = 0;
-    NSData *infoData = nil;
-    if(dataCompressed == 2)
-    {
-        int decompressedDataSize;
-        if(curIndex >= dataLen)
-        {
-            return nil;
-        }
-        
-        [data getBytes:&decompressedDataSize range:NSMakeRange(curIndex, sizeof(int))];
-        curIndex += sizeof(int);
-        
-        int compressedDataSize;
-        if(curIndex >= dataLen)
-        {
-            return nil;
-        }
-        
-        [data getBytes:&compressedDataSize range:NSMakeRange(curIndex, sizeof(int))];
-        curIndex += sizeof(int);
-        
-        NSData *compressedData = [data subdataWithRange:NSMakeRange(curIndex, compressedDataSize)];
-        infoData = [self uncompress:compressedData withUncompressedDataLength:decompressedDataSize];
-        curIndex = 0;
-        jsonLen = decompressedDataSize;
-    }
-    else
-    {
-        infoData = data;
-        if(curIndex >= dataLen)
-        {
-            return nil;
-        }
-        
-        [infoData getBytes:&jsonLen range:NSMakeRange(curIndex, sizeof(int))];
-        curIndex += sizeof(int);
-    }
-    
-    NSData *jsonData = [infoData subdataWithRange:NSMakeRange(curIndex, jsonLen)];
-    dictionary = [[QIMJSONSerializer sharedInstance] deserializeObject:jsonData error:nil];
-    
-    return dictionary;
-}
-
-@end
-
-@implementation QIMHttpApi(PrivateCommonMethod)
-
-+ (NSData *)uncompress:(NSData *)data withUncompressedDataLength:(NSUInteger)length
-{
-    if([data length] == 0)
-    {
-        return data;
-    }
-    else
-    {
-        // 分配解压空间
-        NSMutableData *decompressedData = [NSMutableData dataWithLength:length];
-        
-        // 设置解压参数
-        z_stream stream;
-        stream.next_in = (Bytef *)[data bytes];
-        stream.avail_in = (uInt)[data length];
-        stream.total_in = 0;
-        stream.next_out = (Bytef *)[decompressedData mutableBytes];
-        stream.avail_out = (uInt)[decompressedData length];
-        stream.total_out = 0;
-        stream.zalloc = Z_NULL;
-        stream.zfree = Z_NULL;
-        stream.opaque = Z_NULL;
-        
-        // 初始化
-        if(inflateInit(&stream) == Z_OK)
-        {
-            // 解压缩
-            int status = inflate(&stream, Z_SYNC_FLUSH);
-            if(status == Z_STREAM_END)
-            {
-                // 清除
-                if(inflateEnd(&stream) == Z_OK)
-                {
-                    return decompressedData;
+                if (callback) {
+                    callback(resultUrl);
                 }
             }
         }
-    }
-    
-    return nil;
-}
-
-+ (NSString *)encrypt:(NSString *)text withKey:(NSString *)key
-{
-    // 加密字
-    NSData *keyData = [key dataUsingEncoding:NSUTF8StringEncoding];
-    NSUInteger keyLength = [keyData length];
-    Byte *keyBytes = (Byte *)[keyData bytes];
-    
-    // 旧的数据
-    NSData *srcData = [text dataUsingEncoding:NSUTF8StringEncoding];
-    NSUInteger srcLength = [srcData length];
-    Byte* srcBytes = (Byte *)[srcData bytes];
-    
-    // 新的数据
-    int headSize = sizeof(uint32_t);
-    NSUInteger destLength = headSize + srcLength;
-    Byte* destBytes = (Byte *)malloc(sizeof(Byte) * destLength);
-    memcpy(destBytes + headSize, srcBytes, sizeof(Byte) * srcLength);
-    
-    // 加密
-    for(NSUInteger i = 0; i < srcLength; i++)
-    {
-        destBytes[i + headSize] ^= 91;
-        destBytes[i + headSize] += keyBytes[i % keyLength];
-    }
-    
-    // 计算CRC32
-    uLong crc32Value = crc32(0L, Z_NULL, 0);
-    crc32Value = crc32(crc32Value, destBytes + headSize, sizeof(Byte) * srcLength);
-    
-    // 加密CRC32
-    destBytes[0] = (Byte)crc32Value;
-    destBytes[1] = (Byte)(crc32Value >> 24);
-    destBytes[2] = (Byte)(crc32Value >> 8);
-    destBytes[3] = (Byte)(crc32Value >> 16);
-    
-    // 通过字节数组得到字符串
-    NSMutableString *destString = [[NSMutableString alloc] initWithString:@""];
-    for(NSUInteger i = 0; i < destLength; i++)
-    {
-        Byte destByte = destBytes[i] & 0xFF;
-        Byte destHexFirst = destByte / 16;
-        Byte destHexSecond = destByte % 16;
-        
-        [destString appendFormat:@"%x%x", destHexFirst, destHexSecond];
-    }
-    free(destBytes);
-    
-    return destString;
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
 }
 
 @end

@@ -323,7 +323,7 @@
 
 #pragma mark - 单人ConsultServer消息（下拉加载） qchatId = 5
 
-- (NSArray *)getConsultServerlogWithFrom:(NSString *)from virtualId:(NSString *)virtualId to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction {
+- (void)getConsultServerlogWithFrom:(NSString *)from virtualId:(NSString *)virtualId to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction withCallBack:(QIMKitGetConsultServerMsgListCallBack)callback {
     
     CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
 
@@ -350,6 +350,26 @@
                          [[QIMAppInfo sharedInstance] AppBuildVersion]];
     destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:params error:nil];
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        if (ret) {
+            NSArray *msgList = [result objectForKey:@"data"];
+            if (callback) {
+                callback(msgList);
+            }
+        } else {
+            if (callback) {
+                callback(nil);
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
+    
+    /*
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
     [request setUseCookiePersistence:NO];
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
@@ -378,11 +398,12 @@
         }
     }
     return msgList;
+    */
 }
 
 #pragma mark - 单人历史消息（下拉加载）
 
-- (NSArray *)getUserChatlogWithFrom:(NSString *)from to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction include:(BOOL)include {
+- (void)getUserChatlogWithFrom:(NSString *)from to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction include:(BOOL)include withCallBack:(QIMKitGetUserChatMsgListCallBack)callback {
 
     CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
 
@@ -410,6 +431,31 @@
                          [[QIMAppInfo sharedInstance] AppBuildVersion]];
     destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:params error:nil];
+    
+    NSDictionary *logDic = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"describtion":@"单人Chat消息（下拉加载)"};
+    Class autoManager = NSClassFromString(@"QIMAutoTrackerManager");
+    id autoManagerObject = [[autoManager alloc] init];
+    [autoManagerObject performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic];
+    
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        if (ret) {
+            NSArray *msgList = [result objectForKey:@"data"];
+            if (callback) {
+                callback(msgList);
+            }
+        } else {
+            if (callback) {
+                callback(nil);
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
+    /*
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
     [request setUseCookiePersistence:NO];
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
@@ -437,6 +483,7 @@
         }
     }
     return nil;
+    */
 }
 
 @end

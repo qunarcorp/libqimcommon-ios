@@ -16,41 +16,18 @@ CFStringRef QIMFileMD5HashCreateWithData(const void *data,long long dataLenght);
 
 @interface QIMHttpApi : NSObject
 
-+ (NSString *)checkFileKeyForFile:(NSString *)fileKey WithFileLength:(long long)fileLength WithPathExtension:(NSString *)extension;
++ (void)qim_uploadImage:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension withCallBack:(QIMKitUploadImageCallBack)callback;
 
-+ (NSString *)checkFileKey:(NSString *)fileKey WithFileLength:(long long)fileLength WithPathExtension:(NSString *)extension;
++ (void)qim_uploadFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension withCallBack:(QIMKitUploadFileCallBack)callback;
 
-+ (NSDictionary *)checkUserToken:(NSString *)verifCode;
++ (void)qim_uploadNewVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequestSuccessedBlock)callback;
 
-+ (NSDictionary *)getUserTokenWithUserName:(NSString *)userName WithVerifyCode:(NSString *)verifCode;
++ (void)qim_updateLoadVoiceFile:(NSData *)voiceFileData withFilePath:(NSString *)filePath withCallBack:(QIMKitUpdateLoadVoiceFileCallBack)callback;
 
-+ (NSDictionary *)getVerifyCodeWithUserName:(NSString *)userName;
-
-+ (NSString *) updateLoadMomentFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension;
-
-+ (NSString *) updateLoadFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension;
-
-+ (void)uploadVideo:(NSData *)fileData withCallBack:(QIMKitUploadVideoRequestSuccessedBlock)callback;
-
-+ (void)uploadVideoPath:(NSString *)filePath withCallBack:(QIMKitUploadVideoRequestSuccessedBlock)callback;
-
-+ (NSDictionary *)getUserList;
-
-+ (NSString *)updateLoadFile:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension;
-
-//add by dan.zheng 15-4-24
-+ (NSString *)updateLoadVoiceFile:(NSData *)voiceFileData WithFilePath:(NSString *)filePath;
-+ (NSString *)updateMyPhoto:(NSData *)headerData;
++ (void)qim_uploadMyPhotoData:(NSData *)headerData withCallBack:(QIMKitUploadMyPhotoCallBack)callback;
 
 +(NSString *)getFileDataMD5WithFileData:(NSData *)fileData;
 
 +(NSString*)getFileMD5WithPath:(NSString*)path;
-
-@end
-
-@interface QIMHttpApi(CommonMethod)
-
-+ (NSString *)UUID;
-+ (NSDictionary *)deserializeAsDictionary:(NSData *)data;
 
 @end

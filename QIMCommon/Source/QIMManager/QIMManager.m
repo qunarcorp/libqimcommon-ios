@@ -60,7 +60,6 @@
 #import "QIMAppInfo.h"
 #import "QIMUserCacheManager.h"
 #import "QIMNavConfigManager.h"
-#import "ASIHTTPRequest.h"
 #import "QIMVoiceNoReadStateManager.h"
 
 //Categories

@@ -31,14 +31,4 @@
     return [[QIMManager sharedInstance] updateOfflineMessagesV2];
 }
 
-#warning 单人聊天消息
-
-#pragma mark - 单人ConsultServer消息（下拉加载） qchatId = 5
-
-#pragma mark - 单人历史消息（下拉加载）
-
-- (NSArray *)getUserChatlogWithFrom:(NSString *)from to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction include:(BOOL)include {
-    return [[QIMManager sharedInstance] getUserChatlogWithFrom:from to:to version:version count:count direction:direction include:include];
-}
-
 @end

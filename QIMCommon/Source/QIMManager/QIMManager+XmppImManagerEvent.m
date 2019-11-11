@@ -1276,16 +1276,17 @@
             [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"NavConfig"];
             QIMErrorLog(@"重新获取导航");
             [[QIMUserCacheManager sharedInstance] setUserObject:[QIMManager getLastUserName] forKey:@"currentLoginName"];
-            BOOL getNavSuccess = [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithCheck:YES];
-            if (getNavSuccess == NO) {
-                QIMErrorLog(@"获取导航失败，请稍后再试");
-                [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkNetworkStatus) object:nil];
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"kNotificationStreamEnd" object:@"请检查当前网络状态后重试"];
-                return;
-            }
-            QIMWarnLog(@"再次重新登录");
-            self.needTryRelogin = YES;
-            [self socketDisconnect];
+            [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithCheck:YES withCallBack:^(BOOL success) {
+                if (success == NO) {
+                    QIMErrorLog(@"获取导航失败，请稍后再试");
+                    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkNetworkStatus) object:nil];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"kNotificationStreamEnd" object:@"请检查当前网络状态后重试"];
+                } else {
+                    QIMWarnLog(@"再次重新登录");
+                    self.needTryRelogin = YES;
+                    [self socketDisconnect];
+                }
+            }];
         } else {
             QIMWarnLog(@"被踢下线后重新登录");
             [self relogin];

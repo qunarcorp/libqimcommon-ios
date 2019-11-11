@@ -305,10 +305,11 @@
                 dispatch_async(self.load_history_msg, ^{
                     long long version = [[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:virtualId RealJid:userId] - timeChange;
                     
-                    NSArray *result = [self getConsultServerlogWithFrom:[self getLastJid] virtualId:virtualId to:userId version:version count:(int)(limit - list.count) direction:QIMMessageDirection_Sent];
-                    if (result.count > 0) {
-                        [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertHistoryChatJSONMsg:result];
-                    }
+                    [self getConsultServerlogWithFrom:[self getLastJid] virtualId:virtualId to:userId version:version count:(int)(limit - list.count) direction:QIMMessageDirection_Sent withCallBack:^(NSArray *result) {
+                        if (result.count > 0) {
+                            [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertHistoryChatJSONMsg:result];
+                        }
+                    }];
                 });
             }
         } else {
@@ -318,24 +319,24 @@
                 }
                 dispatch_async(self.load_history_msg, ^{
                     long long version = [[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:virtualId RealJid:userId] - timeChange;
-                    NSArray *resultList = [self getConsultServerlogWithFrom:[self getLastJid] virtualId:virtualId to:userId version:version count:limit direction:QIMMessageDirection_Sent];
-                    
-                    if (resultList.count > 0) {
-                        [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertHistoryChatJSONMsg:resultList];
-                        NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_getMgsListBySessionId:virtualId WithRealJid:userId WithLimit:limit WithOffset:offset];
-                        NSMutableArray *list = [NSMutableArray array];
-                        for (NSDictionary *infoDic in datas) {
-                            QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
-                            [list addObject:msg];
+                    [self getConsultServerlogWithFrom:[self getLastJid] virtualId:virtualId to:userId version:version count:limit direction:QIMMessageDirection_Sent withCallBack:^(NSArray *resultList) {
+                        if (resultList.count > 0) {
+                            [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertHistoryChatJSONMsg:resultList];
+                            NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_getMgsListBySessionId:virtualId WithRealJid:userId WithLimit:limit WithOffset:offset];
+                            NSMutableArray *list = [NSMutableArray array];
+                            for (NSDictionary *infoDic in datas) {
+                                QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
+                                [list addObject:msg];
+                            }
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                complete(list);
+                            });
+                        } else {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                complete(@[]);
+                            });
                         }
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            complete(list);
-                        });
-                    } else {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            complete(@[]);
-                        });
-                    }
+                    }];
                 });
             } else {
                 dispatch_async(dispatch_get_main_queue(), ^{

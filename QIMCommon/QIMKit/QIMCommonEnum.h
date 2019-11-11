@@ -477,4 +477,37 @@ typedef void(^QIMKitUpdatePublicNumberCardCallBack)(NSArray *list);
 typedef void(^QIMKitDownloadQIMRNExternalAppBundleSuccessCallBack)(BOOL res);
 typedef void(^QIMKitOPSRNBundlePatchDownloadHelperHandle)(BOOL res);
 
+//系统消息
+typedef void(^QIMKitGetSystemMsgListCallBack)(NSArray *list);
+
+//获取导航
+typedef void(^QIMKitGetNavConfigCallBack)(BOOL success);
+
+//拉群历史
+typedef void(^QIMKitGetMucMsgListCallBack)(NSArray *list);
+//下拉Consult消息
+typedef void(^QIMKitGetConsultServerMsgListCallBack)(NSArray *list);
+//下拉单人消息
+typedef void(^QIMKitGetUserChatMsgListCallBack)(NSArray *list);
+//拉取离线消息
+typedef void(^QIMKitGetUserChatHistoryCallBack)(NSArray *list);
+
+//check图片key
+typedef void(^QIMKitCheckImageKeyForImageCallBack)(NSString *result);
+
+//check文件key
+typedef void(^QIMKitCheckFileKeyForFileCallBack)(NSString *result);
+
+//上传文件
+typedef void(^QIMKitUploadFileCallBack)(NSString *result);
+
+//上传图片
+typedef void(^QIMKitUploadImageCallBack)(NSString *result);
+
+typedef void(^QIMKitCheckVideoCallBack)(NSDictionary *result);
+
+typedef void(^QIMKitUploadMyPhotoCallBack)(NSString *result);
+
+typedef void(^QIMKitUpdateLoadVoiceFileCallBack)(NSString *httpUrl);
+
 #endif /* QIMCommonEnum_h */

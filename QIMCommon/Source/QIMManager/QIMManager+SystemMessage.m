@@ -72,10 +72,11 @@
                 dispatch_async(self.load_history_msg, ^{
                     long long version = [[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:userId] - timeChange;
                     
-                    NSArray *result = [self getSystemMsgListWithDirection:0 WithUserId:userId WithFromHost:fromHost WithLimit:limit - list.count withTimeVersion:version toId:[QIMManager getLastUserName] toHost:fromHost];
-                    if (result.count > 0) {
-                        [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertHistoryChatJSONMsg:result];
-                    }
+                    [self getSystemMsgListWithDirection:0 WithUserId:userId WithFromHost:fromHost WithLimit:limit - list.count withTimeVersion:version toId:[QIMManager getLastUserName] toHost:fromHost withCallBack:^(NSArray *result) {
+                        if (result.count > 0) {
+                            [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertHistoryChatJSONMsg:result];
+                        }
+                    }];
                 });
             }
         } else {
@@ -85,23 +86,24 @@
                 }
                 dispatch_async(self.load_history_msg, ^{
                     long long version = [[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:userId] - timeChange;
-                    NSArray *resultList = [self getSystemMsgListWithDirection:0 WithUserId:userId WithFromHost:fromHost WithLimit:limit withTimeVersion:version toId:[QIMManager getLastUserName] toHost:fromHost];
-                    if (resultList.count > 0) {
-                        [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertHistoryChatJSONMsg:resultList];
-                        NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_getMgsListBySessionId:userId WithRealJid:nil WithLimit:(int)(resultList.count) WithOffset:offset];
-                        NSMutableArray *list = [NSMutableArray array];
-                        for (NSDictionary *infoDic in datas) {
-                            QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
-                            [list addObject:msg];
+                    [self getSystemMsgListWithDirection:0 WithUserId:userId WithFromHost:fromHost WithLimit:limit withTimeVersion:version toId:[QIMManager getLastUserName] toHost:fromHost withCallBack:^(NSArray *resultList) {
+                        if (resultList.count > 0) {
+                            [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertHistoryChatJSONMsg:resultList];
+                            NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_getMgsListBySessionId:userId WithRealJid:nil WithLimit:(int)(resultList.count) WithOffset:offset];
+                            NSMutableArray *list = [NSMutableArray array];
+                            for (NSDictionary *infoDic in datas) {
+                                QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
+                                [list addObject:msg];
+                            }
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                complete(list);
+                            });
+                        } else {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                complete(@[]);
+                            });
                         }
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            complete(list);
-                        });
-                    } else {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            complete(@[]);
-                        });
-                    }
+                    }];
                 });
             } else {
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -113,7 +115,7 @@
 }
 
 #pragma mark -  获取Notice消息（下拉加载）
-- (NSArray *)getSystemMsgListWithDirection:(int)direction WithUserId:(NSString *)userId WithFromHost:(NSString *)fromHost WithLimit:(NSInteger)limit withTimeVersion:(long long)version toId:(NSString *)toId toHost:(NSString *)toHost {
+- (void)getSystemMsgListWithDirection:(int)direction WithUserId:(NSString *)userId WithFromHost:(NSString *)fromHost WithLimit:(NSInteger)limit withTimeVersion:(long long)version toId:(NSString *)toId toHost:(NSString *)toHost withCallBack:(QIMKitGetSystemMsgListCallBack)callback {
     
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
     [params setObject:userId forKey:@"from"];
@@ -127,6 +129,26 @@
     [params setObject:@"t" forKey:@"f"];
     NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:params error:nil];
     NSString *destUrl = [NSString stringWithFormat:@"%@/qtapi/get_system_msgs.qunar?v=%@&p=iOS&u=%@&k=%@&f=t", [[QIMNavConfigManager sharedInstance] javaurl], [[QIMAppInfo sharedInstance] AppBuildVersion], [QIMManager getLastUserName], self.remoteKey];
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        if (ret) {
+            NSArray *msgArray = [result objectForKey:@"data"];
+            if (callback) {
+                callback(msgArray);
+            }
+        } else {
+            if (callback) {
+                callback(nil);
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
+    
+    /*
     NSURL *requestUrl = [NSURL URLWithString:destUrl];
     
     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
@@ -150,6 +172,7 @@
         }
     }
     return nil;
+    */
 }
 
 

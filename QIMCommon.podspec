@@ -61,7 +61,6 @@ Pod::Spec.new do |s|
     s.default_subspecs = 'Base', 'QIMPrivatePBCommon'
   end
   
-#  s.dependency 'ASIHTTPRequest'
   s.dependency 'YYCache'
   s.dependency 'YYModel'
   s.dependency 'ProtocolBuffers'
