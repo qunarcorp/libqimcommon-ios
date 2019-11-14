@@ -153,7 +153,7 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (NSInteger)qim_dbVersion {
-    return 3;
+    return 4;
 }
 
 - (NSInteger)upgradeDB:(NSInteger)oldVersion {
@@ -177,6 +177,11 @@ static dispatch_once_t _onceDBToken;
         case 2: {
             result = [self upgradeFrom2To3];
             currentOldVersion = 2;
+        }
+            break;
+        case 3: {
+            result = [self upgradeFrom3To4];
+            currentOldVersion = 3;
         }
             break;
         default: {
@@ -251,6 +256,19 @@ static dispatch_once_t _onceDBToken;
                   mappingVersion        INTEGER,\
                   updateTime            INTEGER,\
                   primary key  (medalId,userId));"];
+    }];
+    return result;
+}
+
+- (BOOL)upgradeFrom3To4 {
+    QIMVerboseLog(@"upgradeFrom3To4");
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+        if ([database columnExists:@"IM_Work_CommentV2" columnName:@"atList"] == NO) {
+            result = [database executeNonQuery:@"ALTER TABLE IM_Work_CommentV2 ADD atList TEXT;" withParameters:nil];
+        } else {
+            result = YES;
+        }
     }];
     return result;
 }
