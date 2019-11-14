@@ -56,7 +56,6 @@
 #import "QIMAppSetting.h"
 #import "QIMDataController.h"
 #import "QIMDESHelper.h"
-#import "QIMHttpApi.h"
 #import "QIMHttpRequestMonitor.h"
 #import "QIMJSONSerializer.h"
 #import "QIMFileManager.h"

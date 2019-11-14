@@ -388,8 +388,6 @@ char* bio_read_publicKey(const char* data, const char *filepath, int *len)
 }
 
 + (NSString *) encryptByRsa:(NSString*)content {
-    
-    
     NSString *fileName = [QIMNavConfigManager sharedInstance].pubkey;
     int status;
     int length = (int)[content length];

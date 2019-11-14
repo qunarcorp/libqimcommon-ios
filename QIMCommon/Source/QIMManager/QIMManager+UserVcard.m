@@ -403,39 +403,40 @@ static NSMutableArray *cacheUserCardHttpList = nil;
 }
 
 - (void)updateMyPhoto:(NSData *)photoData {
-    NSString *myPhotoUrl = [QIMHttpApi updateMyPhoto:photoData];
-    if (myPhotoUrl.length > 0) {
-        NSDictionary *cardDic = @{@"user": [QIMManager getLastUserName], @"url": myPhotoUrl, @"domain":[[XmppImManager sharedInstance] domain]};
-        NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:@[cardDic] error:nil];
-        NSString *destUrl = [NSString stringWithFormat:@"%@/profile/set_profile.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
-        [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
-            NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-            BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
-            NSInteger errcode = [[resultDic objectForKey:@"errcode"] integerValue];
-            if (ret && errcode == 0) {
-                NSArray *resultData = [resultDic objectForKey:@"data"];
-                if ([resultData isKindOfClass:[NSArray class]]) {
-                    [self dealWithUpdateMyVCard:resultData];
+    [[QIMFileManager sharedInstance] qim_uploadMyPhotoData:photoData withCallBack:^(NSString *myPhotoUrl) {
+        if (myPhotoUrl.length > 0) {
+            NSDictionary *cardDic = @{@"user": [QIMManager getLastUserName], @"url": myPhotoUrl, @"domain":[[XmppImManager sharedInstance] domain]};
+            NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:@[cardDic] error:nil];
+            NSString *destUrl = [NSString stringWithFormat:@"%@/profile/set_profile.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+            [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
+                NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+                BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
+                NSInteger errcode = [[resultDic objectForKey:@"errcode"] integerValue];
+                if (ret && errcode == 0) {
+                    NSArray *resultData = [resultDic objectForKey:@"data"];
+                    if ([resultData isKindOfClass:[NSArray class]]) {
+                        [self dealWithUpdateMyVCard:resultData];
+                    } else {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMyHeaderImgaeUpdateFaild object:nil];
+                        });
+                    }
                 } else {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMyHeaderImgaeUpdateFaild object:nil];
                     });
                 }
-            } else {
+            } withFailedCallBack:^(NSError *error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMyHeaderImgaeUpdateFaild object:nil];
                 });
-            }
-        } withFailedCallBack:^(NSError *error) {
+            }];
+        } else {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMyHeaderImgaeUpdateFaild object:nil];
             });
-        }];
-    } else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMyHeaderImgaeUpdateFaild object:nil];
-        });
-    }
+        }
+    }];    
 }
 
 - (void)dealWithUpdateMyVCard:(NSArray *)resultData {
