@@ -87,30 +87,6 @@
 }
 
 - (void)getRemoteHotlineShopList {
-//    NSString *destUrl = [NSString stringWithFormat:@"%@/qcadmin/getHotlineShopList.qunar?line=%@&username=%@&host=%@", [[QIMNavConfigManager sharedInstance] newerHttpUrl], @"qtalk", [QIMManager getLastUserName], [[QIMManager sharedInstance] getDomain]];
-//    __weak __typeof(self) weakSelf = self;
-//    [self sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
-//        NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-//        BOOL ret = [[responseDic objectForKey:@"ret"] boolValue];
-//        NSInteger errcode = [[responseDic objectForKey:@"errcode"] integerValue];
-//        if (ret && errcode == 0) {
-//            NSDictionary *data = [responseDic objectForKey:@"data"];
-//            if ([data isKindOfClass:[NSDictionary class]]) {
-//                NSDictionary *allhotlines = [data objectForKey:@"allhotlines"];
-//                NSArray *myhotlines = [data objectForKey:@"myhotlines"];
-//                __typeof(self) strongSelf = weakSelf;
-//                if (!strongSelf) {
-//                    return;
-//                }
-//                strongSelf.allhotlines = [allhotlines allKeys];
-//                strongSelf.myhotLinelist = myhotlines;
-//                NSLog(@"getHotlineShopList.qunar : %@", data);
-//            }
-//        }
-//    } withFailedCallBack:^(NSError *error) {
-//
-//    }];
-    
     NSString *destUrl = [NSString stringWithFormat:@"%@/admin/outer/qtalk/getHotlineList", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     NSDictionary *body = @{@"username":[QIMManager getLastUserName], @"host":[[QIMManager sharedInstance] getDomain]};
     NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:body error:nil];

@@ -110,24 +110,20 @@
     NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:@[userParam] error:nil];
     NSString *destUrl = [NSString stringWithFormat:@"%@/profile/set_profile.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
+        __typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
         NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
         NSInteger errcode = [[resultDic objectForKey:@"errcode"] integerValue];
         if (ret && errcode == 0) {
             NSArray *resultData = [resultDic objectForKey:@"data"];
-            [self dealWithUpdateUserProfile:resultData];
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
+            [strongSelf dealWithUpdateUserProfile:resultData];
             if (callback) {
                 callback(YES);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             if (callback) {
                 callback(NO);
             }
@@ -502,10 +498,6 @@ static NSMutableArray *cacheUserCardHttpList = nil;
             NSDictionary *resultData = [resultDic objectForKey:@"data"];
             if ([resultData isKindOfClass:[NSDictionary class]]) {
                 //插入数据库IM_UsersWorkInfo
-                __typeof(self) strongSelf = weakSelf;
-                if (!strongSelf) {
-                    return;
-                }
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (callback) {
                         callback(resultData);
@@ -520,10 +512,6 @@ static NSMutableArray *cacheUserCardHttpList = nil;
                     [[NSNotificationCenter defaultCenter] postNotificationName:kUpdateUserLeaderCard object:@{@"UserId":userId, @"LeaderInfo":workInfo}];
                 });
             } else {
-                __typeof(self) strongSelf = weakSelf;
-                if (!strongSelf) {
-                    return;
-                }
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (callback) {
                         callback(nil);
@@ -531,10 +519,6 @@ static NSMutableArray *cacheUserCardHttpList = nil;
                 });
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (callback) {
                     callback(nil);
@@ -565,7 +549,6 @@ static NSMutableArray *cacheUserCardHttpList = nil;
     NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:param error:nil];
     NSString *destUrl = [[QIMNavConfigManager sharedInstance] mobileurl];
     QIMVerboseLog(@"查看用户%@手机号Url : %@", qtalkId, destUrl);
-    __weak __typeof(self) weakSelf = self;
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         NSInteger errcode = [[resultDic objectForKey:@"errcode"] integerValue];
@@ -573,36 +556,20 @@ static NSMutableArray *cacheUserCardHttpList = nil;
             NSDictionary *resultData = [resultDic objectForKey:@"data"];
             if ([resultData isKindOfClass:[NSDictionary class]]) {
                 NSString *phoneNumber = [resultData objectForKey:@"phone"];
-                __typeof(self) strongSelf = weakSelf;
-                if (!strongSelf) {
-                    return;
-                }
                 if (callback) {
                     callback(phoneNumber);
                 }
             } else {
-                __typeof(self) strongSelf = weakSelf;
-                if (!strongSelf) {
-                    return;
-                }
                 if (callback) {
                     callback(nil);
                 }
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             if (callback) {
                 callback(nil);
             }
         }
     } withFailedCallBack:^(NSError *error) {
-        __typeof(self) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
         if (callback) {
             callback(nil);
         }

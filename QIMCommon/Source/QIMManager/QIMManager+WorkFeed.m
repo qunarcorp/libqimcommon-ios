@@ -327,17 +327,12 @@
     [bodyDic setQIMSafeObject:(superParentUUID.length > 0) ? superParentUUID : nil forKey:@"superParentUUID"];
     
     NSData *momentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
-    __weak __typeof(self) weakSelf = self;
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
         NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
         if (ret && errcode == 0) {
             NSDictionary *data = [result objectForKey:@"data"];
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             if ([data isKindOfClass:[NSDictionary class]]) {
                 NSArray *attachCommentList = [data objectForKey:@"attachCommentList"];
                 if ([attachCommentList isKindOfClass:[NSArray class]]) {
@@ -383,10 +378,6 @@
         NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
         if (ret && errcode == 0) {
             NSDictionary *data = [result objectForKey:@"data"];
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             if ([data isKindOfClass:[NSDictionary class]]) {
                 
                 NSInteger likeNum = [[data objectForKey:@"postLikeNum"] integerValue];
@@ -438,7 +429,6 @@
     
     QIMVerboseLog(@"HotComment : %@", bodyDic);
     NSData *hotCommentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
-    __weak __typeof(self) weakSelf = self;
 
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:hotCommentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
@@ -446,10 +436,6 @@
         NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
         if (ret && errcode == 0) {
             NSDictionary *data = [result objectForKey:@"data"];
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             if ([data isKindOfClass:[NSDictionary class]]) {
                 NSArray *newComment = [data objectForKey:@"newComment"];
                 if ([newComment isKindOfClass:[NSArray class]]) {
@@ -485,7 +471,6 @@
 
     QIMVerboseLog(@"cricle_camel/getNewComment/V2 : %@", bodyDic);
     NSData *hotCommentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
-    __weak __typeof(self) weakSelf = self;
     
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:hotCommentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
@@ -493,10 +478,6 @@
         NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
         if (ret && errcode == 0) {
             NSDictionary *data = [result objectForKey:@"data"];
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             if ([data isKindOfClass:[NSDictionary class]]) {
                 NSArray *attachCommentList = [data objectForKey:@"attachCommentList"];
                 if ([attachCommentList isKindOfClass:[NSArray class]]) {
@@ -560,7 +541,6 @@
     
     QIMVerboseLog(@"cricle_camel/getHistoryComment : %@", bodyDic);
     NSData *hotCommentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
-    __weak __typeof(self) weakSelf = self;
     
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:hotCommentBodyData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
@@ -569,10 +549,6 @@
         if (ret && errcode == 0) {
             
             NSDictionary *data = [result objectForKey:@"data"];
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             if ([data isKindOfClass:[NSDictionary class]]) {
                 NSArray *deteleComments = [data objectForKey:@"deleteComments"];
                 if ([deteleComments isKindOfClass:[NSArray class]]) {
@@ -726,7 +702,6 @@
     
     QIMVerboseLog(@"ownerCamel/getMyReply : %@", bodyDic);
     NSData *hotCommentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
-    __weak __typeof(self) weakSelf = self;
     
     [self sendTPPOSTRequestWithUrl:urlStr withRequestBodyData:[[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil] withSuccessCallBack:^(NSData *responseData) {
         NSDictionary * result = [[QIMJSONSerializer sharedInstance]deserializeObject:responseData error:nil];
@@ -782,7 +757,6 @@
     
     QIMVerboseLog(@"ownerCamel/getAtList : %@", bodyDic);
     NSData *hotCommentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
-    __weak __typeof(self) weakSelf = self;
     [self sendTPPOSTRequestWithUrl:urlStr withRequestBodyData:[[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil] withSuccessCallBack:^(NSData *responseData) {
         NSDictionary * result = [[QIMJSONSerializer sharedInstance]deserializeObject:responseData error:nil];
         BOOL ret = [[result objectForKey:@"ret"] boolValue];

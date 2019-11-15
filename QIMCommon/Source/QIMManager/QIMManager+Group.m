@@ -254,7 +254,7 @@
         NSInteger errcode = [[resultDic objectForKey:@"errcode"] integerValue];
         if (ret && errcode == 0) {
             NSArray *mucList = [resultDic objectForKey:@"data"];
-            [self dealWithSetUpdateMucVcard:mucList];
+            [strongSelf dealWithSetUpdateMucVcard:mucList];
             if (callback) {
                 callback(YES);
             }

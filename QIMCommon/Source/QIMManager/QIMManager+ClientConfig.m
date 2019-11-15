@@ -241,11 +241,16 @@
     NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyProperties error:nil];
     
     //AFN
+    __weak __typeof(self) weakSelf = self;
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
+        __typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         if ([[result objectForKey:@"ret"] boolValue]) {
-            [self insertNewClientConfigInfoWithData:result];
-            [self postUpdateNSNotificationWithType:type];
+            [strongSelf insertNewClientConfigInfoWithData:result];
+            [strongSelf postUpdateNSNotificationWithType:type];
             if (callback) {
                 callback(YES);
             }
@@ -306,11 +311,16 @@
     [bodyProperties setQIMSafeObject:delFlag ? @(2) : @(1) forKey:@"type"]; //操作类型1：设置；2：删除或取消
     [bodyProperties setQIMSafeObject:@([[IMDataManager qimDB_SharedInstance] qimDB_getConfigVersion]) forKey:@"version"];
     NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyProperties error:nil];
+    __weak __typeof(self) weakSelf = self;
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
+        __typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
         NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         if ([[result objectForKey:@"ret"] boolValue]) {
-            [self insertNewClientConfigInfoWithData:result];
-            [self postUpdateNSNotificationWithType:type WithSubKey:subKey WithConfigValue:configValue];
+            [strongSelf insertNewClientConfigInfoWithData:result];
+            [strongSelf postUpdateNSNotificationWithType:type WithSubKey:subKey WithConfigValue:configValue];
             if (callback) {
                 callback(YES);
             }

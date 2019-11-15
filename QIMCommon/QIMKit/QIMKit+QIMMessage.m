@@ -31,6 +31,14 @@
     [[QIMManager sharedInstance] checkMsgTimeWithJid:jid WithMsgDate:msgDate WithGroup:flag];
 }
 
+- (void)checkMsgTimeWithJid:(NSString *)jid WithRealJid:(NSString *)realJid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag withFrontInsert:(BOOL)frontInsert {
+    [[QIMManager sharedInstance] checkMsgTimeWithJid:jid WithRealJid:realJid WithMsgDate:msgDate WithGroup:(BOOL)flag withFrontInsert:frontInsert];
+}
+
+- (void)checkMsgTimeWithJid:(NSString *)jid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag withFrontInsert:(BOOL)frontInsert {
+    [[QIMManager sharedInstance] checkMsgTimeWithJid:jid WithMsgDate:msgDate WithGroup:flag withFrontInsert:frontInsert];
+}
+
 - (void)setAppendInfo:(NSDictionary *)appendInfoDict ForUserId:(NSString *)userId {
     [[QIMManager sharedInstance] setAppendInfo:appendInfoDict ForUserId:userId];
 }

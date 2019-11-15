@@ -265,7 +265,7 @@
 - (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId userType:(ChatType)userType msgType:(QIMMessageType)msgType backinfo:(NSString *)backInfo {
     
     long long msgDate = ([[NSDate date] timeIntervalSince1970] - self.serverTimeDiff) * 1000;
-    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO];
+    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO withFrontInsert:YES];
     QIMMessageModel *mesg = [QIMMessageModel new];
     [mesg setMessageId:[QIMUUIDTools UUID]];
     [mesg setMessageType:msgType];
@@ -299,7 +299,7 @@
 
 - (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId realJid:(NSString *)realJid userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId msgState:(QIMMessageSendState)msgState willSave:(BOOL)willSave {
     long long msgDate = ([[NSDate date] timeIntervalSince1970] - self.serverTimeDiff) * 1000;
-    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO];
+    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO withFrontInsert:YES];
     QIMMessageModel *mesg = [QIMMessageModel new];
     [mesg setMessageId:mId.length ? mId : [QIMUUIDTools UUID]];
     [mesg setMessageType:msgType];
@@ -333,7 +333,7 @@
 - (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId realJid:(NSString *)realJid userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId willSave:(BOOL)willSave {
     
     long long msgDate = ([[NSDate date] timeIntervalSince1970] - self.serverTimeDiff) * 1000;
-    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO];
+    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:YES withFrontInsert:YES];
     QIMMessageModel *mesg = [QIMMessageModel new];
     [mesg setMessageId:mId.length ? mId : [QIMUUIDTools UUID]];
     [mesg setMessageType:msgType];
@@ -597,7 +597,7 @@
 - (QIMMessageModel *)sendMessage:(NSString *)msg WithInfo:(NSString *)info ToUserId:(NSString *)userId WithMsgType:(int)msgType {
     
     long long msgDate = ([[NSDate date] timeIntervalSince1970] - self.serverTimeDiff) * 1000;
-    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO];
+    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO withFrontInsert:YES];
     
     QIMMessageModel *mesg = [QIMMessageModel new];
     [mesg setXmppId:userId];
@@ -723,6 +723,14 @@
 }
 
 - (void)checkMsgTimeWithJid:(NSString *)jid WithRealJid:(NSString *)realJid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag{
+    [self checkMsgTimeWithJid:jid WithRealJid:realJid WithMsgDate:msgDate WithGroup:flag withFrontInsert:NO];
+}
+
+- (void)checkMsgTimeWithJid:(NSString *)jid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag {
+    [self checkMsgTimeWithJid:jid WithMsgDate:msgDate WithGroup:flag withFrontInsert:NO];
+}
+
+- (void)checkMsgTimeWithJid:(NSString *)jid WithRealJid:(NSString *)realJid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag withFrontInsert:(BOOL)frontInsert {
     NSString *key = [NSString stringWithFormat:@"%@-%@",jid,realJid];
     NSNumber *globalMsgDate = [self.timeStempDic objectForKey:key];
     if (msgDate - globalMsgDate.longLongValue >= 2 * 60 * 1000) {
@@ -745,13 +753,12 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationMessageUpdate
                                                                 object:key
-                                                              userInfo:@{@"message":msg}];
+                                                              userInfo:@{@"message":msg, @"frontInsert":@(frontInsert)}];
         });
     }
 }
 
-- (void)checkMsgTimeWithJid:(NSString *)jid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag {
-    
+- (void)checkMsgTimeWithJid:(NSString *)jid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag withFrontInsert:(BOOL)frontInsert {
     if (!jid || msgDate < 0) {
         return;
     }
@@ -774,10 +781,11 @@
             return;
         }
         [self saveMsg:msg ByJid:jid];
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationMessageUpdate
-                                                            object:jid
-                                                          userInfo:@{@"message": msg}];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationMessageUpdate
+                                                                object:jid
+                                                              userInfo:@{@"message": msg, @"frontInsert":@(frontInsert)}];
+        });
     }
 }
 
