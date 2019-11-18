@@ -481,75 +481,84 @@ static QIMFileManager *_newfileManager = nil;
 }
 
 - (void)qim_uploadVideoPath:(NSString *)LocalVideoOutPath forMessage:(QIMMessageModel *)message {
-    NSString *videoMsg = message.message;
-    NSDictionary *localVideoDic = [[QIMJSONSerializer sharedInstance] deserializeObject:videoMsg error:nil];
-    BOOL videoConfigUseAble = [[[QIMUserCacheManager sharedInstance] userObjectForKey:@"VideoConfigUseAble"] boolValue];
-    if (videoConfigUseAble == YES) {
-        NSDictionary *videoExt = [[QIMJSONSerializer sharedInstance] deserializeObject:message.message error:nil];
-        [self qim_uploadVideo:LocalVideoOutPath videoDic:videoExt withCallBack:^(NSDictionary *resultVideoData, BOOL needTrans) {
-            if (resultVideoData.count) {
-                NSString *firstThumbUrl = [resultVideoData objectForKey:@"firstThumbUrl"];
-                NSString *ThumbName = [resultVideoData objectForKey:@"firstThumb"];
-                NSString *videoUrl = [resultVideoData objectForKey:@"transUrl"];
-                NSDictionary *transFileInfo = [resultVideoData objectForKey:@"transFileInfo"];
-                NSString *videoName = [transFileInfo objectForKey:@"videoName"];
-                long long videoSize = [[transFileInfo objectForKey:@"videoSize"] longLongValue];
-                NSString *height = [transFileInfo objectForKey:@"height"];
-                NSString *width = [transFileInfo objectForKey:@"width"];
-                NSInteger Duration = [[transFileInfo objectForKey:@"duration"] integerValue] / 1000;
-                NSString *fileSizeStr = [QIMStringTransformTools qim_CapacityTransformStrWithSize:videoSize];
-                
-                NSString *onlineUrl = [resultVideoData objectForKey:@"onlineUrl"];
-                
-                NSMutableDictionary *newVideoDic = [NSMutableDictionary dictionaryWithCapacity:1];
-                [newVideoDic setQIMSafeObject:@(Duration) forKey:@"Duration"];
-                [newVideoDic setQIMSafeObject:videoName forKey:@"FileName"];
-                [newVideoDic setQIMSafeObject:fileSizeStr forKey:@"FileSize"];
-                [newVideoDic setQIMSafeObject:videoUrl forKey:@"FileUrl"];
-                [newVideoDic setQIMSafeObject:height forKey:@"Height"];
-                [newVideoDic setQIMSafeObject:ThumbName forKey:@"ThumbName"];
-                [newVideoDic setQIMSafeObject:firstThumbUrl forKey:@"ThumbUrl"];
-                [newVideoDic setQIMSafeObject:width forKey:@"Width"];
-                [newVideoDic setQIMSafeObject:@(needTrans) forKey:@"newVideo"];
-                
-                NSString *msg = [[QIMJSONSerializer sharedInstance] serializeObject:newVideoDic];
-                NSString *msgContent = [NSString stringWithFormat:@"发送了一段视频. [obj type=\"url\" value=\"%@\"]", onlineUrl];
-                message.message = msgContent;
-                message.extendInformation = msg;
-                message.messageType = QIMMessageType_SmallVideo;
-                if (message.chatType == ChatType_PublicNumber) {
-                    [[QIMManager sharedInstance] sendMessage:msg ToPublicNumberId:message.to WithMsgId:message.messageId WithMsgType:message.messageType];
-                } else if (message.chatType == ChatType_Consult || message.chatType == ChatType_ConsultServer) {
-                    [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
-                } else {
-                    [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        NSString *videoMsg = message.message;
+        NSDictionary *localVideoDic = [[QIMJSONSerializer sharedInstance] deserializeObject:videoMsg error:nil];
+        BOOL videoConfigUseAble = [[[QIMUserCacheManager sharedInstance] userObjectForKey:@"VideoConfigUseAble"] boolValue];
+        if (videoConfigUseAble == YES) {
+            NSDictionary *videoExt = [[QIMJSONSerializer sharedInstance] deserializeObject:message.message error:nil];
+            [self qim_uploadVideo:LocalVideoOutPath videoDic:videoExt withCallBack:^(NSDictionary *resultVideoData, BOOL needTrans) {
+                if (resultVideoData.count) {
+                    NSString *firstThumbUrl = [resultVideoData objectForKey:@"firstThumbUrl"];
+                    NSString *ThumbName = [resultVideoData objectForKey:@"firstThumb"];
+                    NSString *videoUrl = [resultVideoData objectForKey:@"transUrl"];
+                    NSDictionary *transFileInfo = [resultVideoData objectForKey:@"transFileInfo"];
+                    NSString *videoName = [transFileInfo objectForKey:@"videoName"];
+                    long long videoSize = [[transFileInfo objectForKey:@"videoSize"] longLongValue];
+                    NSString *height = [transFileInfo objectForKey:@"height"];
+                    NSString *width = [transFileInfo objectForKey:@"width"];
+                    NSInteger Duration = [[transFileInfo objectForKey:@"duration"] integerValue] / 1000;
+                    NSString *fileSizeStr = [QIMStringTransformTools qim_CapacityTransformStrWithSize:videoSize];
+                    
+                    NSString *onlineUrl = [resultVideoData objectForKey:@"onlineUrl"];
+                    
+                    NSMutableDictionary *newVideoDic = [NSMutableDictionary dictionaryWithCapacity:1];
+                    [newVideoDic setQIMSafeObject:@(Duration) forKey:@"Duration"];
+                    [newVideoDic setQIMSafeObject:videoName forKey:@"FileName"];
+                    [newVideoDic setQIMSafeObject:fileSizeStr forKey:@"FileSize"];
+                    [newVideoDic setQIMSafeObject:videoUrl forKey:@"FileUrl"];
+                    [newVideoDic setQIMSafeObject:height forKey:@"Height"];
+                    [newVideoDic setQIMSafeObject:ThumbName forKey:@"ThumbName"];
+                    [newVideoDic setQIMSafeObject:firstThumbUrl forKey:@"ThumbUrl"];
+                    [newVideoDic setQIMSafeObject:width forKey:@"Width"];
+                    [newVideoDic setQIMSafeObject:@(needTrans) forKey:@"newVideo"];
+                    
+                    NSString *msg = [[QIMJSONSerializer sharedInstance] serializeObject:newVideoDic];
+                    NSString *msgContent = [NSString stringWithFormat:@"发送了一段视频. [obj type=\"url\" value=\"%@\"]", onlineUrl];
+                    message.message = msgContent;
+                    message.extendInformation = msg;
+                    message.messageType = QIMMessageType_SmallVideo;
+                    if (message.chatType == ChatType_PublicNumber) {
+                        [[QIMManager sharedInstance] sendMessage:msg ToPublicNumberId:message.to WithMsgId:message.messageId WithMsgType:message.messageType];
+                    } else if (message.chatType == ChatType_Consult || message.chatType == ChatType_ConsultServer) {
+                        [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
+                    } else {
+                        [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
+                    }
                 }
-            }
-        }];
-    } else {
-        //老版本上传视频
-        NSDictionary *videoExt = [[QIMJSONSerializer sharedInstance] deserializeObject:message.message error:nil];
-        [self qim_uploadFileWithFilePath:LocalVideoOutPath WithCallback:^(NSString *fileUrl) {
-            if (fileUrl.length > 0) {
-                NSMutableDictionary *newVideoDic = [NSMutableDictionary dictionaryWithDictionary:videoExt];
-                [newVideoDic setQIMSafeObject:fileUrl forKey:@"FileUrl"];
-                [newVideoDic setQIMSafeObject:@(NO) forKey:@"newVideo"];
-                
-                NSString *msg = [[QIMJSONSerializer sharedInstance] serializeObject:newVideoDic];
-                NSString *msgContent = [NSString stringWithFormat:@"发送了一段视频. [obj type=\"url\" value=\"%@\"]", fileUrl];
-                message.message = msgContent;
-                message.extendInformation = msg;
-                message.messageType = QIMMessageType_SmallVideo;
-                if (message.chatType == ChatType_PublicNumber) {
-                    [[QIMManager sharedInstance] sendMessage:msg ToPublicNumberId:message.to WithMsgId:message.messageId WithMsgType:message.messageType];
-                } else if (message.chatType == ChatType_Consult || message.chatType == ChatType_ConsultServer) {
-                    [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
-                } else {
-                    [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
-                }
-            }
-        }];
-    }
+            }];
+        } else {
+            //老版本上传视频
+            NSDictionary *videoExt = [[QIMJSONSerializer sharedInstance] deserializeObject:message.message error:nil];
+            NSString *pathExtension = [[LocalVideoOutPath lastPathComponent] pathExtension];
+            NSString *fileName = [[LocalVideoOutPath lastPathComponent] stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@".%@", pathExtension] withString:@"_thumb.jpg"];
+            NSString *thumbFilePath = [LocalVideoOutPath stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@".%@", pathExtension] withString:@"_thumb.jpg"];
+            [self qim_uploadImageWithImagePath:thumbFilePath withCallback:^(NSString *imageUrl) {
+                NSString *thumbImageUrl = imageUrl;
+                [self qim_uploadFileWithFilePath:LocalVideoOutPath WithCallback:^(NSString *fileUrl) {
+                    if (fileUrl.length > 0) {
+                        NSMutableDictionary *newVideoDic = [NSMutableDictionary dictionaryWithDictionary:videoExt];
+                        [newVideoDic setQIMSafeObject:fileUrl forKey:@"FileUrl"];
+                        [newVideoDic setQIMSafeObject:@(NO) forKey:@"newVideo"];
+                        [newVideoDic setQIMSafeObject:(thumbImageUrl.length > 0) ? thumbImageUrl : @"" forKey:@"ThumbUrl"];
+                        
+                        NSString *msg = [[QIMJSONSerializer sharedInstance] serializeObject:newVideoDic];
+                        NSString *msgContent = [NSString stringWithFormat:@"发送了一段视频. [obj type=\"url\" value=\"%@\"]", fileUrl];
+                        message.message = msgContent;
+                        message.extendInformation = msg;
+                        message.messageType = QIMMessageType_SmallVideo;
+                        if (message.chatType == ChatType_PublicNumber) {
+                            [[QIMManager sharedInstance] sendMessage:msg ToPublicNumberId:message.to WithMsgId:message.messageId WithMsgType:message.messageType];
+                        } else if (message.chatType == ChatType_Consult || message.chatType == ChatType_ConsultServer) {
+                            [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
+                        } else {
+                            [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
+                        }
+                    }
+                }];
+            }];
+        }
+    });
 }
 
 #pragma mark - 文件
