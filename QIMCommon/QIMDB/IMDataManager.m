@@ -1091,4 +1091,29 @@ static dispatch_once_t _onceDBToken;
     return platForm;
 }
 
+- (NSArray *)qimDB_getAllTables {
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:3];
+    [[self dbInstance] inDatabase:^(QIMDataBase * _Nonnull database) {
+        NSString *sql = @"select tbl_name from sqlite_master where type='table';";
+        DataReader *reader = [database executeReader:sql withParameters:nil];
+        NSMutableArray *tempList = [NSMutableArray arrayWithCapacity:3];
+        while ([reader read]) {
+            NSString *tbl_name = [reader objectForColumnIndex:0];
+            [tempList addObject:tbl_name];
+        }
+        for (NSString *tab_name in tempList) {
+            NSString *sql = [NSString stringWithFormat:@"select count(*) from %@", tab_name];
+            DataReader *reader = [database executeReader:sql withParameters:nil];
+            if ([reader read]) {
+                NSInteger count = [[reader objectForColumnIndex:0] integerValue];
+                NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithCapacity:0];
+                [dic setQIMSafeObject:@(count) forKey:tab_name];
+                [array addObject:dic];
+            }
+            [reader close];
+        }
+    }];
+    return array;
+}
+
 @end

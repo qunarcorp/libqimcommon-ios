@@ -850,6 +850,7 @@
                 [[QIMUserCacheManager sharedInstance] setUserObject:@(videoFileSize) forKey:@"videoFileSize"];
                 [[QIMUserCacheManager sharedInstance] setUserObject:@(videoTimeLen) forKey:@"videoTimeLen"];
                 [[QIMUserCacheManager sharedInstance] setUserObject:@(videoMaxTimeLen) forKey:@"videoMaxTimeLen"];
+                [[QIMUserCacheManager sharedInstance] setUserObject:@(300000) forKey:@"videoMaxTimeLen"];
             }
         }
     } withFailedCallBack:^(NSError *error) {
