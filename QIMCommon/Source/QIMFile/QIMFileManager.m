@@ -334,7 +334,6 @@ static QIMFileManager *_newfileManager = nil;
     });
     [[QIMManager sharedInstance] uploadFileRequest:destUrl withFileData:fileData withProgressBlock:^(float progressValue) {
         NSLog(@"privateUpLoadImage : %lf", progressValue);
-        //mark by AFN
         //这里上报一下上传图片的进度，渲染图片进度
         dispatch_async(dispatch_get_main_queue(), ^{
             [[NSNotificationCenter defaultCenter] postNotificationName:kQIMUploadImageProgress object:@{@"ImageUploadKey":fileName, @"ImageUploadProgress":@(progressValue)}];
@@ -380,7 +379,19 @@ static QIMFileManager *_newfileManager = nil;
             messageNewBody = [NSString stringWithFormat:@"[obj type=\"image\" value=\"%@/%@\" width=%f height=%f]", [[QIMKit sharedInstance] qimNav_InnerFileHttpHost], imageUrl, width, height];
         }
         message.message = messageNewBody;
-        [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
+#if __has_include("QIMNoteManager.h")
+        if (message.encryptChatState == QIMEncryptChatStateEncrypting) {
+            NSString *encrypeMsg = [[QIMEncryptChat sharedInstance] encryptMessageWithMsgType:message.messageType WithOriginBody:messageNewBody WithOriginExtendInfo:nil WithUserId:message.to];
+            message.message = @"iOS加密消息";
+            message.extendInformation = encrypeMsg;
+            message.messageType = QIMMessageType_Encrypt;
+        }
+#endif
+        if (message.chatType == ChatType_ConsultServer || message.chatType == ChatType_Consult) {
+            [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
+        } else {
+            [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
+        }
     }
 }
 
@@ -518,6 +529,16 @@ static QIMFileManager *_newfileManager = nil;
                     message.message = msgContent;
                     message.extendInformation = msg;
                     message.messageType = QIMMessageType_SmallVideo;
+                    
+#if __has_include("QIMNoteManager.h")
+                    if (message.encryptChatState == QIMEncryptChatStateEncrypting) {
+                        NSString *encrypeMsg = [[QIMEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_SmallVideo WithOriginBody:msgContent WithOriginExtendInfo:msg WithUserId:message.to];
+                        message.message = @"iOS加密视频消息";
+                        message.extendInformation = encrypeMsg;
+                        message.messageType = QIMMessageType_Encrypt;
+                    }
+#endif
+                    
                     if (message.chatType == ChatType_PublicNumber) {
                         [[QIMManager sharedInstance] sendMessage:msg ToPublicNumberId:message.to WithMsgId:message.messageId WithMsgType:message.messageType];
                     } else if (message.chatType == ChatType_Consult || message.chatType == ChatType_ConsultServer) {
@@ -547,6 +568,16 @@ static QIMFileManager *_newfileManager = nil;
                         message.message = msgContent;
                         message.extendInformation = msg;
                         message.messageType = QIMMessageType_SmallVideo;
+                        
+#if __has_include("QIMNoteManager.h")
+                        if (message.encryptChatState == QIMEncryptChatStateEncrypting) {
+                            NSString *encrypeMsg = [[QIMEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_SmallVideo WithOriginBody:msgContent WithOriginExtendInfo:msg WithUserId:message.to];
+                            message.message = @"iOS加密视频消息S";
+                            message.extendInformation = encrypeMsg;
+                            message.messageType = QIMMessageType_Encrypt;
+                        }
+#endif
+                        
                         if (message.chatType == ChatType_PublicNumber) {
                             [[QIMManager sharedInstance] sendMessage:msg ToPublicNumberId:message.to WithMsgId:message.messageId WithMsgType:message.messageType];
                         } else if (message.chatType == ChatType_Consult || message.chatType == ChatType_ConsultServer) {
@@ -620,6 +651,10 @@ static QIMFileManager *_newfileManager = nil;
             [self privateUpLoadFile:fileData WithFileKey:fileKey withMsgId:messageId WithMsgType:5 WithPathExtension:fileExt withCallBack:callback];
         }
     }];
+}
+
+- (void)qim_uploadFileWithFileData:(NSData *)fileData WithPathExtension:(NSString *)extension WithCallback:(QIMKitUploadFileNewRequestSuccessedBlock)callback {
+    [self qim_uploadFileWithFileData:fileData withMsgId:[QIMUUIDTools UUID] WithPathExtension:extension WithCallback:callback];
 }
 
 #pragma mark - 文件Private Method
@@ -712,17 +747,16 @@ static QIMFileManager *_newfileManager = nil;
         [mulDic removeObjectForKey:@"Uploading"];
 
         NSString *msgContent = [[QIMJSONSerializer sharedInstance] serializeObject:mulDic];
-        //QIMSDKTODO
-        //    if (encryptState == QTEncryptChatStateEncrypting) {
-        //        NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_File WithOriginBody:msgContent WithOriginExtendInfo:msgContent WithUserId:self.message.to];
-        //        self.message.message = @"加密消息记录消息iOS";
-        //        self.message.extendInformation = encryptContent;
-        //        self.message.messageType = QIMMessageType_Encrypt;
-        //    } else {
         message.extendInformation = msgContent;
         message.message = msgContent;//@"您收到了一个文件，请升级客户端查看。";
-        //    }
         
+#if __has_include("QIMNoteManager.h")
+        if (message.encryptChatState == QIMEncryptChatStateEncrypting) {
+            NSString *encrypeMsg = [[QIMEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_File WithOriginBody:msgContent WithOriginExtendInfo:msgContent WithUserId:message.to];
+            message.message = @"加密消息记录消息iOS";
+            message.extendInformation = encrypeMsg;
+        }
+#endif
         if (message.chatType == ChatType_ConsultServer || message.chatType == ChatType_Consult) {
             [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
         } else {
@@ -739,6 +773,15 @@ static QIMFileManager *_newfileManager = nil;
         NSString *msgContent = [[QIMJSONSerializer sharedInstance] serializeObject:mulDic];
         message.message = msgContent;
         
+#if __has_include("QIMNoteManager.h")
+        if (message.encryptChatState == QIMEncryptChatStateEncrypting) {
+            NSString *encrypeMsg = [[QIMEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_Voice WithOriginBody:msgContent WithOriginExtendInfo:nil WithUserId:message.to];
+            message.message = @"iOS加密语音消息";
+            message.extendInformation = encrypeMsg;
+            message.messageType = QIMMessageType_Encrypt;
+        }
+#endif
+
         if (message.chatType == ChatType_ConsultServer || message.chatType == ChatType_Consult) {
             [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
         } else {
@@ -754,17 +797,16 @@ static QIMFileManager *_newfileManager = nil;
         NSString *shareurl = [NSString stringWithFormat:@"%@?jdata=%@", [[QIMNavConfigManager sharedInstance] shareUrl], [jDataStr qim_URLEncodedString]];
         [mulDic setQIMSafeObject:shareurl forKey:@"linkurl"];
         NSString *msgExtendInfoStr = [[QIMJSONSerializer sharedInstance] serializeObject:mulDic];
-        //QIMSDKTODO
-        //        if (encryptState == QTEncryptChatStateEncrypting) {
-        //            NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_CommonTrdInfo WithOriginBody:@"您收到了一个消息记录文件文件，请升级客户端查看。" WithOriginExtendInfo:msgExtendInfoStr WithUserId:self.message.to];
-        //            self.message.message = @"加密消息记录消息iOS";
-        //            self.message.extendInformation = encryptContent;
-        //            self.message.messageType = QIMMessageType_Encrypt;
-        //        } else {
         message.extendInformation = msgExtendInfoStr;
         message.message = @"您收到了一个消息记录文件文件，请升级客户端查看。";
-        //        }
-        
+#if __has_include("QIMNoteManager.h")
+        if (message.encryptChatState == QIMEncryptChatStateEncrypting) {
+            NSString *encrypeMsg = [[QIMEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_Voice WithOriginBody:@"您收到了一个消息记录文件文件，请升级客户端查看。" WithOriginExtendInfo:msgExtendInfoStr WithUserId:message.to];
+            message.message = @"iOS加密消息记录";
+            message.extendInformation = encrypeMsg;
+            message.messageType = QIMMessageType_Encrypt;
+        }
+#endif
         if (message.chatType == ChatType_Consult || message.chatType == ChatType_ConsultServer) {
             [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
         } else {
@@ -775,17 +817,17 @@ static QIMFileManager *_newfileManager = nil;
         NSMutableDictionary *mulDic = [NSMutableDictionary dictionaryWithDictionary:dic];
         [mulDic setQIMSafeObject:fileUrl forKey:@"fileUrl"];
         NSString *msgExtendInfo = [[QIMJSONSerializer sharedInstance] serializeObject:mulDic];
-        //QIMSDKTODO
-        //        if (encryptState == QTEncryptChatStateEncrypting) {
-        //            NSString *encryptContent = [[QTEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_LocalShare WithOriginBody:[[self message] originalMessage] WithOriginExtendInfo:msgExtendInfo WithUserId:self.message.to];
-        //            self.message.message = @"加密地理位置共享消息iOS";
-        //            self.message.extendInformation = encryptContent;
-        //            self.message.messageType = QIMMessageType_Encrypt;
-        //        } else {
         message.extendInformation = msgExtendInfo;
         message.message = [message originalMessage];
-        //        }
         
+#if __has_include("QIMNoteManager.h")
+        if (message.encryptChatState == QIMEncryptChatStateEncrypting) {
+            NSString *encrypeMsg = [[QIMEncryptChat sharedInstance] encryptMessageWithMsgType:QIMMessageType_LocalShare WithOriginBody:[message originalMessage] WithOriginExtendInfo:msgExtendInfo WithUserId:message.to];
+            message.message = @"iOS加密地理位置共享消息";
+            message.extendInformation = encrypeMsg;
+            message.messageType = QIMMessageType_Encrypt;
+        }
+#endif
         if (message.chatType == ChatType_Consult) {
             [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
         } else if (message.chatType == ChatType_ConsultServer) {

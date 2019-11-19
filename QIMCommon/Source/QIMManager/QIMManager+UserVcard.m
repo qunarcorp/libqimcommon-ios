@@ -583,7 +583,6 @@ static NSMutableArray *cacheUserCardHttpList = nil;
         NSString *destUrl = [NSString stringWithFormat:@"%@/domain/search_vcard?keyword=%@&server=%@&c=qtalk&u=%@&k=%@&p=iphone&v=%@", searchStr, [[QIMNavConfigManager sharedInstance] httpHost], [self getDomain], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
         destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         
-        //mark by AFN
         [self sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
             NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
             BOOL ret = [[result objectForKey:@"ret"] boolValue];
@@ -602,25 +601,7 @@ static NSMutableArray *cacheUserCardHttpList = nil;
                 callback(nil);
             }
         }];
-        
-        /*
-        NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-        ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-        [request startSynchronous];
-        
-        NSError *error = [request error];
-        if ([request responseStatusCode] == 200 && !error) {
-            NSData *responseData = [request responseData];
-            NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-            BOOL ret = [[result objectForKey:@"ret"] boolValue];
-            if (ret) {
-                NSArray *msgList = [result objectForKey:@"data"];
-                return msgList;
-            }
-        }
-         */
     }
-//    return nil;
 }
 
 - (NSArray *)searchUserListBySearchStr:(NSString *)searchStr {
@@ -745,42 +726,7 @@ static NSMutableArray *cacheUserCardHttpList = nil;
                 callback(nil);
             }
         }];
-        //Mark by AFN
-        /*
-        ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-        [request appendPostData:requestData];
-        [request setRequestMethod:@"POST"];
-        [request startSynchronous];
-        NSError *error = [request error];
-        if ([request responseStatusCode] == 200 && !error) {
-            NSData *responseData = [request responseData];
-            NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-            BOOL ret = [[result objectForKey:@"errcode"] boolValue];
-            if (!ret) {
-                
-                NSMutableArray *userList = [NSMutableArray arrayWithCapacity:20];
-                NSArray *users = [result objectForKey:@"data"][@"users"];
-                for (NSDictionary *user in users) {
-                    
-                    NSString *icon = user[@"icon"];
-                    NSString *label = user[@"label"];
-                    NSString *content = user[@"content"];
-                    NSString *uri = user[@"uri"];
-                    if (icon && label && content && uri) {
-                        
-                        NSDictionary *userDict = @{@"icon": icon, @"Name": label, @"DescInfo": content, @"XmppId": uri};
-                        if (userDict) {
-                            
-                            [userList addObject:userDict];
-                        }
-                    }
-                }
-                return userList;
-            }
-        }
-        */
     }
-//    return nil;
 }
 
 @end

@@ -143,7 +143,6 @@
     
     [request setHTTPRequestHeaders:cookieProperties];
     [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
-        //mark by AFN
         if (pCallback) {
             pCallback(progress.fractionCompleted);
         }
@@ -154,9 +153,8 @@
                 sCallback(responseData);
             }
         } else {
-            NSData *responseData = [response data];
             if (sCallback) {
-                sCallback(responseData);
+                sCallback(nil);
             }
         }
     } failure:^(NSError *error) {
@@ -187,7 +185,6 @@
     [request setTimeoutInterval:600];
     [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
-            //mark by AFN
             pCallback(progress.fractionCompleted);
         }
     } complete:^(QIMHTTPResponse *response) {
@@ -197,9 +194,8 @@
                 sCallback(responseData);
             }
         } else {
-            NSData *responseData = [response data];
             if (sCallback) {
-                sCallback(responseData);
+                sCallback(nil);
             }
         }
     } failure:^(NSError *error) {
@@ -226,7 +222,6 @@
     [request setTimeoutInterval:600];
     [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
-            //mark by AFN
             pCallback(progress.fractionCompleted);
         }
     } complete:^(QIMHTTPResponse *response) {
@@ -236,9 +231,8 @@
                 sCallback(responseData);
             }
         } else {
-            NSData *responseData = [response data];
             if (sCallback) {
-                sCallback(responseData);
+                sCallback(nil);
             }
         }
     } failure:^(NSError *error) {
@@ -264,7 +258,6 @@
     [request setTimeoutInterval:600];
     [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
-            //mark by AFN
             pCallback(progress.fractionCompleted);
         }
     } complete:^(QIMHTTPResponse *response) {
@@ -274,9 +267,8 @@
                 sCallback(responseData);
             }
         } else {
-            NSData *responseData = [response data];
             if (sCallback) {
-                sCallback(responseData);
+                sCallback(nil);
             }
         }
     } failure:^(NSError *error) {
@@ -341,7 +333,6 @@
     [request setTimeoutInterval:600];
     [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
         if (pCallback) {
-            //mark by AFN
             pCallback(progress.fractionCompleted);
         }
     } complete:^(QIMHTTPResponse *response) {
@@ -351,9 +342,8 @@
                 sCallback(responseData);
             }
         } else {
-            NSData *responseData = [response data];
             if (sCallback) {
-                sCallback(responseData);
+                sCallback(nil);
             }
         }
     } failure:^(NSError *error) {

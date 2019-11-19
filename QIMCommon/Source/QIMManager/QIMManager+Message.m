@@ -936,26 +936,6 @@
             callback(0);
         }
     }];
-    //Mark by AFN
-    /*
-    NSURL *url = [NSURL URLWithString:@"http://u.package.qunar.com/user/message/countUnreply.json"];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:url];
-    [request addRequestHeader:@"Content-type" value:@"application/x-www-form-urlencoded;"];
-    [request setRequestMethod:@"GET"];
-    [request setCachePolicy:ASIDoNotReadFromCacheCachePolicy];
-    [request startSynchronous];
-    NSError *error = [request error];
-    if ([request responseStatusCode] == 200 && !error) {
-        NSData *responseData = [request responseData];
-        NSError *errol = nil;
-        NSDictionary *resDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
-        if ([resDic objectForKey:@"data"] != [NSNull null]) {
-            int count = [[[resDic objectForKey:@"data"] objectForKey:@"count"] boolValue];
-            return count;
-        }
-    }
-    return 0;
-    */
 }
 
 - (void)clearSystemMsgNotReadWithJid:(NSString *)jid {

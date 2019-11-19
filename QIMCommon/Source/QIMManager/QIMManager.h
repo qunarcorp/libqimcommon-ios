@@ -422,9 +422,9 @@
 
 - (void)clearcache;
 
-- (BOOL)setStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType;
+- (void)setStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
-- (BOOL)removeStickWithCombineJid:(NSString *)jid WithChatType:(ChatType)chatType;
+- (void)removeStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
 - (BOOL)isStickWithCombineJid:(NSString *)jid;
 

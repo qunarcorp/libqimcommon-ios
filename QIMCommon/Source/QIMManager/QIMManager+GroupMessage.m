@@ -304,30 +304,6 @@
             callback(nil);
         }
     }];
-    /*
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
-    [request setUseCookiePersistence:NO];
-    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
-    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
-    [cookieProperties setObject:@"application/json" forKey:@"Content-type"];
-    [request setRequestHeaders:cookieProperties];
-    QIMVerboseLog(@"JSON请求群翻页历史记录 Ckey 为:%@", cookieProperties);
-    [request appendPostData:requestData];
-
-    [request startSynchronous];
-    NSError *error = [request error];
-    NSDictionary *result = nil;
-    if ([request responseStatusCode] == 200 && !error) {
-        NSData *responseData = [request responseData];
-        result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        BOOL ret = [[result objectForKey:@"ret"] boolValue];
-        if (ret) {
-            return [result objectForKey:@"data"];
-        }
-    }
-    return nil;
-    */
 }
 
 //更新群阅读指针

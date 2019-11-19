@@ -264,36 +264,6 @@
             callback(NO);
         }
     }];
-    //Mark by AFN
-    /*
-     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
-     QIMVerboseLog(@"批量远端个人配置url : %@", destUrl);
-     [request setRequestMethod:@"POST"];
-     [request setUseCookiePersistence:NO];
-     
-     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
-     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
-     [request setRequestHeaders:cookieProperties];
-     QIMVerboseLog(@"批量远端个人配置q_ckey : %@", requestHeaders);
-    QIMVerboseLog(@"批量远端个人配置body体 : %@", [[QIMJSONSerializer sharedInstance] serializeObject:bodyProperties]);
-    [request addRequestHeader:@"Content-type" value:@"application/json;"];
-    [request appendPostData:requestData];
-    [request startSynchronous];
-    NSError *error = [request error];
-    if ([request responseStatusCode] == 200 && !error) {
-        NSData *responseData = [request responseData];
-        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        if ([[result objectForKey:@"ret"] boolValue]) {
-            [self insertNewClientConfigInfoWithData:result];
-            [self postUpdateNSNotificationWithType:type];
-            return YES;
-        }
-    }  else {
-        QIMErrorLog(@"批量远端个人配置返回失败 : %ld - Error : %@", [request responseStatusCode], error);
-    }
-    return NO;
-    */
 }
 
 - (void)updateRemoteClientConfigWithType:(QIMClientConfigType)type WithSubKey:(NSString *)subKey WithConfigValue:(NSString *)configValue WithDel:(BOOL)delFlag withCallback:(QIMKitUpdateRemoteClientConfig)callback {
@@ -334,37 +304,6 @@
             callback(NO);
         }
     }];
-    //Mark by AFN
-    /*
-     ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
-     [request setRequestMethod:@"POST"];
-     [request setUseCookiePersistence:NO];
-     
-     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-     NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
-     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
-     [request setRequestHeaders:cookieProperties];
-     QIMVerboseLog(@"单独设置远端个人配置q_ckey : %@", requestHeaders);
-
-    QIMVerboseLog(@"单独设置远端个人配置body体 : %@", [[QIMJSONSerializer sharedInstance] serializeObject:bodyProperties]);
-
-    [request addRequestHeader:@"Content-type" value:@"application/json;"];
-    [request appendPostData:requestData];
-    [request startSynchronous];
-    NSError *error = [request error];
-    if ([request responseStatusCode] == 200 && !error) {
-        NSData *responseData = [request responseData];
-        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        if ([[result objectForKey:@"ret"] boolValue]) {
-            [self insertNewClientConfigInfoWithData:result];
-            [self postUpdateNSNotificationWithType:type WithSubKey:subKey WithConfigValue:configValue];
-            return YES;
-        }
-    } else {
-        QIMVerboseLog(@"单独设置远端个人配置返回失败 : %ld - Error : %@", [request responseStatusCode], error);
-    }
-    return NO;
-    */
 }
 
 - (void)getRemoteClientConfig {
@@ -433,26 +372,21 @@
     }
 }
 
-- (BOOL)setStarOrblackContact:(NSString *)subkey ConfigKey:(NSString *)pkey Flag:(BOOL)value {
-    //mark by AFN
-    __block BOOL success = NO;
+- (void)setStarOrblackContact:(NSString *)subkey ConfigKey:(NSString *)pkey Flag:(BOOL)value withCallback:(QIMKitUpdateRemoteClientConfig)callback {
     if([@"kStarContact" isEqualToString:pkey]){
-        [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKStarContact WithSubKey:subkey WithConfigValue:value?@"1":@"0" WithDel:!value withCallback:^(BOOL successed) {
-            success = successed;
-        }];
+        [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKStarContact WithSubKey:subkey WithConfigValue:value?@"1":@"0" WithDel:!value withCallback:callback];
     } else if([@"kBlackList" isEqualToString:pkey]){
-        [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKBlackList WithSubKey:subkey WithConfigValue:value?@"1":@"0" WithDel:!value withCallback:^(BOOL successed) {
-            success = successed;
-        }];
+        [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKBlackList WithSubKey:subkey WithConfigValue:value?@"1":@"0" WithDel:!value withCallback:callback];
     } else{
-        success = NO;
+        
     }
-    return success;
 }
 
-- (BOOL)setStarOrblackContacts:(NSDictionary *)map ConfigKey:(NSString *)pkey Flag:(BOOL)value {
+- (void)setStarOrblackContacts:(NSDictionary *)map ConfigKey:(NSString *)pkey Flag:(BOOL)value withCallback:(QIMKitUpdateRemoteClientConfig)callback {
     if(map == nil){
-        return YES;
+        if (callback) {
+            callback(NO);
+        }
     }
     QIMClientConfigType *configType = QIMClientConfigTypeKStarContact;
     if([@"kBlackList" isEqualToString:pkey]){
@@ -467,25 +401,15 @@
         [dict setQIMSafeObject:configvalue forKey:@"value"];
         [deleteStickList addObject:dict];
     }
-    //mark by AFN
-    __block BOOL success = NO;
-    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:configType BatchProcessConfigInfo:deleteStickList WithDel:!value withCallback:^(BOOL successed) {
-        success = successed;
-    }];
-    return success;
+    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:configType BatchProcessConfigInfo:deleteStickList WithDel:!value withCallback:callback];
 }
 
 - (NSString *)getClientNotificationSoundName {
     return [[QIMManager sharedInstance] getClientConfigInfoWithType:QIMClientConfigTypeKNotificationSound WithSubKey:@"ios"];
 }
 
-- (BOOL)setClientNotificationSound:(NSString *)soundName {
-    //mark by AFN
-    __block BOOL success = NO;
-    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKNotificationSound WithSubKey:@"ios" WithConfigValue:soundName WithDel:NO withCallback:^(BOOL successed) {
-        success = successed;
-    }];
-    return success;
+- (void)setClientNotificationSound:(NSString *)soundName withCallback:(QIMKitUpdateRemoteClientConfig)callback {
+    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKNotificationSound WithSubKey:@"ios" WithConfigValue:soundName WithDel:NO withCallback:callback];
 }
 
 @end

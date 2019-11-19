@@ -335,7 +335,7 @@
  
  @param jid 需要置顶的jid
  */
-- (BOOL)setStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType;
+- (void)setStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
 /**
  置顶/ 移除置顶
@@ -343,7 +343,7 @@
  @param jid 需要置顶的jid
  @param chatType 会话类型
  */
-- (BOOL)removeStickWithCombineJid:(NSString *)jid WithChatType:(ChatType)chatType;
+- (void)removeStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
 /**
  是否已置顶

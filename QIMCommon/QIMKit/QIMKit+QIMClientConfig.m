@@ -70,12 +70,12 @@
     return [[QIMManager sharedInstance] isStarOrBlackContact:subkey ConfigKey:pkey];
 }
 
-- (BOOL)setStarOrblackContact:(NSString *)subkey ConfigKey:(NSString *)pkey Flag:(BOOL)value {
-    return [[QIMManager sharedInstance] setStarOrblackContact:subkey ConfigKey:pkey Flag:value];
+- (void)setStarOrblackContact:(NSString *)subkey ConfigKey:(NSString *)pkey Flag:(BOOL)value withCallback:(QIMKitUpdateRemoteClientConfig)callback {
+    [[QIMManager sharedInstance] setStarOrblackContact:subkey ConfigKey:pkey Flag:value withCallback:callback];
 }
 
-- (BOOL)setStarOrblackContacts:(NSDictionary *)map ConfigKey:(NSString *)pkey Flag:(BOOL)value{
-    return [[QIMManager sharedInstance] setStarOrblackContacts:map ConfigKey:pkey Flag:value];
+- (void)setStarOrblackContacts:(NSDictionary *)map ConfigKey:(NSString *)pkey Flag:(BOOL)value withCallback:(QIMKitUpdateRemoteClientConfig)callback {
+    [[QIMManager sharedInstance] setStarOrblackContacts:map ConfigKey:pkey Flag:value withCallback:callback];
 }
 
 /**
@@ -93,8 +93,8 @@
  @param soundName 提示音文件名
  @return 是否设置成功
  */
-- (BOOL)setClientNotificationSound:(NSString *)soundName {
-    return [[QIMManager sharedInstance] setClientNotificationSound:soundName];
+- (void)setClientNotificationSound:(NSString *)soundName withCallback:(QIMKitUpdateRemoteClientConfig)callback {
+    return [[QIMManager sharedInstance] setClientNotificationSound:soundName withCallback:callback];
 }
 
 @end

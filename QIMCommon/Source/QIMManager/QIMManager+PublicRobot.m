@@ -239,7 +239,6 @@
     NSString *destUrl = [NSString stringWithFormat:@"%@/user_robot?u=%@&k=%@&p=iphone&v=%@", [[QIMNavConfigManager sharedInstance] httpHost], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
     NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:@{@"user": [QIMManager getLastUserName], @"rbt": publicNumberId, @"method": @"add"} error:nil];
 
-    //Mark by AFN
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
         NSError *errol = nil;
         NSDictionary *value = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
@@ -263,30 +262,6 @@
             callback(NO);
         }
     }];
-    /*
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-    [request addRequestHeader:@"content-type" value:@"application/json"];
-    [request appendPostData:data];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSData *responseData = [request responseData];
-        NSError *errol = nil;
-        NSDictionary *value = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
-        if (value.count > 0) {
-            int errorCode = [[value objectForKey:@"errcode"] intValue];
-            NSString *errorMsg = [value objectForKey:@"errmsg"];
-            QIMErrorLog(@"focusOnPublicNumberId error msg %@", errorMsg);
-            if (errorCode == 0) {
-                
-                return YES;
-            }
-        }
-    }
-    return NO;
-    */
 }
 
 - (void)cancelFocusOnPublicNumberId:(NSString *)publicNumberId withCallBack:(QIMKitCancelFocusPublicNumberCallBack)callback {
@@ -324,33 +299,6 @@
             callback(NO);
         }
     }];
-    
-    //Mark by AFN
-    /*
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-    [request addRequestHeader:@"content-type" value:@"application/json"];
-    [request appendPostData:data];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSData *responseData = [request responseData];
-        NSError *errol = nil;
-        NSDictionary *value = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
-        if (value.count > 0) {
-            int errorCode = [[value objectForKey:@"errcode"] intValue];
-            NSString *errorMsg = [value objectForKey:@"errmsg"];
-            QIMErrorLog(@"cancelFocusOnPublicNumberId error msg %@", errorMsg);
-            if (errorCode == 0) {
-                [[IMDataManager qimDB_SharedInstance] qimDB_deletePublicNumberId:publicNumberId];
-                return YES;
-            }
-        }
-        
-    }
-    return NO;
-    */
 }
 
 #pragma mark - 公众号消息
@@ -500,31 +448,6 @@
             callback(nil);
         }
     }];
-    //Mark by AFN
-    /*
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-    [request addRequestHeader:@"content-type" value:@"application/json"];
-    [request appendPostData:data];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSData *responseData = [request responseData];
-        NSError *errol = nil;
-        NSDictionary *value = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
-        if (value.count > 0) {
-            int errorCode = [[value objectForKey:@"errcode"] intValue];
-            id errorMsg = [value objectForKey:@"errmsg"];
-            QIMErrorLog(@"searchRobotByKeyStr error msg %@", errorMsg);
-            if (errorCode == 0) {
-                NSArray *list = [value objectForKey:@"data"];
-                return list;
-            }
-        }
-    }
-    return nil;
-    */
 }
 
 @end
