@@ -320,6 +320,9 @@
 
 - (BOOL)sendConsultMessageId:(NSString *)msgId WithMessage:(NSString *)message WithInfo:(NSString *)info toJid:(NSString *)toJid realToJid:(NSString *)realToJid realFromJid:(NSString *)realFromJid channelInfo:(NSString *)channelInfo WithAppendInfoDict:(NSDictionary *)appendInfoDict chatId:(NSString *)chatId WithMsgTYpe:(int)msgType OutMsgRaw:(NSString **)msgRaw;
 
+- (BOOL)revokeConsultMessageId:(NSString *)msgId WithMessage:(NSString *)message ToJid:(NSString *)jid realToJid:(NSString *)realToJid chatType:(int)chatType;
+
+
 #pragma mark - Share Location
 //开启一个共享位置
 - (BOOL)beginShareLocationToUserId:(NSString *)userId WithShareLocationId:(NSString *)shareLocationId;

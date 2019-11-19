@@ -113,6 +113,17 @@
  */
 - (void)revokeMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid;
 
+
+/**
+ 撤销consult消息
+ @param messageId messageId
+ @param message message
+ @param jid jid
+ 
+ */
+- (void)revokeConsultMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid realToJid:(NSString *)realToJid chatType:(int)chatType;
+
+
 /**
  发送语音消息
  
