@@ -153,7 +153,7 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (NSInteger)qim_dbVersion {
-    return 4;
+    return 5;
 }
 
 - (NSInteger)upgradeDB:(NSInteger)oldVersion {
@@ -182,6 +182,11 @@ static dispatch_once_t _onceDBToken;
         case 3: {
             result = [self upgradeFrom3To4];
             currentOldVersion = 3;
+        }
+            break;
+        case 4: {
+            result = [self upgradeFrom4To5];
+            currentOldVersion = 4;
         }
             break;
         default: {
@@ -269,6 +274,54 @@ static dispatch_once_t _onceDBToken;
         } else {
             result = YES;
         }
+    }];
+    return result;
+}
+
+- (BOOL)upgradeFrom4To5 {
+    QIMVerboseLog(@"upgradeFrom4To5");
+    //之前有一版本在TRIGGER中写入了大量的log，后面应该是更新逻辑失败了，导致log一直在写入，会导致db文件暴增。所以需要删掉TRIGGER，重新创建
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+        
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS sessionlist_unread_insert;" ];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS sessionlist_unread_update;" ];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS lastupdatetime_insert;" ];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS updatetime_update;" ];
+
+        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS sessionlist_unread_insert after insert on IM_Message\
+                  for each row begin\
+                  update IM_SessionList set UnreadCount = case when ((new.ReadState&2)<>2) then UnreadCount+1 else UnreadCount end where XmppId = new.XmppId and RealJid = new.RealJid and new.Direction=1 ;\
+                  update IM_SessionList set LastMessageId = new.MsgId, LastUpdateTime = new.LastUpdateTime where XmppId = new.XmppId and RealJid = new.RealJid and LastUpdateTime <= new.LastUpdateTime;\
+                  end" ];
+        
+        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS sessionlist_unread_update after update of ReadState on IM_Message\
+                  for each row begin\
+                  update IM_SessionList set UnreadCount = case when (new.ReadState& 2) =2 and old.ReadState & 2 <>2 then (case when\ UnreadCount >0 then (unreadcount -1) else 0 end ) when (new.ReadState & 2) <>2 and old.ReadState & 2 =2 then\ UnreadCount + 1 else UnreadCount end where XmppId = new.XmppId and RealJid = new.RealJid and new.Direction = 1;\
+                  end" ];
+        
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS singlelastupdatetime_insert;" ];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS grouplastupdatetime_insert;" ];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS systemlastupdatetime_insert;" ];
+        
+        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS lastupdatetime_insert after insert on IM_Message\
+                  for each row begin\
+                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and (new.ChatType=0 or new.ChatType=4 or new.ChatType=5 or new.ChatType=6)) then new.LastUpdateTime else valueInt end where key='singlelastupdatetime' and type=10 ;\
+                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
+                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
+                  end" ];
+        
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS singlelastupdatetime_update;"];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS grouplastupdatetime_update;"];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS systemlastupdatetime_update;"];
+        
+        //更新时间
+        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS updatetime_update after update of State on IM_Message\
+                  for each row begin\
+                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and (new.ChatType=0 or new.ChatType=4 or new.ChatType=5 or new.ChatType=6)) then new.LastUpdateTime else valueInt end where key='singlelastupdatetime' and type=10 ;\
+                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
+                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
+                  end" ];
     }];
     return result;
 }
@@ -496,27 +549,9 @@ static dispatch_once_t _onceDBToken;
                   update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
                   update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
                   end" ];
-        /*
-        //插入单人消息时更新单人消息最后一条消息时间戳
-        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS singlelastupdatetime_insert after insert on IM_Message\
-                  for each row begin\
-                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and (new.ChatType=0 or new.ChatType=4 or new.ChatType=5 or new.ChatType=6)) then new.LastUpdateTime else valueInt end where key='singlelastupdatetime' and type=10 ;\
-                  end" ];
-        //更新群消息最后一条消息时间戳
-        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS grouplastupdatetime_insert after insert on IM_Message\
-                  for each row begin\
-                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
-                  end" ];
-        //更新系统消息最后一条消息时间戳
-        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS systemlastupdatetime_insert after insert on IM_Message\
-                  for each row begin\
-                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
-                  end" ];
-        */
-        
-        result = [database executeUpdate:@"DROP TRIGGER if EXISTS singlelastupdatetime_update;" ];
-        result = [database executeUpdate:@"DROP TRIGGER if EXISTS grouplastupdatetime_update;" ];
-        result = [database executeUpdate:@"DROP TRIGGER if EXISTS systemlastupdatetime_update;" ];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS singlelastupdatetime_update;"];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS grouplastupdatetime_update;"];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS systemlastupdatetime_update;"];
         //更新时间
         result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS updatetime_update after update of State on IM_Message\
                   for each row begin\
@@ -524,22 +559,6 @@ static dispatch_once_t _onceDBToken;
                   update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
                   update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
                   end" ];
-        /*
-        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS singlelastupdatetime_update after update of State on IM_Message\
-                  for each row begin\
-                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and (new.ChatType=0 or new.ChatType=4 or new.ChatType=5 or new.ChatType=6)) then new.LastUpdateTime else valueInt end where key='singlelastupdatetime' and type=10 ;\
-                  end" ];
-        
-        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS grouplastupdatetime_update after update of State on IM_Message\
-                  for each row begin\
-                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
-                  end" ];
-        
-        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS systemlastupdatetime_update after update of State on IM_Message\
-                  for each row begin\
-                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
-                  end" ];
-        */
     }
     
     //创建公众号表
