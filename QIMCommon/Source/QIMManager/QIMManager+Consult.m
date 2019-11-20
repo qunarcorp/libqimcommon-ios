@@ -164,22 +164,6 @@
             callback(NO);
         }
     }];
-    //AFN
-    /*
-    ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
-    [request addRequestHeader:@"Content-type" value:@"application/x-www-form-urlencoded"];
-    [request setRequestMethod:@"POST"];
-    [request setPostBody:postData];
-    [request startSynchronous];
-    NSError *error = [request error];
-    if ([request responseStatusCode] == 200 && !error) {
-        NSData *responseData = [request responseData];
-        NSDictionary *resDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        BOOL ret = [[resDic objectForKey:@"ret"] boolValue];
-        return ret;
-    }
-    return NO;
-     */
 }
 
 - (NSDictionary *)userSeatStatusDict:(int)userStatus {

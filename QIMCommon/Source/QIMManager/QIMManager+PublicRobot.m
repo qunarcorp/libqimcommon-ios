@@ -121,50 +121,6 @@
             callback(nil);
         }
     }];
-    
-    /*
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-    [request addRequestHeader:@"content-type" value:@"application/json"];
-    [request appendPostData:data];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSData *responseData = [request responseData];
-        NSError *errol = nil;
-        NSDictionary *value = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
-        if (value.count > 0) {
-            int errorCode = [[value objectForKey:@"errcode"] intValue];
-            id errorMsg = [value objectForKey:@"errmsg"];
-            if (errorCode == 0) {
-                NSArray *temp = [value objectForKey:@"data"];
-                NSMutableArray *cardList = [NSMutableArray array];
-                if ([temp isKindOfClass:[NSArray class]]) {
-                    for (NSDictionary *cardDic in temp) {
-                        NSDictionary *bodyDic = [cardDic objectForKey:@"rbt_body"];
-                        if (bodyDic) {
-                            NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithDictionary:bodyDic];
-                            [dictionary setQIMSafeObject:[cardDic objectForKey:@"rbt_ver"] forKey:@"rbt_ver"];
-                            NSString *headerurl = [dictionary objectForKey:@"headerurl"];
-                            NSString *fileName = [[headerurl pathComponents] lastObject];
-                            [dictionary setQIMSafeObject:fileName forKey:@"headerSrc"];
-                            [dictionary setQIMSafeObject:[QIMPinYinForObjc chineseConvertToPinYin:[dictionary objectForKey:@"robotCnName"]] forKey:@"searchIndex"];
-                            [cardList addObject:dictionary];
-                        }
-                    }
-                } else {
-                    QIMErrorLog(@"updatePublicNumberCardByIds error msg %@", errorMsg);
-                }
-                if (flag) {
-                    [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertPublicNumbers:cardList];
-                }
-                return cardList;
-            }
-        }
-    }
-    return nil;
-    */
 }
 
 - (void)updateAllPublicNumberCard {

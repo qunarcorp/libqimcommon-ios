@@ -455,35 +455,6 @@
             callback(nil);
         }
     }];
-    /*
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
-    [request setUseCookiePersistence:NO];
-    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
-    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
-    [cookieProperties setObject:@"application/json" forKey:@"Content-type"];
-    [request setRequestHeaders:cookieProperties];
-    [request appendPostData:requestData];
-    
-    NSDictionary *logDic = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"单人ConsultServer消息（下拉加载)"};
-    Class autoManager = NSClassFromString(@"QIMAutoTrackerManager");
-    id autoManagerObject = [[autoManager alloc] init];
-    [autoManagerObject performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic];
-
-    [request startSynchronous];
-    NSError *error = [request error];
-    NSDictionary *result = nil;
-    if ([request responseStatusCode] == 200 && !error) {
-        NSData *responseData = [request responseData];
-        result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        BOOL ret = [[result objectForKey:@"ret"] boolValue];
-        if (ret) {
-            NSArray *msgList = [result objectForKey:@"data"];
-            return msgList;
-        }
-    }
-    return nil;
-    */
 }
 
 @end

@@ -235,22 +235,6 @@
             callback(nil);
         }
     }];
-    /*
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:url];
-    [request addRequestHeader:@"Content-type" value:@"application/x-www-form-urlencoded;"];
-    [request setRequestMethod:@"POST"];
-    [request setPostBody:tempPostData];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSData *responseData = [request responseData];
-        NSError *errol = nil;
-        NSDictionary *resDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
-        return resDic;
-    }
-    return nil;
-    */
 }
 
 - (NSString *)getFormStringByDiction:(NSDictionary *)diction {

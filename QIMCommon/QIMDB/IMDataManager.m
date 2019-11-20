@@ -322,6 +322,8 @@ static dispatch_once_t _onceDBToken;
                   update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
                   update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
                   end" ];
+        
+        result = [database executeNonQuery:@"delete from logs" withParameters:nil];
     }];
     return result;
 }

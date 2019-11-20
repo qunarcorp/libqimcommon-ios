@@ -654,40 +654,6 @@
             callBack(NO);
         }
     }];
-    /*
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:navConfigUrl]];
-    if (check == NO) {
-        [request setTimeOutSeconds:1];
-    } else {
-        [request setTimeOutSeconds:10];
-    }
-    [request startSynchronous];
-    if ([request responseStatusCode] == 200) {
-        NSDictionary *navConfig = [[QIMJSONSerializer sharedInstance] deserializeObject:request.responseData error:nil];
-        if (navConfig.count > 0) {
-            [self setNavConfig:navConfig];
-            QIMVerboseLog(@"QC_CurrentNavDictDict : %@ QC_NavConfigs : %@", navConfigUrl, navConfig);
-            NSRange range = [navConfigUrl rangeOfString:@"qim.qunar.com/s/qtalk"];
-            if (!navConfigUrl || (range.location != NSNotFound && range.length > 0)) {
-                [[QIMUserCacheManager sharedInstance] setUserObject:@(YES) forKey:@"isQunarQTalk"];
-            }
-            [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"QCNavFailed"];
-            NSString *navConfigStr = [[QIMJSONSerializer sharedInstance] serializeObject:navConfig];
-            [[QIMUserCacheManager sharedInstance] setUserObject:navConfigStr forKey:@"NavConfig"];
-            [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"currentLoginUserName"];
-            return YES;
-        } else {
-            [[QIMUserCacheManager sharedInstance] setUserObject:@(NO) forKey:@"QCNavFailed"];
-            [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"currentLoginUserName"];
-            return NO;
-        }
-    } else {
-        [[QIMUserCacheManager sharedInstance] setUserObject:@(NO) forKey:@"QCNavFailed"];
-        [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"currentLoginUserName"];
-        return NO;
-    }
-    return NO;
-    */
 }
 
 - (void)qimNav_updateNavigationConfigWithDomain:(NSString *)domain WithUserName:(NSString *)userName withCallBack:(QIMKitGetNavConfigCallBack)callback {
@@ -1006,23 +972,6 @@
     } withFailedCallBack:^(NSError *error) {
         
     }];
-    /*
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:url]];
-    [request startSynchronous];
-    NSError *error = [request error];
-    if (!error && [request responseStatusCode] == 200) {
-        NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:[request responseData] error:nil];
-        if (resultDic.count) {
-            BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
-            if (ret) {
-                NSDictionary *data = [resultDic objectForKey:@"data"];
-                NSString *pub_key_fullkey = [data objectForKey:@"pub_key_fullkey"];
-                BOOL success = [pub_key_fullkey writeToFile:[self qimNav_getRSACodePublicKeyPathWithFileName:self.pubkey] atomically:YES encoding:NSUTF8StringEncoding error:nil];
-                QIMVerboseLog(@"self.pubKey公钥文件写入%@ %@", self.pubkey, success ? @"成功" : @"失败");
-            }
-        }
-    }
-    */
 }
 
 - (NSString *)getWebAppUrl {

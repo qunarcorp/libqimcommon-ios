@@ -147,32 +147,6 @@
             callback(nil);
         }
     }];
-    
-    /*
-    NSURL *requestUrl = [NSURL URLWithString:destUrl];
-    
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-    [request setUseCookiePersistence:NO];
-    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
-    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
-    [cookieProperties setObject:@"application/json" forKey:@"Content-type"];
-    [request setRequestHeaders:cookieProperties];
-    [request appendPostData:requestData];
-    [request startSynchronous];
-    NSError *error = [request error];
-    NSDictionary *result = nil;
-    if ([request responseStatusCode] == 200 && !error) {
-        NSData *responseData = [request responseData];
-        result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-        BOOL ret = [[result objectForKey:@"ret"] boolValue];
-        if (ret) {
-            NSArray *msgArray = [result objectForKey:@"data"];
-            return msgArray;
-        }
-    }
-    return nil;
-    */
 }
 
 
