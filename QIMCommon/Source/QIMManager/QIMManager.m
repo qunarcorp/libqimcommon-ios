@@ -544,7 +544,7 @@ static QIMManager *__IMManager = nil;
     QIMVerboseLog(@"开始获取加密会话密码箱2结束");
     
     CFAbsoluteTime startTime13 = [[QIMWatchDog sharedInstance] startTime];
-    [self sendPushTokenWithMyToken:[[QIMAppInfo sharedInstance] getPushToken] WithDeleteFlag:NO];
+    [self sendPushTokenWithMyToken:[[QIMAppInfo sharedInstance] getPushToken] WithDeleteFlag:NO withCallback:nil];
     QIMVerboseLog(@"注册Token1loginComplate耗时 : %llf", [[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime13]);
     
     // 更新好友列表
@@ -1658,8 +1658,7 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
     }];
 }
 
-- (BOOL)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag {
-    __block BOOL result = NO;
+- (void)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag withCallback:(QIMKitRegisterPushTokenSuccessBlock)callback {
     if ([QIMManager getLastUserName].length > 0) {
         if (self.remoteKey.length <= 0) {
             [self updateRemoteLoginKey];
@@ -1670,19 +1669,9 @@ http://url/push/qtapi/token/setmsgsettings.qunar?username=hubo.hu&domain=ejabhos
                   withParamU:[self getLastJid]
                   withParamK:self.remoteKey
                   WithDelete:deleteFlag
-                withCallback:^(BOOL successed) {
-                    if (successed) {
-                        result = YES;
-                        QIMVerboseLog(@"更新后的PushToken为%@", myToken);
-                    } else {
-                        result = NO;
-                        QIMErrorLog(@"更新PushToken失败");
-                    }
-                }
-             ];
+                withCallback:callback];
         }
     }
-    return result;
 }
 
 - (void)checkClearCache {

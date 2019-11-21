@@ -388,8 +388,8 @@ static QIMKit *__global_QIMKit = nil;
     [[QIMManager sharedInstance] sendServer:notificationToken withUsername:username withParamU:paramU withParamK:paramK WithDelete:deleteFlag withCallback:callback];
 }
 
-- (BOOL)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag {
-    return [[QIMManager sharedInstance] sendPushTokenWithMyToken:myToken WithDeleteFlag:deleteFlag];
+- (void)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag withCallback:(QIMKitRegisterPushTokenSuccessBlock)callback {
+    [[QIMManager sharedInstance] sendPushTokenWithMyToken:myToken WithDeleteFlag:deleteFlag withCallback:callback];
 }
 
 - (void)checkClearCache {

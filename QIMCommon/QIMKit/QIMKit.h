@@ -390,7 +390,7 @@
  @param myToken 注册的通知token
  @param deleteFlag 是否删除
  */
-- (BOOL)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag;
+- (void)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag withCallback:(QIMKitRegisterPushTokenSuccessBlock)callback;
 
 - (void)checkClearCache;
 
