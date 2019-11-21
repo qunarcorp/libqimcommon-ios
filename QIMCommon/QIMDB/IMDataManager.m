@@ -115,29 +115,8 @@ static dispatch_once_t _onceDBToken;
         }
     }
     
-    if (oldDbVersion != currentDBVersion) {
-        //数据库升级
-        NSInteger upgradeResultVersion = [self upgradeDB:oldDbVersion];
-        if (upgradeResultVersion >= currentDBVersion) {
-            QIMVerboseLog(@"DB文件升级成功");
-            NSString *currentDBVersionStr = [NSString stringWithFormat:@"%ld", currentDBVersion];
-            BOOL writeSucc = [currentDBVersionStr writeToFile:[self qim_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
-            if (writeSucc == YES) {
-                QIMVerboseLog(@"最新DB版本：%@写入配置文件成功", currentDBVersionStr);
-            } else {
-                QIMVerboseLog(@"最新DB版本：%@写入配置文件失败", currentDBVersionStr);
-            }
-        } else {
-            QIMVerboseLog(@"DB文件升级失败");
-            NSString *currentDBVersionStr = [NSString stringWithFormat:@"%ld", upgradeResultVersion];
-            BOOL writeSucc = [currentDBVersionStr writeToFile:[self qim_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
-            if (writeSucc == YES) {
-                QIMVerboseLog(@"最新DB版本：%@写入配置文件成功", currentDBVersionStr);
-            } else {
-                QIMVerboseLog(@"最新DB版本：%@写入配置文件失败", currentDBVersionStr);
-            }
-        }
-    }
+    QIMVerboseLog(@"升级DB文件");
+    [self upgradeDB:oldDbVersion];
 }
 
 - (NSString *)qim_dbVersionFilePath {
@@ -156,13 +135,25 @@ static dispatch_once_t _onceDBToken;
     return 5;
 }
 
-- (NSInteger)upgradeDB:(NSInteger)oldVersion {
+- (void)updateDBVersionToFileWithVersion:(NSInteger)upgradeResultVersion {
+    NSString *currentDBVersionStr = [NSString stringWithFormat:@"%ld", upgradeResultVersion];
+    BOOL writeSucc = [currentDBVersionStr writeToFile:[self qim_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    if (writeSucc == YES) {
+        QIMVerboseLog(@"最新DB版本：%@写入配置文件成功", currentDBVersionStr);
+    } else {
+        QIMVerboseLog(@"最新DB版本：%@写入配置文件失败", currentDBVersionStr);
+    }
+}
+
+- (void)upgradeDB:(NSInteger)oldVersion {
     NSInteger currentNewVersion = [self qim_dbVersion];
     if (oldVersion >= currentNewVersion) {
-        return currentNewVersion;
+        QIMVerboseLog(@"升级DB成功，版本：%ld写入配置文件成功", currentNewVersion);
+        [self updateDBVersionToFileWithVersion:currentNewVersion];
+        return;
     }
-    __block NSInteger currentOldVersion = oldVersion;
-    __block BOOL result = YES;
+    NSInteger currentOldVersion = oldVersion;
+    BOOL result = YES;
     switch (oldVersion) {
         case 0: {
             result = [self upgradeFrom0To1];
@@ -197,14 +188,12 @@ static dispatch_once_t _onceDBToken;
             break;
     }
     if (result == NO) {
-        return currentOldVersion;
-    }
-    oldVersion ++;
-    
-    // 递归判断是否需要升级
-    if (oldVersion >= currentNewVersion) {
-        return oldVersion;
+        [self updateDBVersionToFileWithVersion:currentOldVersion];
+        QIMVerboseLog(@"升级DB过程中失败，版本：%ld写入配置文件成功", currentOldVersion);
+        return;
     } else {
+        oldVersion ++;
+        // 递归判断是否需要升级
         [self upgradeDB:oldVersion];
     }
 }
