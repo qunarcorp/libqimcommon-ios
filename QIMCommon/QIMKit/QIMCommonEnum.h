@@ -495,6 +495,9 @@ typedef void(^QIMKitGetUserChatHistoryCallBack)(NSArray *list);
 //check图片key
 typedef void(^QIMKitCheckImageKeyForImageCallBack)(NSString *result);
 
+//check新Video
+typedef void(^QIMKitCheckNewVideoCallBack)(NSDictionary *result);
+
 //check文件key
 typedef void(^QIMKitCheckFileKeyForFileCallBack)(NSString *result);
 

@@ -139,7 +139,63 @@
         NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
         [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
         QIMVerboseLog(@"JSON请求群历史消息Ckey为:%@", cookieProperties);
-        
+        __block NSDictionary *result = nil;
+        dispatch_semaphore_t sema=dispatch_semaphore_create(0);
+        [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
+            result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+            dispatch_semaphore_signal(sema);
+        } withFailedCallBack:^(NSError *error) {
+            getMucHistorySuccess == NO;
+            
+            NSDictionary *logDic3 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"获取群离线消息失败了", @"ext":@{@"Error": error ? error : @""}};
+            
+            Class autoManager3 = NSClassFromString(@"QIMAutoTrackerManager");
+            id autoManagerObject3 = [[autoManager3 alloc] init];
+            [autoManagerObject3 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic3];
+            
+            QIMErrorLog(@"获取群历史记录失败了了了 : %@", error);
+            dispatch_semaphore_signal(sema);
+        }];
+        dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+        if (result.count > 0) {
+            int errCode = [[result objectForKey:@"errcode"] intValue];
+            if (errCode == 0) {
+                NSArray *data = [result objectForKey:@"data"];
+                QIMVerboseLog(@"获取群历史记录成功。 : %lu", (unsigned long)data.count);
+                if (data.count >= DEFAULT_GROUPMSG_NUM) {
+                    self.latestGroupMessageFlag = YES;
+                } else {
+                    self.latestGroupMessageFlag = NO;
+                }
+                
+                NSDictionary *logDic4 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"ext":@{@"是否还要继续拉取群离线消息":@(self.latestGroupMessageFlag)},@"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"是否还要继续拉取群离线消息"};
+                
+                Class autoManager4 = NSClassFromString(@"QIMAutoTrackerManager");
+                id autoManagerObject4 = [[autoManager4 alloc] init];
+                [autoManagerObject4 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic4];
+                
+                QIMVerboseLog(@"是否还要继续拉取群离线消息 : %d", self.latestGroupMessageFlag);
+                [self dealWithGroupMsg:data successed:&getMucHistorySuccess];
+            } else {
+                getMucHistorySuccess == NO;
+                if (errCode == 5000) {
+                    [self updateRemoteLoginKey];
+                }
+                
+                NSDictionary *logDic5 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"获取群离线消息失败了", @"ext":@{@"Error":result?result:@""}};
+                
+                Class autoManager5 = NSClassFromString(@"QIMAutoTrackerManager");
+                id autoManagerObject5 = [[autoManager5 alloc] init];
+                [autoManagerObject5 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic5];
+                
+                QIMErrorLog(@"获取群历史记录失败,ErrMsg:%@", result);
+            }
+        } else {
+            getMucHistorySuccess == NO;
+            
+            QIMErrorLog(@"获取群历史记录失败了了了, 没有result");
+        }
+        /*
         ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
         [request setUseCookiePersistence:NO];
         [request setRequestHeaders:cookieProperties];
@@ -209,6 +265,7 @@
             
             QIMErrorLog(@"获取群历史记录失败了了了, 没有result");
         }
+        */
     }
     return getMucHistorySuccess;
 }

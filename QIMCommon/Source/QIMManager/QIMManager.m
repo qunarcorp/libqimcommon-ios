@@ -53,8 +53,8 @@
 #import "QIMAppSetting.h"
 #import "QIMNetworkObserver.h"
 
-#import "ASIDataCompressor.h"
-#import "ASIDataDecompressor.h"
+//#import "ASIDataCompressor.h"
+//#import "ASIDataDecompressor.h"
 //#import "Database.h"
 
 #import "QIMAppInfo.h"
@@ -1140,7 +1140,6 @@ static QIMManager *__IMManager = nil;
             NSData *latin1Data = [appName dataUsingEncoding:NSUTF8StringEncoding];
             appName = [[NSString alloc] initWithData:latin1Data encoding:NSISOLatin1StringEncoding];
 
-            // If we couldn't find one, we'll give up (and ASIHTTPRequest will use the standard CFNetwork user agent)
             if (!appName) {
                 return nil;
             }
@@ -1174,7 +1173,6 @@ static QIMManager *__IMManager = nil;
                 OSName = @"Mac OS X";
 
                 // From http://www.cocoadev.com/index.pl?DeterminingOSVersion
-                // We won't bother to check for systems prior to 10.4, since ASIHTTPRequest only works on 10.5+
                 OSErr err;
                 SInt32 versionMajor, versionMinor, versionBugFix;
                 err = Gestalt(gestaltSystemVersionMajor, &versionMajor);

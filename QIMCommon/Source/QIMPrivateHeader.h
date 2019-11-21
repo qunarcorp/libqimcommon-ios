@@ -92,7 +92,6 @@
 
 #import "QIMCommonCategories.h"
 
-#import "ASIHTTPRequest.h"
 #import "YYModel.h"
 
 #define UserDocumentsPath NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0]

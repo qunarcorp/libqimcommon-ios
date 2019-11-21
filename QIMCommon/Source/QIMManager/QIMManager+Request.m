@@ -316,6 +316,42 @@
     }];
 }
 
+- (void)downloadFileRequest:(NSString *)downloadFileUrl withTargetFilePath:(NSString *)targetFilePath withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:downloadFileUrl]];
+    [request setShouldASynchronous:YES];
+    [request setDownloadDestinationPath:targetFilePath];
+    
+    [request setHTTPMethod:QIMHTTPMethodGET];
+    [request setHttpRequestType:QIMHTTPRequestTypeDownload];
+    
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+    [request setHTTPRequestHeaders:cookieProperties];
+    [request setTimeoutInterval:600];
+     [QIMHTTPClient sendRequest:request progressBlock:^(NSProgress *progress) {
+        if (pCallback) {
+            pCallback(progress.fractionCompleted);
+        }
+    } complete:^(QIMHTTPResponse *response) {
+        if (response.code == 200) {
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        } else {
+            NSData *responseData = [response data];
+            if (sCallback) {
+                sCallback(responseData);
+            }
+        }
+    } failure:^(NSError *error) {
+        if (fCallback) {
+            fCallback(error);
+        }
+    }];
+}
+
 - (void)sendFormatRequest:(NSString *)destUrl withPOSTBody:(NSDictionary *)bodyDic withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
     [request setShouldASynchronous:YES];
