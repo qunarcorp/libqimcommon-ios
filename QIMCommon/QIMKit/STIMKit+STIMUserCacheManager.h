@@ -1,0 +1,25 @@
+//
+//  STIMKit+STIMUserCacheManager.h
+//  STIMCommon
+//
+//  Created by 李露 on 2018/4/21.
+//  Copyright © 2018年 STIMKit. All rights reserved.
+//
+
+#import "STIMKit.h"
+
+@interface STIMKit (STIMUserCacheManager)
+
+- (void)chooseNewData:(BOOL)flag;
+- (void)setCacheName:(NSString *)cacheName;
+
+- (BOOL)containsObjectForKey:(NSString *)key;
+- (void)setUserObject:(nullable id)object forKey:(nonnull NSString *)aKey;
+- (nullable id)userObjectForKey:(nonnull NSString *)aKey;
+- (void)removeUserObjectForKey:(nonnull NSString *)aKey;
+- (void)clearUserCache;
+- (void)saveUserDefault;
+
+- (void)removeUserDefaultFilePath;
+
+@end

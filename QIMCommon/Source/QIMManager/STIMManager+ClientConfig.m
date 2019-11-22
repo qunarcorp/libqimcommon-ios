@@ -1,0 +1,420 @@
+//
+//  STIMManager+ClientConfig.m
+//  STIMCommon
+//
+//  Created by 李露 on 2018/7/10.
+//  Copyright © 2018年 STIMKit. All rights reserved.
+//
+
+#import "STIMManager+ClientConfig.h"
+
+@implementation STIMManager (ClientConfig)
+
+- (NSString *)transformClientConfigKeyWithType:(STIMClientConfigType)type {
+
+    switch (type) {
+        case STIMClientConfigTypeKMarkupNames:
+            return @"kMarkupNames";
+            break;
+        case STIMClientConfigTypeKCollectionCacheKey:
+            return @"kCollectionCacheKey";
+            break;
+        case STIMClientConfigTypeKStickJidDic:
+            return @"kStickJidDic";
+            break;
+        case STIMClientConfigTypeKNotificationSetting:
+            return @"kNotificationSetting";
+            break;
+        case STIMClientConfigTypeKConversationParamDic:
+            return @"kConversationParamDic";
+            break;
+        case STIMClientConfigTypeKQuickResponse:
+            return @"kQuickResponse";
+            break;
+        case STIMClientConfigTypeKChatColorInfo:
+            return @"kChatColorInfo";
+            break;
+        case STIMClientConfigTypeKCurrentFontInfo:
+            return @"kCurrentFontInfo";
+            break;
+        case STIMClientConfigTypeKNoticeStickJidDic:
+            return @"kNoticeStickJidDic";
+            break;
+        case STIMClientConfigTypeKLocalMucRemarkUpdateTime:
+            return @"kLocalMucRemarkUpdateTime";
+            break;
+        case STIMClientConfigTypeKLocalIncrementUpdateTime:
+            return @"kLocalIncrementUpdateTime";
+            break;
+        case STIMClientConfigTypeKLocalTripUpdateTime:
+            return @"kLocalTripUpdateTime";
+            break;
+        case STIMClientConfigTypeKStarContact:
+            return @"kStarContact";
+            break;
+        case STIMClientConfigTypeKBlackList:
+            return @"kBlackList";
+            break;
+        case STIMClientConfigTypeKNotificationSound:
+            return @"kNotificationSound";
+            break;
+        default:
+            return @"ALL";
+            break;
+    }
+}
+
+- (void)postUpdateNSNotificationWithType:(STIMClientConfigType)type {
+    switch (type) {
+        case STIMClientConfigTypeKCollectionCacheKey: {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kNotifyResetFaceCollectionManager object:[[STIMManager sharedInstance] getClientConfigValueArrayWithType:STIMClientConfigTypeKCollectionCacheKey]];
+            });
+        }
+            break;
+        default: {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationSessionListUpdate object:nil];
+            });
+        }
+            break;
+    }
+}
+
+- (void)postUpdateNSNotificationWithType:(STIMClientConfigType)type WithSubKey:(NSString *)subKey WithConfigValue:(NSString *)configValue {
+    switch (type) {
+        case STIMClientConfigTypeKMarkupNames: {
+            // 通知有问题
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMarkNameUpdate object:@{@"jid":subKey,@"nickName":configValue}];
+            });
+        }
+            break;
+        case STIMClientConfigTypeKCollectionCacheKey: {
+            
+        }
+            break;
+        case STIMClientConfigTypeKStickJidDic: {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationSessionListUpdate object:nil];
+            });
+        }
+            break;
+        case STIMClientConfigTypeKNoticeStickJidDic: {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kGroupMsgRemindDic object:subKey];
+            });
+        }
+        default:
+            break;
+    }
+}
+
+- (NSInteger)getClientConfigDeleteFlagWithType:(STIMClientConfigType)type WithSubKey:(NSString *)subKey {
+    return [[IMDataManager stIMDB_SharedInstance] stIMDB_getConfigDeleteFlagWithConfigKey:[self transformClientConfigKeyWithType:type] WithSubKey:subKey];
+}
+
+/**
+ 返回配置Value
+ */
+- (NSString *)getClientConfigInfoWithType:(STIMClientConfigType)type WithSubKey:(NSString *)subKey {
+    return [self getClientConfigInfoWithType:type WithSubKey:subKey WithDeleteFlag:NO];
+}
+
+- (NSString *)getClientConfigInfoWithType:(STIMClientConfigType)type WithSubKey:(NSString *)subKey WithDeleteFlag:(BOOL)deleteFlag {
+    return [[IMDataManager stIMDB_SharedInstance] stIMDB_getConfigInfoWithConfigKey:[self transformClientConfigKeyWithType:type] WithSubKey:subKey WithDeleteFlag:deleteFlag];
+}
+
+/**
+ 返回字典
+ */
+- (NSDictionary *)getClientConfigDicWithType:(STIMClientConfigType)type {
+    return [self getClientConfigDicWithType:type WithDeleteFlag:NO];
+}
+
+- (NSDictionary *)getClientConfigDicWithType:(STIMClientConfigType)type WithDeleteFlag:(BOOL)deleteFlag {
+    return [[IMDataManager stIMDB_SharedInstance] stIMDB_getConfigDicWithConfigKey:[self transformClientConfigKeyWithType:type] WithDeleteFlag:deleteFlag];
+}
+
+/**
+ 返回配置详情数组
+ */
+- (NSArray *)getClientConfigInfoArrayWithType:(STIMClientConfigType)type {
+    return [self getClientConfigInfoArrayWithType:type WithDeleteFlag:NO];
+}
+
+- (NSArray *)getClientConfigInfoArrayWithType:(STIMClientConfigType *)type WithDeleteFlag:(BOOL)deleteFlag {
+    return [[IMDataManager stIMDB_SharedInstance] stIMDB_getConfigInfoArrayWithConfigKey:[self transformClientConfigKeyWithType:type] WithDeleteFlag:deleteFlag];
+}
+
+
+/**
+ 返回配置Value数组
+ */
+- (NSArray *)getClientConfigValueArrayWithType:(STIMClientConfigType)type {
+    return [self getClientConfigValueArrayWithType:type WithDeleteFlag:NO];
+}
+
+- (NSArray *)getClientConfigValueArrayWithType:(STIMClientConfigType)type WithDeleteFlag:(BOOL)deleteFlag {
+    return [[IMDataManager stIMDB_SharedInstance] stIMDB_getConfigValueArrayWithConfigKey:[self transformClientConfigKeyWithType:type] WithDeleteFlag:deleteFlag];
+}
+
+- (void)insertNewClientConfigInfoWithData:(NSDictionary *)result {
+    NSDictionary *data = [[result objectForKey:@"data"] objectForKey:@"clientConfigInfos"];
+    NSInteger version = [[[result objectForKey:@"data"] objectForKey:@"version"] integerValue];
+#warning 循环中尽可能避免操作db，汇总之后批量插入
+    
+    for (NSDictionary *configInfo in data) {
+        NSArray *configInfoData = [configInfo objectForKey:@"infos"];
+        NSString *key = [configInfo objectForKey:@"key"];
+        [[IMDataManager stIMDB_SharedInstance] stIMDB_bulkInsertConfigArrayWithConfigKey:key WithConfigVersion:version ConfigArray:configInfoData];
+        if ([key isEqualToString:@"kStickJidDic"]) {
+            self.stickJidDic = nil;
+            for (NSDictionary *stickInfo in configInfoData) {
+                NSString *subkey = [stickInfo objectForKey:@"subkey"];
+                NSString *chatId = [[subkey componentsSeparatedByString:@"<>"] firstObject];
+                NSString *stickValue = [stickInfo objectForKey:@"configinfo"];
+                NSDictionary *stickValueDic = [[STIMJSONSerializer sharedInstance] deserializeObject:stickValue error:nil];
+                ChatType chatType = (ChatType)[[stickValueDic objectForKey:@"chatType"] unsignedIntegerValue];
+                NSInteger isDel = [[stickInfo objectForKey:@"isdel"] integerValue];
+                if (isDel == NO) {
+                    [self addSessionByType:chatType ById:chatId ByMsgId:nil WithMsgTime:0 WithNeedUpdate:YES];
+                }
+            }
+        } else if ([key isEqualToString:@"kNoticeStickJidDic"]) {
+            if (!self.notMindGroupDic) {
+                self.notMindGroupDic = [NSMutableDictionary dictionaryWithCapacity:3];
+            }
+            for (NSDictionary *noticeStickInfo in configInfoData) {
+                NSString *subkey = [noticeStickInfo objectForKey:@"subkey"];
+                [self.notMindGroupDic removeObjectForKey:subkey];
+            }
+            self.notMindGroupDic = nil;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kRemindStateChange object:nil];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kRemindStateChange object:@"ForceRefresh"];
+            });
+        } else if ([key isEqualToString:@"kMarkupNames"]) {
+            for (NSDictionary *markupInfo in configInfoData) {
+                NSString *subkey = [markupInfo objectForKey:@"subkey"];
+                [self.userMarkupNameDic removeObjectForKey:subkey];
+            }
+            self.userMarkupNameDic = nil;
+        } else if ([key isEqualToString:@"kChatColorInfo"]) {
+            NSDictionary *newColorInfoDic = [configInfoData firstObject];
+            NSString *configInfo = [newColorInfoDic objectForKey:@"configinfo"];
+            NSDictionary *colorConfigInfoDic = [[STIMJSONSerializer sharedInstance] deserializeObject:configInfo error:nil];
+            [[STIMUserCacheManager sharedInstance] setUserObject:colorConfigInfoDic forKey:kChatColorInfo];
+        } else if ([key isEqualToString:@"kCurrentFontInfo"]) {
+            NSDictionary *newFontInfoDic = [configInfoData firstObject];
+            NSString *configInfo = [newFontInfoDic objectForKey:@"configinfo"];
+            NSDictionary *fontConfigInfoDic = [[STIMJSONSerializer sharedInstance] deserializeObject:configInfo error:nil];
+            [[STIMUserCacheManager sharedInstance] setUserObject:fontConfigInfoDic forKey:kCurrentFontInfo];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationCurrentFontUpdate object:nil];
+            });
+        } else if ([key isEqualToString:@"kNotificationSound"]) {
+            for (NSDictionary *markupInfo in configInfoData) {
+                NSString *subkey = [markupInfo objectForKey:@"subkey"];
+                if ([subkey isEqualToString:@"ios"]) {
+                    self.soundName = [[STIMManager sharedInstance] getClientNotificationSoundName];
+                }
+            }
+        } else {
+
+        }
+    }
+}
+
+- (BOOL)updateRemoteClientConfigWithType:(STIMClientConfigType)type BatchProcessConfigInfo:(NSArray *)configInfoArray WithDel:(BOOL)delFlag {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/configuration/setclientconfig.qunar", [[STIMNavConfigManager sharedInstance] newerHttpUrl]];
+    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
+    STIMVerboseLog(@"批量远端个人配置url : %@", destUrl);
+    [request setRequestMethod:@"POST"];
+    [request setUseCookiePersistence:NO];
+    
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[STIMManager sharedInstance] thirdpartKeywithValue]];
+    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+    [request setRequestHeaders:cookieProperties];
+    STIMVerboseLog(@"批量远端个人配置q_ckey : %@", requestHeaders);
+    
+    NSMutableDictionary *bodyProperties = [NSMutableDictionary dictionary];
+    [bodyProperties setSTIMSafeObject:[STIMManager getLastUserName] forKey:@"username"];
+    [bodyProperties setSTIMSafeObject:[[STIMManager sharedInstance] getDomain] forKey:@"host"];
+    [bodyProperties setSTIMSafeObject:configInfoArray forKey:@"batchProcess"];
+    [bodyProperties setSTIMSafeObject:@"iOS" forKey:@"operate_plat"];
+    [bodyProperties setSTIMSafeObject:[[XmppImManager sharedInstance] resource] forKey:@"resource"];
+    [bodyProperties setSTIMSafeObject:delFlag ? @(2) : @(1) forKey:@"type"]; //操作类型1：设置；2：删除或取消
+    [bodyProperties setSTIMSafeObject:@(delFlag) forKey:@"isdel"];
+    [bodyProperties setSTIMSafeObject:@([[IMDataManager stIMDB_SharedInstance] stIMDB_getConfigVersion]) forKey:@"version"];
+    NSData *requestData = [[STIMJSONSerializer sharedInstance] serializeObject:bodyProperties error:nil];
+    STIMVerboseLog(@"批量远端个人配置body体 : %@", [[STIMJSONSerializer sharedInstance] serializeObject:bodyProperties]);
+    [request addRequestHeader:@"Content-type" value:@"application/json;"];
+    [request appendPostData:requestData];
+    [request startSynchronous];
+    NSError *error = [request error];
+    if ([request responseStatusCode] == 200 && !error) {
+        NSData *responseData = [request responseData];
+        NSDictionary *result = [[STIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        if ([[result objectForKey:@"ret"] boolValue]) {
+            [self insertNewClientConfigInfoWithData:result];
+            [self postUpdateNSNotificationWithType:type];
+            return YES;
+        }
+    }  else {
+        STIMErrorLog(@"批量远端个人配置返回失败 : %ld - Error : %@", [request responseStatusCode], error);
+    }
+    return NO;
+}
+
+- (BOOL)updateRemoteClientConfigWithType:(STIMClientConfigType)type WithSubKey:(NSString *)subKey WithConfigValue:(NSString *)configValue WithDel:(BOOL)delFlag {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/configuration/setclientconfig.qunar", [[STIMNavConfigManager sharedInstance] newerHttpUrl]];
+    STIMVerboseLog(@"单独设置远端个人配置信息 url : %@", destUrl);
+    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
+    [request setRequestMethod:@"POST"];
+    [request setUseCookiePersistence:NO];
+    
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[STIMManager sharedInstance] thirdpartKeywithValue]];
+    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+    [request setRequestHeaders:cookieProperties];
+    STIMVerboseLog(@"单独设置远端个人配置q_ckey : %@", requestHeaders);
+
+    NSMutableDictionary *bodyProperties = [NSMutableDictionary dictionary];
+    [bodyProperties setSTIMSafeObject:[STIMManager getLastUserName] forKey:@"username"];
+    [bodyProperties setSTIMSafeObject:[[STIMManager sharedInstance] getDomain] forKey:@"host"];
+    [bodyProperties setSTIMSafeObject:[self transformClientConfigKeyWithType:type] forKey:@"key"];
+    [bodyProperties setSTIMSafeObject:subKey forKey:@"subkey"];
+    [bodyProperties setSTIMSafeObject:configValue forKey:@"value"];
+    [bodyProperties setSTIMSafeObject:@"iOS" forKey:@"operate_plat"];
+    [bodyProperties setSTIMSafeObject:[[XmppImManager sharedInstance] resource] forKey:@"resource"];
+    [bodyProperties setSTIMSafeObject:delFlag ? @(2) : @(1) forKey:@"type"]; //操作类型1：设置；2：删除或取消
+    [bodyProperties setSTIMSafeObject:@([[IMDataManager stIMDB_SharedInstance] stIMDB_getConfigVersion]) forKey:@"version"];
+    NSData *requestData = [[STIMJSONSerializer sharedInstance] serializeObject:bodyProperties error:nil];
+    STIMVerboseLog(@"单独设置远端个人配置body体 : %@", [[STIMJSONSerializer sharedInstance] serializeObject:bodyProperties]);
+
+    [request addRequestHeader:@"Content-type" value:@"application/json;"];
+    [request appendPostData:requestData];
+    [request startSynchronous];
+    NSError *error = [request error];
+    if ([request responseStatusCode] == 200 && !error) {
+        NSData *responseData = [request responseData];
+        NSDictionary *result = [[STIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        if ([[result objectForKey:@"ret"] boolValue]) {
+            [self insertNewClientConfigInfoWithData:result];
+            [self postUpdateNSNotificationWithType:type WithSubKey:subKey WithConfigValue:configValue];
+            return YES;
+        }
+    } else {
+        STIMVerboseLog(@"单独设置远端个人配置返回失败 : %ld - Error : %@", [request responseStatusCode], error);
+    }
+    return NO;
+}
+
+- (void)getRemoteClientConfig {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/configuration/getincreclientconfig.qunar", [[STIMNavConfigManager sharedInstance] newerHttpUrl]];
+    STIMVerboseLog(@"获取远端个人配置信息 url : %@", destUrl);
+
+    
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[STIMManager sharedInstance] thirdpartKeywithValue]];
+    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
+    [cookieProperties setObject:@"application/json;" forKey:@"Content-type"];
+    STIMVerboseLog(@"获取远端个人配置q_ckey : %@", requestHeaders);
+
+    NSMutableDictionary *bodyProperties = [NSMutableDictionary dictionary];
+    [bodyProperties setSTIMSafeObject:[STIMManager getLastUserName] forKey:@"username"];
+    [bodyProperties setSTIMSafeObject:[[STIMManager sharedInstance] getDomain] forKey:@"host"];
+    [bodyProperties setSTIMSafeObject:@([[IMDataManager stIMDB_SharedInstance] stIMDB_getConfigVersion]) forKey:@"version"];
+    NSData *requestData = [[STIMJSONSerializer sharedInstance] serializeObject:bodyProperties error:nil];
+    STIMVerboseLog(@"获取远端个人配置Body体 : %@", [[STIMJSONSerializer sharedInstance] serializeObject:bodyProperties]);
+    
+    STIMHTTPRequest *request = [[STIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
+    request.useCookiePersistence = NO;
+    request.HTTPMethod = STIMHTTPMethodPOST;
+    request.HTTPRequestHeaders = cookieProperties;
+    request.HTTPBody = requestData;
+    __weak __typeof(self) weakSelf = self;
+    [STIMHTTPClient sendRequest:request complete:^(STIMHTTPResponse *response) {
+        if (response.code == 200) {
+            __typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSData *responseData = [response data];
+            NSDictionary *result = [[STIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+            if ([[result objectForKey:@"ret"] boolValue]) {
+                [strongSelf insertNewClientConfigInfoWithData:result];
+            }
+        }
+    } failure:^(NSError *error) {
+        STIMErrorLog(@"获取远端个人配置失败 : Error : %@", error);
+    }];
+}
+
+//返回星标联系人或者黑名单用户
+- (NSMutableArray *)selectStarOrBlackContacts:(NSString *)pkey {
+    return [[IMDataManager stIMDB_SharedInstance] stIMDB_getConfigArrayStarOrBlackContacts:pkey];
+}
+
+//查询不在星标用户的好友
+- (NSMutableArray *)selectFriendsNotInStarContacts {
+    return [[IMDataManager stIMDB_SharedInstance] stIMDB_getConfigArrayFriendsNotInStarContacts];
+}
+
+//搜索不在星标里面的用户
+- (NSMutableArray *)selectUserNotInStartContacts:(NSString *)key {
+    return [[IMDataManager stIMDB_SharedInstance] stIMDB_getConfigArrayUserNotInStartContacts:key];
+}
+
+- (BOOL)isStarOrBlackContact:(NSString *)subkey ConfigKey:(NSString *)pkey {
+    if([@"kStarContact" isEqualToString:pkey]){
+        return [[STIMManager sharedInstance] getClientConfigDeleteFlagWithType:STIMClientConfigTypeKStarContact WithSubKey:subkey] == 0;
+    }else if([@"kBlackList" isEqualToString:pkey]){
+        return [[STIMManager sharedInstance] getClientConfigDeleteFlagWithType:STIMClientConfigTypeKBlackList WithSubKey:subkey] == 0;
+    }else{
+        return NO;
+    }
+}
+
+- (BOOL)setStarOrblackContact:(NSString *)subkey ConfigKey:(NSString *)pkey Flag:(BOOL)value {
+    if([@"kStarContact" isEqualToString:pkey]){
+        return [[STIMManager sharedInstance] updateRemoteClientConfigWithType:STIMClientConfigTypeKStarContact WithSubKey:subkey WithConfigValue:value?@"1":@"0" WithDel:!value];
+    }else if([@"kBlackList" isEqualToString:pkey]){
+        return [[STIMManager sharedInstance] updateRemoteClientConfigWithType:STIMClientConfigTypeKBlackList WithSubKey:subkey WithConfigValue:value?@"1":@"0" WithDel:!value];
+    }else{
+        return NO;
+    }
+}
+
+- (BOOL)setStarOrblackContacts:(NSDictionary *)map ConfigKey:(NSString *)pkey Flag:(BOOL)value {
+    if(map == nil){
+        return YES;
+    }
+    STIMClientConfigType *configType = STIMClientConfigTypeKStarContact;
+    if([@"kBlackList" isEqualToString:pkey]){
+        configType = STIMClientConfigTypeKBlackList;
+    }
+    NSMutableArray *deleteStickList = [NSMutableArray arrayWithCapacity:3];
+    NSString *configvalue = value ? @"1" : @"0";
+    for(NSString *k in map){
+        NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:3];
+        [dict setSTIMSafeObject:k forKey:@"subkey"];
+        [dict setSTIMSafeObject:pkey forKey:@"key"];
+        [dict setSTIMSafeObject:configvalue forKey:@"value"];
+        [deleteStickList addObject:dict];
+    }
+    return [[STIMManager sharedInstance] updateRemoteClientConfigWithType:configType BatchProcessConfigInfo:deleteStickList WithDel:!value];
+}
+
+- (NSString *)getClientNotificationSoundName {
+    return [[STIMManager sharedInstance] getClientConfigInfoWithType:STIMClientConfigTypeKNotificationSound WithSubKey:@"ios"];
+}
+
+- (BOOL)setClientNotificationSound:(NSString *)soundName {
+    BOOL success = [[STIMManager sharedInstance] updateRemoteClientConfigWithType:STIMClientConfigTypeKNotificationSound WithSubKey:@"ios" WithConfigValue:soundName WithDel:NO];
+    return success;
+}
+
+@end
