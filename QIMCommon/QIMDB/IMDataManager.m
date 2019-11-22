@@ -8,10 +8,10 @@
 //
 
 #import "IMDataManager.h"
-#import "QIMDataBase.h"
-#import "QIMDBLogger.h"
-#import "QIMWatchDog.h"
-#import "IMDataManager+QIMDBMessage.h"
+#import "STIMDataBase.h"
+#import "STIMDBLogger.h"
+#import "STIMWatchDog.h"
+#import "IMDataManager+STIMDBMessage.h"
 
 static IMDataManager *__global_data_manager = nil;
 @interface IMDataManager()
@@ -24,7 +24,7 @@ static IMDataManager *__global_data_manager = nil;
     NSDateFormatter *_timeSmtapFormatter;
 }
 
-+ (IMDataManager *)qimDB_SharedInstance {
++ (IMDataManager *)stIMDB_SharedInstance {
     return __global_data_manager;
 }
 
@@ -37,14 +37,14 @@ static IMDataManager *__global_data_manager = nil;
 }
 
 static dispatch_once_t _onceDBToken;
-+ (IMDataManager *) qimDB_sharedInstanceWithDBPath:(NSString *)dbPath withDBFullJid:(NSString *)dbOwnerFullJid {
++ (IMDataManager *) stIMDB_sharedInstanceWithDBPath:(NSString *)dbPath withDBFullJid:(NSString *)dbOwnerFullJid {
 
     dispatch_once(&_onceDBToken, ^{
         __global_data_manager = [[IMDataManager alloc] initWithDBPath:dbPath];
         [__global_data_manager setdbPath:dbPath];
         [__global_data_manager setDBOwnerFullJid:dbOwnerFullJid];
         [__global_data_manager setDomain:[[dbOwnerFullJid componentsSeparatedByString:@"@"] lastObject]];
-        __global_data_manager.databasePool = [QIMDataBasePool databasePoolWithPath:dbPath];
+        __global_data_manager.databasePool = [STIMDataBasePool databasePoolWithPath:dbPath];
         [__global_data_manager openDB];
     });
     return __global_data_manager;
@@ -88,7 +88,7 @@ static dispatch_once_t _onceDBToken;
         _timeSmtapFormatter = [[NSDateFormatter alloc] init];
         [_timeSmtapFormatter setDateFormat:@"yyyy-MM-dd HH:mm"];
         
-        QIMVerboseLog(@"DB Path %@", _dbPath);
+        STIMVerboseLog(@"DB Path %@", _dbPath);
         
     }
     return self;
@@ -98,20 +98,20 @@ static dispatch_once_t _onceDBToken;
     
     BOOL dataBaseExist = [[NSFileManager defaultManager] fileExistsAtPath:_dbPath];
     
-    NSInteger oldDbVersion = [self qim_dbOldVersion];
-    NSInteger currentDBVersion = [self qim_dbVersion];
+    NSInteger oldDbVersion = [self stimDB_dbOldVersion];
+    NSInteger currentDBVersion = [self stimDB_dbVersion];
     if (dataBaseExist == NO) {
         //数据库文件不存在，重新创建
         __block BOOL result = NO;
-        [_databasePool inDatabase:^(QIMDataBase* _Nonnull db) {
+        [_databasePool inDatabase:^(STIMDataBase* _Nonnull db) {
             result = [self createDb:db];
         }];
         oldDbVersion = 0;
         if (result) {
-            QIMVerboseLog(@"创建DB文件成功");
+            STIMVerboseLog(@"创建DB文件成功");
             [self insertUserCacheData];
         } else {
-            QIMVerboseLog(@"创建DB文件失败");
+            STIMVerboseLog(@"创建DB文件失败");
         }
     }
     
@@ -119,45 +119,45 @@ static dispatch_once_t _onceDBToken;
         //数据库升级
         NSInteger upgradeResultVersion = [self upgradeDB:oldDbVersion];
         if (upgradeResultVersion >= currentDBVersion) {
-            QIMVerboseLog(@"DB文件升级成功");
+            STIMVerboseLog(@"DB文件升级成功");
             NSString *currentDBVersionStr = [NSString stringWithFormat:@"%ld", currentDBVersion];
-            BOOL writeSucc = [currentDBVersionStr writeToFile:[self qim_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+            BOOL writeSucc = [currentDBVersionStr writeToFile:[self stimDB_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
             if (writeSucc == YES) {
-                QIMVerboseLog(@"最新DB版本：%@写入配置文件成功", currentDBVersionStr);
+                STIMVerboseLog(@"最新DB版本：%@写入配置文件成功", currentDBVersionStr);
             } else {
-                QIMVerboseLog(@"最新DB版本：%@写入配置文件失败", currentDBVersionStr);
+                STIMVerboseLog(@"最新DB版本：%@写入配置文件失败", currentDBVersionStr);
             }
         } else {
-            QIMVerboseLog(@"DB文件升级失败");
+            STIMVerboseLog(@"DB文件升级失败");
             NSString *currentDBVersionStr = [NSString stringWithFormat:@"%ld", upgradeResultVersion];
-            BOOL writeSucc = [currentDBVersionStr writeToFile:[self qim_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+            BOOL writeSucc = [currentDBVersionStr writeToFile:[self stimDB_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
             if (writeSucc == YES) {
-                QIMVerboseLog(@"最新DB版本：%@写入配置文件成功", currentDBVersionStr);
+                STIMVerboseLog(@"最新DB版本：%@写入配置文件成功", currentDBVersionStr);
             } else {
-                QIMVerboseLog(@"最新DB版本：%@写入配置文件失败", currentDBVersionStr);
+                STIMVerboseLog(@"最新DB版本：%@写入配置文件失败", currentDBVersionStr);
             }
         }
     }
 }
 
-- (NSString *)qim_dbVersionFilePath {
+- (NSString *)stimDB_dbVersionFilePath {
     NSString *dbVersionFile = [[_dbPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"DBVersion"];
     return dbVersionFile;
 }
 
-- (NSInteger)qim_dbOldVersion {
-    NSString *dbVersionFile = [self qim_dbVersionFilePath];
+- (NSInteger)stimDB_dbOldVersion {
+    NSString *dbVersionFile = [self stimDB_dbVersionFilePath];
     NSString *dbVersionStr = [[NSString alloc] initWithContentsOfFile:dbVersionFile encoding:NSUTF8StringEncoding error:nil];
     NSInteger oldDbVersion = [dbVersionStr integerValue];
     return oldDbVersion;
 }
 
-- (NSInteger)qim_dbVersion {
+- (NSInteger)stimDB_dbVersion {
     return 3;
 }
 
 - (NSInteger)upgradeDB:(NSInteger)oldVersion {
-    NSInteger currentNewVersion = [self qim_dbVersion];
+    NSInteger currentNewVersion = [self stimDB_dbVersion];
     if (oldVersion >= currentNewVersion) {
         return currentNewVersion;
     }
@@ -200,9 +200,9 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (BOOL)upgradeFrom0To1 {
-    QIMVerboseLog(@"upgradeFrom0To1");
+    STIMVerboseLog(@"upgradeFrom0To1");
     __block BOOL result = YES;
-    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+    [_databasePool inDatabase:^(STIMDataBase* _Nonnull database) {
         if ([database columnExists:@"IM_Group" columnName:@"UTLastUpdateTime"] == NO) {
             result = [database executeNonQuery:@"ALTER TABLE IM_Group ADD UTLastUpdateTime INTEGER;" withParameters:nil];
         } else {
@@ -213,9 +213,9 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (BOOL)upgradeFrom1To2 {
-    QIMVerboseLog(@"upgradeFrom1To2");
+    STIMVerboseLog(@"upgradeFrom1To2");
     __block BOOL result = YES;
-    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+    [_databasePool inDatabase:^(STIMDataBase* _Nonnull database) {
         if ([database columnExists:@"IM_Users" columnName:@"visibleFlag"] == NO) {
             result = [database executeNonQuery:@"ALTER TABLE IM_Users ADD visibleFlag INTEGER DEFAULT 1;" withParameters:nil];
         } else {
@@ -226,9 +226,9 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (BOOL)upgradeFrom2To3 {
-    QIMVerboseLog(@"upgradeFrom2To3");
+    STIMVerboseLog(@"upgradeFrom2To3");
     __block BOOL result = YES;
-    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+    [_databasePool inDatabase:^(STIMDataBase* _Nonnull database) {
 
         //新增勋章列表
         result = [database executeUpdate: @"CREATE TABLE IF NOT EXISTS IM_Medal_List(\
@@ -256,7 +256,7 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (void)initSQLiteLog {
-    QIMDBLogger *sqliteLogger = [[QIMDBLogger alloc] initWithLogDirectory:[self sqliteLogFilesDirectory] WithDBOperator:[self dbInstance]];
+    STIMDBLogger *sqliteLogger = [[STIMDBLogger alloc] initWithLogDirectory:[self sqliteLogFilesDirectory] WithDBOperator:[self dbInstance]];
     sqliteLogger.saveThreshold     = 500;
     sqliteLogger.saveInterval      = 60;               // 60 seconds
     sqliteLogger.maxAge            = 60 * 60 * 24 * 7; //  7 days
@@ -274,13 +274,13 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (void)insertUserCacheData {
-    [self qimDB_InsertUserCacheDataWithKey:@"singlelastupdatetime" withType:10 withValue:@"单人聊天时间戳" withValueInt:0];
-    [self qimDB_InsertUserCacheDataWithKey:@"grouplastupdatetime" withType:10 withValue:@"群聊聊天时间戳" withValueInt:0];
-    [self qimDB_InsertUserCacheDataWithKey:@"systemlastupdatetime" withType:10 withValue:@"系统聊天时间戳" withValueInt:0];
+    [self stIMDB_InsertUserCacheDataWithKey:@"singlelastupdatetime" withType:10 withValue:@"单人聊天时间戳" withValueInt:0];
+    [self stIMDB_InsertUserCacheDataWithKey:@"grouplastupdatetime" withType:10 withValue:@"群聊聊天时间戳" withValueInt:0];
+    [self stIMDB_InsertUserCacheDataWithKey:@"systemlastupdatetime" withType:10 withValue:@"系统聊天时间戳" withValueInt:0];
 }
 
-- (void)qimDB_InsertUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type withValue:(NSString *)value withValueInt:(long long)valueInt {
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+- (void)stIMDB_InsertUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type withValue:(NSString *)value withValueInt:(long long)valueInt {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = @"insert or IGNORE into IM_Cache_Data(key, type, value, valueInt) Values(:key, :type, :value, :valueInt);";
         NSMutableArray *parames = [[NSMutableArray alloc] init];
         [parames addObject:key];
@@ -291,8 +291,8 @@ static dispatch_once_t _onceDBToken;
     }];
 }
 
-- (void)qimDB_UpdateUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type withValue:(NSString *)value withValueInt:(long long)valueInt {
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+- (void)stIMDB_UpdateUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type withValue:(NSString *)value withValueInt:(long long)valueInt {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = @"insert or replace into IM_Cache_Data(key, type, value, valueInt) Values(:key, :type, :value, :valueInt);";
         NSMutableArray *parames = [[NSMutableArray alloc] init];
         [parames addObject:key];
@@ -303,9 +303,9 @@ static dispatch_once_t _onceDBToken;
     }];
 }
 
-- (long long)qimDB_getUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type {
+- (long long)stIMDB_getUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type {
     __block long long maxRemoteTime = 0;
-    [[self dbInstance] inDatabase:^(QIMDataBase * _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase * _Nonnull database) {
         NSString *newSql = [NSString stringWithFormat:@"select valueInt from IM_Cache_Data Where key == '%@' and type == %d", key, type];
         DataReader *newReader = [database executeReader:newSql withParameters:nil];
         if ([newReader read]) {
@@ -315,9 +315,9 @@ static dispatch_once_t _onceDBToken;
     return maxRemoteTime;
 }
 
-- (BOOL)qimDB_checkExistUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type {
+- (BOOL)stIMDB_checkExistUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type {
     __block BOOL exist = NO;
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
         NSString *sql = [NSString stringWithFormat:@"select 1 from IM_Cache_Data Where key == '%@' and type == %d", key, type];
         DataReader *reader = [database executeReader:sql withParameters:nil];
         if ([reader read]) {
@@ -338,7 +338,7 @@ static dispatch_once_t _onceDBToken;
     }
 }
 
-- (BOOL)createDb:(QIMDataBase*)database {
+- (BOOL)createDb:(STIMDataBase*)database {
     BOOL result = NO;
     
     //创建用户表
@@ -1030,7 +1030,7 @@ static dispatch_once_t _onceDBToken;
     return result;
 }
 
-- (void)qimDB_closeDataBase {
+- (void)stIMDB_closeDataBase {
     __global_data_manager = nil;
     _onceDBToken = 0;
     /*
@@ -1042,18 +1042,18 @@ static dispatch_once_t _onceDBToken;
      */
 }
 
-+ (void)qimDB_clearDataBaseCache{
++ (void)stIMDB_clearDataBaseCache{
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"dbVersion"];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-- (void)qimDB_dbCheckpoint {
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-        [database checkpoint:QIMDBCheckpointModeTruncate error:nil];
+- (void)stIMDB_dbCheckpoint {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
+        [database checkpoint:STIMDBCheckpointModeTruncate error:nil];
     }];
 }
 
-- (NSInteger)qimDB_parserplatForm:(NSString *)platFormStr {
+- (NSInteger)stIMDB_parserplatForm:(NSString *)platFormStr {
     NSInteger platForm = 2;
     if ([platFormStr isEqualToString:@"ClientTypeMac"]) {
         platForm = 1;

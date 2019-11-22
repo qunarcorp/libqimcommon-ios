@@ -7,12 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "QIMCommonEnum.h"
-#import "QIMPublicRedefineHeader.h"
-#import <QIMCommonCategories/QIMCommonCategories.h>
-#import "QIMDataBasePool.h"
-#import "QIMDataBaseQueue.h"
-#import "QIMDataBase.h"
+#import "STIMCommonEnum.h"
+#import "STIMPublicRedefineHeader.h"
+#import <QIMCommonCategories/STIMCommonCategories.h>
+#import "STIMDataBasePool.h"
+#import "STIMDataBaseQueue.h"
+#import "STIMDataBase.h"
 
 @class UserInfo;
 
@@ -30,12 +30,12 @@
 
 @property (nonatomic, strong) NSDateFormatter *timeSmtapFormatter;
 
-@property (nonatomic, strong) QIMDataBasePool *databasePool;
+@property (nonatomic, strong) STIMDataBasePool *databasePool;
 
-@property (nonatomic, strong) QIMDataBaseQueue *dataBaseQueue;
+@property (nonatomic, strong) STIMDataBaseQueue *dataBaseQueue;
 
-+ (IMDataManager *) qimDB_SharedInstance;
-+ (IMDataManager *) qimDB_sharedInstanceWithDBPath:(NSString *)dbPath withDBFullJid:(NSString *)dbOwnerFullJid;
++ (IMDataManager *) stIMDB_SharedInstance;
++ (IMDataManager *) stIMDB_sharedInstanceWithDBPath:(NSString *)dbPath withDBFullJid:(NSString *)dbOwnerFullJid;
 
 - (NSString *)getDbOwnerFullJid;
 
@@ -51,19 +51,19 @@
 
 - (id)dbInstance;
 
-- (void)qimDB_closeDataBase;
+- (void)stIMDB_closeDataBase;
 
-+ (void)qimDB_clearDataBaseCache;
-- (void)qimDB_dbCheckpoint;
++ (void)stIMDB_clearDataBaseCache;
+- (void)stIMDB_dbCheckpoint;
 
-- (NSInteger)qimDB_parserplatForm:(NSString *)platFormStr;
+- (NSInteger)stIMDB_parserplatForm:(NSString *)platFormStr;
 
-- (void)qimDB_InsertUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type withValue:(NSString *)value withValueInt:(long long)valueInt;
+- (void)stIMDB_InsertUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type withValue:(NSString *)value withValueInt:(long long)valueInt;
 
-- (void)qimDB_UpdateUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type withValue:(NSString *)value withValueInt:(long long)valueInt;
+- (void)stIMDB_UpdateUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type withValue:(NSString *)value withValueInt:(long long)valueInt;
 
-- (long long)qimDB_getUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type;
+- (long long)stIMDB_getUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type;
 
-- (BOOL)qimDB_checkExistUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type;
+- (BOOL)stIMDB_checkExistUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type;
 
 @end

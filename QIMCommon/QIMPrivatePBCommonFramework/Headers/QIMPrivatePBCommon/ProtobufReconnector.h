@@ -5,7 +5,7 @@
 
 #import <Foundation/Foundation.h>
 #import <SystemConfiguration/SystemConfiguration.h>
-#import "QIMProtobufModel.h"
+#import "STIMProtobufModel.h"
 
 #define _XMPP_RECONNECT_H
 
@@ -54,7 +54,7 @@
  * which will trigger the class into action just as if an accidental disconnect occurred.
  **/
 
-@interface ProtobufReconnector : QIMProtobufModel {
+@interface ProtobufReconnector : STIMProtobufModel {
     Byte flags;
     Byte config;
     NSTimeInterval reconnectDelay;

@@ -1,20 +1,20 @@
 //
 //  IMDataManager+WorkFeed.m
-//  QIMCommon
+//  STIMCommon
 //
 //  Created by lilu on 2019/1/7.
-//  Copyright © 2019 QIM. All rights reserved.
+//  Copyright © 2019 STIM. All rights reserved.
 //
 
 #import "IMDataManager+WorkFeed.h"
-#import "QIMDataBase.h"
-#import "QIMJSONSerializer.h"
+#import "STIMDataBase.h"
+#import "STIMJSONSerializer.h"
 
 @implementation IMDataManager (WorkFeed)
 
-- (BOOL)qimDB_checkMomentWithMomentId:(NSString *)momentId {
+- (BOOL)stIMDB_checkMomentWithMomentId:(NSString *)momentId {
     __block BOOL isExist = NO;
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
         NSString *sql = [NSString stringWithFormat:@"Select 1 From IM_Work_World Where uuid = '%@';", momentId];
         DataReader *reader = [database executeReader:sql withParameters:nil];
         if ([reader read]) {
@@ -45,8 +45,8 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
           commentsNum           INTEGER,\
           review_status         INTEGER)" withParameters:nil];
 */
-- (void)qimDB_bulkinsertMoments:(NSArray *)moments {
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+- (void)stIMDB_bulkinsertMoments:(NSArray *)moments {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = @"insert or Replace into IM_Work_World(id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList) values(:id, :uuid, :owner, :ownerHost, :isAnonymous, :anonymousName, :anonymousPhoto, :createTime, :updateTime, :content, :atList, :isDelete, :isLike, :likeNum, :commentsNum, :review_status, :attachCommentList);";
         NSMutableArray *paramList = [[NSMutableArray alloc] init];
         for (NSDictionary *momentDic in moments) {
@@ -67,7 +67,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             NSNumber *commentsNum = [momentDic objectForKey:@"commentsNum"];
             NSNumber *reviewStatus = [momentDic objectForKey:@"reviewStatus"];
             NSArray *attachCommentList = [momentDic objectForKey:@"attachCommentList"];
-            NSString *attachCommentListStr = [[QIMJSONSerializer sharedInstance] serializeObject:attachCommentList];
+            NSString *attachCommentListStr = [[STIMJSONSerializer sharedInstance] serializeObject:attachCommentList];
             
             NSMutableArray *param = [[NSMutableArray alloc] init];
             [param addObject:rId];
@@ -94,21 +94,21 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     }];
 }
 
-- (void)qimDB_bulkdeleteMomentsWithXmppId:(NSString *)xmppId {
+- (void)stIMDB_bulkdeleteMomentsWithXmppId:(NSString *)xmppId {
     if (xmppId.length <= 0) {
         return;
     }
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = [NSString stringWithFormat:@"delete from IM_Work_World where owner = '%@' and ownerHost = '%@';", [[xmppId componentsSeparatedByString:@"@"] firstObject], [[xmppId componentsSeparatedByString:@"@"] lastObject]];
         [database executeBulkInsert:sql withParameters:nil];
     }];
 }
 
-- (void)qimDB_bulkdeleteMoments:(NSArray *)moments {
+- (void)stIMDB_bulkdeleteMoments:(NSArray *)moments {
     if (moments.count <= 0) {
         return;
     }
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = @"delete from IM_Work_World where id = :id;";
         NSMutableArray *paramList = [[NSMutableArray alloc] init];
         for (NSDictionary *momentDic in moments) {
@@ -124,9 +124,9 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     }];
 }
 
-- (NSDictionary *)qimDB_getWorkMomentWithMomentId:(NSString *)momentId {
+- (NSDictionary *)stIMDB_getWorkMomentWithMomentId:(NSString *)momentId {
     __block NSMutableDictionary *result = nil;
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
         NSString *sql = [NSString stringWithFormat:@"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList from IM_Work_World where uuid = '%@'", momentId];
         DataReader *reader = [database executeReader:sql withParameters:nil];
         if (result == nil) {
@@ -150,7 +150,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             NSNumber *commentsNum = [reader objectForColumnIndex:14];
             NSNumber *review_status = [reader objectForColumnIndex:15];
             NSString *attachCommentListStr = [reader objectForColumnIndex:16];
-            NSArray *attachCommentList = [[QIMJSONSerializer sharedInstance] deserializeObject:attachCommentListStr error:nil];
+            NSArray *attachCommentList = [[STIMJSONSerializer sharedInstance] deserializeObject:attachCommentListStr error:nil];
             
             NSMutableDictionary *msgDic = [[NSMutableDictionary alloc] init];
             [IMDataManager safeSaveForDic:result setObject:rid forKey:@"id"];
@@ -176,9 +176,9 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     return result;
 }
 
-- (NSDictionary *)qimDB_getLastWorkMoment {
+- (NSDictionary *)stIMDB_getLastWorkMoment {
     __block NSMutableDictionary *result = nil;
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
         NSString *sql = @"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList from IM_Work_World order by createTime desc limit 1";
         DataReader *reader = [database executeReader:sql withParameters:nil];
         if (result == nil) {
@@ -202,7 +202,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             NSNumber *commentsNum = [reader objectForColumnIndex:14];
             NSNumber *review_status = [reader objectForColumnIndex:15];
             NSString *attachCommentListStr = [reader objectForColumnIndex:16];
-            NSArray *attachCommentList = [[QIMJSONSerializer sharedInstance] deserializeObject:attachCommentListStr error:nil];
+            NSArray *attachCommentList = [[STIMJSONSerializer sharedInstance] deserializeObject:attachCommentListStr error:nil];
             
             NSMutableDictionary *msgDic = [[NSMutableDictionary alloc] init];
             [IMDataManager safeSaveForDic:result setObject:rid forKey:@"id"];
@@ -228,10 +228,10 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     return result;
 }
 
-- (NSArray *)qimDB_getWorkMomentWithXmppId:(NSString *)xmppId WithLimit:(int)limit WithOffset:(int)offset {
+- (NSArray *)stIMDB_getWorkMomentWithXmppId:(NSString *)xmppId WithLimit:(int)limit WithOffset:(int)offset {
     __block NSMutableArray *result = nil;
     CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
         NSString *sql = nil;
         if (xmppId == nil) {
             sql = [NSString stringWithFormat:@"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList from IM_Work_World order by createTime desc limit %d offset %d;", limit, offset];
@@ -263,7 +263,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             NSNumber *commentsNum = [reader objectForColumnIndex:14];
             NSNumber *review_status = [reader objectForColumnIndex:15];
             NSString *attachCommentListStr = [reader objectForColumnIndex:16];
-            NSArray *attachCommentList = [[QIMJSONSerializer sharedInstance] deserializeObject:attachCommentListStr error:nil];
+            NSArray *attachCommentList = [[STIMJSONSerializer sharedInstance] deserializeObject:attachCommentListStr error:nil];
 
             NSMutableDictionary *msgDic = [[NSMutableDictionary alloc] init];
             [IMDataManager safeSaveForDic:msgDic setObject:rid forKey:@"id"];
@@ -293,8 +293,8 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     return result;
 }
 
-- (void)qimDB_deleteMomentWithRId:(NSInteger)rId {
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+- (void)stIMDB_deleteMomentWithRId:(NSInteger)rId {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = [NSString stringWithFormat:@"delete from IM_Work_World where id = %ld", rId];
         DataReader *reader = [database executeReader:sql withParameters:nil];
         if ([reader read]) {
@@ -304,8 +304,8 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     }];
 }
 
-- (void)qimDB_updateMomentLike:(NSArray *)likeMoments {
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+- (void)stIMDB_updateMomentLike:(NSArray *)likeMoments {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = @"Update IM_Work_World Set isLike = :isLike, likeNum = :likeNum Where uuid = :uuid;";
         NSMutableArray *params = [[NSMutableArray alloc] init];
         for (NSDictionary *likeDic in likeMoments) {
@@ -323,11 +323,11 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     }];
 }
 
-- (void)qimDB_updateMomentWithLikeNum:(NSInteger)likeMomentNum WithCommentNum:(NSInteger)commentNum withPostId:(NSString *)postId {
+- (void)stIMDB_updateMomentWithLikeNum:(NSInteger)likeMomentNum WithCommentNum:(NSInteger)commentNum withPostId:(NSString *)postId {
     if (postId.length <= 0) {
         return;
     }
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = [NSString stringWithFormat:@"update IM_Work_World set likeNum = %ld, commentsNum = %ld where uuid = '%@'", likeMomentNum, commentNum, postId];
         [database executeNonQuery:sql withParameters:nil];
     }];
@@ -335,20 +335,20 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
 
 #pragma mark - Comment
 
-- (void)qimDB_bulkDeleteCommentsWithPostId:(NSString *)postUUID withcurCommentCreateTime:(long long)createTime {
+- (void)stIMDB_bulkDeleteCommentsWithPostId:(NSString *)postUUID withcurCommentCreateTime:(long long)createTime {
     if (postUUID.length <= 0) {
         return;
     }
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = [NSString stringWithFormat:@"delete from IM_Work_CommentV2 where postUUID = '%@' and createTime < %lld;", postUUID, createTime];
         [database executeBulkInsert:sql withParameters:nil];
     }];
 }
 
-- (long long)qimDB_getCommentCreateTimeWithCurCommentId:(NSInteger)rCommentId {
+- (long long)stIMDB_getCommentCreateTimeWithCurCommentId:(NSInteger)rCommentId {
 
     __block long long curCommentCreateTime = 0;
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
         NSString *sql = [NSString stringWithFormat:@"select createTime from IM_Work_CommentV2 where id = %ld;", rCommentId];
         DataReader *reader = [database executeReader:sql withParameters:nil];
         if ([reader read]) {
@@ -359,21 +359,21 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     return curCommentCreateTime;
 }
 
-- (void)qimDB_bulkUpdateComments:(NSArray *)comments {
+- (void)stIMDB_bulkUpdateComments:(NSArray *)comments {
     if (comments.count <= 0) {
         return;
     }
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = @"update IM_Work_CommentV2 set Comment='该评论已被删除'";
         [database executeBulkInsert:sql withParameters:nil];
     }];
 }
 
-- (void)qimDB_bulkDeleteCommentsAndAllChildComments:(NSArray *)comments {
+- (void)stIMDB_bulkDeleteCommentsAndAllChildComments:(NSArray *)comments {
     if (comments.count <= 0) {
         return;
     }
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = @"delete from IM_Work_CommentV2 where (commentUUID = :commentUUID Or ParentCommentUUID = :ParentCommentUUID or superCommentUUID = : superCommentUUID) or (ParentCommentUUID = :ParentCommentUUID or superCommentUUID = : superCommentUUID);";
         NSMutableArray *paramList = [[NSMutableArray alloc] init];
         for (NSDictionary *commentDic in comments) {
@@ -391,11 +391,11 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     }];
 }
 
-- (void)qimDB_bulkDeleteComments:(NSArray *)comments {
+- (void)stIMDB_bulkDeleteComments:(NSArray *)comments {
     if (comments.count <= 0) {
         return;
     }
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = @"delete from IM_Work_CommentV2 where commentUUID = :commentUUID;";
         NSMutableArray *paramList = [[NSMutableArray alloc] init];
         for (NSDictionary *commentDic in comments) {
@@ -411,22 +411,22 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     }];
 }
 
-- (void)qimDB_bulkDeleteCommentsWithPostId:(NSString *)postUUID {
+- (void)stIMDB_bulkDeleteCommentsWithPostId:(NSString *)postUUID {
     if (postUUID.length <= 0) {
         return;
     }
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = [NSString stringWithFormat:@"delete from IM_Work_CommentV2 where postUUID = '%@';", postUUID];
         [database executeBulkInsert:sql withParameters:nil];
     }];
 }
 
-- (void)qimDB_bulkinsertComments:(NSArray *)comments {
+- (void)stIMDB_bulkinsertComments:(NSArray *)comments {
     if (comments.count <= 0) {
         return;
     }
     NSMutableArray *newChilds = [[NSMutableArray alloc] init];
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *deleteSql = @"delete from IM_Work_CommentV2 where commentUUID=:commentUUID or parentCommentUUID=:parentCommentUUID or superParentUUID=:superParentUUID;";
         
         NSString *sql = @"insert or Replace into IM_Work_CommentV2(anonymousName, anonymousPhoto, commentUUID, content, createTime, fromHost, fromUser, id, isAnonymous, isDelete, isLike, likeNum, superParentUUID, parentCommentUUID, postUUID, reviewStatus, toAnonymousName, toAnonymousPhoto, toHost, toUser, toisAnonymous, updateTime, atList) values(:anonymousName, :anonymousPhoto, :commentUUID, :content, :createTime, :fromHost, :fromUser, :id, :isAnonymous, :isDelete, :isLike, :likeNum, :superParentUUID, :parentCommentUUID, :postUUID, :reviewStatus, :toAnonymousName, :toAnonymousPhoto, :toHost, :toUser, :toisAnonymous, :updateTime, :atList);";
@@ -497,14 +497,14 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
         [database executeBulkInsert:deleteSql withParameters:deleteParamList];
         [database executeBulkInsert:sql withParameters:paramList];
     }];
-    [self qimDB_bulkinsertNewChildComments:newChilds];
+    [self stIMDB_bulkinsertNewChildComments:newChilds];
 }
 
-- (void)qimDB_bulkinsertNewChildComments:(NSArray *)comments {
+- (void)stIMDB_bulkinsertNewChildComments:(NSArray *)comments {
     if (comments.count <= 0) {
         return;
     }
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *deleteSql = @"delete from IM_Work_CommentV2 where parentCommentUUID=:parentCommentUUID or superParentUUID=:superParentUUID;";
         
         NSString *sql = @"insert or Replace into IM_Work_CommentV2(anonymousName, anonymousPhoto, commentUUID, content, createTime, fromHost, fromUser, id, isAnonymous, isDelete, isLike, likeNum, superParentUUID, parentCommentUUID, postUUID, reviewStatus, toAnonymousName, toAnonymousPhoto, toHost, toUser, toisAnonymous, updateTime, atList) values(:anonymousName, :anonymousPhoto, :commentUUID, :content, :createTime, :fromHost, :fromUser, :id, :isAnonymous, :isDelete, :isLike, :likeNum, :superParentUUID, :parentCommentUUID, :postUUID, :reviewStatus, :toAnonymousName, :toAnonymousPhoto, :toHost, :toUser, :toisAnonymous, :updateTimem, :atList);";
@@ -578,9 +578,9 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     }];
 }
 
-- (NSArray *)qimDB_getWorkCommentsWithMomentId:(NSString *)momentId WithLimit:(int)limit WithOffset:(int)offset {
+- (NSArray *)stIMDB_getWorkCommentsWithMomentId:(NSString *)momentId WithLimit:(int)limit WithOffset:(int)offset {
     __block NSMutableArray *result = nil;
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
         NSString *sql = [NSString stringWithFormat:@"select anonymousName, anonymousPhoto, commentUUID, content, createTime, fromHost, fromUser, id, isAnonymous, isDelete, isLike, likeNum, parentCommentUUID, superParentUUID, postUUID, reviewStatus, toAnonymousName, toAnonymousPhoto, toHost, toUser, toisAnonymous, updateTime, atList from IM_Work_CommentV2 where postUUID='%@' and isDelete=0 and parentCommentUUID='' and superParentUUID='' order by createTime desc limit %d offset %d;", momentId, limit, offset];
         NSLog(@"sql : %@", sql);
         DataReader *reader = [database executeReader:sql withParameters:nil];
@@ -646,16 +646,16 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
         }
         
     }];
-    return [self qimDB_getWorkChildCommentsWithParentComments:result];
+    return [self stIMDB_getWorkChildCommentsWithParentComments:result];
 }
 
-- (NSArray *)qimDB_getWorkChildCommentsWithParentComments:(NSArray *)comments {
+- (NSArray *)stIMDB_getWorkChildCommentsWithParentComments:(NSArray *)comments {
     __block NSMutableArray *result = [[NSMutableArray alloc] init];
     for (NSInteger i = 0; i < comments.count; i++) {
         NSMutableDictionary *parentCommentDic = [comments objectAtIndex:i];
         NSString *commentUUID = [parentCommentDic objectForKey:@"commentUUID"];
         __block NSMutableArray *childComments = nil;
-        [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+        [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
             NSString *sql = [NSString stringWithFormat:@"select anonymousName, anonymousPhoto, commentUUID, content, createTime, fromHost, fromUser, id, isAnonymous, isDelete, isLike, likeNum, parentCommentUUID, superParentUUID, postUUID, reviewStatus, toAnonymousName, toAnonymousPhoto, toHost, toUser, toisAnonymous, updateTime, atList from IM_Work_CommentV2 where isDelete=0 and (parentCommentUUID=:'%@' Or superParentUUID='%@') order by createTime desc;", commentUUID, commentUUID];
             DataReader *reader = [database executeReader:sql withParameters:nil];
             if (childComments == nil) {
@@ -725,9 +725,9 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     return result;
 }
 
-- (NSArray *)qimDB_getWorkChildCommentsWithParentCommentUUID:(NSString *)commentUUID {
+- (NSArray *)stIMDB_getWorkChildCommentsWithParentCommentUUID:(NSString *)commentUUID {
     __block NSMutableArray *childComments = nil;
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
         NSString *sql = [NSString stringWithFormat:@"select anonymousName, anonymousPhoto, commentUUID, content, createTime, fromHost, fromUser, id, isAnonymous, isDelete, isLike, likeNum, parentCommentUUID, superParentUUID, postUUID, reviewStatus, toAnonymousName, toAnonymousPhoto, toHost, toUser, toisAnonymous, updateTime, atList from IM_Work_CommentV2 where isDelete=0 and (parentCommentUUID='%@' Or superParentUUID='%@') order by createTime desc;", commentUUID, commentUUID];
         NSLog(@"child sql : %@", sql);
         DataReader *reader = [database executeReader:sql withParameters:nil];
@@ -797,7 +797,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
 
 #pragma mark - NoticeMessage
 
-- (void)qimDB_bulkinsertNoticeMessage:(NSArray *)notices {
+- (void)stIMDB_bulkinsertNoticeMessage:(NSArray *)notices {
     if (notices.count <= 0) {
         return;
     }
@@ -817,7 +817,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     userFromHost          TEXT,\
     fromAnonymousName     TEXT
     */
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = @"insert or IGNORE into IM_Work_NoticeMessage(userFrom, readState, postUUID, fromIsAnonymous, toIsAnonymous, eventType, fromAnonymousPhoto, userTo, uuid, content, userToHost, createTime, userFromHost, fromAnonymousName, toAnonymousName, toAnonymousPhoto) values(:userFrom, :readState, :postUUID, :fromIsAnonymous, :toIsAnonymous, :eventType, :fromAnonymousPhoto, :userTo, :uuid, :content, :userToHost, :createTime, :userFromHost, :fromAnonymousName, :toAnonymousName, :toAnonymousPhoto);";
         NSMutableArray *paramList = [[NSMutableArray alloc] init];
         for (NSDictionary *noticeMsgDic in notices) {
@@ -874,9 +874,9 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     }];
 }
 //获取服务器事件差，来获取剩余未读消息
-- (long long)qimDB_getWorkNoticeMessagesMaxTime {
+- (long long)stIMDB_getWorkNoticeMessagesMaxTime {
     __block long long time = 0;
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
         NSString *sql = [NSString stringWithFormat:@"select max(createTime) from IM_Work_NoticeMessage"];
         DataReader *reader = [database executeReader:sql withParameters:nil];
         if ([reader read]) {
@@ -887,11 +887,11 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     return time;
 }
 
-- (NSInteger)qimDB_getWorkNoticeMessagesCountWithEventType:(NSArray *)eventTyps {
+- (NSInteger)stIMDB_getWorkNoticeMessagesCountWithEventType:(NSArray *)eventTyps {
     __block NSInteger count = 0;
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
         NSString *sql = [NSString stringWithFormat:@"select count(*) from IM_Work_NoticeMessage Where readState=0 and eventType in %@;", eventTyps];
-        NSLog(@"qimDB_getWorkNoticeMessagesCountWithEventType sql : %@", sql);
+        NSLog(@"stIMDB_getWorkNoticeMessagesCountWithEventType sql : %@", sql);
         DataReader *reader = [database executeReader:sql withParameters:nil];
         if ([reader read]) {
             count = [[reader objectForColumnIndex:0] integerValue];
@@ -901,9 +901,9 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     return count;
 }
 
-- (NSArray *)qimDB_getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset eventTypes:(NSArray *)eventTypes readState:(int)readState {
+- (NSArray *)stIMDB_getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset eventTypes:(NSArray *)eventTypes readState:(int)readState {
     __block NSMutableArray *result = nil;
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
         NSString *sql  = [NSString stringWithFormat:@"select userFrom, readState, postUUID, fromIsAnonymous, toIsAnonymous, eventType, fromAnonymousPhoto, userTo, uuid, content, userToHost, createTime, userFromHost, fromAnonymousName, toAnonymousName, toAnonymousPhoto from IM_Work_NoticeMessage where eventType in %@ and  readState = %ld order by createTime desc limit %d offset %d;", eventTypes, readState, limit, offset];
         NSLog(@"sql : %@", sql);
         DataReader *reader = [database executeReader:sql withParameters:nil];
@@ -954,13 +954,13 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
         }
         
     }];
-    //    QIMVerboseLog(@"sql取消息耗时。: %llf", [[QIMWatchDog sharedInstance] escapedTime]);
+    //    STIMVerboseLog(@"sql取消息耗时。: %llf", [[STIMWatchDog sharedInstance] escapedTime]);
     return result;
 }
 
-- (NSArray *)qimDB_getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset eventTypes:(NSArray *)eventTypes {
+- (NSArray *)stIMDB_getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset eventTypes:(NSArray *)eventTypes {
     __block NSMutableArray *result = nil;
-    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+    [[self dbInstance] inDatabase:^(STIMDataBase* _Nonnull database) {
         NSString *sql  = [NSString stringWithFormat:@"select userFrom, readState, postUUID, fromIsAnonymous, toIsAnonymous, eventType, fromAnonymousPhoto, userTo, uuid, content, userToHost, createTime, userFromHost, fromAnonymousName, toAnonymousName, toAnonymousPhoto from IM_Work_NoticeMessage where eventType in %@ order by createTime desc limit %d offset %d;", eventTypes, limit, offset];
         NSLog(@"sql : %@", sql);
         DataReader *reader = [database executeReader:sql withParameters:nil];
@@ -1011,16 +1011,16 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
         }
         
     }];
-    //    QIMVerboseLog(@"sql取消息耗时。: %llf", [[QIMWatchDog sharedInstance] escapedTime]);
+    //    STIMVerboseLog(@"sql取消息耗时。: %llf", [[STIMWatchDog sharedInstance] escapedTime]);
     return result;
 }
 
 //我的驼圈儿根据uuid 数组删除deleteListArr
-- (void)qimDB_deleteWorkNoticeMessageWithUUid:(NSArray *)deleteListArr{
+- (void)stIMDB_deleteWorkNoticeMessageWithUUid:(NSArray *)deleteListArr{
     if (deleteListArr.count <= 0) {
         return ;
     }
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *deleteSql = @"delete from IM_Work_NoticeMessage where uuid=:uuid";
         NSMutableArray *paramList = [[NSMutableArray alloc] init];
         for (NSDictionary *momentDic in deleteListArr) {
@@ -1036,25 +1036,25 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     }];
 }
 
-- (void)qimDB_deleteWorkNoticeMessageWithEventTypes:(NSArray *)eventTypes {
+- (void)stIMDB_deleteWorkNoticeMessageWithEventTypes:(NSArray *)eventTypes {
     if (eventTypes.count <= 0) {
         return ;
     }
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *deleteSql = [NSString stringWithFormat:@"delete from IM_Work_NoticeMessage where eventType in %@", eventTypes];
         BOOL result = [database executeBulkInsert:deleteSql withParameters:nil];
     }];
 }
 
-- (void)qimDB_updateWorkNoticeMessageReadStateWithTime:(long long)time {
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
+- (void)stIMDB_updateWorkNoticeMessageReadStateWithTime:(long long)time {
+    [[self dbInstance] syncUsingTransaction:^(STIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
         NSString *sql = [NSString stringWithFormat:@"update IM_Work_NoticeMessage set readState=1 where readState=0 and createTime <= %lld", time];
-        NSLog(@"qimDB_updateWorkNoticeMessageReadStateWithTime sql : %@", sql);
+        NSLog(@"stIMDB_updateWorkNoticeMessageReadStateWithTime sql : %@", sql);
         BOOL success = [database executeNonQuery:sql withParameters:nil];
         if (success) {
-            NSLog(@"qimDB_updateWorkNoticeMessageReadStateWithTime success");
+            NSLog(@"stIMDB_updateWorkNoticeMessageReadStateWithTime success");
         } else {
-            NSLog(@"qimDB_updateWorkNoticeMessageReadStateWithTime faild");
+            NSLog(@"stIMDB_updateWorkNoticeMessageReadStateWithTime faild");
         }
     }];
 }

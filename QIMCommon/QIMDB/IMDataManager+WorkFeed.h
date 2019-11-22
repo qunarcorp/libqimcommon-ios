@@ -1,90 +1,90 @@
 //
 //  IMDataManager+WorkFeed.h
-//  QIMCommon
+//  STIMCommon
 //
 //  Created by lilu on 2019/1/7.
-//  Copyright © 2019 QIM. All rights reserved.
+//  Copyright © 2019 STIM. All rights reserved.
 //
 
 #import "IMDataManager.h"
-#import "IMDataManager+QIMSession.h"
-#import "IMDataManager+QIMCalendar.h"
-#import "IMDataManager+QIMDBClientConfig.h"
-#import "IMDataManager+QIMDBQuickReply.h"
-#import "IMDataManager+QIMNote.h"
-#import "IMDataManager+QIMDBGroup.h"
-#import "IMDataManager+QIMDBFriend.h"
-#import "IMDataManager+QIMDBMessage.h"
-#import "IMDataManager+QIMDBCollectionMessage.h"
-#import "IMDataManager+QIMDBPublicNumber.h"
-#import "IMDataManager+QIMDBUser.h"
-#import "IMDataManager+QIMUserMedal.h"
-#import "IMDataManager+QIMFoundList.h"
+#import "IMDataManager+STIMSession.h"
+#import "IMDataManager+STIMCalendar.h"
+#import "IMDataManager+STIMDBClientConfig.h"
+#import "IMDataManager+STIMDBQuickReply.h"
+#import "IMDataManager+STIMNote.h"
+#import "IMDataManager+STIMDBGroup.h"
+#import "IMDataManager+STIMDBFriend.h"
+#import "IMDataManager+STIMDBMessage.h"
+#import "IMDataManager+STIMDBCollectionMessage.h"
+#import "IMDataManager+STIMDBPublicNumber.h"
+#import "IMDataManager+STIMDBUser.h"
+#import "IMDataManager+STIMUserMedal.h"
+#import "IMDataManager+STIMFoundList.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface IMDataManager (WorkFeed)
 
-- (BOOL)qimDB_checkMomentWithMomentId:(NSString *)momentId;
+- (BOOL)stIMDB_checkMomentWithMomentId:(NSString *)momentId;
 
-- (void)qimDB_bulkinsertMoments:(NSArray *)moments;
+- (void)stIMDB_bulkinsertMoments:(NSArray *)moments;
 
-- (NSDictionary *)qimDB_getWorkMomentWithMomentId:(NSString *)momentId;
+- (NSDictionary *)stIMDB_getWorkMomentWithMomentId:(NSString *)momentId;
 
-- (void)qimDB_bulkdeleteMomentsWithXmppId:(NSString *)xmppId;
+- (void)stIMDB_bulkdeleteMomentsWithXmppId:(NSString *)xmppId;
 
-- (void)qimDB_bulkdeleteMoments:(NSArray *)moments;
+- (void)stIMDB_bulkdeleteMoments:(NSArray *)moments;
 
-- (NSDictionary *)qimDB_getLastWorkMoment;
+- (NSDictionary *)stIMDB_getLastWorkMoment;
 
-- (NSArray *)qimDB_getWorkMomentWithXmppId:(NSString *)xmppId WithLimit:(int)limit WithOffset:(int)offset;
+- (NSArray *)stIMDB_getWorkMomentWithXmppId:(NSString *)xmppId WithLimit:(int)limit WithOffset:(int)offset;
 
-- (void)qimDB_deleteMomentWithRId:(NSInteger)rId;
+- (void)stIMDB_deleteMomentWithRId:(NSInteger)rId;
 
-- (void)qimDB_updateMomentLike:(NSArray *)likeMoments;
+- (void)stIMDB_updateMomentLike:(NSArray *)likeMoments;
 
-- (void)qimDB_updateMomentWithLikeNum:(NSInteger)likeMomentNum WithCommentNum:(NSInteger)commentNum withPostId:(NSString *)postId;
+- (void)stIMDB_updateMomentWithLikeNum:(NSInteger)likeMomentNum WithCommentNum:(NSInteger)commentNum withPostId:(NSString *)postId;
 
 #pragma mark - Comment
 
-- (void)qimDB_bulkDeleteCommentsWithPostId:(NSString *)postUUID withcurCommentCreateTime:(long long)createTime;
+- (void)stIMDB_bulkDeleteCommentsWithPostId:(NSString *)postUUID withcurCommentCreateTime:(long long)createTime;
 
-- (long long)qimDB_getCommentCreateTimeWithCurCommentId:(NSInteger)commentId;
+- (long long)stIMDB_getCommentCreateTimeWithCurCommentId:(NSInteger)commentId;
 
-- (void)qimDB_bulkUpdateComments:(NSArray *)comments;
+- (void)stIMDB_bulkUpdateComments:(NSArray *)comments;
 
-- (void)qimDB_bulkDeleteCommentsAndAllChildComments:(NSArray *)comments;
+- (void)stIMDB_bulkDeleteCommentsAndAllChildComments:(NSArray *)comments;
 
-- (void)qimDB_bulkDeleteComments:(NSArray *)comments;
+- (void)stIMDB_bulkDeleteComments:(NSArray *)comments;
 
-- (void)qimDB_bulkDeleteCommentsWithPostId:(NSString *)postUUID;
+- (void)stIMDB_bulkDeleteCommentsWithPostId:(NSString *)postUUID;
 
-- (void)qimDB_bulkinsertComments:(NSArray *)comments;
+- (void)stIMDB_bulkinsertComments:(NSArray *)comments;
 
-- (NSArray *)qimDB_getWorkCommentsWithMomentId:(NSString *)momentId WithLimit:(int)limit WithOffset:(int)offset;
+- (NSArray *)stIMDB_getWorkCommentsWithMomentId:(NSString *)momentId WithLimit:(int)limit WithOffset:(int)offset;
 
-- (NSArray *)qimDB_getWorkChildCommentsWithParentCommentUUID:(NSString *)commentUUID;
+- (NSArray *)stIMDB_getWorkChildCommentsWithParentCommentUUID:(NSString *)commentUUID;
 
 #pragma mark - NoticeMessage
 
-- (void)qimDB_bulkinsertNoticeMessage:(NSArray *)notices;
+- (void)stIMDB_bulkinsertNoticeMessage:(NSArray *)notices;
 
-- (long long)qimDB_getWorkNoticeMessagesMaxTime;
+- (long long)stIMDB_getWorkNoticeMessagesMaxTime;
 
-- (NSInteger)qimDB_getWorkNoticeMessagesCountWithEventType:(NSArray *)eventTyps;
-
-//新加
-- (NSArray *)qimDB_getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset eventTypes:(NSArray *)eventTypes readState:(int)readState;
+- (NSInteger)stIMDB_getWorkNoticeMessagesCountWithEventType:(NSArray *)eventTyps;
 
 //新加
-- (NSArray *)qimDB_getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset eventTypes:(NSArray *)eventTypes;
+- (NSArray *)stIMDB_getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset eventTypes:(NSArray *)eventTypes readState:(int)readState;
+
+//新加
+- (NSArray *)stIMDB_getWorkNoticeMessagesWithLimit:(int)limit WithOffset:(int)offset eventTypes:(NSArray *)eventTypes;
 
 //我的驼圈儿根据uuid 数组删除deleteListArr
-- (void)qimDB_deleteWorkNoticeMessageWithUUid:(NSArray *)deleteListArr;
+- (void)stIMDB_deleteWorkNoticeMessageWithUUid:(NSArray *)deleteListArr;
 
-- (void)qimDB_deleteWorkNoticeMessageWithEventTypes:(NSArray *)eventTypes;
+- (void)stIMDB_deleteWorkNoticeMessageWithEventTypes:(NSArray *)eventTypes;
 
-- (void)qimDB_updateWorkNoticeMessageReadStateWithTime:(long long)time;
+- (void)stIMDB_updateWorkNoticeMessageReadStateWithTime:(long long)time;
 
 @end
 
