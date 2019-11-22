@@ -244,18 +244,25 @@
 
 static NSMutableArray *cacheUserCardHttpList = nil;
 - (void)updateUserCard:(NSString *)xmppId withCache:(BOOL)cache {
-    if (YES == cache) {
-        if (!cacheUserCardHttpList) {
-            cacheUserCardHttpList = [NSMutableArray arrayWithCapacity:3];
-        }
-        if ([cacheUserCardHttpList containsObject:xmppId]) {
-            return;
+    dispatch_block_t block = ^{
+        if (YES == cache) {
+            if (!cacheUserCardHttpList) {
+                cacheUserCardHttpList = [NSMutableArray arrayWithCapacity:3];
+            }
+            if ([cacheUserCardHttpList containsObject:xmppId]) {
+                return;
+            } else {
+                [cacheUserCardHttpList addObject:xmppId];
+                [self updateUserCard:@[xmppId]];
+            }
         } else {
-            [cacheUserCardHttpList addObject:xmppId];
             [self updateUserCard:@[xmppId]];
         }
+    };
+    if (dispatch_get_specific(self.cacheTag)) {
+        block();
     } else {
-        [self updateUserCard:@[xmppId]];
+        dispatch_sync(self.cacheQueue, block);
     }
 }
 
