@@ -58,6 +58,8 @@
 
 - (NSInteger)qimDB_parserplatForm:(NSString *)platFormStr;
 
+- (NSArray *)qimDB_getAllTables;
+
 - (void)qimDB_InsertUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type withValue:(NSString *)value withValueInt:(long long)valueInt;
 
 - (void)qimDB_UpdateUserCacheDataWithKey:(NSString *)key withType:(NSInteger)type withValue:(NSString *)value withValueInt:(long long)valueInt;

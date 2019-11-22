@@ -412,7 +412,7 @@
 
 - (void)setNotSendText:(NSString *)text inputItems:(NSArray *)inputItems ForJid:(NSString *)jid;
 
-- (NSDictionary *)getQChatTokenWithBusinessLineName:(NSString *)businessLineName;
+- (void)getQChatTokenWithBusinessLineName:(NSString *)businessLineName withCallBack:(QIMKitGetQChatTokenSuccessBlock)callback;
 
 - (NSDictionary *)getQVTForQChat;
 
@@ -422,15 +422,15 @@
 
 - (void)clearcache;
 
-- (BOOL)setStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType;
+- (void)setStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
-- (BOOL)removeStickWithCombineJid:(NSString *)jid WithChatType:(ChatType)chatType;
+- (void)removeStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
 - (BOOL)isStickWithCombineJid:(NSString *)jid;
 
 - (NSDictionary *)stickList;
 
-- (BOOL)setMsgNotifySettingWithIndex:(QIMMSGSETTING)setting WithSwitchOn:(BOOL)switchOn;
+- (void)setMsgNotifySettingWithIndex:(QIMMSGSETTING)setting WithSwitchOn:(BOOL)switchOn withCallBack:(QIMKitSetMsgNotifySettingSuccessBlock)callback;
 
 - (BOOL)getLocalMsgNotifySettingWithIndex:(QIMMSGSETTING)setting;
 
@@ -442,9 +442,9 @@
 
 - (void)sendNoPush;
 
-- (BOOL)sendServer:(NSString *)notificationToken withUsername:(NSString *)username withParamU:(NSString *)paramU withParamK:(NSString *)paramK WithDelete:(BOOL)deleteFlag;
+- (void)sendServer:(NSString *)notificationToken withUsername:(NSString *)username withParamU:(NSString *)paramU withParamK:(NSString *)paramK WithDelete:(BOOL)deleteFlag withCallback:(QIMKitRegisterPushTokenSuccessBlock)callback;
 
-- (BOOL)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag;
+- (void)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag withCallback:(QIMKitRegisterPushTokenSuccessBlock)callback;
 
 - (void)findNewestClient;
 

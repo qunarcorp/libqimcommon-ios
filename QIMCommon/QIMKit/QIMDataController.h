@@ -19,8 +19,6 @@
 
 - (void)saveResourceWithFileName:(NSString *)fileName data:(NSData *)data;
 
-- (NSData *)getResourceData:(NSString *)key;
-
 - (UIImage *)getResourceImage:(NSString *)key;
 
 - (void)addResource:(id)resource withKey:(NSString *)key;

@@ -45,7 +45,7 @@
         [dict setQIMSafeObject:combineXmppId forKey:@"subkey"];
         [deleteStickList addObject:dict];
     }
-    [self updateRemoteClientConfigWithType:QIMClientConfigTypeKStickJidDic BatchProcessConfigInfo:deleteStickList WithDel:YES];
+    [self updateRemoteClientConfigWithType:QIMClientConfigTypeKStickJidDic BatchProcessConfigInfo:deleteStickList WithDel:YES withCallback:nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationSessionListRemove object:nil];
 }
 

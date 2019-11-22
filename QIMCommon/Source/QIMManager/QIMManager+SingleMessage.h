@@ -19,8 +19,8 @@
 
 - (BOOL)updateOfflineMessagesV2;
 
-- (NSArray *)getUserChatlogWithFrom:(NSString *)from to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction include:(BOOL)include;
+- (void)getUserChatlogWithFrom:(NSString *)from to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction include:(BOOL)include withCallBack:(QIMKitGetUserChatMsgListCallBack)callback;
 
-- (NSArray *)getConsultServerlogWithFrom:(NSString *)from virtualId:(NSString *)virtualId to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction;
+- (void)getConsultServerlogWithFrom:(NSString *)from virtualId:(NSString *)virtualId to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction withCallBack:(QIMKitGetConsultServerMsgListCallBack)callback;
 
 @end

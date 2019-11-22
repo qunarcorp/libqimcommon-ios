@@ -447,4 +447,70 @@ typedef void(^QIMKitGetUserTokenSuccessBlock)(NSDictionary *result);
 typedef void(^QIMKitGetUserNewTokenSuccessBlock)(NSDictionary *result);
 typedef void(^QIMKitGetVerifyCodeSuccessBlock)(NSDictionary *result);
 
+
+typedef void(^QIMKitGetQChatTokenSuccessBlock)(NSDictionary *result);
+typedef void (^QIMKitSetMsgNotifySettingSuccessBlock)(BOOL successed);
+
+typedef void(^QIMKitRegisterPushTokenSuccessBlock)(BOOL successed);
+
+typedef void(^QIMKitGetQChatBetaLoginTokenDic)(NSDictionary *loginDic);
+
+typedef void(^QIMKitUpdateRemoteClientConfig)(BOOL successed);
+
+typedef void(^QIMKitGetSeatSeStatusBlock)(NSArray *list);
+typedef void(^QIMKitUpdateSeatSeStatusBlock)(BOOL res);
+
+typedef void(^QIMKitGetLeaveMsgNotReaderCountBlock)(NSInteger count);
+
+typedef void(^QIMKitCheckNetWorkBlock)(BOOL successed);
+
+typedef void(^QIMKitSearchQunarUserBlock)(NSArray *list);
+
+typedef void(^QIMKitSearchUserListCallBack)(NSArray *list);
+
+//公众号
+typedef void(^QIMKitSearchRobotByKeyStrCallBack)(NSArray *list);
+typedef void(^QIMKitCancelFocusPublicNumberCallBack)(BOOL res);
+typedef void(^QIMKitFocusPublicNumberCallBack)(BOOL res);
+typedef void(^QIMKitUpdatePublicNumberCardCallBack)(NSArray *list);
+
+typedef void(^QIMKitDownloadQIMRNExternalAppBundleSuccessCallBack)(BOOL res);
+typedef void(^QIMKitOPSRNBundlePatchDownloadHelperHandle)(BOOL res);
+
+//系统消息
+typedef void(^QIMKitGetSystemMsgListCallBack)(NSArray *list);
+
+//获取导航
+typedef void(^QIMKitGetNavConfigCallBack)(BOOL success);
+
+//拉群历史
+typedef void(^QIMKitGetMucMsgListCallBack)(NSArray *list);
+//下拉Consult消息
+typedef void(^QIMKitGetConsultServerMsgListCallBack)(NSArray *list);
+//下拉单人消息
+typedef void(^QIMKitGetUserChatMsgListCallBack)(NSArray *list);
+//拉取离线消息
+typedef void(^QIMKitGetUserChatHistoryCallBack)(NSArray *list);
+
+//check图片key
+typedef void(^QIMKitCheckImageKeyForImageCallBack)(NSString *result);
+
+//check新Video
+typedef void(^QIMKitCheckNewVideoCallBack)(NSDictionary *result);
+
+//check文件key
+typedef void(^QIMKitCheckFileKeyForFileCallBack)(NSString *result);
+
+//上传文件
+typedef void(^QIMKitUploadFileCallBack)(NSString *result);
+
+//上传图片
+typedef void(^QIMKitUploadImageCallBack)(NSString *result);
+
+typedef void(^QIMKitCheckVideoCallBack)(NSDictionary *result);
+
+typedef void(^QIMKitUploadMyPhotoCallBack)(NSString *result);
+
+typedef void(^QIMKitUpdateLoadVoiceFileCallBack)(NSString *httpUrl);
+
 #endif /* QIMCommonEnum_h */

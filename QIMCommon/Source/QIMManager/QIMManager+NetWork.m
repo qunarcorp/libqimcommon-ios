@@ -25,22 +25,23 @@
 
 #pragma mark - 网络状态监测
 
-- (BOOL)checkNetworkCanUser{
+- (void)checkNetWorkWithCallBack:(QIMKitCheckNetWorkBlock)callback {
     NSString *checkUrl = [[QIMNavConfigManager sharedInstance] healthcheckUrl];
     QIMVerboseLog(@"网络检测，检测地址:%@...", checkUrl);
     if (checkUrl.length > 0) {
-        ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:checkUrl]];
-        [request setTimeOutSeconds:2];
-        [request startSynchronous];
-        if ([request responseStatusCode] == 200) {
-            QIMWarnLog(@"<Method: checkNetworkCanUser> 网络检测，已连接到互联网...");
-            return YES;
-        } else {
-            QIMWarnLog(@"网络检测，Request Url %@, Respone Code : %d , Error %@",checkUrl,request.responseStatusCode,request.error);
-            return NO;
-        }
+        [self sendTPGetRequestWithUrl:checkUrl withSuccessCallBack:^(NSData *responseData) {
+            if (callback) {
+                callback(YES);
+            }
+        } withFailedCallBack:^(NSError *error) {
+            if (callback) {
+                callback(NO);
+            }
+        }];
     } else {
-        return YES;
+        if (callback) {
+            callback(NO);
+        }
     }
 }
 
@@ -48,7 +49,24 @@
 - (void)checkNetworkStatus{
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkNetworkStatus) object:nil];
     QIMWarnLog(@" _needTryRelogin = %d", self.needTryRelogin);
+    __weak __typeof(self)weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self checkNetWorkWithCallBack:^(BOOL successed) {
+            __strong __typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            if (strongSelf.notNeedCheckNetwotk == NO) {
+                if ([strongSelf isLogin] == NO) {
+                    [strongSelf relogin];
+                }
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self performSelector:@selector(checkNetworkStatus) withObject:nil afterDelay:3];
+                });
+            }
+        }];
+        /*
         if ([self checkNetworkCanUser] && self.notNeedCheckNetwotk == NO) {
             if ([self isLogin] == NO) {
                 [self relogin];
@@ -58,6 +76,7 @@
                 [self performSelector:@selector(checkNetworkStatus) withObject:nil afterDelay:3];
             });
         }
+        */
     });
 }
 

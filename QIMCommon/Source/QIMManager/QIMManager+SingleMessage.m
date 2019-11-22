@@ -211,7 +211,7 @@
 #pragma mark - 获取离线单人消息
 - (NSArray *)getUserChatlogSince:(NSTimeInterval)lastChatTime success:(BOOL *)flag timeOut:(NSTimeInterval)timeOut {
     
-    NSArray *msgList = [[NSArray alloc] init];
+    __block NSArray *msgList = [[NSArray alloc] init];
     NSString *jid = [QIMManager getLastUserName];
     if ([jid length] > 0) {
         NSString *destUrl = [NSString stringWithFormat:@"%@/qtapi/gethistory.qunar?server=%@&c=qtalk&u=%@&k=%@&p=iphone&v=%@&f=t",
@@ -237,8 +237,67 @@
         destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         
         CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
-        
         NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:jsonDic error:nil];
+        
+        dispatch_semaphore_t sema=dispatch_semaphore_create(0);
+        [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
+            NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+            if (result) {
+                int errCode = [[result objectForKey:@"errcode"] intValue];
+                BOOL ret = [[result objectForKey:@"ret"] boolValue];
+                if (errCode == 0) {
+                    if (ret) {
+                        msgList = [result objectForKey:@"data"];
+                        //请求回来的数据 >= 默认值，再次获取一次
+                        if (msgList.count >= DEFAULT_CHATMSG_NUM) {
+                            self.latestSingleMessageFlag = YES;
+                        } else {
+                            self.latestSingleMessageFlag = NO;
+                            //最后一次获取
+                        }
+                        QIMVerboseLog(@"是否还要继续获取单人离线JSON消息 ： %d", self.latestSingleMessageFlag);
+                        *flag = YES;
+                        QIMVerboseLog(@"获取单人历史JSON记录请求成功");
+                        
+//                        NSDictionary *logDic3 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":jsonDic, @"requestHeaders":cookieProperties, @"describtion":@"是否还要继续获取单人离线JSON消息", @"ext":@{@"是否还要继续获取单人离线JSON消息":@(self.latestSingleMessageFlag)}};
+//                        Class autoManager3 = NSClassFromString(@"QIMAutoTrackerManager");
+//                        id autoManagerObject3 = [[autoManager3 alloc] init];
+//                        [autoManagerObject3 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic3];
+                    }
+                } else {
+                    *flag = NO;
+                    if (errCode == 5000) {
+                        [self updateRemoteLoginKey];
+                    }
+                    
+//                    NSDictionary *logDic4 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":jsonDic, @"requestHeaders":cookieProperties, @"describtion":@"获取单人历史JSON记录请求失败", @"ext":@{@"Error":result?result:@""}};
+//                    Class autoManager4 = NSClassFromString(@"QIMAutoTrackerManager");
+//                    id autoManagerObject4 = [[autoManager4 alloc] init];
+//                    [autoManagerObject4 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic4];
+                    
+                    QIMErrorLog(@"获取单人历史JSON记录请求失败,ErrMsg:%@", [result objectForKey:@"errmsg"]);
+                }
+            } else {
+                QIMErrorLog(@"获取单人历史JSON记录失败");
+            }
+            dispatch_semaphore_signal(sema);
+        } withFailedCallBack:^(NSError *error) {
+            *flag = NO;
+            if (error) {
+                QIMErrorLog(@"获取单人历史JSON记录请求失败,ErrMsg:%@",error);
+            } else {
+                QIMErrorLog(@"获取单人历史JSON记录失败");
+            }
+            dispatch_semaphore_signal(sema);
+            
+//            NSDictionary *logDic5 = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":jsonDic, @"requestHeaders":cookieProperties, @"describtion":@"获取单人历史JSON记录请求失败", @"ext":@{@"Error":error?error:@""}};
+//            Class autoManager5 = NSClassFromString(@"QIMAutoTrackerManager");
+//            id autoManagerObject5 = [[autoManager5 alloc] init];
+//            [autoManagerObject5 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic5];
+
+        }];
+        dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+        /*
         ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
         [request setUseCookiePersistence:NO];
         NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
@@ -315,6 +374,7 @@
             id autoManagerObject5 = [[autoManager5 alloc] init];
             [autoManagerObject5 performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic5];
         }
+        */
     }
     return msgList;
 }
@@ -323,7 +383,7 @@
 
 #pragma mark - 单人ConsultServer消息（下拉加载） qchatId = 5
 
-- (NSArray *)getConsultServerlogWithFrom:(NSString *)from virtualId:(NSString *)virtualId to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction {
+- (void)getConsultServerlogWithFrom:(NSString *)from virtualId:(NSString *)virtualId to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction withCallBack:(QIMKitGetConsultServerMsgListCallBack)callback {
     
     CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
 
@@ -350,39 +410,29 @@
                          [[QIMAppInfo sharedInstance] AppBuildVersion]];
     destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:params error:nil];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
-    [request setUseCookiePersistence:NO];
-    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
-    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
-    [cookieProperties setObject:@"application/json" forKey:@"Content-type"];
-    [request setRequestHeaders:cookieProperties];
-    [request appendPostData:requestData];
-    
-    [request startSynchronous];
-    
-    NSDictionary *logDic = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"单人ConsultServer消息（下拉加载)"};
-    Class autoManager = NSClassFromString(@"QIMAutoTrackerManager");
-    id autoManagerObject = [[autoManager alloc] init];
-    [autoManagerObject performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic];
-    
-    NSError *error = [request error];
-    NSDictionary *result = nil;
-    if ([request responseStatusCode] == 200 && !error) {
-        NSData *responseData = [request responseData];
-        result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
         if (ret) {
             NSArray *msgList = [result objectForKey:@"data"];
-            return msgList;
+            if (callback) {
+                callback(msgList);
+            }
+        } else {
+            if (callback) {
+                callback(nil);
+            }
         }
-    }
-    return msgList;
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
 }
 
 #pragma mark - 单人历史消息（下拉加载）
 
-- (NSArray *)getUserChatlogWithFrom:(NSString *)from to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction include:(BOOL)include {
+- (void)getUserChatlogWithFrom:(NSString *)from to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction include:(BOOL)include withCallBack:(QIMKitGetUserChatMsgListCallBack)callback {
 
     CFAbsoluteTime startTime = [[QIMWatchDog sharedInstance] startTime];
 
@@ -410,33 +460,30 @@
                          [[QIMAppInfo sharedInstance] AppBuildVersion]];
     destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:params error:nil];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
-    [request setUseCookiePersistence:NO];
-    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
-    [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
-    [cookieProperties setObject:@"application/json" forKey:@"Content-type"];
-    [request setRequestHeaders:cookieProperties];
-    [request appendPostData:requestData];
     
-    NSDictionary *logDic = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"requestHeaders":requestHeaders, @"describtion":@"单人ConsultServer消息（下拉加载)"};
+    NSDictionary *logDic = @{@"costTime":@([[QIMWatchDog sharedInstance] escapedTimewithStartTime:startTime]), @"reportTime":@([[NSDate date] timeIntervalSince1970]), @"threadName":@"", @"isMainThread":@([NSThread isMainThread]), @"url":destUrl, @"methodParams":params, @"describtion":@"单人Chat消息（下拉加载)"};
     Class autoManager = NSClassFromString(@"QIMAutoTrackerManager");
     id autoManagerObject = [[autoManager alloc] init];
     [autoManagerObject performSelectorInBackground:@selector(addCATTraceData:) withObject:logDic];
-
-    [request startSynchronous];
-    NSError *error = [request error];
-    NSDictionary *result = nil;
-    if ([request responseStatusCode] == 200 && !error) {
-        NSData *responseData = [request responseData];
-        result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+    
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[result objectForKey:@"ret"] boolValue];
         if (ret) {
             NSArray *msgList = [result objectForKey:@"data"];
-            return msgList;
+            if (callback) {
+                callback(msgList);
+            }
+        } else {
+            if (callback) {
+                callback(nil);
+            }
         }
-    }
-    return nil;
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
 }
 
 @end

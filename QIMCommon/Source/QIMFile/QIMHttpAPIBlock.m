@@ -7,12 +7,11 @@
 //
 
 #import "QIMHttpAPIBlock.h"
-#import "ASIHttpRequest.h"
 #import "QIMPublicRedefineHeader.h"
 
 #define KNotifyUploadProgress               @"KNotifyUploadProgress"
 
-@interface QIMHttpAPIBlock () <ASIProgressDelegate>
+@interface QIMHttpAPIBlock () 
 
 @end
 

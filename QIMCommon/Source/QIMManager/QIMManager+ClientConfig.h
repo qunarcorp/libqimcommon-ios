@@ -34,9 +34,9 @@
 
 - (void)insertNewClientConfigInfoWithData:(NSDictionary *)result;
 
-- (BOOL)updateRemoteClientConfigWithType:(QIMClientConfigType)type BatchProcessConfigInfo:(NSArray *)configInfoArray WithDel:(BOOL)delFlag;
+- (void)updateRemoteClientConfigWithType:(QIMClientConfigType)type BatchProcessConfigInfo:(NSArray *)configInfoArray WithDel:(BOOL)delFlag withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
-- (BOOL)updateRemoteClientConfigWithType:(QIMClientConfigType)type WithSubKey:(NSString *)subKey WithConfigValue:(NSString *)configValue WithDel:(BOOL)delFlag;
+- (void)updateRemoteClientConfigWithType:(QIMClientConfigType)type WithSubKey:(NSString *)subKey WithConfigValue:(NSString *)configValue WithDel:(BOOL)delFlag withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
 - (void)getRemoteClientConfig;
 
@@ -51,9 +51,9 @@
 
 -(BOOL)isStarOrBlackContact:(NSString *)subkey ConfigKey:(NSString *)pkey;
 
--(BOOL)setStarOrblackContact:(NSString *)subkey ConfigKey:(NSString *)pkey Flag:(BOOL)value;
+- (void)setStarOrblackContact:(NSString *)subkey ConfigKey:(NSString *)pkey Flag:(BOOL)value withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
--(BOOL)setStarOrblackContacts:(NSDictionary *)map ConfigKey:(NSString *)pkey Flag:(BOOL)value;
+- (void)setStarOrblackContacts:(NSDictionary *)map ConfigKey:(NSString *)pkey Flag:(BOOL)value withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
 /**
  客户端消息提示音
@@ -68,6 +68,6 @@
  @param soundName 提示音文件名
  @return 是否设置成功
  */
-- (BOOL)setClientNotificationSound:(NSString *)soundName;
+- (void)setClientNotificationSound:(NSString *)soundName withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
 @end

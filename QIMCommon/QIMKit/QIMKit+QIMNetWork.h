@@ -24,7 +24,7 @@
 
  @return YES / NO
  */
-- (BOOL)checkNetworkCanUser;
+- (void)checkNetWorkWithCallBack:(QIMKitCheckNetWorkBlock)callback;
 
 
 /**

@@ -37,4 +37,16 @@
     [[QIMManager sharedInstance] synchronizeDujiaWarningWithJid:dujiaJid];
 }
 
+- (void)sendTPPOSTFormUrlEncodedRequestWithUrl:(NSString *)url withRequestBodyData:(NSData *)bodyData withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    [[QIMManager sharedInstance] sendTPPOSTFormUrlEncodedRequestWithUrl:url withRequestBodyData:bodyData withSuccessCallBack:sCallback withFailedCallBack:fCallback];
+}
+
+- (void)downloadFileRequest:(NSString *)downloadFileUrl withTargetFilePath:(NSString *)targetFilePath withProgressBlock:(QIMKitSendTPRequesProgressBlock)pCallback withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    [[QIMManager sharedInstance] downloadFileRequest:downloadFileUrl withTargetFilePath:targetFilePath withProgressBlock:pCallback withSuccessCallBack:sCallback withFailedCallBack:fCallback];
+}
+
+- (void)sendTPGETFormUrlEncodedRequestWithUrl:(NSString *)url withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
+    [[QIMManager sharedInstance] sendTPGETFormUrlEncodedRequestWithUrl:url withSuccessCallBack:sCallback withFailedCallBack:fCallback];
+}
+
 @end

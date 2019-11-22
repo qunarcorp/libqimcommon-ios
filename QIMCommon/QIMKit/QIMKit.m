@@ -330,8 +330,8 @@ static QIMKit *__global_QIMKit = nil;
     [[QIMManager sharedInstance] setNotSendText:text inputItems:inputItems ForJid:jid];
 }
 
-- (NSDictionary *)getQChatTokenWithBusinessLineName:(NSString *)businessLineName {
-    return [[QIMManager sharedInstance] getQChatTokenWithBusinessLineName:businessLineName];
+- (void)getQChatTokenWithBusinessLineName:(NSString *)businessLineName withCallBack:(QIMKitGetQChatTokenSuccessBlock)callback {
+    [[QIMManager sharedInstance] getQChatTokenWithBusinessLineName:businessLineName withCallBack:callback];
 }
 
 - (NSDictionary *)getQVTForQChat {
@@ -350,12 +350,12 @@ static QIMKit *__global_QIMKit = nil;
     [[QIMManager sharedInstance] clearcache];
 }
 
-- (BOOL)setStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType {
-    return [[QIMManager sharedInstance] setStickWithCombineJid:combineJid WithChatType:chatType];
+- (void)setStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType withCallback:(QIMKitUpdateRemoteClientConfig)callback {
+    [[QIMManager sharedInstance] setStickWithCombineJid:combineJid WithChatType:chatType withCallback:callback];
 }
 
-- (BOOL)removeStickWithCombineJid:(NSString *)jid WithChatType:(ChatType)chatType {
-    return [[QIMManager sharedInstance] removeStickWithCombineJid:jid WithChatType:chatType];
+- (BOOL)removeStickWithCombineJid:(NSString *)jid WithChatType:(ChatType)chatType withCallback:(QIMKitUpdateRemoteClientConfig)callback{
+    [[QIMManager sharedInstance] removeStickWithCombineJid:jid WithChatType:chatType withCallback:callback];
 }
 
 - (BOOL)isStickWithCombineJid:(NSString *)jid {
@@ -366,8 +366,8 @@ static QIMKit *__global_QIMKit = nil;
     return [[QIMManager sharedInstance] stickList];
 }
 
-- (BOOL)setMsgNotifySettingWithIndex:(QIMMSGSETTING)setting WithSwitchOn:(BOOL)switchOn {
-    return [[QIMManager sharedInstance] setMsgNotifySettingWithIndex:setting WithSwitchOn:switchOn];
+- (void)setMsgNotifySettingWithIndex:(QIMMSGSETTING)setting WithSwitchOn:(BOOL)switchOn withCallBack:(QIMKitSetMsgNotifySettingSuccessBlock)callback {
+    [[QIMManager sharedInstance] setMsgNotifySettingWithIndex:setting WithSwitchOn:switchOn withCallBack:callback];
 }
 
 - (BOOL)getLocalMsgNotifySettingWithIndex:(QIMMSGSETTING)setting {
@@ -384,12 +384,12 @@ static QIMKit *__global_QIMKit = nil;
     [[QIMManager sharedInstance] sendNoPush];
 }
 
-- (BOOL)sendServer:(NSString *)notificationToken withUsername:(NSString *)username withParamU:(NSString *)paramU withParamK:(NSString *)paramK WithDelete:(BOOL)deleteFlag {
-    return [[QIMManager sharedInstance] sendServer:notificationToken withUsername:username withParamU:paramU withParamK:paramK WithDelete:deleteFlag];
+- (void)sendServer:(NSString *)notificationToken withUsername:(NSString *)username withParamU:(NSString *)paramU withParamK:(NSString *)paramK WithDelete:(BOOL)deleteFlag withCallback:(QIMKitRegisterPushTokenSuccessBlock)callback {
+    [[QIMManager sharedInstance] sendServer:notificationToken withUsername:username withParamU:paramU withParamK:paramK WithDelete:deleteFlag withCallback:callback];
 }
 
-- (BOOL)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag {
-    return [[QIMManager sharedInstance] sendPushTokenWithMyToken:myToken WithDeleteFlag:deleteFlag];
+- (void)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag withCallback:(QIMKitRegisterPushTokenSuccessBlock)callback {
+    [[QIMManager sharedInstance] sendPushTokenWithMyToken:myToken WithDeleteFlag:deleteFlag withCallback:callback];
 }
 
 - (void)checkClearCache {

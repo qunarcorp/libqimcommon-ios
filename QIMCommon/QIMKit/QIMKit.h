@@ -317,7 +317,7 @@
  
  @return 返回token
  */
-- (NSDictionary *)getQChatTokenWithBusinessLineName:(NSString *)businessLineName;
+- (void)getQChatTokenWithBusinessLineName:(NSString *)businessLineName withCallBack:(QIMKitGetQChatTokenSuccessBlock)callback;
 
 - (NSDictionary *)getQVTForQChat;
 
@@ -335,7 +335,7 @@
  
  @param jid 需要置顶的jid
  */
-- (BOOL)setStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType;
+- (void)setStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
 /**
  置顶/ 移除置顶
@@ -343,7 +343,7 @@
  @param jid 需要置顶的jid
  @param chatType 会话类型
  */
-- (BOOL)removeStickWithCombineJid:(NSString *)jid WithChatType:(ChatType)chatType;
+- (void)removeStickWithCombineJid:(NSString *)combineJid WithChatType:(ChatType)chatType withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
 /**
  是否已置顶
@@ -360,7 +360,7 @@
  */
 - (NSDictionary *)stickList;
 
-- (BOOL)setMsgNotifySettingWithIndex:(QIMMSGSETTING)setting WithSwitchOn:(BOOL)switchOn;
+- (void)setMsgNotifySettingWithIndex:(QIMMSGSETTING)setting WithSwitchOn:(BOOL)switchOn withCallBack:(QIMKitSetMsgNotifySettingSuccessBlock)callback;
 
 - (BOOL)getLocalMsgNotifySettingWithIndex:(QIMMSGSETTING)setting;
 
@@ -382,7 +382,7 @@
  @param deleteFlag 是否删除服务器推送Token
  @return 上传是否成功
  */
-- (BOOL)sendServer:(NSString *)notificationToken withUsername:(NSString *)username withParamU:(NSString *)paramU withParamK:(NSString *)paramK WithDelete:(BOOL)deleteFlag;
+- (void)sendServer:(NSString *)notificationToken withUsername:(NSString *)username withParamU:(NSString *)paramU withParamK:(NSString *)paramK WithDelete:(BOOL)deleteFlag withCallback:(QIMKitRegisterPushTokenSuccessBlock)callback;
 
 /**
  发送push Token
@@ -390,7 +390,7 @@
  @param myToken 注册的通知token
  @param deleteFlag 是否删除
  */
-- (BOOL)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag;
+- (void)sendPushTokenWithMyToken:(NSString *)myToken WithDeleteFlag:(BOOL)deleteFlag withCallback:(QIMKitRegisterPushTokenSuccessBlock)callback;
 
 - (void)checkClearCache;
 

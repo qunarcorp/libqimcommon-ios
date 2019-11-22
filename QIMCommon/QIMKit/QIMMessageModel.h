@@ -44,13 +44,10 @@
 @property (nonatomic, assign) ChatType          originChatType;             //代收消息 -> 原始消息的ChatType
 @property (nonatomic, assign) ChatType          chatType;                   //消息的ChatType
 @property (nonatomic, assign) long long         messageDate;                //消息时间戳
-//@property (nonatomic, assign) long long         version;
 @property (nonatomic, strong) NSData            * imageData;
-//@property (nonatomic, strong) NSString          *MD5;// 保存图片only
-
-//@property (nonatomic, copy)   NSString          *fromUser;
-//@property (nonatomic, assign) int               readTag;
 @property (nonatomic, copy)   NSString          *msgRaw;                    //原始的消息完整体
+
+@property (nonatomic, assign) NSInteger         encryptChatState;           //加密状态
 
 - (NSDictionary *)getMsgInfoDic;
 

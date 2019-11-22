@@ -204,12 +204,15 @@
         return NO;
     }
     NSString *configValue = (on == YES) ? @"0" : @"1";
-    BOOL success = [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKNoticeStickJidDic WithSubKey:groupId WithConfigValue:configValue WithDel:on];
-    if (success) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:kRemindStateChange object:groupId];
-        });
-    }
+    __block BOOL success = NO;
+    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKNoticeStickJidDic WithSubKey:groupId WithConfigValue:configValue WithDel:on withCallback:^(BOOL successed) {
+        success = successed;
+        if (successed) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kRemindStateChange object:groupId];
+            });
+        }
+    }];
     return success;
 }
 
@@ -242,33 +245,25 @@
     NSString *destUrl = [NSString stringWithFormat:@"%@/muc/set_muc_vcard.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     __weak __typeof(self) weakSelf = self;
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
+        __typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
         NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
         NSInteger errcode = [[resultDic objectForKey:@"errcode"] integerValue];
         if (ret && errcode == 0) {
             NSArray *mucList = [resultDic objectForKey:@"data"];
-            [self dealWithSetUpdateMucVcard:mucList];
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
+            [strongSelf dealWithSetUpdateMucVcard:mucList];
             if (callback) {
                 callback(YES);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             if (callback) {
                 callback(NO);
             }
         }
     } withFailedCallBack:^(NSError *error) {
-        __typeof(self) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
         if (callback) {
             callback(NO);
         }
@@ -671,9 +666,9 @@ static NSMutableArray *cacheGroupCardHttpList = nil;
 - (void)quickJoinAllGroup {
     if ([[QIMAppInfo sharedInstance] appType] != QIMProjectTypeQChat) {
         self.lastMaxGroupVersion = [[IMDataManager qimDB_SharedInstance] qimDB_getUserCacheDataWithKey:kGetIncrementMucListVersion withType:11];
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+//        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
            [self getIncrementMucList:self.lastMaxGroupVersion];
-        });
+//        });
     } else {
         [[XmppImManager sharedInstance] quickJoinAllGroup];
     }

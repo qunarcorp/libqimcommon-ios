@@ -11,7 +11,7 @@
 
 @property (nonatomic, assign) AppWorkState appWorkState; // 应用的登陆状态
 
-- (BOOL)checkNetworkCanUser;
+- (void)checkNetWorkWithCallBack:(QIMKitCheckNetWorkBlock)callback;
 
 - (void)checkNetworkStatus;
 
