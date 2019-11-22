@@ -16,7 +16,7 @@
     [request setHTTPMethod:QIMHTTPMethodPOST];
     
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [cookieProperties setObject:@"application/json;" forKey:@"Content-type"];
 
@@ -47,7 +47,7 @@
     [request setHTTPBody:bodyData];
     [request setShouldASynchronous:YES];
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [cookieProperties setObject:@"application/json;" forKey:@"Content-type"];
 
@@ -78,7 +78,7 @@
     [request setHTTPMethod:QIMHTTPMethodPOST];
     
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [cookieProperties setObject:@"application/json;" forKey:@"Content-type"];
     [request setHTTPRequestHeaders:cookieProperties];
@@ -107,7 +107,7 @@
     [request setShouldASynchronous:YES];
 
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [cookieProperties setObject:@"application/json;" forKey:@"Content-type"];
     [request setHTTPRequestHeaders:cookieProperties];
@@ -137,7 +137,7 @@
     [request setHTTPMethod:QIMHTTPMethodGET];
     [request setShouldASynchronous:YES];
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [cookieProperties setObject:@"application/json;" forKey:@"Content-type"];
     
@@ -179,7 +179,7 @@
     [request setHttpRequestType:QIMHTTPRequestTypeUpload];
 
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [request setHTTPRequestHeaders:cookieProperties];
     [request setTimeoutInterval:600];
@@ -216,7 +216,7 @@
     [request setHttpRequestType:QIMHTTPRequestTypeUpload];
 
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [request setHTTPRequestHeaders:cookieProperties];
     [request setTimeoutInterval:600];
@@ -252,7 +252,7 @@
     [request setHttpRequestType:QIMHTTPRequestTypeUpload];
 
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [request setHTTPRequestHeaders:cookieProperties];
     [request setTimeoutInterval:600];
@@ -289,7 +289,7 @@
     [request setHttpRequestType:QIMHTTPRequestTypeUpload];
 
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [request setHTTPRequestHeaders:cookieProperties];
     [request setTimeoutInterval:600];
@@ -325,7 +325,7 @@
     [request setHttpRequestType:QIMHTTPRequestTypeDownload];
     
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [request setHTTPRequestHeaders:cookieProperties];
     [request setTimeoutInterval:600];
@@ -362,7 +362,7 @@
     [request setHttpRequestType:QIMHTTPRequestTypeUpload];
 
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
 //    [cookieProperties setObject:@"application/json;" forKey:@"Content-type"];
     [request setHTTPRequestHeaders:cookieProperties];
@@ -397,7 +397,7 @@
     [request setShouldASynchronous:YES];
     [request setTimeoutInterval:10];
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [cookieProperties setObject:@"application/x-www-form-urlencoded" forKey:@"Content-type"];
     
@@ -430,7 +430,7 @@
     [request setShouldASynchronous:YES];
     [request setTimeoutInterval:10];
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    NSString *requestHeaders = [NSString stringWithFormat:@"q_ckey=%@", [[QIMManager sharedInstance] thirdpartKeywithValue]];
+    NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [cookieProperties setObject:@"application/x-www-form-urlencoded" forKey:@"Content-type"];
     
