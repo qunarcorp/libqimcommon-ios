@@ -58,7 +58,7 @@
 }
 
 - (NSString *)getPublicNumberDefaultHeaderPath {
-    NSString *robotHeaderPath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:@"robot_default_header" ofType:@"png"];
+    NSString *robotHeaderPath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"robot_default_header" ofType:@"png"];
     return robotHeaderPath;
 }
 

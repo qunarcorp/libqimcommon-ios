@@ -403,7 +403,7 @@ char* bio_read_publicKey(const char* data, const char *filepath, int *len)
     
     NSString *path = [[STIMNavConfigManager sharedInstance] qimNav_getRSACodePublicKeyPathWithFileName:fileName];
     if (![[NSFileManager defaultManager] fileExistsAtPath:path] || !path) {
-        path = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:fileName ofType:@"pem"];
+        path = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:fileName ofType:@"pem"];
     }
     STIMVerboseLog(@"EncryptRSA FileName : %@, Path : %@", fileName, path);
     if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
@@ -455,7 +455,7 @@ char* bio_read_publicKey(const char* data, const char *filepath, int *len)
 
     NSString *path = [[STIMNavConfigManager sharedInstance] qimNav_getRSACodePublicKeyPathWithFileName:fileName];
     if (![[NSFileManager defaultManager] fileExistsAtPath:path] || !path.length) {
-        path = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:fileName ofType:@"pem"];
+        path = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:fileName ofType:@"pem"];
     }
     STIMVerboseLog(@"EncryptRSA FileName : %@, Path : %@", fileName, path);
     if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {

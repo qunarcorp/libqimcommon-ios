@@ -17,7 +17,7 @@
     static UIImage *__defaultCommonTrdInfoImage = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        NSString *commonTrdInfoImagePath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:@"Activity_default" ofType:@"png"];
+        NSString *commonTrdInfoImagePath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"Activity_default" ofType:@"png"];
         __defaultCommonTrdInfoImage = [UIImage imageWithContentsOfFile:commonTrdInfoImagePath];
     });
     return __defaultCommonTrdInfoImage;
@@ -25,7 +25,7 @@
 
 + (NSString *)defaultCommonTrdInfoImagePath {
     
-    return [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:@"Activity_default" ofType:@"png"];
+    return [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"Activity_default" ofType:@"png"];
 }
 
 + (NSData *)defaultUserHeaderImage {
@@ -34,10 +34,10 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         if ([[STIMAppInfo sharedInstance] appType] == STIMProjectTypeStartalk) {
-            NSString *singleHeaderPath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:@"STIMSTdefaultHeader" ofType:@"png"];
+            NSString *singleHeaderPath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"STIMSTdefaultHeader" ofType:@"png"];
             __defaultUserHeaderImage = [NSData dataWithContentsOfFile:singleHeaderPath];
         } else {
-            NSString *singleHeaderPath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:@"STIMManDefaultHeader" ofType:@"png"];
+            NSString *singleHeaderPath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"STIMManDefaultHeader" ofType:@"png"];
             __defaultUserHeaderImage = [NSData dataWithContentsOfFile:singleHeaderPath];
         }
     });
@@ -46,9 +46,9 @@
 
 + (NSString *)defaultUserHeaderImagePath {
     if ([[STIMAppInfo sharedInstance] appType] == STIMProjectTypeStartalk) {
-        return [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:@"STIMSTdefaultHeader" ofType:@"png"];
+        return [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"STIMSTdefaultHeader" ofType:@"png"];
     } else {
-        return [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:@"STIMManDefaultHeader" ofType:@"png"];
+        return [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"STIMManDefaultHeader" ofType:@"png"];
     }
 }
 

@@ -143,10 +143,10 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         if ([[STIMAppInfo sharedInstance] appType] == STIMProjectTypeStartalk) {
-            NSString *groupHeaderPath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:@"STIMdefaultGroupHeader" ofType:@"png"];
+            NSString *groupHeaderPath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"STIMdefaultGroupHeader" ofType:@"png"];
             __defaultGroupHeaderImage = [UIImage imageWithContentsOfFile:groupHeaderPath];
         } else {
-            NSString *groupHeaderPath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:@"STIMGroupDefaultHeader" ofType:@"png"];
+            NSString *groupHeaderPath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"STIMGroupDefaultHeader" ofType:@"png"];
             __defaultGroupHeaderImage = [UIImage imageWithContentsOfFile:groupHeaderPath];
         }
     });

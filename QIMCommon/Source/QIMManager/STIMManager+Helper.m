@@ -26,7 +26,7 @@ static SystemSoundID _ringSystemSoundID;
             // 非租车业务才播放声音
             SystemSoundID soundID;
             // 读文件获取SoundID
-            NSString *filePath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:@"hongbao" ofType:@"aac"];
+            NSString *filePath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"hongbao" ofType:@"aac"];
             if (filePath != nil) {
                 
                 //声音
@@ -74,7 +74,7 @@ static void ringAudioServicesSystemSoundCompletionProc(SystemSoundID ssID, void 
                     SystemSoundID soundID;
                     // 读文件获取SoundID
 
-                    NSString *filePath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:@"msg" ofType:@"wav"];
+                    NSString *filePath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"msg" ofType:@"wav"];
                     if (filePath != nil) {
                         //声音
                         [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategorySoloAmbient
@@ -93,7 +93,7 @@ static void ringAudioServicesSystemSoundCompletionProc(SystemSoundID ssID, void 
                         // 读文件获取SoundID
                         NSString *soundFirstName = [[soundName componentsSeparatedByString:@"."] firstObject];
                         NSString *soundLastName = [[soundName componentsSeparatedByString:@"."] lastObject];
-                        NSString *filePath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:@"in" ofType:@"caf"];
+                        NSString *filePath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:@"in" ofType:@"caf"];
                         if (filePath != nil) {
                             //声音
                             [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategorySoloAmbient
@@ -109,7 +109,7 @@ static void ringAudioServicesSystemSoundCompletionProc(SystemSoundID ssID, void 
                         // 读文件获取SoundID
                         NSString *soundFirstName = [[soundName componentsSeparatedByString:@"."] firstObject];
                         NSString *soundLastName = [[soundName componentsSeparatedByString:@"."] lastObject];
-                        NSString *filePath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"STIMCommonResource" BundleName:@"STIMCommonResource" pathForResource:soundFirstName ofType:soundLastName];
+                        NSString *filePath = [NSBundle stimDB_myLibraryResourcePathWithClassName:@"QIMCommonResource" BundleName:@"QIMCommonResource" pathForResource:soundFirstName ofType:soundLastName];
                         if (filePath != nil) {
                             //声音
                             [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategorySoloAmbient
