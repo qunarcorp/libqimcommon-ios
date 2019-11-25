@@ -169,9 +169,15 @@ static QIMFileManager *_newfileManager = nil;
  @param message 要发送的消息Model
  */
 - (void)qim_uploadImageWithImageKey:(NSString *)localImageKey forMessage:(QIMMessageModel *)message {
-
-    NSString *localImagePath = [[QIMImageManager sharedInstance] defaultCachePathForKey:localImageKey];
-    [self qim_uploadImageWithImagePath:localImagePath forMessage:message];
+    
+    if (localImageKey.length > 0 && [[NSFileManager defaultManager] fileExistsAtPath:localImageKey]) {
+        //兼容以前传进来全路径的问题
+        [self qim_uploadImageWithImagePath:localImageKey forMessage:message];
+    } else {
+        //新版本使用半路径
+        NSString *localImagePath = [[QIMImageManager sharedInstance] defaultCachePathForKey:localImageKey];
+        [self qim_uploadImageWithImagePath:localImagePath forMessage:message];
+    }
 }
 
 
@@ -392,6 +398,28 @@ static QIMFileManager *_newfileManager = nil;
         } else {
             [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
         }
+    } else if (QIMMessageType_LocalShare == msgType) {
+        NSDictionary *dic = [[QIMJSONSerializer sharedInstance] deserializeObject:message.originalExtendedInfo error:nil];
+        NSMutableDictionary * mulDic = [NSMutableDictionary dictionaryWithDictionary:dic];
+        [mulDic setQIMSafeObject:imageUrl forKey:@"fileUrl"];
+        NSString *msgExtendInfo = [[QIMJSONSerializer sharedInstance] serializeObject:mulDic];
+        message.extendInformation = msgExtendInfo;
+        message.message = [message originalMessage];
+#if __has_include("QIMNoteManager.h")
+        if (message.encryptChatState == QIMEncryptChatStateEncrypting) {
+            NSString *encrypeMsg = [[QIMEncryptChat sharedInstance] encryptMessageWithMsgType:message.messageType WithOriginBody:message.message WithOriginExtendInfo:nil WithUserId:message.to];
+            message.message = @"iOS加密地理位置消息";
+            message.extendInformation = encrypeMsg;
+            message.messageType = QIMMessageType_Encrypt;
+        }
+#endif
+        if (message.chatType == ChatType_Consult || message.chatType == ChatType_ConsultServer) {
+            [[QIMManager sharedInstance] sendConsultMessageId:message.messageId WithMessage:message.message WithInfo:message.extendInformation toJid:message.to realToJid:message.realJid WithChatType:message.chatType WithMsgType:message.messageType];
+        } else{
+            [[QIMManager sharedInstance] sendMessage:message ToUserId:message.to];
+        }
+    } else {
+        
     }
 }
 
