@@ -199,21 +199,23 @@
     return result;
 }
 
-- (BOOL)updatePushState:(NSString *)groupId withOn:(BOOL)on {
+- (void)updatePushState:(NSString *)groupId withOn:(BOOL)on withCallback:(QIMKitUpdateRemoteClientConfig)callback {
     if (groupId.length <= 0) {
-        return NO;
+        return;
     }
     NSString *configValue = (on == YES) ? @"0" : @"1";
     __block BOOL success = NO;
     [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKNoticeStickJidDic WithSubKey:groupId WithConfigValue:configValue WithDel:on withCallback:^(BOOL successed) {
         success = successed;
+        if (callback) {
+            callback(success);
+        }
         if (successed) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:kRemindStateChange object:groupId];
             });
         }
     }];
-    return success;
 }
 
 - (void)setMucVcardForGroupId:(NSString *)groupId
