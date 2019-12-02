@@ -176,7 +176,7 @@
  @param on 是否免打扰
  @return 更新群组免打扰状态是否成功
  */
-- (BOOL)updatePushState:(NSString *)groupId withOn:(BOOL)on;
+- (void)updatePushState:(NSString *)groupId withOn:(BOOL)on withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
 /**
  默认群组设置

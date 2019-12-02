@@ -112,8 +112,8 @@
     return [[QIMManager sharedInstance] groupPushState:groupId];
 }
 
-- (BOOL)updatePushState:(NSString *)groupId withOn:(BOOL)on {
-    return [[QIMManager sharedInstance] updatePushState:groupId withOn:on];
+- (void)updatePushState:(NSString *)groupId withOn:(BOOL)on withCallback:(QIMKitUpdateRemoteClientConfig)callback {
+    [[QIMManager sharedInstance] updatePushState:groupId withOn:on withCallback:callback];
 }
 
 - (NSDictionary *) defaultGroupSetting {
