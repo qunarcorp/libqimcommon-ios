@@ -424,7 +424,7 @@ static QIMFileManager *_newfileManager = nil;
 }
 
 #pragma mark - 视频
-- (NSDictionary *)qim_newCheckVideo:(NSString *)fileMd5 withCallBack:(QIMKitCheckNewVideoCallBack)callback {
+- (void)qim_newCheckVideo:(NSString *)fileMd5 withCallBack:(QIMKitCheckNewVideoCallBack)callback {
     NSString *destUrl = [NSString stringWithFormat:@"%@/video/check", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     NSDictionary *bodyDic = @{@"videoMd5":fileMd5};
     NSMutableData *postData = [NSMutableData dataWithData:[[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil]];
