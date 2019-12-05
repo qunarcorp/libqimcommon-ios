@@ -17,6 +17,7 @@
 @property(nonatomic, readonly, copy) NSString *checkSmsUrl;
 @property(nonatomic, readonly, copy) NSString *tokenSmsUrl;
 @property(nonatomic, readonly, copy) NSString *javaurl;
+@property(nonatomic, readonly, copy) NSString *payurl;
 @property(nonatomic, readonly, copy) NSString *pubkey;
 @property(nonatomic, readonly, copy) NSString *domain;
 @property(nonatomic, readonly, assign) QTLoginType loginType; //登录方式

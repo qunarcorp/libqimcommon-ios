@@ -170,13 +170,8 @@
                 sCallback(responseData);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
-            NSData *responseData = [response data];
             if (sCallback) {
-                sCallback(responseData);
+                sCallback(nil);
             }
         }
     } failure:^(NSError *error) {
