@@ -22,6 +22,7 @@
     NSString *_newerHttpUrl;
     NSString *_takeSmsUrl;
     NSString *_javaurl;
+    NSString *_payurl;
     NSString *_checkSmsUrl;
     NSString *_wikiUrl;
     NSString *_tokenSmsUrl;
@@ -142,6 +143,7 @@
             _httpHost = [self.defaultSettings objectForKey:@"httpHost"];
             _newerHttpUrl = [self.defaultSettings objectForKey:@"newerHttpUrl"];
             _javaurl = [self.defaultSettings objectForKey:@"javaurl"];
+            _payurl = [self.defaultSettings objectForKey:@"payurl"];
             _domain = [self.defaultSettings objectForKey:@"domain"];
             _innerFileHttpHost = [self.defaultSettings objectForKey:@"innerFileHttpHost"];
             _pubkey = [self.defaultSettings objectForKey:@"pubkey"];
@@ -162,6 +164,7 @@
             _xmppHost = [self.defaultSettings objectForKey:@"xmppHost"];
             _httpHost = [self.defaultSettings objectForKey:@"httpHost"];
             _javaurl = [self.defaultSettings objectForKey:@"javaurl"];
+            _payurl = [self.defaultSettings objectForKey:@"payurl"];
             _newerHttpUrl = [self.defaultSettings objectForKey:@"newerHttpUrl"];
             _domain = [self.defaultSettings objectForKey:@"domain"];
             _innerFileHttpHost = [self.defaultSettings objectForKey:@"innerFileHttpHost"];
@@ -292,6 +295,13 @@
         _javaurl = [self.defaultSettings objectForKey:@"javaurl"];
     }
     return _javaurl;
+}
+
+- (NSString *)payurl {
+    if (!_payurl) {
+        _payurl = [self.defaultSettings objectForKey:@"payurl"];
+    }
+    return _payurl;
 }
 
 - (NSString *)qcHost {
@@ -551,6 +561,7 @@
         _newerHttpUrl = [baseAddess objectForKey:@"httpurl"];
         _wikiUrl = [baseAddess objectForKey:@"wikiurl"];
         _javaurl = [baseAddess objectForKey:@"javaurl"];
+        _payurl = [baseAddess objectForKey:@"payurl"];
         _innerFileHttpHost = [baseAddess objectForKey:@"fileurl"];
         _port = [baseAddess objectForKey:@"xmppmport"];
         _protobufPort = [baseAddess objectForKey:@"protobufPort"];
@@ -603,6 +614,7 @@
                 _domain = [baseAddess objectForKey:@"domain"];
                 _httpHost = [baseAddess objectForKey:@"apiurl"];
                 _javaurl = [baseAddess objectForKey:@"javaurl"];
+                _payurl = [baseAddess objectForKey:@"payurl"];
                 _innerFileHttpHost = [baseAddess objectForKey:@"fileurl"];
                 _port = [baseAddess objectForKey:@"xmppmport"];
                 _protobufPort = [baseAddess objectForKey:@"protobufPort"];

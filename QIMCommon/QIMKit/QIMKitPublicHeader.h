@@ -51,6 +51,7 @@
 #import "QIMKit+QIMUserVcard.h"
 #import "QIMKit+QIMPublicNavUserManager.h"
 #import "QIMKit+QIMUserCacheManager.h"
+#import "QIMKit+QIMPay.h"
 #import "QIMMessageModel.h"
 
 #endif /* QIMKitPublicHeader_h */

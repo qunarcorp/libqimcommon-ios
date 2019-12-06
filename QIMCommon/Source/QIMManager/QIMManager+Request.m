@@ -165,7 +165,7 @@
 }
 
 - (void)sendTPGetRequestWithUrl:(NSString *)url withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback{
-    
+
     [self sendTPGetRequestWithUrl:url withProgressCallBack:nil withSuccessCallBack:sCallback withFailedCallBack:fCallback];
 }
 
@@ -191,7 +191,7 @@
         if (response.code == 200) {
             NSData *responseData = [response data];
             if (sCallback) {
-                sCallback(responseData);
+                sCallback(nil);
             }
         } else {
             if (sCallback) {
@@ -320,10 +320,10 @@
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:downloadFileUrl]];
     [request setShouldASynchronous:YES];
     [request setDownloadDestinationPath:targetFilePath];
-    
+
     [request setHTTPMethod:QIMHTTPMethodGET];
     [request setHttpRequestType:QIMHTTPRequestTypeDownload];
-    
+
     NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
     NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
@@ -390,7 +390,7 @@
 }
 
 - (void)sendTPPOSTFormUrlEncodedRequestWithUrl:(NSString *)url withRequestBodyData:(NSData *)bodyData withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
-    
+
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:url]];
     [request setHTTPMethod:QIMHTTPMethodPOST];
     [request setHTTPBody:bodyData];
@@ -400,9 +400,9 @@
     NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [cookieProperties setObject:@"application/x-www-form-urlencoded" forKey:@"Content-type"];
-    
+
     [request setHTTPRequestHeaders:cookieProperties];
-    
+
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
             NSData *responseData = [response data];
@@ -423,7 +423,7 @@
 }
 
 - (void)sendTPGETFormUrlEncodedRequestWithUrl:(NSString *)url withSuccessCallBack:(QIMKitSendTPRequesSuccessedBlock)sCallback withFailedCallBack:(QIMKitSendTPRequesFailedBlock)fCallback {
-    
+
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:url]];
     [request setHTTPMethod:QIMHTTPMethodPOST];
 //    [request setHTTPBody:bodyData];
@@ -433,9 +433,9 @@
     NSString *requestHeaders = [NSString stringWithFormat:@"p_user=%@;q_ckey=%@", [QIMManager getLastUserName], [[QIMManager sharedInstance] thirdpartKeywithValue]];
     [cookieProperties setObject:requestHeaders forKey:@"Cookie"];
     [cookieProperties setObject:@"application/x-www-form-urlencoded" forKey:@"Content-type"];
-    
+
     [request setHTTPRequestHeaders:cookieProperties];
-    
+
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
             NSData *responseData = [response data];
