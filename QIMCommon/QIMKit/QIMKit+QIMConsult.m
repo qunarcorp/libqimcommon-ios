@@ -43,8 +43,8 @@
 }
 
 //V2版获取客服坐席列表：支持多店铺
-- (NSArray *)getSeatSeStatus {
-    return [[QIMManager sharedInstance] getSeatSeStatus];
+- (void)getSeatSeStatusWithCallback:(QIMKitGetSeatSeStatusBlock)callback {
+    [[QIMManager sharedInstance] getSeatSeStatusWithCallback:callback];
 }
 
 //V2版区别Shop来设置服务模式upSeatSeStatusWithSid.qunar
@@ -56,8 +56,8 @@
  @param shopServiceStatus 服务模式
  @return 是否设置成功
  */
-- (BOOL)updateSeatSeStatusWithShopId:(NSInteger)shopId WithStatus:(NSInteger)shopServiceStatus {
-    return [[QIMManager sharedInstance] updateSeatSeStatusWithShopId:shopId WithStatus:shopServiceStatus];
+- (void)updateSeatSeStatusWithShopId:(NSInteger)shopId WithStatus:(NSInteger)shopServiceStatus withCallBack:(QIMKitUpdateSeatSeStatusBlock)callback {
+    [[QIMManager sharedInstance] updateSeatSeStatusWithShopId:shopId WithStatus:shopServiceStatus withCallBack:callback];
 }
 
 /**

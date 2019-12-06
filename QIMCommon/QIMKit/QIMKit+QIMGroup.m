@@ -106,22 +106,14 @@
     return [QIMManager defaultGroupHeaderImage];
 }
 
-- (void)getGroupHeaderImageFromRemoteWithGroupId:(NSString *)groupId {
-    [[QIMManager sharedInstance] getGroupHeaderImageFromRemoteWithGroupId:groupId];
-}
-
-- (UIImage *)getGroupImageFromLocalByGroupId:(NSString *)groupId {
-    return [[QIMManager sharedInstance] getGroupImageFromLocalByGroupId:groupId];
-}
-
 #pragma mark - 群消息设置
 
 - (BOOL)groupPushState:(NSString *)groupId {
     return [[QIMManager sharedInstance] groupPushState:groupId];
 }
 
-- (BOOL)updatePushState:(NSString *)groupId withOn:(BOOL)on {
-    return [[QIMManager sharedInstance] updatePushState:groupId withOn:on];
+- (void)updatePushState:(NSString *)groupId withOn:(BOOL)on withCallback:(QIMKitUpdateRemoteClientConfig)callback {
+    [[QIMManager sharedInstance] updatePushState:groupId withOn:on withCallback:callback];
 }
 
 - (NSDictionary *) defaultGroupSetting {

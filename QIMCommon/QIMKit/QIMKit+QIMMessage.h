@@ -27,6 +27,10 @@
 
 - (void)checkMsgTimeWithJid:(NSString *)jid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag;
 
+- (void)checkMsgTimeWithJid:(NSString *)jid WithRealJid:(NSString *)realJid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag withFrontInsert:(BOOL)frontInsert;
+
+- (void)checkMsgTimeWithJid:(NSString *)jid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag withFrontInsert:(BOOL)frontInsert;
+
 #pragma mark - 公共消息
 
 /**
@@ -120,7 +124,16 @@
  @param message message
  @param jid jid
  */
-- (void)revokeMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid;
+- (void)revokeMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid ;
+
+/**
+ 撤销资讯类消息
+ 
+ @param messageId messageId
+ @param message message
+ @param jid jid
+ */
+- (void)revokeConsultMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid realToJid:(NSString *)realToJid chatType:(ChatType)chatType;
 
 /**
  发送语音消息
@@ -378,7 +391,7 @@
 /**
  获取QChat商家未回复留言数
  */
-- (NSInteger)getLeaveMsgNotReaderCount;
+- (void)getLeaveMsgNotReaderCountWithCallBack:(QIMKitGetLeaveMsgNotReaderCountBlock)callback;
 
 - (void)updateNotReadCountCacheByJid:(NSString *)jid WithRealJid:(NSString *)realJid;
 - (void)updateMessageStateWithNewState:(QIMMessageSendState)state ByMsgIdList:(NSArray *)MsgIdList;

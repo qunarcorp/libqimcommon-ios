@@ -66,25 +66,20 @@
     return [[IMDataManager qimDB_SharedInstance] qimDB_getPublicNumberCardByJId:jid];
 }
 
-- (NSArray *)updatePublicNumberCardByIds:(NSArray *)publicNumberIdList WithNeedUpdate:(BOOL)flag {
+- (void)updatePublicNumberCardByIds:(NSArray *)publicNumberIdList WithNeedUpdate:(BOOL)flag withCallBack:(QIMKitUpdatePublicNumberCardCallBack)callback {
     
     if ([[[QIMManager getLastUserName] lowercaseString] isEqualToString:@"appstore"] ||
         [[[QIMManager getLastUserName] lowercaseString] isEqualToString:@"ctrip"]) {
-        return nil;
+//        return nil;
+        if (callback) {
+            callback(nil);
+        }
     }
     
     NSString *destUrl = [NSString stringWithFormat:@"%@/get_robot?u=%@&k=%@&p=iphone&v=%@", [[QIMNavConfigManager sharedInstance] httpHost], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
-    
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-    [request addRequestHeader:@"content-type" value:@"application/json"];
     NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:publicNumberIdList error:nil];
-    [request appendPostData:data];
-    [request startSynchronous];
     
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSData *responseData = [request responseData];
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
         NSError *errol = nil;
         NSDictionary *value = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
         if (value.count > 0) {
@@ -112,16 +107,25 @@
                 if (flag) {
                     [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertPublicNumbers:cardList];
                 }
-                return cardList;
+                if (callback) {
+                    callback(cardList);
+                }
+            } else {
+                if (callback) {
+                    callback(nil);
+                }
             }
         }
-    }
-    return nil;
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
 }
 
 - (void)updateAllPublicNumberCard {
     NSArray *list = [[IMDataManager qimDB_SharedInstance] qimDB_getPublicNumberVersionList];
-    [self updatePublicNumberCardByIds:list WithNeedUpdate:YES];
+    [self updatePublicNumberCardByIds:list WithNeedUpdate:YES withCallBack:nil];
 }
 
 #pragma mark - sss
@@ -174,28 +178,24 @@
     }];
 }
 
-- (BOOL)focusOnPublicNumberId:(NSString *)publicNumberId {
+- (void)focusOnPublicNumberId:(NSString *)publicNumberId withCallBack:(QIMKitFocusPublicNumberCallBack)callback {
     
     if (publicNumberId == nil) {
-        return NO;
+        if (callback) {
+            callback(NO);
+        }
     }
     if ([[[QIMManager getLastUserName] lowercaseString] isEqualToString:@"appstore"] ||
         [[[QIMManager getLastUserName] lowercaseString] isEqualToString:@"ctrip"]) {
-        return NO;
+        if (callback) {
+            callback(NO);
+        }
     }
     
     NSString *destUrl = [NSString stringWithFormat:@"%@/user_robot?u=%@&k=%@&p=iphone&v=%@", [[QIMNavConfigManager sharedInstance] httpHost], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
-    
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-    [request addRequestHeader:@"content-type" value:@"application/json"];
     NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:@{@"user": [QIMManager getLastUserName], @"rbt": publicNumberId, @"method": @"add"} error:nil];
-    [request appendPostData:data];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSData *responseData = [request responseData];
+
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
         NSError *errol = nil;
         NSDictionary *value = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
         if (value.count > 0) {
@@ -204,32 +204,35 @@
             QIMErrorLog(@"focusOnPublicNumberId error msg %@", errorMsg);
             if (errorCode == 0) {
                 
-                return YES;
+                if (callback) {
+                    callback(YES);
+                }
+            } else {
+                if (callback) {
+                    callback(NO);
+                }
             }
         }
-    }
-    return NO;
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(NO);
+        }
+    }];
 }
 
-- (BOOL)cancelFocusOnPublicNumberId:(NSString *)publicNumberId {
+- (void)cancelFocusOnPublicNumberId:(NSString *)publicNumberId withCallBack:(QIMKitCancelFocusPublicNumberCallBack)callback {
     
     if ([[[QIMManager getLastUserName] lowercaseString] isEqualToString:@"appstore"] ||
         [[[QIMManager getLastUserName] lowercaseString] isEqualToString:@"ctrip"]) {
-        return nil;
+        if (callback) {
+            callback(NO);
+        }
     }
     
     NSString *destUrl = [NSString stringWithFormat:@"%@/user_robot?u=%@&k=%@&p=iphone&v=%@", [[QIMNavConfigManager sharedInstance] httpHost], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
-    
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-    [request addRequestHeader:@"content-type" value:@"application/json"];
     NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:@{@"user": [QIMManager getLastUserName], @"rbt": publicNumberId, @"method": @"del"} error:nil];
-    [request appendPostData:data];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSData *responseData = [request responseData];
+
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
         NSError *errol = nil;
         NSDictionary *value = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
         if (value.count > 0) {
@@ -238,12 +241,20 @@
             QIMErrorLog(@"cancelFocusOnPublicNumberId error msg %@", errorMsg);
             if (errorCode == 0) {
                 [[IMDataManager qimDB_SharedInstance] qimDB_deletePublicNumberId:publicNumberId];
-                return YES;
+                if (callback) {
+                    callback(YES);
+                }
+            } else {
+                if (callback) {
+                    callback(NO);
+                }
             }
         }
-        
-    }
-    return NO;
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(NO);
+        }
+    }];
 }
 
 #pragma mark - 公众号消息
@@ -359,24 +370,18 @@
     }
 }
 
-- (NSArray *)searchRobotByKeyStr:(NSString *)keyStr {
+- (void)searchRobotByKeyStr:(NSString *)keyStr withCallBack:(QIMKitSearchRobotByKeyStrCallBack)callback {
     
     if ([[[QIMManager getLastUserName] lowercaseString] isEqualToString:@"appstore"] ||
         [[[QIMManager getLastUserName] lowercaseString] isEqualToString:@"ctrip"]) {
-        return nil;
+        if (callback) {
+            callback(nil);
+        }
     }
     
     NSString *destUrl = [NSString stringWithFormat:@"%@/search_robot?u=%@&k=%@&p=iphone&v=%@", [[QIMNavConfigManager sharedInstance] httpHost], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
-    NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-    [request addRequestHeader:@"content-type" value:@"application/json"];
     NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:@{@"type": @"1", @"keyword": keyStr} error:nil];
-    [request appendPostData:data];
-    [request startSynchronous];
-    
-    NSError *error = [request error];
-    if (([request responseStatusCode] == 200) && !error) {
-        NSData *responseData = [request responseData];
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
         NSError *errol = nil;
         NSDictionary *value = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
         if (value.count > 0) {
@@ -385,11 +390,20 @@
             QIMErrorLog(@"searchRobotByKeyStr error msg %@", errorMsg);
             if (errorCode == 0) {
                 NSArray *list = [value objectForKey:@"data"];
-                return list;
+                if (callback) {
+                    callback(list);
+                }
+            } else {
+                if (callback) {
+                    callback(nil);
+                }
             }
         }
-    }
-    return nil;
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
 }
 
 @end

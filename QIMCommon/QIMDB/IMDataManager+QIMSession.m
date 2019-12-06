@@ -34,6 +34,7 @@
         NSString *msgId = [value objectForKey:@"MsgId"];
         if (lastMaxMsgTime <= msgTime) {
             lastMaxMsgTime = msgTime;
+            QIMVerboseLog(@"最终比较出来的时间戳是 : %lld", msgTime);
         }
 
         if ([key hasPrefix:@"rbt-notice"] || [key hasPrefix:@"rbt-qiangdan"] || [key hasPrefix:@"rbt-zhongbao"] || [key hasPrefix:@"FriendNotify"] || [key hasPrefix:@"rbt-system"]) {

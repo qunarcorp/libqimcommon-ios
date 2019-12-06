@@ -135,13 +135,6 @@
 + (NSString *)defaultCommonTrdInfoImagePath;
 
 /**
- 根据用户Id获取用户名片信息
-
- @param rtxId 用户Id
- */
-- (NSDictionary *)getUserInfoByRTX:(NSString *)rtxId ;
-
-/**
  更新用户签名
 
  @param userId 用户Id
@@ -157,7 +150,7 @@
  @param searchStr 关键词
  @return 返回用户列表
  */
-- (NSArray *)searchQunarUserBySearchStr:(NSString *)searchStr;
+- (void)searchQunarUserBySearchStr:(NSString *)searchStr withCallback:(QIMKitSearchQunarUserBlock)callback;
 
 /**
  搜索用户
@@ -181,6 +174,6 @@
  @param offset 偏移量
  @return 返回用户列表
  */
-- (NSArray *)searchUserListBySearchStr:(NSString *)searchStr Url:(NSString *)searchURL id:(NSString *)Id limit:(NSInteger)limitNum offset:(NSInteger)offset;
+- (void)searchUserListBySearchStr:(NSString *)searchStr Url:(NSString *)searchURL id:(NSString *)Id limit:(NSInteger)limitNum offset:(NSInteger)offset withCallBack:(QIMKitSearchUserListCallBack)callback;
 
 @end

@@ -163,6 +163,8 @@
 
 #define kUpdateUserMedal                    @"kUpdateUserMedal"
 
+#define kUpdateNewUserMedalList             @"kUpdateNewUserMedalList"
+
 #define kRightCardRemindNotification        @"kRightCardRemindNotification"
 
 #define kUpdateMyPersonalSignature          @"kUpdateMyPersonalSignature"
@@ -336,5 +338,10 @@ static const NSString *kGetIncrementMucGroupCardVersion = @"kGetIncrementMucGrou
 static const NSString *kGetUpdateUsersV2Version = @"kGetUpdateUsersV2Version";
 static const NSString *kGetGroupReadMarkVersion = @"kGetGroupReadMarkVersionV2";
 static const NSString *kWorkMomentNotifySwitchConfig = @"kWorkMomentNotifySwitchConfig";
+
+//上传图片进度
+static const NSString *kQIMUploadImageProgress = @"kQIMUploadImageProgress";
+//上传文件进度
+static const NSString *kQIMUploadFileProgress = @"kQIMUploadFileProgress";
 
 #endif /* QIMNotificationKeys_h */

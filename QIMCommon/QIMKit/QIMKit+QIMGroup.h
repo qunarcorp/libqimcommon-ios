@@ -163,18 +163,6 @@
  */
 + (UIImage *)defaultGroupHeaderImage;
 
-/**
- 根据GroupId从远程拉取群头像
- */
-- (void)getGroupHeaderImageFromRemoteWithGroupId:(NSString *)groupId;
-
-/**
- 根据GroupId从本地取群头像
- 
- @param groupId 群Id
- */
-- (UIImage *)getGroupImageFromLocalByGroupId:(NSString *)groupId;
-
 #pragma mark - 群设置
 
 /**
@@ -192,7 +180,7 @@
  @param on 是否免打扰
  @return 更新群组免打扰状态是否成功
  */
-- (BOOL)updatePushState:(NSString *)groupId withOn:(BOOL)on;
+- (void)updatePushState:(NSString *)groupId withOn:(BOOL)on withCallback:(QIMKitUpdateRemoteClientConfig)callback;
 
 /**
  默认群组设置

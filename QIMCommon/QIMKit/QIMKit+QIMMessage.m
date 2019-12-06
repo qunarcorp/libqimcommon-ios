@@ -31,6 +31,14 @@
     [[QIMManager sharedInstance] checkMsgTimeWithJid:jid WithMsgDate:msgDate WithGroup:flag];
 }
 
+- (void)checkMsgTimeWithJid:(NSString *)jid WithRealJid:(NSString *)realJid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag withFrontInsert:(BOOL)frontInsert {
+    [[QIMManager sharedInstance] checkMsgTimeWithJid:jid WithRealJid:realJid WithMsgDate:msgDate WithGroup:(BOOL)flag withFrontInsert:frontInsert];
+}
+
+- (void)checkMsgTimeWithJid:(NSString *)jid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag withFrontInsert:(BOOL)frontInsert {
+    [[QIMManager sharedInstance] checkMsgTimeWithJid:jid WithMsgDate:msgDate WithGroup:flag withFrontInsert:frontInsert];
+}
+
 - (void)setAppendInfo:(NSDictionary *)appendInfoDict ForUserId:(NSString *)userId {
     [[QIMManager sharedInstance] setAppendInfo:appendInfoDict ForUserId:userId];
 }
@@ -93,6 +101,10 @@
 
 - (void)revokeMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid {
     [[QIMManager sharedInstance] revokeMessageWithMessageId:messageId message:message ToJid:jid];
+}
+
+- (void)revokeConsultMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid realToJid:(NSString *)realToJid chatType:(int)chatType{
+    [[QIMManager sharedInstance] revokeConsultMessageWithMessageId:messageId message:message ToJid:jid realToJid:realToJid chatType:chatType];
 }
 
 - (QIMMessageModel *)sendVoiceUrl:(NSString *)voiceUrl withVoiceName:(NSString *)voiceName withSeconds:(int)seconds ToUserId:(NSString *)userId {
@@ -256,8 +268,8 @@
     [[QIMManager sharedInstance] getExploreNotReaderCount];
 }
 
-- (NSInteger)getLeaveMsgNotReaderCount {
-    return [[QIMManager sharedInstance] getLeaveMsgNotReaderCount];
+- (void)getLeaveMsgNotReaderCountWithCallBack:(QIMKitGetLeaveMsgNotReaderCountBlock)callback {
+    [[QIMManager sharedInstance] getLeaveMsgNotReaderCountWithCallBack:callback];
 }
 
 - (void)updateNotReadCountCacheByJid:(NSString *)jid WithRealJid:(NSString *)realJid {

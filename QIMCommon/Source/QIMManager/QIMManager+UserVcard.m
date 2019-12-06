@@ -55,7 +55,7 @@
 #pragma mark - 用户备注
 
 - (void)updateUserMarkupNameWithUserId:(NSString *)userId WithMarkupName:(NSString *)markUpName {
-    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKMarkupNames WithSubKey:userId WithConfigValue:markUpName WithDel:(markUpName.length > 0) ? NO : YES];
+    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKMarkupNames WithSubKey:userId WithConfigValue:markUpName WithDel:(markUpName.length > 0) ? NO : YES withCallback:nil];
 }
 
 - (NSString *)getUserMarkupNameWithUserId:(NSString *)userId {
@@ -110,24 +110,20 @@
     NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:@[userParam] error:nil];
     NSString *destUrl = [NSString stringWithFormat:@"%@/profile/set_profile.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
+        __typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
         NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
         NSInteger errcode = [[resultDic objectForKey:@"errcode"] integerValue];
         if (ret && errcode == 0) {
             NSArray *resultData = [resultDic objectForKey:@"data"];
-            [self dealWithUpdateUserProfile:resultData];
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
+            [strongSelf dealWithUpdateUserProfile:resultData];
             if (callback) {
                 callback(YES);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             if (callback) {
                 callback(NO);
             }
@@ -180,36 +176,6 @@
 }
 
 #pragma mark - 用户名片
-
-- (NSDictionary *)getUserInfoByRTX:(NSString *)rtxId {
-    
-    __block NSDictionary *result = nil;
-    __weak __typeof(self) weakSelf = self;
-    dispatch_block_t block = ^{
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
-        NSDictionary *tempDic = [[IMDataManager qimDB_SharedInstance] qimDB_selectUserByID:rtxId];
-        if (tempDic) {
-            NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithDictionary:tempDic];
-            if ([[QIMAppInfo sharedInstance] appType] != QIMProjectTypeQChat) {
-                NSString *rtxId = [dic objectForKey:@"UserId"];
-                NSString *desc = [strongSelf.friendDescDic objectForKey:rtxId];
-                if (desc) {
-                    [dic setObject:desc forKey:@"DescInfo"];
-                }
-            }
-            result = dic;
-        }
-    };
-    
-    if (dispatch_get_specific(self.cacheTag))
-        block();
-    else
-        dispatch_sync(self.cacheQueue, block);
-    return result;
-}
 
 - (NSDictionary *)getUserInfoByUserId:(NSString *)myId {
     if (myId.length <= 0) {
@@ -278,18 +244,25 @@
 
 static NSMutableArray *cacheUserCardHttpList = nil;
 - (void)updateUserCard:(NSString *)xmppId withCache:(BOOL)cache {
-    if (YES == cache) {
-        if (!cacheUserCardHttpList) {
-            cacheUserCardHttpList = [NSMutableArray arrayWithCapacity:3];
-        }
-        if ([cacheUserCardHttpList containsObject:xmppId]) {
-            return;
+    dispatch_block_t block = ^{
+        if (YES == cache) {
+            if (!cacheUserCardHttpList) {
+                cacheUserCardHttpList = [NSMutableArray arrayWithCapacity:3];
+            }
+            if ([cacheUserCardHttpList containsObject:xmppId]) {
+                return;
+            } else {
+                [cacheUserCardHttpList addObject:xmppId];
+                [self updateUserCard:@[xmppId]];
+            }
         } else {
-            [cacheUserCardHttpList addObject:xmppId];
             [self updateUserCard:@[xmppId]];
         }
+    };
+    if (dispatch_get_specific(self.cacheTag)) {
+        block();
     } else {
-        [self updateUserCard:@[xmppId]];
+        dispatch_sync(self.cacheQueue, block);
     }
 }
 
@@ -433,39 +406,40 @@ static NSMutableArray *cacheUserCardHttpList = nil;
 }
 
 - (void)updateMyPhoto:(NSData *)photoData {
-    NSString *myPhotoUrl = [QIMHttpApi updateMyPhoto:photoData];
-    if (myPhotoUrl.length > 0) {
-        NSDictionary *cardDic = @{@"user": [QIMManager getLastUserName], @"url": myPhotoUrl, @"domain":[[XmppImManager sharedInstance] domain]};
-        NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:@[cardDic] error:nil];
-        NSString *destUrl = [NSString stringWithFormat:@"%@/profile/set_profile.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
-        [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
-            NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-            BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
-            NSInteger errcode = [[resultDic objectForKey:@"errcode"] integerValue];
-            if (ret && errcode == 0) {
-                NSArray *resultData = [resultDic objectForKey:@"data"];
-                if ([resultData isKindOfClass:[NSArray class]]) {
-                    [self dealWithUpdateMyVCard:resultData];
+    [[QIMFileManager sharedInstance] qim_uploadMyPhotoData:photoData withCallBack:^(NSString *myPhotoUrl) {
+        if (myPhotoUrl.length > 0) {
+            NSDictionary *cardDic = @{@"user": [QIMManager getLastUserName], @"url": myPhotoUrl, @"domain":[[XmppImManager sharedInstance] domain]};
+            NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:@[cardDic] error:nil];
+            NSString *destUrl = [NSString stringWithFormat:@"%@/profile/set_profile.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+            [[QIMManager sharedInstance] sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
+                NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+                BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
+                NSInteger errcode = [[resultDic objectForKey:@"errcode"] integerValue];
+                if (ret && errcode == 0) {
+                    NSArray *resultData = [resultDic objectForKey:@"data"];
+                    if ([resultData isKindOfClass:[NSArray class]]) {
+                        [self dealWithUpdateMyVCard:resultData];
+                    } else {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMyHeaderImgaeUpdateFaild object:nil];
+                        });
+                    }
                 } else {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMyHeaderImgaeUpdateFaild object:nil];
                     });
                 }
-            } else {
+            } withFailedCallBack:^(NSError *error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMyHeaderImgaeUpdateFaild object:nil];
                 });
-            }
-        } withFailedCallBack:^(NSError *error) {
+            }];
+        } else {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMyHeaderImgaeUpdateFaild object:nil];
             });
-        }];
-    } else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMyHeaderImgaeUpdateFaild object:nil];
-        });
-    }
+        }
+    }];    
 }
 
 - (void)dealWithUpdateMyVCard:(NSArray *)resultData {
@@ -531,10 +505,6 @@ static NSMutableArray *cacheUserCardHttpList = nil;
             NSDictionary *resultData = [resultDic objectForKey:@"data"];
             if ([resultData isKindOfClass:[NSDictionary class]]) {
                 //插入数据库IM_UsersWorkInfo
-                __typeof(self) strongSelf = weakSelf;
-                if (!strongSelf) {
-                    return;
-                }
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (callback) {
                         callback(resultData);
@@ -549,10 +519,6 @@ static NSMutableArray *cacheUserCardHttpList = nil;
                     [[NSNotificationCenter defaultCenter] postNotificationName:kUpdateUserLeaderCard object:@{@"UserId":userId, @"LeaderInfo":workInfo}];
                 });
             } else {
-                __typeof(self) strongSelf = weakSelf;
-                if (!strongSelf) {
-                    return;
-                }
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (callback) {
                         callback(nil);
@@ -560,10 +526,6 @@ static NSMutableArray *cacheUserCardHttpList = nil;
                 });
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (callback) {
                     callback(nil);
@@ -594,7 +556,6 @@ static NSMutableArray *cacheUserCardHttpList = nil;
     NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:param error:nil];
     NSString *destUrl = [[QIMNavConfigManager sharedInstance] mobileurl];
     QIMVerboseLog(@"查看用户%@手机号Url : %@", qtalkId, destUrl);
-    __weak __typeof(self) weakSelf = self;
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         NSInteger errcode = [[resultDic objectForKey:@"errcode"] integerValue];
@@ -602,36 +563,20 @@ static NSMutableArray *cacheUserCardHttpList = nil;
             NSDictionary *resultData = [resultDic objectForKey:@"data"];
             if ([resultData isKindOfClass:[NSDictionary class]]) {
                 NSString *phoneNumber = [resultData objectForKey:@"phone"];
-                __typeof(self) strongSelf = weakSelf;
-                if (!strongSelf) {
-                    return;
-                }
                 if (callback) {
                     callback(phoneNumber);
                 }
             } else {
-                __typeof(self) strongSelf = weakSelf;
-                if (!strongSelf) {
-                    return;
-                }
                 if (callback) {
                     callback(nil);
                 }
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             if (callback) {
                 callback(nil);
             }
         }
     } withFailedCallBack:^(NSError *error) {
-        __typeof(self) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
         if (callback) {
             callback(nil);
         }
@@ -640,26 +585,30 @@ static NSMutableArray *cacheUserCardHttpList = nil;
 
 #pragma mark - 跨域搜索
 
-- (NSArray *)searchQunarUserBySearchStr:(NSString *)searchStr {
+- (void)searchQunarUserBySearchStr:(NSString *)searchStr withCallback:(QIMKitSearchQunarUserBlock)callback {
     if (searchStr.length > 0) {
-        NSString *destUrl = [NSString stringWithFormat:@"%@/domain/search_vcard?keyword=%@&server=%@&c=qtalk&u=%@&k=%@&p=iphone&v=%@", searchStr, [[QIMNavConfigManager sharedInstance] httpHost], [[XmppImManager sharedInstance] domain], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
+        NSString *destUrl = [NSString stringWithFormat:@"%@/domain/search_vcard?keyword=%@&server=%@&c=qtalk&u=%@&k=%@&p=iphone&v=%@", searchStr, [[QIMNavConfigManager sharedInstance] httpHost], [self getDomain], [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.remoteKey, [[QIMAppInfo sharedInstance] AppBuildVersion]];
         destUrl = [destUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSURL *requestUrl = [[NSURL alloc] initWithString:destUrl];
-        ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-        [request startSynchronous];
         
-        NSError *error = [request error];
-        if ([request responseStatusCode] == 200 && !error) {
-            NSData *responseData = [request responseData];
+        [self sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
             NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
             BOOL ret = [[result objectForKey:@"ret"] boolValue];
             if (ret) {
                 NSArray *msgList = [result objectForKey:@"data"];
-                return msgList;
+                if (callback) {
+                    callback(msgList);
+                }
+            } else {
+                if (callback) {
+                    callback(nil);
+                }
             }
-        }
+        } withFailedCallBack:^(NSError *error) {
+            if (callback) {
+                callback(nil);
+            }
+        }];
     }
-    return nil;
 }
 
 - (NSArray *)searchUserListBySearchStr:(NSString *)searchStr {
@@ -732,7 +681,7 @@ static NSMutableArray *cacheUserCardHttpList = nil;
 }
 
 //好友页面搜索
-- (NSArray *)searchUserListBySearchStr:(NSString *)searchStr Url:(NSString *)searchURL id:(NSString *)Id limit:(NSInteger)limitNum offset:(NSInteger)offset {
+- (void)searchUserListBySearchStr:(NSString *)searchStr Url:(NSString *)searchURL id:(NSString *)Id limit:(NSInteger)limitNum offset:(NSInteger)offset withCallBack:(QIMKitSearchUserListCallBack)callback {
     
     if (searchStr.length > 0) {
         
@@ -749,13 +698,7 @@ static NSMutableArray *cacheUserCardHttpList = nil;
         NSString *ckey = [[newString dataUsingEncoding:NSUTF8StringEncoding] base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
         NSDictionary *paramDic = @{@"ckey": ckey, @"id": Id, @"key": searchStr, @"limit": limitNumber, @"offset": offsetNumber};
         NSData *requestData = [[QIMJSONSerializer sharedInstance] serializeObject:paramDic error:nil];
-        ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:requestUrl];
-        [request appendPostData:requestData];
-        [request setRequestMethod:@"POST"];
-        [request startSynchronous];
-        NSError *error = [request error];
-        if ([request responseStatusCode] == 200 && !error) {
-            NSData *responseData = [request responseData];
+        [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:requestData withSuccessCallBack:^(NSData *responseData) {
             NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
             BOOL ret = [[result objectForKey:@"errcode"] boolValue];
             if (!ret) {
@@ -777,11 +720,20 @@ static NSMutableArray *cacheUserCardHttpList = nil;
                         }
                     }
                 }
-                return userList;
+                if (callback) {
+                    callback(userList);
+                }
+            } else {
+                if (callback) {
+                    callback(nil);
+                }
             }
-        }
+        } withFailedCallBack:^(NSError *error) {
+            if (callback) {
+                callback(nil);
+            }
+        }];
     }
-    return nil;
 }
 
 @end

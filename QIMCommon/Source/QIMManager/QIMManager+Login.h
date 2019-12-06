@@ -44,6 +44,7 @@
  */
 - (void)clearLogginUser;
 
+- (void)clearUserToken;
 
 - (void)saveUserInfoWithName:(NSString *)userName passWord:(NSString *)pwd;
 
@@ -71,6 +72,14 @@
 
 - (void)sendHeartBeat;
 
-- (NSDictionary *)QChatLoginWithUserId:(NSString *)userId rsaPassword:(NSString *)password type:(NSString *)type;
+- (void)QChatLoginWithUserId:(NSString *)userId rsaPassword:(NSString *)password type:(NSString *)type withCallback:(QIMKitGetQChatBetaLoginTokenDic)callback;
+
+#pragma mark - 验证码
+
+- (void)getUserTokenWithUserName:(NSString *)userName WithVerifyCode:(NSString *)verifCode withCallback:(QIMKitGetUserTokenSuccessBlock)callback;
+
+- (void)getVerifyCodeWithUserName:(NSString *)userName withCallback:(QIMKitGetVerifyCodeSuccessBlock)callback;
+
+- (void)getNewUserTokenWithUserName:(NSString *)userName WithPassword:(NSString *)password withCallback:(QIMKitGetUserNewTokenSuccessBlock)callback;
 
 @end

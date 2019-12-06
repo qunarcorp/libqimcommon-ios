@@ -9,12 +9,17 @@
 #import "QIMDataController.h"
 #import "NSString+QIMUtility.h"
 #import "QIMUtility.h"
-#import "QIMFileManager.h"
 #import "QIMManager.h"
+#import "QIMManager+Helper.h"
+#import "QIMNotificationKeys.h"
 #define kResourceCachePath                          @"Resource"
 #define kImageCahce                                 @"QIMImageCache"
 #define kHashSalt                                   @"iqunar"
 #define kResourceEmptyValue                             "\0"
+
+#define UserDocumentsPath NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0]
+#define UserCachesPath NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0]
+#define UserPath @"_Release"
 
 static QIMDataController *__globalDataController = nil;
 @implementation QIMDataController
@@ -35,20 +40,6 @@ static QIMDataController *__globalDataController = nil;
 // 销毁
 - (void)destroy {
 
-}
-
-- (NSData *)getResourceData:(NSString *)key{
-    return [[QIMFileManager sharedInstance] getFileDataFromUrl:key forCacheType:QIMFileCacheTypeColoction];
-    
-    
-    if (![key qim_isStringSafe])
-    {
-        return nil;
-    }
-    UIImage *resource = nil;
-    NSString *fileName = [NSString qim_hashString:key withSalt:kHashSalt];
-    NSData *data = [self getResourceWithFileName:fileName];
-    return data;
 }
 
 - (UIImage *)getResourceImage:(NSString *)key {
@@ -82,15 +73,35 @@ static QIMDataController *__globalDataController = nil;
 - (long long) sizeofImagePath {
     NSString *cachePath = [UserCachesPath stringByAppendingPathComponent:kImageCahce];
     NSString *imageCachePath = [UserCachesPath stringByAppendingPathComponent:@"imageCache"];
-    NSString *newcachePath = [QIMFileManager documentsofPath:QIMFileCacheTypeColoction];
     NSString *logDirectory = [UserCachesPath stringByAppendingPathComponent:@"Logs"];
 
-    return [QIMUtility sizeofPath:cachePath] + [QIMUtility sizeofPath:newcachePath] + [QIMUtility sizeofPath:logDirectory];
+    return [QIMUtility sizeofPath:cachePath] + [QIMUtility sizeofPath:logDirectory];
 }
 
 - (long long)sizeOfDBPath {
-    NSString *dbPath = [UserCachesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/QIMNewDataBase/"]];
-    return [QIMUtility sizeofPath:dbPath];
+    NSString *dbPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/QIMNewDataBase/%@%@/", [[QIMManager sharedInstance] getLastJid], UserPath]];
+    [[QIMManager sharedInstance] addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:[dbPath stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    dbPath = [dbPath stringByAppendingPathComponent:@"data.dat"];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:dbPath]) {
+        
+        return [[[NSFileManager defaultManager] attributesOfItemAtPath:dbPath error:nil] fileSize];
+        
+    }
+    return 0;
+}
+    
+- (long long)sizeOfDBWALPath {
+    NSString *dbWalPath = [UserDocumentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"/QIMNewDataBase/%@%@/", [[QIMManager sharedInstance] getLastJid], UserPath]];
+    [[QIMManager sharedInstance] addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:[dbWalPath stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+
+    dbWalPath = [dbWalPath stringByAppendingPathComponent:@"data.dat-wal"];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:dbWalPath]) {
+        
+        return [[[NSFileManager defaultManager] attributesOfItemAtPath:dbWalPath error:nil] fileSize];
+        
+    }
+    return 0;
 }
 
 - (NSString *)transfromTotalSize:(long long)totalSize {
@@ -127,10 +138,8 @@ static QIMDataController *__globalDataController = nil;
 
 - (void) removeAllImage {
     NSString *cachePath = [UserCachesPath stringByAppendingPathComponent:kImageCahce];
-    NSString *newcachePath = [QIMFileManager documentsofPath:QIMFileCacheTypeColoction];
     NSString *imageCachePath = [UserCachesPath stringByAppendingPathComponent:@"imageCache"];
     [self deleteAllFilesAtPath:cachePath];
-    [self deleteAllFilesAtPath:newcachePath];
     [self deleteAllFilesAtPath:imageCachePath];
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:kQCRemoveImageCachePathSuccess object:nil];

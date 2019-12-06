@@ -199,18 +199,23 @@
     return result;
 }
 
-- (BOOL)updatePushState:(NSString *)groupId withOn:(BOOL)on {
+- (void)updatePushState:(NSString *)groupId withOn:(BOOL)on withCallback:(QIMKitUpdateRemoteClientConfig)callback {
     if (groupId.length <= 0) {
-        return NO;
+        return;
     }
     NSString *configValue = (on == YES) ? @"0" : @"1";
-    BOOL success = [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKNoticeStickJidDic WithSubKey:groupId WithConfigValue:configValue WithDel:on];
-    if (success) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:kRemindStateChange object:groupId];
-        });
-    }
-    return success;
+    __block BOOL success = NO;
+    [[QIMManager sharedInstance] updateRemoteClientConfigWithType:QIMClientConfigTypeKNoticeStickJidDic WithSubKey:groupId WithConfigValue:configValue WithDel:on withCallback:^(BOOL successed) {
+        success = successed;
+        if (callback) {
+            callback(success);
+        }
+        if (successed) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kRemindStateChange object:groupId];
+            });
+        }
+    }];
 }
 
 - (void)setMucVcardForGroupId:(NSString *)groupId
@@ -242,33 +247,25 @@
     NSString *destUrl = [NSString stringWithFormat:@"%@/muc/set_muc_vcard.qunar", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     __weak __typeof(self) weakSelf = self;
     [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
+        __typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
         NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
         NSInteger errcode = [[resultDic objectForKey:@"errcode"] integerValue];
         if (ret && errcode == 0) {
             NSArray *mucList = [resultDic objectForKey:@"data"];
-            [self dealWithSetUpdateMucVcard:mucList];
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
+            [strongSelf dealWithSetUpdateMucVcard:mucList];
             if (callback) {
                 callback(YES);
             }
         } else {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             if (callback) {
                 callback(NO);
             }
         }
     } withFailedCallBack:^(NSError *error) {
-        __typeof(self) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
         if (callback) {
             callback(NO);
         }
@@ -477,84 +474,7 @@ static NSMutableArray *cacheGroupCardHttpList = nil;
     }];
 }
 
-#pragma mark - GroupHeader 群头像
-
-- (UIImage *)getGroupImageFromLocalByGroupId:(NSString *)groupId {
-    
-    if (groupId.length <= 0) {
-        return nil;
-    }
-    UIImage *groupImage = [self.groupHeaderImageDic objectForKey:groupId];
-    if (groupImage == nil) {
-        
-        NSString *groupHeaderImagePath = [[self getImagerCache] stringByAppendingPathComponent:groupId];
-        BOOL isExist = [[NSFileManager defaultManager] fileExistsAtPath:groupHeaderImagePath];
-        if (isExist) {
-            groupImage = [[UIImage alloc] initWithContentsOfFile:groupHeaderImagePath];
-            if (groupImage) {
-                [self.groupHeaderImageDic setObject:groupImage forKey:groupId];
-            } else {
-                groupImage = [QIMManager defaultGroupHeaderImage];
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-                    [self getGroupHeaderImageFromRemoteWithGroupId:groupId];
-                });
-            }
-        } else {
-            groupImage = [QIMManager defaultGroupHeaderImage];
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-                [self getGroupHeaderImageFromRemoteWithGroupId:groupId];
-            });
-        }
-    }
-    return groupImage;
-}
-
-/**
- 根据GroupId从远程拉取群头像
- */
-- (void)getGroupHeaderImageFromRemoteWithGroupId:(NSString *)groupId {
-    
-    NSDictionary *groupVcard = [self getGroupCardByGroupId:groupId];
-    if (groupVcard.count) {
-        NSString *headerRemoteSrc = [groupVcard objectForKey:@"HeaderSrc"];
-        if (headerRemoteSrc.length > 0) {
-            NSString *headerUrl = headerRemoteSrc;
-            if (![headerRemoteSrc qim_hasPrefixHttpHeader]) {
-                headerUrl = [[QIMNavConfigManager sharedInstance].innerFileHttpHost stringByAppendingFormat:@"/%@", headerRemoteSrc];
-            }
-            QIMVerboseLog(@"根据GroupId开始更新群组头像getGroupHeaderWithGroupId  GroupId : %@, 请求URL : %@", groupId, headerUrl);
-            
-            QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:headerUrl]];
-            [request setTimeoutInterval:2.0f];
-            __weak __typeof(self) weakSelf = self;
-            [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
-                if (response.code == 200) {
-                    __typeof(self) strongSelf = weakSelf;
-                    if (!strongSelf) {
-                        return;
-                    }
-                    NSData *headerImageData = response.data;
-                    if (headerImageData.length > 0) {
-                        UIImage *groupHeaderImage = [UIImage imageWithData:headerImageData];
-                        NSString *headerLocalSrc = [[strongSelf getImagerCache] stringByAppendingPathComponent:groupId];
-                        if (headerLocalSrc.length > 0) {
-                            [[NSFileManager defaultManager] removeItemAtPath:headerLocalSrc error:nil];
-                        }
-                        [headerImageData writeToFile:headerLocalSrc atomically:YES];
-                        [strongSelf.groupHeaderImageDic setObject:groupHeaderImage forKey:groupId];
-                        
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kUserHeaderImgUpdate object:groupId];
-                        });
-                    }
-                }
-            } failure:^(NSError *error) {
-                
-            }];
-        }
-    }
-}
-
+#pragma mark - 群权限
 - (BOOL)isGroupOwner:(NSString *)groupId {
     
     NSDictionary *myInfoDic = [[IMDataManager qimDB_SharedInstance] qimDB_getGroupMemberInfoByJid:[self getLastJid] WithGroupId:groupId];
@@ -748,9 +668,9 @@ static NSMutableArray *cacheGroupCardHttpList = nil;
 - (void)quickJoinAllGroup {
     if ([[QIMAppInfo sharedInstance] appType] != QIMProjectTypeQChat) {
         self.lastMaxGroupVersion = [[IMDataManager qimDB_SharedInstance] qimDB_getUserCacheDataWithKey:kGetIncrementMucListVersion withType:11];
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+//        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
            [self getIncrementMucList:self.lastMaxGroupVersion];
-        });
+//        });
     } else {
         [[XmppImManager sharedInstance] quickJoinAllGroup];
     }

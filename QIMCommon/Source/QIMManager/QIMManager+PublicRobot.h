@@ -45,7 +45,7 @@
  @param publicNumberIdList 公众号Id列表
  @param flag 是否需要更新本地数据库
  */
-- (NSArray *)updatePublicNumberCardByIds:(NSArray *)publicNumberIdList WithNeedUpdate:(BOOL)flag;
+- (void)updatePublicNumberCardByIds:(NSArray *)publicNumberIdList WithNeedUpdate:(BOOL)flag withCallBack:(QIMKitUpdatePublicNumberCardCallBack)callback;
 
 #pragma mark - sss
 
@@ -66,7 +66,7 @@
  @param publicNumberId 公众号Id
  @return 是否关注成功
  */
-- (BOOL)focusOnPublicNumberId:(NSString *)publicNumberId;
+- (void)focusOnPublicNumberId:(NSString *)publicNumberId withCallBack:(QIMKitFocusPublicNumberCallBack)callback;
 
 /**
  根据公众号Id取消关注公众号
@@ -74,7 +74,7 @@
  @param publicNumberId 公众号Id
  @return 是否取消关注成功
  */
-- (BOOL)cancelFocusOnPublicNumberId:(NSString *)publicNumberId;
+- (void)cancelFocusOnPublicNumberId:(NSString *)publicNumberId withCallBack:(QIMKitCancelFocusPublicNumberCallBack)callback;
 
 
 #pragma mark - 公众号消息
@@ -136,6 +136,6 @@
 /**
  根据关键字搜索公众号
  */
-- (NSArray *)searchRobotByKeyStr:(NSString *)keyStr;
+- (void)searchRobotByKeyStr:(NSString *)keyStr withCallBack:(QIMKitSearchRobotByKeyStrCallBack)callback;
 
 @end

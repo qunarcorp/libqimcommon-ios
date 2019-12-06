@@ -261,6 +261,8 @@ enum XmppLoginType {
 
 - (BOOL)revokeGroupMessageId:(NSString *)msgId WithMessage:(NSString *)message ToJid:(NSString *)jid;
 
+- (BOOL)revokeConsultMessageId:(NSString *)msgId WithMessage:(NSString *)message ToJid:(NSString *)jid realToJid:(NSString *)realToJid chatType:(int)chatType;
+
 #pragma mark - Login
 
 - (void)quitLogin;

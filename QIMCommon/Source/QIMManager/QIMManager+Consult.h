@@ -44,7 +44,7 @@
 - (void)getRemoteHotlineShopList;
 
 //V2版获取客服坐席列表：支持多店铺
-- (NSArray *)getSeatSeStatus;
+- (void)getSeatSeStatusWithCallback:(QIMKitGetSeatSeStatusBlock)callback;
 
 //V2版区别Shop来设置服务模式upSeatSeStatusWithSid.qunar
 
@@ -55,7 +55,7 @@
  @param shopServiceStatus 服务模式
  @return 是否设置成功
  */
-- (BOOL)updateSeatSeStatusWithShopId:(NSInteger)shopId WithStatus:(NSInteger)shopServiceStatus;
+- (void)updateSeatSeStatusWithShopId:(NSInteger)shopId WithStatus:(NSInteger)shopServiceStatus withCallBack:(QIMKitUpdateSeatSeStatusBlock)callback;
 
 /**
  根据服务模式获取基础信息

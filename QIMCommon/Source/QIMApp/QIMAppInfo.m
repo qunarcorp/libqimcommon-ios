@@ -67,7 +67,7 @@ static QIMAppInfo *__globalAppInfo = nil;
             if (_pushToken) {
                 [[QIMUserCacheManager sharedInstance] setUserObject:_pushToken forKey:@"AppPushToken"];
             }
-            [[QIMManager sharedInstance] sendPushTokenWithMyToken:[[QIMAppInfo sharedInstance] pushToken] WithDeleteFlag:deleteFlag];
+            [[QIMManager sharedInstance] sendPushTokenWithMyToken:[[QIMAppInfo sharedInstance] pushToken] WithDeleteFlag:deleteFlag withCallback:nil];
         });
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];

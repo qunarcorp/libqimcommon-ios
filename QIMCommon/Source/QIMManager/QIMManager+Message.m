@@ -265,7 +265,7 @@
 - (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId userType:(ChatType)userType msgType:(QIMMessageType)msgType backinfo:(NSString *)backInfo {
     
     long long msgDate = ([[NSDate date] timeIntervalSince1970] - self.serverTimeDiff) * 1000;
-    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO];
+    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO withFrontInsert:YES];
     QIMMessageModel *mesg = [QIMMessageModel new];
     [mesg setMessageId:[QIMUUIDTools UUID]];
     [mesg setMessageType:msgType];
@@ -299,7 +299,7 @@
 
 - (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId realJid:(NSString *)realJid userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId msgState:(QIMMessageSendState)msgState willSave:(BOOL)willSave {
     long long msgDate = ([[NSDate date] timeIntervalSince1970] - self.serverTimeDiff) * 1000;
-    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO];
+    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO withFrontInsert:YES];
     QIMMessageModel *mesg = [QIMMessageModel new];
     [mesg setMessageId:mId.length ? mId : [QIMUUIDTools UUID]];
     [mesg setMessageType:msgType];
@@ -333,7 +333,7 @@
 - (QIMMessageModel *)createMessageWithMsg:(NSString *)msg extenddInfo:(NSString *)extendInfo userId:(NSString *)userId realJid:(NSString *)realJid userType:(ChatType)userType msgType:(QIMMessageType)msgType forMsgId:(NSString *)mId willSave:(BOOL)willSave {
     
     long long msgDate = ([[NSDate date] timeIntervalSince1970] - self.serverTimeDiff) * 1000;
-    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO];
+    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:YES withFrontInsert:YES];
     QIMMessageModel *mesg = [QIMMessageModel new];
     [mesg setMessageId:mId.length ? mId : [QIMUUIDTools UUID]];
     [mesg setMessageType:msgType];
@@ -468,6 +468,19 @@
     [[XmppImManager sharedInstance] revokeMessageId:messageId WithMessage:message ToJid:jid];
 }
 
+
+/**
+ 撤销consult消息
+ @param messageId messageId
+ @param message message
+ @param jid jid
+ 
+ */
+
+- (void)revokeConsultMessageWithMessageId:(NSString *)messageId message:(NSString *)message ToJid:(NSString *)jid realToJid:(NSString *)realToJid chatType:(int)chatType{
+    [[XmppImManager sharedInstance] revokeConsultMessageId:messageId WithMessage:message ToJid:jid realToJid:realToJid chatType:chatType];
+}
+
 /**
  撤销群消息
  
@@ -597,7 +610,7 @@
 - (QIMMessageModel *)sendMessage:(NSString *)msg WithInfo:(NSString *)info ToUserId:(NSString *)userId WithMsgType:(int)msgType {
     
     long long msgDate = ([[NSDate date] timeIntervalSince1970] - self.serverTimeDiff) * 1000;
-    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO];
+    [self checkMsgTimeWithJid:userId WithMsgDate:msgDate WithGroup:NO withFrontInsert:YES];
     
     QIMMessageModel *mesg = [QIMMessageModel new];
     [mesg setXmppId:userId];
@@ -723,6 +736,14 @@
 }
 
 - (void)checkMsgTimeWithJid:(NSString *)jid WithRealJid:(NSString *)realJid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag{
+    [self checkMsgTimeWithJid:jid WithRealJid:realJid WithMsgDate:msgDate WithGroup:flag withFrontInsert:NO];
+}
+
+- (void)checkMsgTimeWithJid:(NSString *)jid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag {
+    [self checkMsgTimeWithJid:jid WithMsgDate:msgDate WithGroup:flag withFrontInsert:NO];
+}
+
+- (void)checkMsgTimeWithJid:(NSString *)jid WithRealJid:(NSString *)realJid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag withFrontInsert:(BOOL)frontInsert {
     NSString *key = [NSString stringWithFormat:@"%@-%@",jid,realJid];
     NSNumber *globalMsgDate = [self.timeStempDic objectForKey:key];
     if (msgDate - globalMsgDate.longLongValue >= 2 * 60 * 1000) {
@@ -745,13 +766,12 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationMessageUpdate
                                                                 object:key
-                                                              userInfo:@{@"message":msg}];
+                                                              userInfo:@{@"message":msg, @"frontInsert":@(frontInsert)}];
         });
     }
 }
 
-- (void)checkMsgTimeWithJid:(NSString *)jid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag {
-    
+- (void)checkMsgTimeWithJid:(NSString *)jid WithMsgDate:(long long)msgDate WithGroup:(BOOL)flag withFrontInsert:(BOOL)frontInsert {
     if (!jid || msgDate < 0) {
         return;
     }
@@ -774,10 +794,11 @@
             return;
         }
         [self saveMsg:msg ByJid:jid];
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationMessageUpdate
-                                                            object:jid
-                                                          userInfo:@{@"message": msg}];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationMessageUpdate
+                                                                object:jid
+                                                              userInfo:@{@"message": msg, @"frontInsert":@(frontInsert)}];
+        });
     }
 }
 
@@ -907,24 +928,27 @@
     }];
 }
 
-- (int)getLeaveMsgNotReaderCount {
-    NSURL *url = [NSURL URLWithString:@"http://u.package.qunar.com/user/message/countUnreply.json"];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:url];
-    [request addRequestHeader:@"Content-type" value:@"application/x-www-form-urlencoded;"];
-    [request setRequestMethod:@"GET"];
-    [request setCachePolicy:ASIDoNotReadFromCacheCachePolicy];
-    [request startSynchronous];
-    NSError *error = [request error];
-    if ([request responseStatusCode] == 200 && !error) {
-        NSData *responseData = [request responseData];
+- (void)getLeaveMsgNotReaderCountWithCallBack:(QIMKitGetLeaveMsgNotReaderCountBlock)callback {
+    
+    NSString *url = @"http://u.package.qunar.com/user/message/countUnreply.json";
+    [self sendTPGETFormUrlEncodedRequestWithUrl:url withSuccessCallBack:^(NSData *responseData) {
         NSError *errol = nil;
         NSDictionary *resDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:&errol];
         if ([resDic objectForKey:@"data"] != [NSNull null]) {
             int count = [[[resDic objectForKey:@"data"] objectForKey:@"count"] boolValue];
-            return count;
+            if (callback) {
+                callback(count);
+            }
+        } else {
+            if (callback) {
+                callback(0);
+            }
         }
-    }
-    return 0;
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(0);
+        }
+    }];
 }
 
 - (void)clearSystemMsgNotReadWithJid:(NSString *)jid {
@@ -1114,24 +1138,25 @@
 }
 
 - (void)synchronizeChatSessionWithUserId:(NSString *)userId WithChatType:(ChatType)chatType WithRealJid:(NSString *)realJid {
-    
-    NSMutableDictionary *msgDict = [NSMutableDictionary dictionaryWithCapacity:5];
-    [msgDict setQIMSafeObject:userId forKey:@"id"];
-    [msgDict setQIMSafeObject:@([NSDate timeIntervalSinceReferenceDate]) forKey:@"timestamp"];
-    [msgDict setQIMSafeObject:realJid forKey:@"realjid"];
-    [msgDict setQIMSafeObject:[self getChatTypeStr:chatType] forKey:@"type"];
-    if (chatType == ChatType_Consult) {
-        [msgDict setQIMSafeObject:@"4" forKey:@"qchatid"];
-    } else if (chatType == ChatType_ConsultServer) {
-        [msgDict setQIMSafeObject:@"5" forKey:@"qchatid"];
-    } else {
-        
-    }
-    NSString *msg = [[QIMJSONSerializer sharedInstance] serializeObject:msgDict];
-    NSMutableDictionary *presenceMsgDict = [NSMutableDictionary dictionaryWithCapacity:5];
-    [presenceMsgDict setQIMSafeObject:@(QIMCategoryNotifyMsgTypeSession) forKey:@"PresenceMsgType"];
-    [presenceMsgDict setQIMSafeObject:msg forKey:@"PresenceMsg"];
-    [[XmppImManager sharedInstance] sendNotifyPresenceMsg:presenceMsgDict ToJid:[[QIMManager sharedInstance] getLastJid]];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+        NSMutableDictionary *msgDict = [NSMutableDictionary dictionaryWithCapacity:5];
+        [msgDict setQIMSafeObject:userId forKey:@"id"];
+        [msgDict setQIMSafeObject:@([NSDate timeIntervalSinceReferenceDate]) forKey:@"timestamp"];
+        [msgDict setQIMSafeObject:realJid forKey:@"realjid"];
+        [msgDict setQIMSafeObject:[self getChatTypeStr:chatType] forKey:@"type"];
+        if (chatType == ChatType_Consult) {
+            [msgDict setQIMSafeObject:@"4" forKey:@"qchatid"];
+        } else if (chatType == ChatType_ConsultServer) {
+            [msgDict setQIMSafeObject:@"5" forKey:@"qchatid"];
+        } else {
+
+        }
+        NSString *msg = [[QIMJSONSerializer sharedInstance] serializeObject:msgDict];
+        NSMutableDictionary *presenceMsgDict = [NSMutableDictionary dictionaryWithCapacity:5];
+        [presenceMsgDict setQIMSafeObject:@(QIMCategoryNotifyMsgTypeSession) forKey:@"PresenceMsgType"];
+        [presenceMsgDict setQIMSafeObject:msg forKey:@"PresenceMsg"];
+        [[XmppImManager sharedInstance] sendNotifyPresenceMsg:presenceMsgDict ToJid:[[QIMManager sharedInstance] getLastJid]];
+    });
 }
 
 #pragma mark - 数据库更新 或者 保存消息
@@ -1338,52 +1363,47 @@
         dispatch_async(self.load_history_msg, ^{
             
             if ([userId rangeOfString:@"@conference."].location != NSNotFound) {
-                NSNumber *readMarkT = nil;
-                NSArray *resultList = [self getMucMsgListWithGroupId:userId WithDirection:direction WithLimit:(lastUpdateTime < 0) ? (direction == 0 ? 20 : limit) : limit WithVersion:(lastUpdateTime < 0) ? (direction == 0 ? INT64_MAX : 0) : lastUpdateTime include:YES];
-                NSString *date1Str = [resultList.lastObject objectForKey:@"time"][@"stamp"];
-                //zzz表示时区，zzz可以删除，这样返回的日期字符将不包含时区信息。
-                NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-                [dateFormatter setDateFormat:@"yyyyMMdd'T'HH:mm:ss"];
-                NSDate *date1 = [dateFormatter dateFromString:date1Str];
-                readMarkT = [NSNumber numberWithLong:[date1 timeIntervalSince1970]];
-                if (resultList.count > 0) {
-                    NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertIphoneMucPageJSONMsg:resultList withInsertDBFlag:NO];
-                    NSMutableArray *list = [NSMutableArray array];
-                    for (NSDictionary *infoDic in datas) {
-                        QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
-                        [list addObject:msg];
+                [self getMucMsgListWithGroupId:userId WithDirection:direction WithLimit:(lastUpdateTime < 0) ? (direction == 0 ? 20 : limit) : limit WithVersion:(lastUpdateTime < 0) ? (direction == 0 ? INT64_MAX : 0) : lastUpdateTime include:YES withCallBack:^(NSArray *resultList) {
+                    if (resultList.count > 0) {
+                        NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertIphoneMucPageJSONMsg:resultList withInsertDBFlag:NO];
+                        NSMutableArray *list = [NSMutableArray array];
+                        for (NSDictionary *infoDic in datas) {
+                            QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
+                            [list addObject:msg];
+                        }
+                        complete(list);
+                    } else {
+                        complete(@[]);
                     }
-                    complete(list);
-                } else {
-                    complete(@[]);
-                }
+                }];
             } else {
-                NSArray *result = [self getUserChatlogWithFrom:userId to:[self getLastJid] version:lastUpdateTime count:limit direction:direction include:YES];
-                if (result.count > 0) {
-                    NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertPageHistoryChatJSONMsg:result WithXmppId:userId withInsertDBFlag:NO];
-                    NSMutableArray *list = [NSMutableArray array];
-                    NSString *channelInfo = nil;
-                    NSString *buInfo = nil;
-                    NSString *cctextInfo = nil;
-                    for (NSDictionary *infoDic in datas) {
-                        QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
-                        [list addObject:msg];
-                        // channelid
-                        channelInfo = [infoDic objectForKey:@"channelid"];
-                        buInfo = [infoDic objectForKey:@"bu"];
-                        cctextInfo = [infoDic objectForKey:@"cctext"];
+                [self getUserChatlogWithFrom:userId to:[self getLastJid] version:lastUpdateTime count:limit direction:direction include:YES withCallBack:^(NSArray *result) {
+                    if (result.count > 0) {
+                        NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertPageHistoryChatJSONMsg:result WithXmppId:userId withInsertDBFlag:NO];
+                        NSMutableArray *list = [NSMutableArray array];
+                        NSString *channelInfo = nil;
+                        NSString *buInfo = nil;
+                        NSString *cctextInfo = nil;
+                        for (NSDictionary *infoDic in datas) {
+                            QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
+                            [list addObject:msg];
+                            // channelid
+                            channelInfo = [infoDic objectForKey:@"channelid"];
+                            buInfo = [infoDic objectForKey:@"bu"];
+                            cctextInfo = [infoDic objectForKey:@"cctext"];
+                        }
+                        [self setChannelInfo:channelInfo ForUserId:userId];
+                        if (buInfo.length > 0) {
+                            [self setAppendInfo:@{@"bu":buInfo} ForUserId:userId];
+                        }
+                        if (cctextInfo.length > 0) {
+                            [self setAppendInfo:@{@"cctext":cctextInfo} ForUserId:userId];
+                        }
+                        complete(list);
+                    } else {
+                        complete(@[]);
                     }
-                    [self setChannelInfo:channelInfo ForUserId:userId];
-                    if (buInfo.length > 0) {
-                        [self setAppendInfo:@{@"bu":buInfo} ForUserId:userId];
-                    }
-                    if (cctextInfo.length > 0) {
-                        [self setAppendInfo:@{@"cctext":cctextInfo} ForUserId:userId];
-                    }
-                    complete(list);
-                } else {
-                    complete(@[]);
-                }
+                }];
             }
         });
     });
@@ -1408,36 +1428,32 @@
                         NSString *groupName = [[[userId componentsSeparatedByString:@"@"] objectAtIndex:0] copy];
 #pragma mark - 这里开始拉取群翻页消息
                         if (groupName) {
-                            NSArray *resultList = [self getMucMsgListWithGroupId:userId WithDirection:0 WithLimit:limit WithVersion:[[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:userId] include:NO];
-                            NSString *date1Str = [resultList.lastObject objectForKey:@"time"][@"stamp"];
-                            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-                            [dateFormatter setDateFormat:@"yyyyMMdd'T'HH:mm:ss"];
-                            NSDate *date1 = [dateFormatter dateFromString:date1Str];
-                            NSNumber *readMarkT = [NSNumber numberWithLong:[date1 timeIntervalSince1970]];
-                            
-                            if (resultList.count > 0) {
-                                
-                                [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertIphoneMucPageJSONMsg:resultList];
-                            }
+                            [self getMucMsgListWithGroupId:userId WithDirection:0 WithLimit:limit WithVersion:[[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:userId] include:NO withCallBack:^(NSArray *resultList) {
+                                if (resultList.count > 0) {
+                                    
+                                    [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertIphoneMucPageJSONMsg:resultList];
+                                }
+                            }];
                         } else {
 #pragma mark - 这里开始拉取单人翻页消息
-                            NSArray *result = [self getUserChatlogWithFrom:userId to:[self getLastJid] version:[[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:userId] count:limit direction:0 include:NO];
-                            if (result.count > 0) {
-                                NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertPageHistoryChatJSONMsg:result WithXmppId:userId];
-                                NSDictionary *infoDic = datas.lastObject;
-                                if (infoDic) {
-                                    NSString *channelInfo = [infoDic objectForKey:@"channelid"];
-                                    NSString *buInfo = [infoDic objectForKey:@"bu"];
-                                    NSString *cctextInfo = [infoDic objectForKey:@"cctext"];
-                                    [self setChannelInfo:channelInfo ForUserId:userId];
-                                    if (buInfo.length > 0) {
-                                        [self setAppendInfo:@{@"bu":buInfo} ForUserId:userId];
-                                    }
-                                    if (cctextInfo.length > 0) {
-                                        [self setAppendInfo:@{@"cctext":cctextInfo} ForUserId:userId];
+                            [self getUserChatlogWithFrom:userId to:[self getLastJid] version:[[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:userId] count:limit direction:0 include:NO withCallBack:^(NSArray *result) {
+                                if (result.count > 0) {
+                                    NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertPageHistoryChatJSONMsg:result WithXmppId:userId];
+                                    NSDictionary *infoDic = datas.lastObject;
+                                    if (infoDic) {
+                                        NSString *channelInfo = [infoDic objectForKey:@"channelid"];
+                                        NSString *buInfo = [infoDic objectForKey:@"bu"];
+                                        NSString *cctextInfo = [infoDic objectForKey:@"cctext"];
+                                        [self setChannelInfo:channelInfo ForUserId:userId];
+                                        if (buInfo.length > 0) {
+                                            [self setAppendInfo:@{@"bu":buInfo} ForUserId:userId];
+                                        }
+                                        if (cctextInfo.length > 0) {
+                                            [self setAppendInfo:@{@"cctext":cctextInfo} ForUserId:userId];
+                                        }
                                     }
                                 }
-                            }
+                            }];
                         }
                     }
                 });
@@ -1455,52 +1471,49 @@
                         long long version = [[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:userId] - timeChange;
                         int direction = 0;
                         NSNumber *readMarkT = nil;
-                        NSArray *resultList = [self getMucMsgListWithGroupId:userId WithDirection:direction WithLimit:version < 0 ? (direction == 0 ? 20 : limit) : limit WithVersion:version < 0 ? (direction == 0 ? INT64_MAX : 0) : version include:NO];
-                        NSString *date1Str = [resultList.lastObject objectForKey:@"time"][@"stamp"];
-                        //zzz表示时区，zzz可以删除，这样返回的日期字符将不包含时区信息。
-                        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-                        [dateFormatter setDateFormat:@"yyyyMMdd'T'HH:mm:ss"];
-                        NSDate *date1 = [dateFormatter dateFromString:date1Str];
-                        readMarkT = [NSNumber numberWithLong:[date1 timeIntervalSince1970]];
-                        if (resultList.count > 0) {
-                            NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertIphoneMucPageJSONMsg:resultList];
-                            NSMutableArray *list = [NSMutableArray array];
-                            for (NSDictionary *infoDic in datas) {
-                                QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
-                                [list addObject:msg];
+                        [self getMucMsgListWithGroupId:userId WithDirection:direction WithLimit:version < 0 ? (direction == 0 ? 20 : limit) : limit WithVersion:version < 0 ? (direction == 0 ? INT64_MAX : 0) : version include:NO withCallBack:^(NSArray *resultList) {
+                            if (resultList.count > 0) {
+                                NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertIphoneMucPageJSONMsg:resultList];
+                                NSMutableArray *list = [NSMutableArray array];
+                                for (NSDictionary *infoDic in datas) {
+                                    QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
+                                    [list addObject:msg];
+                                }
+                                complete(list);
+                            } else {
+                                complete(@[]);
                             }
-                            complete(list);
-                        } else {
-                            complete(@[]);
-                        }
+                        }];
+      
                     } else {
-                        NSArray *result = [self getUserChatlogWithFrom:userId to:[self getLastJid] version:[[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:userId] count:limit direction:0 include:NO];
-                        if (result.count > 0) {
-                            NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertPageHistoryChatJSONMsg:result WithXmppId:userId];
-                            NSMutableArray *list = [NSMutableArray array];
-                            NSString *channelInfo = nil;
-                            NSString *buInfo = nil;
-                            NSString *cctextInfo = nil;
-                            for (NSDictionary *infoDic in datas) {
-                                QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
-                                [list addObject:msg];
-                                // channelid
-                                channelInfo = [infoDic objectForKey:@"channelid"];
-                                buInfo = [infoDic objectForKey:@"bu"];
-                                cctextInfo = [infoDic objectForKey:@"cctext"];
+                        [self getUserChatlogWithFrom:userId to:[self getLastJid] version:[[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:userId] count:limit direction:0 include:NO withCallBack:^(NSArray *result) {
+                            if (result.count > 0) {
+                                NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertPageHistoryChatJSONMsg:result WithXmppId:userId];
+                                NSMutableArray *list = [NSMutableArray array];
+                                NSString *channelInfo = nil;
+                                NSString *buInfo = nil;
+                                NSString *cctextInfo = nil;
+                                for (NSDictionary *infoDic in datas) {
+                                    QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
+                                    [list addObject:msg];
+                                    // channelid
+                                    channelInfo = [infoDic objectForKey:@"channelid"];
+                                    buInfo = [infoDic objectForKey:@"bu"];
+                                    cctextInfo = [infoDic objectForKey:@"cctext"];
+                                }
+                                
+                                [self setChannelInfo:channelInfo ForUserId:userId];
+                                if (buInfo.length > 0) {
+                                    [self setAppendInfo:@{@"bu":buInfo} ForUserId:userId];
+                                }
+                                if (cctextInfo.length > 0) {
+                                    [self setAppendInfo:@{@"cctext":cctextInfo} ForUserId:userId];
+                                }
+                                complete(list);
+                            } else {
+                                complete(@[]);
                             }
-                            
-                            [self setChannelInfo:channelInfo ForUserId:userId];
-                            if (buInfo.length > 0) {
-                                [self setAppendInfo:@{@"bu":buInfo} ForUserId:userId];
-                            }
-                            if (cctextInfo.length > 0) {
-                                [self setAppendInfo:@{@"cctext":cctextInfo} ForUserId:userId];
-                            }
-                            complete(list);
-                        } else {
-                            complete(@[]);
-                        }
+                        }];
                     }
                 });
             } else {

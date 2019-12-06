@@ -2,222 +2,96 @@
 //  QIMKit+QIMFileManager.h
 //  QIMCommon
 //
-//  Created by 李露 on 2018/4/20.
-//  Copyright © 2018年 QIMKit. All rights reserved.
+//  Created by lilu on 2019/8/28.
 //
 
 #import "QIMKit.h"
 
-@class QIMMessageModel;
-typedef void(^QIMFileManagerUploadCompletionBlock)(UIImage *image, NSError *error, QIMFileCacheType cacheType, NSString *imageURL);
+NS_ASSUME_NONNULL_BEGIN
 
 @interface QIMKit (QIMFileManager)
 
+#pragma mark - Public
+- (NSString * _Nonnull)qim_cachedFileNameForKey:(NSString * _Nullable) key;
+
+- (NSString *)qim_getFileMD5WithPath:(NSString *)filePath;
+
+#pragma mark - 图片
+
+- (NSString *)qim_imageKey:(NSData *)imageData;
+
+- (NSString *)qim_saveImageData:(NSData *)imageData;
+
+- (NSString *)getFileExtFromUrl:(NSString *)url;
+
+- (NSString *)md5fromUrl:(NSString *)url;
+
+- (NSString *)getFileNameFromUrl:(NSString *)url;
 
 /**
- 根据文件URL获取文件后缀
-
- @param url 文件URL
- @return 文件后缀
- */
-+ (NSString *) urlpathExtension:(NSString *) url;
-
-+ (NSString *) documentsofPath:(QIMFileCacheType) type;
-
-/**
- 文件上传
+ 上传图片成功之后会，发送图片消息
  
- @param filePath 文件路径
- @param message 消息
- @param jid user id
- @param flag 是文件还是图片
- @return 文件url
+ @param localImageKey 图片key
+ @param message 要发送的消息Model
  */
-- (NSString *)uploadFileForPath:(NSString *)filePath forMessage:(QIMMessageModel *)message withJid:(NSString *)jid isFile:(BOOL)flag;
+- (void)qim_uploadImageWithImageKey:(NSString *)localImageKey forMessage:(QIMMessageModel *)message;
 
 /**
- 文件上传
-
- @param fileData 文件二进制
- @param message 消息
- @param jid 用户Id
- @param flag 是文件还是图片
- @return 文件URL
- */
-- (NSString *)uploadFileForData:(NSData *)fileData forMessage:(QIMMessageModel *)message withJid:(NSString *)jid isFile:(BOOL)flag;
-
-- (void)uploadFileForData:(NSData *)fileData forCacheType:(QIMFileCacheType)type isFile:(BOOL)flag completionBlock:(QIMFileManagerUploadCompletionBlock)completionBlock;
-
-- (void)uploadFileForData:(NSData *)fileData forCacheType:(QIMFileCacheType)type isFile:(BOOL)flag fileExt:(NSString *)fileExt completionBlock:(QIMFileManagerUploadCompletionBlock)completionBlock;
-
-- (void )downloadFileWithUrl:(NSString *)url isFile:(BOOL)flag forCacheType:(QIMFileCacheType)type;
-
-
-/**
- 下载图片
-
- @param url 图片URL
- @param width 图片width
- @param height 图片height
- @param type 图片缓存类型
- */
--(void)downloadImage:(NSString *)url width:(CGFloat) width height:(CGFloat) height  forCacheType:(QIMFileCacheType)type;
-
-
-/**
- 下载图片
-
- @param url 图片URL
- @param width 图片width
- @param height 图片height
- @param type 图片缓存类型
- @param complation 下载成功的回调
- */
--(void)downloadImage:(NSString *)url
-               width:(CGFloat) width
-              height:(CGFloat) height
-        forCacheType:(QIMFileCacheType)type
-          complation:(void(^)(NSData *)) complation;
-
--(void)downloadCollectionEmoji:(NSString *)url
-                         width:(CGFloat) width
-                        height:(CGFloat) height
-                  forCacheType:(QIMFileCacheType)type
-                    complation:(void(^)(NSData *)) complation;
-
-//- (NSData *) getSmallFileDataFromUrl:(NSString *)url forCacheType:(QIMFileCacheType)type;
-
-/**
- 缓存文件
+ 上传图片成功之后，发送图片消息
  
- @param data 文件data
- @param fileName 文件名称
- @param type 缓存类型
- @return 返回path
+ @param localImagePath 本地图片路径
+ @param message 要发送的消息Model
  */
-- (NSString *) saveFileData:(NSData *)data withFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type;
-
-- (NSString *) saveFileData:(NSData *)data url:(NSString *)httpUrl forCacheType:(QIMFileCacheType)type;
+- (void)qim_uploadImageWithImagePath:(NSString *)localImagePath forMessage:(QIMMessageModel *)message;
 
 /**
- 缓存文件
+ 上传图片
  
- @param data 文件data
- @param httpUrl 远程链接
- @param width 宽
- @param height 高
- @param type 缓存类型
- @return 返回path
+ @param localImagePath 本地图片路径
+ @param callback 返回图片地址
  */
-- (NSString *) saveFileData:(NSData *)data url:(NSString *)httpUrl  width:(CGFloat) width height:(CGFloat) height forCacheType:(QIMFileCacheType)type;
+- (void)qim_uploadImageWithImagePath:(NSString *)localImagePath withCallback:(QIMKitUploadImageNewRequestSuccessedBlock)callback;
 
 /**
- 获取文件path
+ 上传图片
  
- @param fileName 文件名
- @param type 缓存类型
- @return 返回path
+ @param fileData 图片二进制
+ @param key fileKey
+ @param type type
+ @param extension 文件后缀
+ @return 返回图片地址
  */
-- (NSString *) getFilePathForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type;
+- (void)qim_uploadImageWithImageData:(NSData *)fileData WithMsgId:(NSString *)key WithMsgType:(int)type WithPathExtension:(NSString *)extension withCallBack:(QIMKitUploadImageCallBack)callback;
 
 /**
- 获取文件path
-
- @param fileName 文件名
- @param type 缓存类型
- @param careExist 是否关心文件已存在
- @return 返回Path
- */
-- (NSString *) getFilePathForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type careExist:(BOOL) careExist;
-
-/**
- *  临时文件URL调明星接口换取持久化URL
- *
- *  @param tempUrl 临时URL
- */
-- (void )getPermUrlWithTempUrl:(NSString *)tempUrl PermHttpUrl:(void(^)(NSString *))callBackPermUrl;
-
-/**
- 文件是否存在
+ 上传我的头像
  
- @param url 文件url
- @param width 宽
- @param height 高
- @param type 缓存类型
- @return 返回是否存在
+ @param headerData 头像二进制
+ @param callback 返回头像地址
  */
-- (BOOL)isFileExistForUrl:(NSString *)url width:(float)width height:(float)height forCacheType:(QIMFileCacheType)type;
+- (void)qim_uploadMyPhotoData:(NSData *)headerData withCallBack:(QIMKitUploadMyPhotoCallBack)callback;
 
-- (NSString *)fileExistLocalPathForUrl:(NSString *)url width:(float)width height:(float)height forCacheType:(QIMFileCacheType)type;
+#pragma mark - 视频
 
-- (NSString *)getNewMd5ForMd5:(NSString *)oldMd5 withWidth:(float)width height:(float)height;
+- (void)qim_uploadVideo:(NSString *)videoPath videoDic:(NSDictionary *)videoExt withCallBack:(QIMKitUploadVideoNewRequestSuccessedBlock)callback;
 
-/**
- 获取file data
- 
- @param fileName file名称
- @param type file缓存类型
- @return 返回file data
- */
-- (NSData *) getFileDataForFileName:(NSString *)fileName forCacheType:(QIMFileCacheType)type;
+- (void)qim_uploadVideoPath:(NSString *)LocalVideoOutPath forMessage:(QIMMessageModel *)message;
 
-- (NSData *) getFileDataFromUrl:(NSString *)url forCacheType:(QIMFileCacheType)type;
+#pragma mark - 文件
 
-- (NSData *) getFileDataFromUrl:(NSString *)url forCacheType:(QIMFileCacheType)type needUpdate:(BOOL)update;
+- (void)qim_uploadFileWithFilePath:(NSString *)localFilePath forMessage:(QIMMessageModel *)message;
 
-- (NSData *) getFileDataFromUrl:(NSString *)url width:(float)width height:(float)height forCacheType:(QIMFileCacheType)type;
+- (void)qim_uploadFileWithFileData:(NSData *)fileData WithPathExtension:(NSString *)extension forMessage:(QIMMessageModel *)message;
 
-- (CGSize)getImageSizeFromUrl:(NSString *)url;
+- (void)qim_uploadFileWithFilePath:(NSString *)localFilePath WithCallback:(QIMKitUploadFileNewRequestSuccessedBlock)callback;
 
-- (NSString *) getFileNameFromKey:(NSString *)url;
+- (void)qim_uploadFileWithFileData:(NSData *)fileData WithPathExtension:(NSString *)extension WithCallback:(QIMKitUploadFileNewRequestSuccessedBlock)callback;
 
-/**
- *  根据URL获得文件名
- *
- *  @param url URL
- */
-- (NSString *) getFileNameFromUrl:(NSString *)url;
 
-- (NSString *) getFileExtFromUrl:(NSString *) url;
+- (NSString *)qim_getLocalFileDataWithFileName:(NSString *)fileName;
 
-- (NSString *) md5fromUrl:(NSString *) url;
-
-/**
- 根据URL获得文件名
-
- @param url 图片URL
- @param width 图片width
- @param height 图片height
- @return 图片文件名
- */
-- (NSString *) getFileNameFromUrl:(NSString *)url width:(CGFloat) width height:(CGFloat) height;
-
-/**
- 获取图片后缀
- 
- @param data data
- @return 返回图片后缀
- */
-- (NSString *)getImageFileExt:(NSData *)data;
-
-- (NSString *)getMD5FromFileData:(NSData *)fileData;
-
-/**
- 获取图片size
- 
- @param imgSize 原图片size
- @return 缩略图size
- */
-- (CGSize)getFitSizeForImgSize:(CGSize)imgSize;
-
-- (NSString *)qim_cachedFileNameForKey:(NSString *)key;
-
-//拷贝文件
-- (void)uploadFileForData:(NSData *)fileData
-             forCacheType:(QIMFileCacheType)type
-                  fileExt:(NSString *)fileExt
-                   isFile:(BOOL)flag
-   uploadProgressDelegate:(id)delegate
-          completionBlock:(QIMFileManagerUploadCompletionBlock)completionBlock progressBlock:(void(^)(CGFloat progress))progressBlock;
+- (NSString *)qim_saveLocalFileData:(NSData *)fileData withFileName:(NSString *)fileName;
 
 @end
+
+NS_ASSUME_NONNULL_END

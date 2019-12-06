@@ -74,6 +74,8 @@
  */
 - (void)clearLogginUser;
 
+- (void)clearUserToken;
+
 /**
  save 用户名 and 密码
  
@@ -113,8 +115,16 @@
  @param type 用户名的类型，值为：@"username"、@"email"、@"mobile"
  @return 返回结果
  */
-- (NSDictionary *)QChatLoginWithUserId:(NSString *)userId rsaPassword:(NSString *)password type:(NSString *)type;
+- (void)QChatLoginWithUserId:(NSString *)userId rsaPassword:(NSString *)password type:(NSString *)type withCallback:(QIMKitGetQChatBetaLoginTokenDic)callback;
 
 - (NSString *)getFormStringByDiction:(NSDictionary *)diction;
+
+#pragma mark - 验证码
+
+- (void)getUserTokenWithUserName:(NSString *)userName WithVerifyCode:(NSString *)verifCode withCallback:(QIMKitGetUserTokenSuccessBlock)callback;
+
+- (void)getVerifyCodeWithUserName:(NSString *)userName withCallback:(QIMKitGetVerifyCodeSuccessBlock)callback;
+
+- (void)getNewUserTokenWithUserName:(NSString *)userName WithPassword:(NSString *)password withCallback:(QIMKitGetUserNewTokenSuccessBlock)callback;
 
 @end

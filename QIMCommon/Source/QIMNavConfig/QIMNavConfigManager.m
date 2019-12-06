@@ -35,6 +35,7 @@
     NSString *_protobufPort;   //Pb端口
     NSString *_resetPwdUrl; //重设密码
     NSString *_hashHosts;
+    NSString * _videourl;
 
     NSArray *_adItems;
     int _adSec;
@@ -100,7 +101,7 @@
             QIMVerboseLog(@"本地找到的oldNavConfigUrlDict : %@", oldNavConfigUrlDict);
             NSString *navUrl = [oldNavConfigUrlDict objectForKey:@"NavUrl"];
             if (navUrl.length > 0) {
-                [self qimNav_updateNavigationConfigWithNavDict:oldNavConfigUrlDict WithUserName:nil Check:YES WithForcedUpdate:YES];
+                [self qimNav_updateNavigationConfigWithNavDict:oldNavConfigUrlDict WithUserName:nil Check:YES WithForcedUpdate:YES withCallBack:nil];
             }
         }
 
@@ -158,6 +159,7 @@
             _uploadLog = [self.defaultSettings objectForKey:@"uploadLog"];
             _resetPwdUrl = [self.defaultSettings objectForKey:@"resetPwdUrl"];
             _isToC = [[self.defaultSettings objectForKey:@"isToC"] boolValue];
+            _videourl = [self.defaultSettings objectForKey:@"videourl"];
         } else if ([[QIMAppInfo sharedInstance] appType] != QIMProjectTypeQChat) {
             _xmppHost = [self.defaultSettings objectForKey:@"xmppHost"];
             _httpHost = [self.defaultSettings objectForKey:@"httpHost"];
@@ -183,6 +185,7 @@
             _resetPwdUrl = [self.defaultSettings objectForKey:@"resetPwdUrl"];
             _qSearchUrl = [self.defaultSettings objectForKey:@"qSearchUrl"];
             _isToC = [[self.defaultSettings objectForKey:@"isToC"] boolValue];
+            _videourl = [self.defaultSettings objectForKey:@"videourl"];
         }
     }
 
@@ -215,7 +218,7 @@
 }
 
 - (NSArray *)qimNav_getDebugers {
-    return @[@"lilulucas.li", @"nigotuu7479", @"hubin.hu", @"lee.guo", @"kaiming.zhang"];
+    return @[@"lilulucas.li", @"nigotuu7479", @"hubin.hu", @"lee.guo", @"kaiming.zhang", @"lihaibin.li", @"yuelin.liu", @"xi.guo"];
 }
 
 - (NSArray *)qimNav_getLocalNavServerConfigs {
@@ -394,8 +397,15 @@
     }
     NSDictionary *loginDict = [navConfig objectForKey:@"Login"];
     NSString *loginType = [loginDict objectForKey:@"loginType"];
-    BOOL pwdLogin = [loginType isEqualToString:@"password"];
-    _loginType = pwdLogin ? QTLoginTypePwd : QTLoginTypeSms;
+    if ([loginType isEqualToString:@"password"]) {
+        _loginType = QTLoginTypePwd;
+    } else if ([loginType isEqualToString:@"newpassword"]) {
+        _loginType = QTLoginTypeNewPwd;
+    } else {
+        _loginType = QTLoginTypeSms;
+    }
+//    BOOL pwdLogin = [loginType isEqualToString:@"password"];
+//    _loginType = pwdLogin ? QTLoginTypePwd : QTLoginTypeSms;
     [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"QC_UserWillSaveNavDict"];
     NSDictionary *abilityDict = [navConfig objectForKey:@"ability"];
     if (abilityDict.count) {
@@ -449,7 +459,7 @@
         _email = [imConfigDic objectForKey:@"mail"];
         _uploadLog = [imConfigDic objectForKey:@"uploadLog"];
         _foundConfigUrl = [imConfigDic objectForKey:@"foundConfigUrl"];
-        _isToC = [imConfigDic objectForKey:@"isToC"];
+        _isToC = [[imConfigDic objectForKey:@"isToC"] boolValue];
     } else {
         _showOA = NO;
         _showOrganizational = NO;
@@ -565,6 +575,7 @@
         _shareUrl = [baseAddess objectForKey:@"shareurl"];
         _resetPwdUrl = [baseAddess objectForKey:@"resetPwdUrl"];
         _appWeb = [baseAddess objectForKey:@"appWeb"];
+        _videourl = [baseAddess objectForKey:@"videourl"];
         NSString *domainHost = [baseAddess objectForKey:@"domainhost"];
         if (domainHost.length > 0) {
             _domainHost = domainHost;
@@ -613,6 +624,7 @@
                 _takeSmsUrl = [baseAddess objectForKey:@"sms_verify"];
                 _resetPwdUrl = [baseAddess objectForKey:@"resetPwdUrl"];
                 _appWeb = [baseAddess objectForKey:@"appWeb"];
+                _videourl = [baseAddess objectForKey:@"videourl"];
             }
         }
     }                  failure:^(NSError *error) {
@@ -621,20 +633,13 @@
 }
 
 //更新导航所有配置
-- (BOOL)qimNav_updateNavigationConfigWithNavDict:(NSDictionary *)navDict NavStr:(NSString *)navConfigUrl Check:(BOOL)check {
+- (void)qimNav_updateNavigationConfigWithNavDict:(NSDictionary *)navDict NavStr:(NSString *)navConfigUrl Check:(BOOL)check withCallBack:(QIMKitGetNavConfigCallBack)callBack {
     NSString *userName = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"currentLoginName"];
     if (![navConfigUrl containsString:@"u="] && userName) {
         navConfigUrl = [navConfigUrl stringByAppendingFormat:@"&u=%@", [QIMManager getLastUserName]];
     }
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:navConfigUrl]];
-    if (check == NO) {
-        [request setTimeOutSeconds:1];
-    } else {
-        [request setTimeOutSeconds:10];
-    }
-    [request startSynchronous];
-    if ([request responseStatusCode] == 200) {
-        NSDictionary *navConfig = [[QIMJSONSerializer sharedInstance] deserializeObject:request.responseData error:nil];
+    [[QIMManager sharedInstance] sendTPGetRequestWithUrl:navConfigUrl withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *navConfig = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         if (navConfig.count > 0) {
             [self setNavConfig:navConfig];
             QIMVerboseLog(@"QC_CurrentNavDictDict : %@ QC_NavConfigs : %@", navConfigUrl, navConfig);
@@ -646,38 +651,55 @@
             NSString *navConfigStr = [[QIMJSONSerializer sharedInstance] serializeObject:navConfig];
             [[QIMUserCacheManager sharedInstance] setUserObject:navConfigStr forKey:@"NavConfig"];
             [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"currentLoginUserName"];
-            return YES;
+            if (callBack) {
+                callBack(YES);
+            }
         } else {
             [[QIMUserCacheManager sharedInstance] setUserObject:@(NO) forKey:@"QCNavFailed"];
             [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"currentLoginUserName"];
-            return NO;
+            if (callBack) {
+                callBack(NO);
+            }
         }
-    } else {
-        [[QIMUserCacheManager sharedInstance] setUserObject:@(NO) forKey:@"QCNavFailed"];
-        [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"currentLoginUserName"];
-        return NO;
-    }
-    return NO;
+    } withFailedCallBack:^(NSError *error) {
+        if (callBack) {
+            callBack(NO);
+        }
+    }];
 }
 
-- (BOOL)qimNav_updateNavigationConfigWithDomain:(NSString *)domain WithUserName:(NSString *)userName {
+- (void)qimNav_updateNavigationConfigWithDomain:(NSString *)domain WithUserName:(NSString *)userName withCallBack:(QIMKitGetNavConfigCallBack)callback {
     if (domain) {
         NSDictionary *currentNav = @{QIMNavNameKey: domain, QIMNavUrlKey: domain};
         [[QIMUserCacheManager sharedInstance] setUserObject:currentNav forKey:@"QC_CurrentNavDict"];
-        return [self qimNav_updateNavigationConfigWithNavDict:currentNav WithUserName:userName Check:YES WithForcedUpdate:YES];
+        [self qimNav_updateNavigationConfigWithNavDict:currentNav WithUserName:userName Check:YES WithForcedUpdate:YES withCallBack:^(BOOL success) {
+            if (callback) {
+                callback(success);
+            }
+        }];
+    } else {
+        if (callback) {
+            callback(NO);
+        }
     }
-    return NO;
 }
 
-- (BOOL)qimNav_updateNavigationConfigWithNavUrl:(NSString *)navUrl WithUserName:(NSString *)userName {
+- (void)qimNav_updateNavigationConfigWithNavUrl:(NSString *)navUrl WithUserName:(NSString *)userName withCallBack:(QIMKitGetNavConfigCallBack)callback {
     if (navUrl.length > 0) {
         NSDictionary *currentNav = @{QIMNavNameKey: navUrl, QIMNavUrlKey: navUrl};
-        return [self qimNav_updateNavigationConfigWithNavDict:currentNav WithUserName:userName Check:YES WithForcedUpdate:YES];
+        [self qimNav_updateNavigationConfigWithNavDict:currentNav WithUserName:userName Check:YES WithForcedUpdate:YES withCallBack:^(BOOL success) {
+            if (callback) {
+                callback(success);
+            }
+        }];
+    } else {
+        if (callback) {
+            callback(NO);
+        }
     }
-    return NO;
 }
 
-- (BOOL)qimNav_updateNavigationConfigWithNavDict:(NSDictionary *)navDict WithUserName:(NSString *)userName Check:(BOOL)check WithForcedUpdate:(BOOL)forcedUpdate {
+- (void)qimNav_updateNavigationConfigWithNavDict:(NSDictionary *)navDict WithUserName:(NSString *)userName Check:(BOOL)check WithForcedUpdate:(BOOL)forcedUpdate withCallBack:(QIMKitGetNavConfigCallBack)callback {
     NSString *customNavUrl = [navDict objectForKey:QIMNavUrlKey];
     NSString *realNavUrl = nil;
     if (customNavUrl.length > 0) {
@@ -714,49 +736,74 @@
         if (![navConfigUrl containsString:@"u="] && userName.length > 0) {
             navConfigUrl = [navConfigUrl stringByAppendingFormat:@"&u=%@", userName];
         }
-        BOOL resultSuccess = [self qimNav_updateNavigationConfigWithNavDict:navDict NavStr:navConfigUrl Check:check];
-        if (resultSuccess) {
-            [self addLocalNavDict:navDict];
-            [[QIMUserCacheManager sharedInstance] setUserObject:_localNavConfigs forKey:@"QC_NavAllDicts"];
-            NSString *lastComponent = [[[navConfigUrl lastPathComponent] componentsSeparatedByString:@"?"] lastObject];
-            if (_hashHosts.length > 0) {
-                if (![_hashHosts containsString:@"?"]) {
-                    _hashHosts = [_hashHosts stringByAppendingFormat:@"?%@", lastComponent];
+        if (![navConfigUrl containsString:@"nauth="]) {
+            navConfigUrl = [navConfigUrl stringByAppendingFormat:@"&nauth=true"];
+        }
+        __block BOOL resultSuccess = NO;
+        [self qimNav_updateNavigationConfigWithNavDict:navDict NavStr:navConfigUrl Check:check withCallBack:^(BOOL res) {
+            resultSuccess = res;
+            if (resultSuccess) {
+                [self addLocalNavDict:navDict];
+                [[QIMUserCacheManager sharedInstance] setUserObject:_localNavConfigs forKey:@"QC_NavAllDicts"];
+                NSString *lastComponent = [[[navConfigUrl lastPathComponent] componentsSeparatedByString:@"?"] lastObject];
+                if (_hashHosts.length > 0) {
+                    if (![_hashHosts containsString:@"?"]) {
+                        _hashHosts = [_hashHosts stringByAppendingFormat:@"?%@", lastComponent];
+                    }
+                    if (![_hashHosts containsString:@"u="] && userName) {
+                        _hashHosts = [_hashHosts stringByAppendingFormat:@"&u=%@", userName];
+                    }
+                    [self qimNav_updateNavigationConfigWithHashHost:_hashHosts];
                 }
-                if (![_hashHosts containsString:@"u="] && userName) {
-                    _hashHosts = [_hashHosts stringByAppendingFormat:@"&u=%@", userName];
-                }
-                [self qimNav_updateNavigationConfigWithHashHost:_hashHosts];
+                [self qimNav_updateAdvertConfigWithCheck:YES];
+                [self qimNav_getRSACodePublicKeyFromRemote];
             }
-            [self qimNav_updateAdvertConfigWithCheck:YES];
-            [self qimNav_getRSACodePublicKeyFromRemote];
-        }
-        [[QIMUserCacheManager sharedInstance] setUserObject:@(currentTime) forKey:@"NavConfigUpdateTime"];
-        [[QIMUserCacheManager sharedInstance] setUserObject:@(_loginType) forKey:@"LoginType"];
-        if (navDict.count > 0) {
-            [[QIMUserCacheManager sharedInstance] setUserObject:navDict forKey:@"QC_CurrentNavDict"];
-        } else {
-            NSDictionary *emptyNavDict = @{QIMNavNameKey: [self navTitle], QIMNavUrlKey: [self navUrl]};
-            [[QIMUserCacheManager sharedInstance] setUserObject:emptyNavDict forKey:@"QC_CurrentNavDict"];
-        }
-//        [[QIMManager sharedInstance] updateNavigationConfig];
-        [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"currentLoginUserName"];
+            [[QIMUserCacheManager sharedInstance] setUserObject:@(currentTime) forKey:@"NavConfigUpdateTime"];
+            [[QIMUserCacheManager sharedInstance] setUserObject:@(_loginType) forKey:@"LoginType"];
+            if (navDict.count > 0) {
+                [[QIMUserCacheManager sharedInstance] setUserObject:navDict forKey:@"QC_CurrentNavDict"];
+            } else {
+                NSDictionary *emptyNavDict = @{QIMNavNameKey: [self navTitle], QIMNavUrlKey: [self navUrl]};
+                [[QIMUserCacheManager sharedInstance] setUserObject:emptyNavDict forKey:@"QC_CurrentNavDict"];
+            }
+            //[[QIMManager sharedInstance] updateNavigationConfig];
+            [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"currentLoginUserName"];
+            if (callback) {
+                callback(resultSuccess);
+            }
+        }];
         QIMVerboseLog(@"请求导航服务器 : %@", navConfigUrl);
-        return resultSuccess;
+    } else {
+        if (callback) {
+            callback(NO);
+        }
     }
-    return NO;
+//    return NO;
 }
 
 
 // 更新导航配置
-- (BOOL)qimNav_updateNavigationConfigWithCheck:(BOOL)check {
+- (void)qimNav_updateNavigationConfigWithCheck:(BOOL)check {
+    [self qimNav_updateNavigationConfigWithCheck:check withCallBack:nil];
+}
+
+- (void)qimNav_updateNavigationConfigWithCheck:(BOOL)check withCallBack:(QIMKitGetNavConfigCallBack)callback {
     QIMVerboseLog(@"更新导航配置 %s", __func__);
     NSDictionary *currentLoginNav = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"QC_UserWillSaveNavDict"];
     NSString *userName = [[QIMUserCacheManager sharedInstance] userObjectForKey:@"currentLoginUserName"];
     if (currentLoginNav.count) {
-        return [self qimNav_updateNavigationConfigWithNavDict:currentLoginNav WithUserName:userName Check:check WithForcedUpdate:NO];
+        [self qimNav_updateNavigationConfigWithNavDict:currentLoginNav WithUserName:userName Check:check WithForcedUpdate:NO withCallBack:^(BOOL success) {
+            if (callback) {
+                callback(success);
+            }
+        }];
+    } else {
+        [self qimNav_updateNavigationConfigWithNavDict:[[QIMUserCacheManager sharedInstance] userObjectForKey:@"QC_CurrentNavDict"] WithUserName:userName Check:check WithForcedUpdate:NO withCallBack:^(BOOL success) {
+            if (callback) {
+                callback(success);
+            }
+        }];
     }
-    return [self qimNav_updateNavigationConfigWithNavDict:[[QIMUserCacheManager sharedInstance] userObjectForKey:@"QC_CurrentNavDict"] WithUserName:userName Check:check WithForcedUpdate:NO];
 }
 
 - (void)qimNav_swicthLocalNavConfigWithNavDict:(NSDictionary *)navDict {
@@ -772,15 +819,15 @@
     if ([willNavDict isKindOfClass:[NSDictionary class]]) {
         QIMVerboseLog(@"willNavDict is NSDictionary");
         if (willNavDict) {
-            [self qimNav_updateNavigationConfigWithNavDict:willNavDict WithUserName:userName Check:YES WithForcedUpdate:YES];
+            [self qimNav_updateNavigationConfigWithNavDict:willNavDict WithUserName:userName Check:YES WithForcedUpdate:YES withCallBack:nil];
         }
     } else if ([willNavDict isKindOfClass:[NSString class]]) {
         QIMVerboseLog(@"willNavDict is NSString");
         NSString *navTitle = [navDict objectForKey:@"title"];
         if (navTitle.length > 0) {
-            [self qimNav_updateNavigationConfigWithNavDict:navDict WithUserName:userName Check:YES WithForcedUpdate:YES];
+            [self qimNav_updateNavigationConfigWithNavDict:navDict WithUserName:userName Check:YES WithForcedUpdate:YES withCallBack:nil];
         } else {
-            [self qimNav_updateNavigationConfigWithNavDict:nil NavStr:willNavDict Check:YES];
+            [self qimNav_updateNavigationConfigWithNavDict:nil NavStr:willNavDict Check:YES withCallBack:nil];
         }
     } else {
         [self setNavConfig:navConfig];
@@ -923,11 +970,8 @@
 
 - (void)qimNav_getRSACodePublicKeyFromRemote {
     NSString *url = [NSString stringWithFormat:@"%@/qtapi/nck/rsa/get_public_key.do", self.javaurl];
-    ASIHTTPRequest *request = [[ASIHTTPRequest alloc] initWithURL:[NSURL URLWithString:url]];
-    [request startSynchronous];
-    NSError *error = [request error];
-    if (!error && [request responseStatusCode] == 200) {
-        NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:[request responseData] error:nil];
+    [[QIMManager sharedInstance] sendTPGetRequestWithUrl:url withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         if (resultDic.count) {
             BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
             if (ret) {
@@ -937,7 +981,9 @@
                 QIMVerboseLog(@"self.pubKey公钥文件写入%@ %@", self.pubkey, success ? @"成功" : @"失败");
             }
         }
-    }
+    } withFailedCallBack:^(NSError *error) {
+        
+    }];
 }
 
 - (NSString *)getWebAppUrl {
@@ -947,6 +993,7 @@
 - (NSString *)getManagerAppUrl {
     return [NSString stringWithFormat:@"%@/manage#/audit_user?domain=%@", self.appWeb, self.domain];
 }
+
 
 - (NSString *)getNewResetPwdUrl {
 

@@ -146,6 +146,7 @@
 - (NSString *)qimNav_Signal_host;
 - (NSString *)qimNav_WssHost;
 - (NSString *)qimNav_VideoApiHost;
+- (NSString *)qimNav_VideoUrl;
 
 //Versions
 - (long long)qimNav_NavVersion;
@@ -163,7 +164,8 @@
 
 - (NSMutableArray *)qimNav_localNavConfigs;
 
-- (BOOL)qimNav_updateNavigationConfigWithCheck:(BOOL)check;
+- (void)qimNav_updateNavigationConfigWithCheck:(BOOL)check;
+- (void)qimNav_updateNavigationConfigWithCheck:(BOOL)check withCallBack:(QIMKitGetNavConfigCallBack)callback;
 
 /**
  清除广告
@@ -176,10 +178,10 @@
 
 - (void)qimNav_updateAdvertConfigWithCheck:(BOOL)check;
 
-- (BOOL)qimNav_updateNavigationConfigWithDomain:(NSString *)domain WithUserName:(NSString *)userName;
+- (void)qimNav_updateNavigationConfigWithDomain:(NSString *)domain WithUserName:(NSString *)userName withCallBack:(QIMKitGetNavConfigCallBack)callback;
 
-- (BOOL)qimNav_updateNavigationConfigWithNavUrl:(NSString *)navUrl WithUserName:(NSString *)userName;
+- (BOOL)qimNav_updateNavigationConfigWithNavUrl:(NSString *)navUrl WithUserName:(NSString *)userName withCallBack:(QIMKitGetNavConfigCallBack)callback;
 
-- (BOOL)qimNav_updateNavigationConfigWithNavDict:(NSDictionary *)navDict WithUserName:(NSString *)userName Check:(BOOL)check WithForcedUpdate:(BOOL)forcedUpdate;
+- (BOOL)qimNav_updateNavigationConfigWithNavDict:(NSDictionary *)navDict WithUserName:(NSString *)userName Check:(BOOL)check WithForcedUpdate:(BOOL)forcedUpdate withCallBack:(QIMKitGetNavConfigCallBack)callback;
 
 @end

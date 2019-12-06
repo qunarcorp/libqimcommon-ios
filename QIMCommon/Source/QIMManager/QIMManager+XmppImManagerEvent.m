@@ -110,6 +110,11 @@
 
 - (void)updateOfflineTime:(NSDictionary *)infoDic {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        //这里并发进行checkPoint会导致后面的sql wait，所以将checkpoint的逻辑移到app进入后台。
+//        QIMVerboseLog(@"登录之前数据库进行checkPoint");
+//        [[IMDataManager qimDB_SharedInstance] qimDB_dbCheckpoint];
+//        QIMVerboseLog(@"登录之前数据库完成checkPoint");
+        
         QIMVerboseLog(@"登录之前初始化数据库文件之后更新各种时间戳开始 : %@", infoDic);
         [self updateLastMsgTime];
         [self updateLastGroupMsgTime];
@@ -212,7 +217,7 @@
                     [self getRemoteQuickReply];
                 } else if (forceRNUpdate) {
                     QIMVerboseLog(@"收到RN包清除通知");
-                    NSString *path = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
+                    NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
                     //内置包版本
                     NSString *latestJSCodeURLString = [path stringByAppendingPathComponent:@"rnRes"];
                     BOOL removeSussess = [[NSFileManager defaultManager] removeItemAtPath:latestJSCodeURLString error:nil];
@@ -394,6 +399,18 @@
                 } else {
                     QIMVerboseLog(@"online 驼圈其他通知 : %@", onlineDict);
                 }
+            }
+                break;
+            case QIMCategoryNotifyMsgTypeMedalListUpdateNotice: {
+                QIMVerboseLog(@"online 更新勋章列表");
+                NSInteger version = [[notifyMsg objectForKey:@"medalVersion"] integerValue];
+                [[QIMManager sharedInstance] getRemoteMedalList];
+            }
+                break;
+            case QIMCategoryNotifyMsgTypeUserMedalUpdateNotice: {
+                QIMVerboseLog(@"online 更新用户的勋章");
+                NSInteger version = [[notifyMsg objectForKey:@"userMedalVersion"] integerValue];
+                [[QIMManager sharedInstance] getRemoteUserMedalListWithUserId:nil];
             }
                 break;
             default: {
@@ -835,6 +852,17 @@
     NSDictionary *dic = [self getPublicNumberCardByJid:publicNumberId];
     if (dic == nil) {
         NSString *enName = [publicNumberId componentsSeparatedByString:@"@"].firstObject;
+        [self updatePublicNumberCardByIds:@[@{@"robot_name": enName, @"version": @(0)}] WithNeedUpdate:YES withCallBack:^(NSArray *cardList) {
+            if (cardList.count <= 0) {
+                NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+                [dic setObject:@(0) forKey:@"rbt_ver"];
+                [dic setObject:enName forKey:@"robotEnName"];
+                [dic setObject:enName forKey:@"robotCnName"];
+                [dic setObject:enName forKey:@"searchIndex"];
+                [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertPublicNumbers:@[dic]];
+            }
+        }];
+        /*
         NSArray *cardList = [self updatePublicNumberCardByIds:@[@{@"robot_name": enName, @"version": @(0)}] WithNeedUpdate:YES];
         if (cardList.count <= 0) {
             NSMutableDictionary *dic = [NSMutableDictionary dictionary];
@@ -844,6 +872,7 @@
             [dic setObject:enName forKey:@"searchIndex"];
             [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertPublicNumbers:@[dic]];
         }
+        */
     }
     QIMMessageModel *c2bFeedBackMessage = [QIMMessageModel new];
     QIMMessageModel *message = [QIMMessageModel new];
@@ -1248,16 +1277,17 @@
             [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"NavConfig"];
             QIMErrorLog(@"重新获取导航");
             [[QIMUserCacheManager sharedInstance] setUserObject:[QIMManager getLastUserName] forKey:@"currentLoginName"];
-            BOOL getNavSuccess = [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithCheck:YES];
-            if (getNavSuccess == NO) {
-                QIMErrorLog(@"获取导航失败，请稍后再试");
-                [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkNetworkStatus) object:nil];
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"kNotificationStreamEnd" object:@"请检查当前网络状态后重试"];
-                return;
-            }
-            QIMWarnLog(@"再次重新登录");
-            self.needTryRelogin = YES;
-            [self socketDisconnect];
+            [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithCheck:YES withCallBack:^(BOOL success) {
+                if (success == NO) {
+                    QIMErrorLog(@"获取导航失败，请稍后再试");
+                    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkNetworkStatus) object:nil];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"kNotificationStreamEnd" object:@"请检查当前网络状态后重试"];
+                } else {
+                    QIMWarnLog(@"再次重新登录");
+                    self.needTryRelogin = YES;
+                    [self socketDisconnect];
+                }
+            }];
         } else {
             QIMWarnLog(@"被踢下线后重新登录");
             [self relogin];
@@ -1594,9 +1624,7 @@
         QIMErrorLog(@"LoginFaild: %@", errDic);
         if ([[errDic objectForKey:@"errMsg"] isEqualToString:@"out_of_date"]) {
             
-//            [self sendNoPush];
-            [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"kTempUserToken"];
-            [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"userToken"];
+            [self clearUserToken];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"kNotificationOutOfDate" object:nil];
             });
@@ -1615,10 +1643,10 @@
     });
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        
+
         [self updateChatRoomList];
     });
-    
+
 }
 
 @end

@@ -87,30 +87,6 @@
 }
 
 - (void)getRemoteHotlineShopList {
-//    NSString *destUrl = [NSString stringWithFormat:@"%@/qcadmin/getHotlineShopList.qunar?line=%@&username=%@&host=%@", [[QIMNavConfigManager sharedInstance] newerHttpUrl], @"qtalk", [QIMManager getLastUserName], [[QIMManager sharedInstance] getDomain]];
-//    __weak __typeof(self) weakSelf = self;
-//    [self sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
-//        NSDictionary *responseDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
-//        BOOL ret = [[responseDic objectForKey:@"ret"] boolValue];
-//        NSInteger errcode = [[responseDic objectForKey:@"errcode"] integerValue];
-//        if (ret && errcode == 0) {
-//            NSDictionary *data = [responseDic objectForKey:@"data"];
-//            if ([data isKindOfClass:[NSDictionary class]]) {
-//                NSDictionary *allhotlines = [data objectForKey:@"allhotlines"];
-//                NSArray *myhotlines = [data objectForKey:@"myhotlines"];
-//                __typeof(self) strongSelf = weakSelf;
-//                if (!strongSelf) {
-//                    return;
-//                }
-//                strongSelf.allhotlines = [allhotlines allKeys];
-//                strongSelf.myhotLinelist = myhotlines;
-//                NSLog(@"getHotlineShopList.qunar : %@", data);
-//            }
-//        }
-//    } withFailedCallBack:^(NSError *error) {
-//
-//    }];
-    
     NSString *destUrl = [NSString stringWithFormat:@"%@/admin/outer/qtalk/getHotlineList", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     NSDictionary *body = @{@"username":[QIMManager getLastUserName], @"host":[[QIMManager sharedInstance] getDomain]};
     NSData *bodyData = [[QIMJSONSerializer sharedInstance] serializeObject:body error:nil];
@@ -140,51 +116,54 @@
 }
 
 //V2版获取客服坐席列表：支持多店铺
-- (NSArray *)getSeatSeStatus {
+- (void)getSeatSeStatusWithCallback:(QIMKitGetSeatSeStatusBlock)callback {
     NSString *urlHost = @"https://qcadmin.qunar.com";
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/api/seat/getSeatSeStatusWithSid.qunar", urlHost]];
     NSString *postDataStr = [NSString stringWithFormat:@"qName=%@", [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     NSMutableData *postData = [NSMutableData dataWithData:[postDataStr dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
-    [request addRequestHeader:@"Content-type" value:@"application/x-www-form-urlencoded"];
-    [request setRequestMethod:@"POST"];
-    [request setPostBody:postData];
-    [request startSynchronous];
-    NSError *error = [request error];
-    if ([request responseStatusCode] == 200 && !error) {
-        NSData *responseData = [request responseData];
+    [self sendTPPOSTFormUrlEncodedRequestWithUrl:url.absoluteString withRequestBodyData:postData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *resDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[resDic objectForKey:@"ret"] boolValue];
         if (ret) {
             NSArray *data = [resDic objectForKey:@"data"];
             if (data.count > 0) {
-                return data;
+                if (callback) {
+                    callback(data);
+                }
+            } else {
+                if (callback) {
+                    callback(nil);
+                }
+            }
+        } else {
+            if (callback) {
+                callback(nil);
             }
         }
-    }
-    return nil;
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(nil);
+        }
+    }];
 }
 
 //V2版区别Shop来设置服务模式upSeatSeStatusWithSid.qunar
-- (BOOL)updateSeatSeStatusWithShopId:(NSInteger)shopId WithStatus:(NSInteger)shopServiceStatus {
+- (void)updateSeatSeStatusWithShopId:(NSInteger)shopId WithStatus:(NSInteger)shopServiceStatus withCallBack:(QIMKitUpdateSeatSeStatusBlock)callback {
     NSString *urlHost = @"https://qcadmin.qunar.com";
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/api/seat/upSeatSeStatusWithSid.qunar", urlHost]];
     NSString *postDataStr = [NSString stringWithFormat:@"qName=%@&st=%ld&sid=%ld", [[QIMManager getLastUserName] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], shopServiceStatus, shopId];
     NSMutableData *postData = [NSMutableData dataWithData:[postDataStr dataUsingEncoding:NSUTF8StringEncoding]];
-    ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
-    [request addRequestHeader:@"Content-type" value:@"application/x-www-form-urlencoded"];
-    [request setRequestMethod:@"POST"];
-    [request setPostBody:postData];
-    [request startSynchronous];
-    NSError *error = [request error];
-    if ([request responseStatusCode] == 200 && !error) {
-        NSData *responseData = [request responseData];
+    [self sendTPPOSTFormUrlEncodedRequestWithUrl:url.absoluteString withRequestBodyData:postData withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *resDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[resDic objectForKey:@"ret"] boolValue];
-        return ret;
-    }
-    return NO;
+        if (callback) {
+            callback(ret);
+        }
+    } withFailedCallBack:^(NSError *error) {
+        if (callback) {
+            callback(NO);
+        }
+    }];
 }
 
 - (NSDictionary *)userSeatStatusDict:(int)userStatus {
@@ -264,10 +243,11 @@
                 dispatch_async(self.load_history_msg, ^{
                     long long version = [[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:virtualId RealJid:userId] - timeChange;
                     
-                    NSArray *result = [self getConsultServerlogWithFrom:[self getLastJid] virtualId:virtualId to:userId version:version count:(int)(limit - list.count) direction:QIMMessageDirection_Sent];
-                    if (result.count > 0) {
-                        [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertHistoryChatJSONMsg:result];
-                    }
+                    [self getConsultServerlogWithFrom:[self getLastJid] virtualId:virtualId to:userId version:version count:(int)(limit - list.count) direction:QIMMessageDirection_Sent withCallBack:^(NSArray *result) {
+                        if (result.count > 0) {
+                            [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertHistoryChatJSONMsg:result];
+                        }
+                    }];
                 });
             }
         } else {
@@ -277,24 +257,24 @@
                 }
                 dispatch_async(self.load_history_msg, ^{
                     long long version = [[IMDataManager qimDB_SharedInstance] qimDB_getMinMsgTimeStampByXmppId:virtualId RealJid:userId] - timeChange;
-                    NSArray *resultList = [self getConsultServerlogWithFrom:[self getLastJid] virtualId:virtualId to:userId version:version count:limit direction:QIMMessageDirection_Sent];
-                    
-                    if (resultList.count > 0) {
-                        [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertHistoryChatJSONMsg:resultList];
-                        NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_getMgsListBySessionId:virtualId WithRealJid:userId WithLimit:limit WithOffset:offset];
-                        NSMutableArray *list = [NSMutableArray array];
-                        for (NSDictionary *infoDic in datas) {
-                            QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
-                            [list addObject:msg];
+                    [self getConsultServerlogWithFrom:[self getLastJid] virtualId:virtualId to:userId version:version count:limit direction:QIMMessageDirection_Sent withCallBack:^(NSArray *resultList) {
+                        if (resultList.count > 0) {
+                            [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertHistoryChatJSONMsg:resultList];
+                            NSArray *datas = [[IMDataManager qimDB_SharedInstance] qimDB_getMgsListBySessionId:virtualId WithRealJid:userId WithLimit:limit WithOffset:offset];
+                            NSMutableArray *list = [NSMutableArray array];
+                            for (NSDictionary *infoDic in datas) {
+                                QIMMessageModel *msg = [self getMessageModelWithByDBMsgDic:infoDic];
+                                [list addObject:msg];
+                            }
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                complete(list);
+                            });
+                        } else {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                complete(@[]);
+                            });
                         }
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            complete(list);
-                        });
-                    } else {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            complete(@[]);
-                        });
-                    }
+                    }];
                 });
             } else {
                 dispatch_async(dispatch_get_main_queue(), ^{

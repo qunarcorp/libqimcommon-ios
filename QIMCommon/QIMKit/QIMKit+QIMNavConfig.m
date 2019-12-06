@@ -281,6 +281,10 @@
     return [[QIMNavConfigManager sharedInstance] videoApiHost];
 }
 
+-(NSString *)qimNav_VideoUrl{
+    return [[QIMNavConfigManager sharedInstance] videourl];
+}
+
 //Versions
 - (long long)qimNav_NavVersion {
     return [[QIMNavConfigManager sharedInstance] navVersion];
@@ -314,8 +318,12 @@
     return [[QIMNavConfigManager sharedInstance] localNavConfigs];
 }
 
-- (BOOL)qimNav_updateNavigationConfigWithCheck:(BOOL)check {
-    return [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithCheck:check];
+- (void)qimNav_updateNavigationConfigWithCheck:(BOOL)check {
+    [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithCheck:check];
+}
+
+- (void)qimNav_updateNavigationConfigWithCheck:(BOOL)check withCallBack:(QIMKitGetNavConfigCallBack)callback {
+    [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithCheck:check withCallBack:callback];
 }
 
 - (void)qimNav_clearAdvertSource {
@@ -334,16 +342,16 @@
     [[QIMNavConfigManager sharedInstance] qimNav_updateAdvertConfigWithCheck:check];
 }
 
-- (BOOL)qimNav_updateNavigationConfigWithDomain:(NSString *)domain WithUserName:(NSString *)userName {
-    return [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithDomain:domain WithUserName:userName];
+- (void)qimNav_updateNavigationConfigWithDomain:(NSString *)domain WithUserName:(NSString *)userName withCallBack:(QIMKitGetNavConfigCallBack)callback {
+    [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithDomain:domain WithUserName:userName withCallBack:callback];
 }
 
-- (BOOL)qimNav_updateNavigationConfigWithNavUrl:(NSString *)navUrl WithUserName:(NSString *)userName {
-    return [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithNavUrl:navUrl WithUserName:userName];
+- (void)qimNav_updateNavigationConfigWithNavUrl:(NSString *)navUrl WithUserName:(NSString *)userName withCallBack:(QIMKitGetNavConfigCallBack)callback{
+    [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithNavUrl:navUrl WithUserName:userName withCallBack:callback];
 }
 
-- (BOOL)qimNav_updateNavigationConfigWithNavDict:(NSDictionary *)navDict WithUserName:(NSString *)userName Check:(BOOL)check WithForcedUpdate:(BOOL)forcedUpdate {
-    return [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithNavDict:navDict WithUserName:userName Check:check WithForcedUpdate:forcedUpdate];
+- (void)qimNav_updateNavigationConfigWithNavDict:(NSDictionary *)navDict WithUserName:(NSString *)userName Check:(BOOL)check WithForcedUpdate:(BOOL)forcedUpdate withCallBack:(QIMKitGetNavConfigCallBack)callback {
+    [[QIMNavConfigManager sharedInstance] qimNav_updateNavigationConfigWithNavDict:navDict WithUserName:userName Check:check WithForcedUpdate:forcedUpdate withCallBack:callback];
 }
 
 -(NSString *)qimNav_webAppUrl{

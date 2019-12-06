@@ -54,7 +54,6 @@ pod 'QIMCommon'
     * CoreGraphics
     * Security
 5. 链接以下第三方库
-    * ASIHTTPRequest
     * YYCache
     * YYModel
     * ProtocolBuffers

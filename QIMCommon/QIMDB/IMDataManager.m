@@ -115,29 +115,8 @@ static dispatch_once_t _onceDBToken;
         }
     }
     
-    if (oldDbVersion < currentDBVersion) {
-        //数据库升级
-        NSInteger upgradeResultVersion = [self upgradeDB:oldDbVersion];
-        if (upgradeResultVersion == currentDBVersion) {
-            QIMVerboseLog(@"DB文件升级成功");
-            NSString *currentDBVersionStr = [NSString stringWithFormat:@"%ld", currentDBVersion];
-            BOOL writeSucc = [currentDBVersionStr writeToFile:[self qim_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
-            if (writeSucc == YES) {
-                QIMVerboseLog(@"最新DB版本：%@写入配置文件成功", currentDBVersionStr);
-            } else {
-                QIMVerboseLog(@"最新DB版本：%@写入配置文件失败", currentDBVersionStr);
-            }
-        } else {
-            QIMVerboseLog(@"DB文件升级失败");
-            NSString *currentDBVersionStr = [NSString stringWithFormat:@"%ld", upgradeResultVersion];
-            BOOL writeSucc = [currentDBVersionStr writeToFile:[self qim_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
-            if (writeSucc == YES) {
-                QIMVerboseLog(@"最新DB版本：%@写入配置文件成功", currentDBVersionStr);
-            } else {
-                QIMVerboseLog(@"最新DB版本：%@写入配置文件失败", currentDBVersionStr);
-            }
-        }
-    }
+    QIMVerboseLog(@"升级DB文件");
+    [self upgradeDB:oldDbVersion];
 }
 
 - (NSString *)qim_dbVersionFilePath {
@@ -153,16 +132,28 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (NSInteger)qim_dbVersion {
-    return 2;
+    return 5;
 }
 
-- (NSInteger)upgradeDB:(NSInteger)oldVersion {
+- (void)updateDBVersionToFileWithVersion:(NSInteger)upgradeResultVersion {
+    NSString *currentDBVersionStr = [NSString stringWithFormat:@"%ld", upgradeResultVersion];
+    BOOL writeSucc = [currentDBVersionStr writeToFile:[self qim_dbVersionFilePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    if (writeSucc == YES) {
+        QIMVerboseLog(@"最新DB版本：%@写入配置文件成功", currentDBVersionStr);
+    } else {
+        QIMVerboseLog(@"最新DB版本：%@写入配置文件失败", currentDBVersionStr);
+    }
+}
+
+- (void)upgradeDB:(NSInteger)oldVersion {
     NSInteger currentNewVersion = [self qim_dbVersion];
     if (oldVersion >= currentNewVersion) {
-        return currentNewVersion;
+        QIMVerboseLog(@"升级DB成功，版本：%ld写入配置文件成功", currentNewVersion);
+        [self updateDBVersionToFileWithVersion:currentNewVersion];
+        return;
     }
-    __block NSInteger currentOldVersion = oldVersion;
-    __block BOOL result = YES;
+    NSInteger currentOldVersion = oldVersion;
+    BOOL result = YES;
     switch (oldVersion) {
         case 0: {
             result = [self upgradeFrom0To1];
@@ -174,21 +165,35 @@ static dispatch_once_t _onceDBToken;
             currentOldVersion = 1;
         }
             break;
+        case 2: {
+            result = [self upgradeFrom2To3];
+            currentOldVersion = 2;
+        }
+            break;
+        case 3: {
+            result = [self upgradeFrom3To4];
+            currentOldVersion = 3;
+        }
+            break;
+        case 4: {
+            result = [self upgradeFrom4To5];
+            currentOldVersion = 4;
+        }
+            break;
         default: {
+            currentOldVersion = 0;
             [[NSUserDefaults standardUserDefaults] setObject:@(oldVersion) forKey:@"dBUpdateVersion"];
             [[NSUserDefaults standardUserDefaults] synchronize];
         }
             break;
     }
     if (result == NO) {
-        return currentOldVersion;
-    }
-    oldVersion ++;
-    
-    // 递归判断是否需要升级
-    if (oldVersion >= currentNewVersion) {
-        return currentNewVersion;
+        [self updateDBVersionToFileWithVersion:currentOldVersion];
+        QIMVerboseLog(@"升级DB过程中失败，版本：%ld写入配置文件成功", currentOldVersion);
+        return;
     } else {
+        oldVersion ++;
+        // 递归判断是否需要升级
         [self upgradeDB:oldVersion];
     }
 }
@@ -215,6 +220,99 @@ static dispatch_once_t _onceDBToken;
         } else {
             result = YES;
         }
+    }];
+    return result;
+}
+
+- (BOOL)upgradeFrom2To3 {
+    QIMVerboseLog(@"upgradeFrom2To3");
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+
+        //新增勋章列表
+        result = [database executeUpdate: @"CREATE TABLE IF NOT EXISTS IM_Medal_List(\
+                  medalId               INTEGER PRIMARY KEY,\
+                  medalName             TEXT,\
+                  obtainCondition       TEXT,\
+                  smallIcon             TEXT,\
+                  bigLightIcon          TEXT,\
+                  bigGrayIcon           TEXT,\
+                  bigLockIcon           BLOB,\
+                  status                INTEGER\
+                  );"];
+
+        //用户勋章表
+        result = [database executeUpdate: @"CREATE TABLE IF NOT EXISTS IM_User_Status_Medal(\
+                  medalId               INTEGER,\
+                  userId                TEXT,\
+                  host                  TEXT,\
+                  medalStatus           INTEGER,\
+                  mappingVersion        INTEGER,\
+                  updateTime            INTEGER,\
+                  primary key  (medalId,userId));"];
+    }];
+    return result;
+}
+
+- (BOOL)upgradeFrom3To4 {
+    QIMVerboseLog(@"upgradeFrom3To4");
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+        if ([database columnExists:@"IM_Work_CommentV2" columnName:@"atList"] == NO) {
+            result = [database executeNonQuery:@"ALTER TABLE IM_Work_CommentV2 ADD atList TEXT;" withParameters:nil];
+        } else {
+            result = YES;
+        }
+    }];
+    return result;
+}
+
+- (BOOL)upgradeFrom4To5 {
+    QIMVerboseLog(@"upgradeFrom4To5");
+    //之前有一版本在TRIGGER中写入了大量的log，后面应该是更新逻辑失败了，导致log一直在写入，会导致db文件暴增。所以需要删掉TRIGGER，重新创建
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+        
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS sessionlist_unread_insert;" ];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS sessionlist_unread_update;" ];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS lastupdatetime_insert;" ];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS updatetime_update;" ];
+
+        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS sessionlist_unread_insert after insert on IM_Message\
+                  for each row begin\
+                  update IM_SessionList set UnreadCount = case when ((new.ReadState&2)<>2) then UnreadCount+1 else UnreadCount end where XmppId = new.XmppId and RealJid = new.RealJid and new.Direction=1 ;\
+                  update IM_SessionList set LastMessageId = new.MsgId, LastUpdateTime = new.LastUpdateTime where XmppId = new.XmppId and RealJid = new.RealJid and LastUpdateTime <= new.LastUpdateTime;\
+                  end" ];
+        
+        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS sessionlist_unread_update after update of ReadState on IM_Message\
+                  for each row begin\
+                  update IM_SessionList set UnreadCount = case when (new.ReadState& 2) =2 and old.ReadState & 2 <>2 then (case when\ UnreadCount >0 then (unreadcount -1) else 0 end ) when (new.ReadState & 2) <>2 and old.ReadState & 2 =2 then\ UnreadCount + 1 else UnreadCount end where XmppId = new.XmppId and RealJid = new.RealJid and new.Direction = 1;\
+                  end" ];
+        
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS singlelastupdatetime_insert;" ];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS grouplastupdatetime_insert;" ];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS systemlastupdatetime_insert;" ];
+        
+        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS lastupdatetime_insert after insert on IM_Message\
+                  for each row begin\
+                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and (new.ChatType=0 or new.ChatType=4 or new.ChatType=5 or new.ChatType=6)) then new.LastUpdateTime else valueInt end where key='singlelastupdatetime' and type=10 ;\
+                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
+                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
+                  end" ];
+        
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS singlelastupdatetime_update;"];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS grouplastupdatetime_update;"];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS systemlastupdatetime_update;"];
+        
+        //更新时间
+        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS updatetime_update after update of State on IM_Message\
+                  for each row begin\
+                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and (new.ChatType=0 or new.ChatType=4 or new.ChatType=5 or new.ChatType=6)) then new.LastUpdateTime else valueInt end where key='singlelastupdatetime' and type=10 ;\
+                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
+                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
+                  end" ];
+        
+        result = [database executeNonQuery:@"delete from logs" withParameters:nil];
     }];
     return result;
 }
@@ -442,27 +540,9 @@ static dispatch_once_t _onceDBToken;
                   update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
                   update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
                   end" ];
-        /*
-        //插入单人消息时更新单人消息最后一条消息时间戳
-        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS singlelastupdatetime_insert after insert on IM_Message\
-                  for each row begin\
-                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and (new.ChatType=0 or new.ChatType=4 or new.ChatType=5 or new.ChatType=6)) then new.LastUpdateTime else valueInt end where key='singlelastupdatetime' and type=10 ;\
-                  end" ];
-        //更新群消息最后一条消息时间戳
-        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS grouplastupdatetime_insert after insert on IM_Message\
-                  for each row begin\
-                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
-                  end" ];
-        //更新系统消息最后一条消息时间戳
-        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS systemlastupdatetime_insert after insert on IM_Message\
-                  for each row begin\
-                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
-                  end" ];
-        */
-        
-        result = [database executeUpdate:@"DROP TRIGGER if EXISTS singlelastupdatetime_update;" ];
-        result = [database executeUpdate:@"DROP TRIGGER if EXISTS grouplastupdatetime_update;" ];
-        result = [database executeUpdate:@"DROP TRIGGER if EXISTS systemlastupdatetime_update;" ];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS singlelastupdatetime_update;"];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS grouplastupdatetime_update;"];
+        result = [database executeUpdate:@"DROP TRIGGER if EXISTS systemlastupdatetime_update;"];
         //更新时间
         result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS updatetime_update after update of State on IM_Message\
                   for each row begin\
@@ -470,22 +550,6 @@ static dispatch_once_t _onceDBToken;
                   update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
                   update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
                   end" ];
-        /*
-        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS singlelastupdatetime_update after update of State on IM_Message\
-                  for each row begin\
-                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and (new.ChatType=0 or new.ChatType=4 or new.ChatType=5 or new.ChatType=6)) then new.LastUpdateTime else valueInt end where key='singlelastupdatetime' and type=10 ;\
-                  end" ];
-        
-        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS grouplastupdatetime_update after update of State on IM_Message\
-                  for each row begin\
-                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=1) then new.LastUpdateTime else valueInt end where key='grouplastupdatetime' and type=10 ;\
-                  end" ];
-        
-        result = [database executeUpdate:@"CREATE TRIGGER IF NOT EXISTS systemlastupdatetime_update after update of State on IM_Message\
-                  for each row begin\
-                  update IM_Cache_Data set valueInt = case when (valueInt<new.LastUpdateTime and old.State&2<>2 and new.State&2=2 and new.ChatType=2) then new.LastUpdateTime else valueInt end where key='systemlastupdatetime' and type=10 ;\
-                  end" ];
-        */
     }
     
     //创建公众号表
@@ -1012,8 +1076,8 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (void)qimDB_dbCheckpoint {
-    [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-        [database checkpoint:QIMDBCheckpointModeFull error:nil];
+    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+        [database checkpoint:QIMDBCheckpointModeTruncate error:nil];
     }];
 }
 
@@ -1035,6 +1099,31 @@ static dispatch_once_t _onceDBToken;
         platForm = 2;
     }
     return platForm;
+}
+
+- (NSArray *)qimDB_getAllTables {
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:3];
+    [[self dbInstance] inDatabase:^(QIMDataBase * _Nonnull database) {
+        NSString *sql = @"select tbl_name from sqlite_master where type='table';";
+        DataReader *reader = [database executeReader:sql withParameters:nil];
+        NSMutableArray *tempList = [NSMutableArray arrayWithCapacity:3];
+        while ([reader read]) {
+            NSString *tbl_name = [reader objectForColumnIndex:0];
+            [tempList addObject:tbl_name];
+        }
+        for (NSString *tab_name in tempList) {
+            NSString *sql = [NSString stringWithFormat:@"select count(*) from %@", tab_name];
+            DataReader *reader = [database executeReader:sql withParameters:nil];
+            if ([reader read]) {
+                NSInteger count = [[reader objectForColumnIndex:0] integerValue];
+                NSMutableDictionary *dic = [NSMutableDictionary dictionaryWithCapacity:0];
+                [dic setQIMSafeObject:@(count) forKey:tab_name];
+                [array addObject:dic];
+            }
+            [reader close];
+        }
+    }];
+    return array;
 }
 
 @end

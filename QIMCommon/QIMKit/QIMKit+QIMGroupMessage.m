@@ -22,11 +22,6 @@
     [[QIMManager sharedInstance] updateOfflineGroupMessages];
 }
 
-//拉取群翻页历史记录
-- (NSArray *)getMucMsgListWithGroupId:(NSString *)groupId WithDirection:(int)direction WithLimit:(int)limit WithVersion:(long long)version include:(BOOL)include {
-    return [[QIMManager sharedInstance] getMucMsgListWithGroupId:groupId WithDirection:direction WithLimit:limit WithVersion:version include:include];
-}
-
 //更新群阅读指针，三次重试
 - (void)updateMucReadMark {
     

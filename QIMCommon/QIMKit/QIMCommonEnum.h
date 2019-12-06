@@ -37,7 +37,8 @@ typedef enum {
 typedef enum {
     QTLoginTypeSms = 0,
     QTLoginTypePwd = 1,
-    QTLoginTypeNone = 2,
+    QTLoginTypeNewPwd = 2,
+    QTLoginTypeNone = 3,
 } QTLoginType;
 
 typedef enum {
@@ -173,6 +174,7 @@ typedef enum {
     QIMMessageType_CardShare = 1 << 8,
     QIMMessageTypeMeetingRemind = 257,
     QIMMessageTypeWorkMomentRemind = 258,
+    QIMMessageTypeUserMedalRemind = 259,
     QIMMessageType_RedPack = 1 << 9,
     QIMMessageType_AA = (1 << 9) + 1,
     QIMMessageType_RedPackInfo = 1 << 10,
@@ -203,8 +205,9 @@ typedef enum {
     QIMMessageTypeRobotTurnToUser = 65537,
     QIMMessageTypeWebRtcMsgTypeVideoMeeting = 5001,
     QIMMessageTypeQChatRobotQuestionList = 65538,
-    
-    
+    QIMMessageTypeWebRtcMsgTypeVideoGroup = 65534,
+    QIMMessageType_WebRTC_Vedio = 65505,
+    QIMMessageType_WebRTC_Audio = 65506,
     QIMMessageType_TransChatToCustomer = 1001,
     QIMMessageType_TransChatToCustomer_Feedback = 1003,
     QIMMessageType_TransChatToCustomerService = 1002,
@@ -348,6 +351,8 @@ typedef enum : NSUInteger {
     QIMCategoryNotifyMsgTypeTickUser = 100,             //踢
     QIMCategoryNotifyMsgTypeTickUserWorkWorldNotice = 12, //驼圈
     QIMCategoryNotifyMsgTypeHotLineSync = 13,
+    QIMCategoryNotifyMsgTypeMedalListUpdateNotice = 14, //勋章更新版本
+    QIMCategoryNotifyMsgTypeUserMedalUpdateNotice = 15, //用户勋章更新版本
 } QIMCategoryNotifyMsgType;
 
 typedef enum : NSUInteger {
@@ -394,7 +399,17 @@ typedef void(^QIMKitGetUserWorkInfoBlock)(NSDictionary *userWorkInfo);
 
 typedef void(^QIMKitSendTPRequesSuccessedBlock)(NSData *responseData);
 typedef void(^QIMKitSendTPRequesFailedBlock)(NSError *error);
-typedef void(^QIMKitUploadVideoRequesSuccessedBlock)(NSDictionary *videoDic);
+typedef void(^QIMKitSendTPRequesProgressBlock)(float progressValue);
+
+typedef void(^QIMKitUploadVideoRequestSuccessedBlock)(NSDictionary *videoDic);
+
+typedef void(^QIMKitUploadVideoNewRequestSuccessedBlock)(NSDictionary *videoDic, BOOL needTrans);    //新版本上传视频callback
+
+typedef void(^QIMKitUploadImageNewRequestProgessSuccessedBlock)(float progressValue);   //新版本上传图片进度callback
+
+typedef void(^QIMKitUploadImageNewRequestSuccessedBlock)(NSString *imageUrl);    //新版本上传图片callback
+typedef void(^QIMKitUploadFileNewRequestSuccessedBlock)(NSString *fileUrl);      //新版本上传文件callback
+typedef void(^QIMKitUploadMyPhotoNewRequestSuccessedBlock)(NSString *imageUrl);      //新版本上传头像callback
 
 
 typedef void(^QIMKitGetTripAreaAvailableRoomBlock)(NSArray *availableRooms);
@@ -403,6 +418,8 @@ typedef void(^QIMKitGetTripAllCitysBlock)(NSArray *allCitys);   //获取所有�
 typedef void(^QIMKitGetTripMemberCheckBlock)(BOOL isConform);   //isConform 冲突
 typedef void(^QIMKitCreateTripBlock)(BOOL success, NSString *errMsg);
 typedef void(^QIMCloseSessionBlock)(NSString *closeMsg);
+
+typedef void(^QIMKitUpdateMedalStatusCallBack)(BOOL success, NSString *errmsg);
 
 typedef void(^QIMKitLikeMomentSuccessedBlock)(NSDictionary *responseDic);
 typedef void(^QIMKitWorkCommentBlock)(NSArray *comments);
@@ -424,6 +441,77 @@ typedef void(^QIMKitUpdateSignatureBlock)(BOOL successed);
 
 typedef void(^QIMKitSearchSuccessBlock)(BOOL successed, NSString *responseJson);
 typedef void(^QIMKitSearchFaildBlock)(BOOL successed, NSString *errmsg);
+
+//Login
+typedef void(^QIMKitGetUserTokenSuccessBlock)(NSDictionary *result);
+typedef void(^QIMKitGetUserNewTokenSuccessBlock)(NSDictionary *result);
+typedef void(^QIMKitGetVerifyCodeSuccessBlock)(NSDictionary *result);
+
+
+typedef void(^QIMKitGetQChatTokenSuccessBlock)(NSDictionary *result);
+typedef void (^QIMKitSetMsgNotifySettingSuccessBlock)(BOOL successed);
+
+typedef void(^QIMKitRegisterPushTokenSuccessBlock)(BOOL successed);
+
+typedef void(^QIMKitGetQChatBetaLoginTokenDic)(NSDictionary *loginDic);
+
+typedef void(^QIMKitUpdateRemoteClientConfig)(BOOL successed);
+
+typedef void(^QIMKitGetSeatSeStatusBlock)(NSArray *list);
+typedef void(^QIMKitUpdateSeatSeStatusBlock)(BOOL res);
+
+typedef void(^QIMKitGetLeaveMsgNotReaderCountBlock)(NSInteger count);
+
+typedef void(^QIMKitCheckNetWorkBlock)(BOOL successed);
+
+typedef void(^QIMKitSearchQunarUserBlock)(NSArray *list);
+
+typedef void(^QIMKitSearchUserListCallBack)(NSArray *list);
+
+//公众号
+typedef void(^QIMKitSearchRobotByKeyStrCallBack)(NSArray *list);
+typedef void(^QIMKitCancelFocusPublicNumberCallBack)(BOOL res);
+typedef void(^QIMKitFocusPublicNumberCallBack)(BOOL res);
+typedef void(^QIMKitUpdatePublicNumberCardCallBack)(NSArray *list);
+
+typedef void(^QIMKitDownloadQIMRNExternalAppBundleSuccessCallBack)(BOOL res);
+typedef void(^QIMKitOPSRNBundlePatchDownloadHelperHandle)(BOOL res);
+
+//系统消息
+typedef void(^QIMKitGetSystemMsgListCallBack)(NSArray *list);
+
+//获取导航
+typedef void(^QIMKitGetNavConfigCallBack)(BOOL success);
+
+//拉群历史
+typedef void(^QIMKitGetMucMsgListCallBack)(NSArray *list);
+//下拉Consult消息
+typedef void(^QIMKitGetConsultServerMsgListCallBack)(NSArray *list);
+//下拉单人消息
+typedef void(^QIMKitGetUserChatMsgListCallBack)(NSArray *list);
+//拉取离线消息
+typedef void(^QIMKitGetUserChatHistoryCallBack)(NSArray *list);
+
+//check图片key
+typedef void(^QIMKitCheckImageKeyForImageCallBack)(NSString *result);
+
+//check新Video
+typedef void(^QIMKitCheckNewVideoCallBack)(NSDictionary *result);
+
+//check文件key
+typedef void(^QIMKitCheckFileKeyForFileCallBack)(NSString *result);
+
+//上传文件
+typedef void(^QIMKitUploadFileCallBack)(NSString *result);
+
+//上传图片
+typedef void(^QIMKitUploadImageCallBack)(NSString *result);
+
+typedef void(^QIMKitCheckVideoCallBack)(NSDictionary *result);
+
+typedef void(^QIMKitUploadMyPhotoCallBack)(NSString *result);
+
+typedef void(^QIMKitUpdateLoadVoiceFileCallBack)(NSString *httpUrl);
 
 typedef void(^QIMKitPayCheckAccountBlock)(BOOL successed);
 typedef void(^QIMKitPayCreateRedEnvelopBlock)(BOOL successed,NSString *payParams);

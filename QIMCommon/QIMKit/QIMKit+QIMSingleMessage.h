@@ -22,6 +22,4 @@
 
 - (BOOL)updateOfflineMessagesV2;
 
-- (NSArray *)getUserChatlogWithFrom:(NSString *)from to:(NSString *)to version:(long long)version count:(int)count direction:(int)direction include:(BOOL)include;
-
 @end

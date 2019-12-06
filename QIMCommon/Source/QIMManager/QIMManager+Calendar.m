@@ -51,7 +51,7 @@
                 NSString *updateTime = [tripsData objectForKey:@"updateTime"];
                 NSString *jid = [[QIMManager sharedInstance] getLastJid];
                 NSArray *configArray = @[@{@"subkey":jid?jid:@"", @"configinfo":updateTime}];
-                [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertConfigArrayWithConfigKey:[self transformClientConfigKeyWithType:QIMClientConfigTypeKLocalTripUpdateTime] WithConfigVersion:0 ConfigArray:configArray];
+                [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertConfigArrayWithConfigKey:[strongSelf transformClientConfigKeyWithType:QIMClientConfigTypeKLocalTripUpdateTime] WithConfigVersion:0 ConfigArray:configArray];
             }
         }
     } failure:^(NSError *error) {
@@ -91,7 +91,7 @@
                 NSString *updateTime = [tripsData objectForKey:@"updateTime"];
                 NSString *jid = [[QIMManager sharedInstance] getLastJid];
                 NSArray *configArray = @[@{@"subkey":jid?jid:@"", @"configinfo":updateTime}];
-                [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertConfigArrayWithConfigKey:[self transformClientConfigKeyWithType:QIMClientConfigTypeKLocalTripUpdateTime] WithConfigVersion:0 ConfigArray:configArray];
+                [[IMDataManager qimDB_SharedInstance] qimDB_bulkInsertConfigArrayWithConfigKey:[strongSelf transformClientConfigKeyWithType:QIMClientConfigTypeKLocalTripUpdateTime] WithConfigVersion:0 ConfigArray:configArray];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (callback) {
                         callback(YES, nil);
@@ -135,13 +135,8 @@
     [request setHTTPMethod:QIMHTTPMethodPOST];
     [request setHTTPBody:[[QIMJSONSerializer sharedInstance] serializeObject:dateDic error:nil]];
     request.HTTPRequestHeaders = cookieProperties;
-    __weak __typeof(self) weakSelf = self;
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
             if ([[result objectForKey:@"ret"] boolValue]) {
@@ -173,13 +168,8 @@
     request.HTTPRequestHeaders = cookieProperties;
     
     QIMVerboseLog(@"检查用户该时间段是否有冲突行程Body : %@", [[QIMJSONSerializer sharedInstance] serializeObject:params]);
-    __weak __typeof(self) weakSelf = self;
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
             if ([[result objectForKey:@"ret"] boolValue]) {
@@ -210,13 +200,8 @@
     [request setHTTPMethod:QIMHTTPMethodGET];
     request.HTTPRequestHeaders = cookieProperties;
     
-    __weak __typeof(self) weakSelf = self;
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
             if ([[result objectForKey:@"ret"] boolValue]) {
@@ -251,13 +236,8 @@
 
     QIMVerboseLog(@"根据城市Id获取可用画区域参数 : %@", [[QIMJSONSerializer sharedInstance] serializeObject:params]);
 
-    __weak __typeof(self) weakSelf = self;
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
             if ([[result objectForKey:@"ret"] boolValue]) {
@@ -295,13 +275,8 @@
     QIMHTTPRequest *request = [[QIMHTTPRequest alloc] initWithURL:[NSURL URLWithString:destUrl]];
     request.useCookiePersistence = NO;
     request.HTTPRequestHeaders = cookieProperties;
-    __weak __typeof(self) weakSelf = self;
     [QIMHTTPClient sendRequest:request complete:^(QIMHTTPResponse *response) {
         if (response.code == 200) {
-            __typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
             NSData *responseData = [response data];
             NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
             if ([[result objectForKey:@"ret"] boolValue]) {
