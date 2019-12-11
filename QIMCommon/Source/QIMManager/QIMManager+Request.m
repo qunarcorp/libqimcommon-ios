@@ -191,7 +191,7 @@
         if (response.code == 200) {
             NSData *responseData = [response data];
             if (sCallback) {
-                sCallback(nil);
+                sCallback(responseData);
             }
         } else {
             if (sCallback) {
