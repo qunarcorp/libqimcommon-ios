@@ -1427,12 +1427,11 @@ static QIMManager *__IMManager = nil;
     }
 }
 
-- (void)getQChatTokenWithBusinessLineName:(NSString *)businessLineName withCallBack:(QIMKitGetQChatTokenSuccessBlock)callback {
-    
+- (void)getQChatTokenWithBusinessLineName:(NSString *)businessLineName qcookie:(NSString *)_q vcookie:(NSString *)_v tcookie:(NSString *)_t withCallBack :(QIMKitGetQChatTokenSuccessBlock)callback{
     NSString *desturl = [[QIMNavConfigManager sharedInstance] getQChatGetTKUrl];
     NSDictionary *params = @{@"macCode": [[QIMAppInfo sharedInstance] macAddress], @"plat": (businessLineName.length > 0) ? businessLineName : @"app"};
     NSData *data = [[QIMJSONSerializer sharedInstance] serializeObject:params error:nil];
-    [self sendTPPOSTRequestWithUrl:desturl withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
+    [self sendTPPOSTRequestWithUrl:desturl qcookie:_q vcookie:_v tcookie:_t withRequestBodyData:data withSuccessCallBack:^(NSData *responseData) {
         NSDictionary *resultDic = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
         BOOL ret = [[resultDic objectForKey:@"ret"] boolValue];
         if (ret) {

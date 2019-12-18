@@ -317,7 +317,7 @@
  
  @return 返回token
  */
-- (void)getQChatTokenWithBusinessLineName:(NSString *)businessLineName withCallBack:(QIMKitGetQChatTokenSuccessBlock)callback;
+- (void)getQChatTokenWithBusinessLineName:(NSString *)businessLineName qcookie:(NSString *)_q vcookie:(NSString *)_v tcookie:(NSString *)_t withCallBack :(QIMKitGetQChatTokenSuccessBlock)callback;
 
 - (NSDictionary *)getQVTForQChat;
 
