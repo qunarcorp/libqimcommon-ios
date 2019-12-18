@@ -330,8 +330,8 @@ static QIMKit *__global_QIMKit = nil;
     [[QIMManager sharedInstance] setNotSendText:text inputItems:inputItems ForJid:jid];
 }
 
-- (void)getQChatTokenWithBusinessLineName:(NSString *)businessLineName withCallBack:(QIMKitGetQChatTokenSuccessBlock)callback {
-    [[QIMManager sharedInstance] getQChatTokenWithBusinessLineName:businessLineName withCallBack:callback];
+- (void)getQChatTokenWithBusinessLineName:(NSString *)businessLineName qcookie:(NSString *)_q vcookie:(NSString *)_v tcookie:(NSString *)_t withCallBack:(QIMKitGetQChatTokenSuccessBlock)callback{
+    [[QIMManager sharedInstance] getQChatTokenWithBusinessLineName:businessLineName qcookie:_q vcookie:_v tcookie:_t withCallBack:callback];
 }
 
 - (NSDictionary *)getQVTForQChat {

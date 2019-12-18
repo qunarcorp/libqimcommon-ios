@@ -412,7 +412,7 @@
 
 - (void)setNotSendText:(NSString *)text inputItems:(NSArray *)inputItems ForJid:(NSString *)jid;
 
-- (void)getQChatTokenWithBusinessLineName:(NSString *)businessLineName withCallBack:(QIMKitGetQChatTokenSuccessBlock)callback;
+- (void)getQChatTokenWithBusinessLineName:(NSString *)businessLineName qcookie:(NSString* )_q vcookie:(NSString* )_v tcookie:(NSString*)_t withCallBack:(QIMKitGetQChatTokenSuccessBlock)callback;
 
 - (NSDictionary *)getQVTForQChat;
 
