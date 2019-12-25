@@ -24,7 +24,7 @@
     QIMVerboseLog(@"获取该用户会议列表q_ckey : %@", requestHeaders);
     
     NSMutableDictionary *bodyProperties = [NSMutableDictionary dictionary];
-    long long version = [[[IMDataManager qimDB_SharedInstance] qimDB_getConfigInfoWithConfigKey:[self transformClientConfigKeyWithType:QIMClientConfigTypeKLocalTripUpdateTime] WithSubKey:[[QIMManager sharedInstance] getLastJid] WithDeleteFlag:NO] longLongValue];
+    long long version = 0;//[[[IMDataManager qimDB_SharedInstance] qimDB_getConfigInfoWithConfigKey:[self transformClientConfigKeyWithType:QIMClientConfigTypeKLocalTripUpdateTime] WithSubKey:[[QIMManager sharedInstance] getLastJid] WithDeleteFlag:NO] longLongValue];
     
     [bodyProperties setQIMSafeObject:[NSString stringWithFormat:@"%lld", version] forKey:@"updateTime"];
     [bodyProperties setQIMSafeObject:[[QIMManager sharedInstance] getLastJid] forKey:@"userName"];

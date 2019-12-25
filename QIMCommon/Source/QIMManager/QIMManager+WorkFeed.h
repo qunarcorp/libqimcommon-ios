@@ -105,6 +105,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)updateLocalWorkNoticeMsgReadStateWithTime:(long long)time;
 
+
+
+-(void)getMomentTagListWithCompleteCallBack:(QIMKitGetMomentHistorySuccessedBlock)block;
+
+- (void)getMomentTopicTagHeaderWithTagID:(NSNumber *)tagID CompleteCallBack:(void(^)(NSDictionary * dic))block;
+
+-(void)getWorkMoreMomentWithLastMomentTime:(long long)lastMomentTime withTagID:(NSNumber *)tagId WithLimit:(int)limit WithOffset:(int)offset withFirstLocalMoment:(BOOL)firstLocal WithComplete:(void (^)(NSArray *))complete;
+
+- (void)getMomentHistoryWithLastUpdateTime:(long long)updateTime withTagId:(NSNumber *)tagId withPostType:(NSInteger)postType withCallBack:(QIMKitGetMomentHistorySuccessedBlock)callback;
+
+- (void)getMomentTopicTagHeaderWithCurPage:(NSNumber *)curPage pageSize:(NSNumber *)pageSize beginTime:(NSInteger)beginTime endTime:(NSInteger)endTime withCallBack:(QIMKitGetMomentHistorySuccessedBlock)callback;
 @end
 
 NS_ASSUME_NONNULL_END

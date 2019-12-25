@@ -161,4 +161,26 @@
     [[QIMManager sharedInstance] updateLocalWorkNoticeMsgReadStateWithTime:time];
 }
 
+
+
+-(void)getMomentTagListWithCompleteCallBack:(QIMKitGetMomentHistorySuccessedBlock)block{
+    [[QIMManager sharedInstance] getMomentTagListWithCompleteCallBack:block];
+}
+
+- (void)getMomentTopicTagHeaderWithTagID:(NSNumber *)tagID CompleteCallBack:(void(^)(NSDictionary * dic))block{
+    [[QIMManager sharedInstance] getMomentTopicTagHeaderWithTagID:tagID CompleteCallBack:block];
+}
+
+-(void)getWorkMoreMomentWithLastMomentTime:(long long)lastMomentTime withTagID:(NSNumber *)tagId WithLimit:(int)limit WithOffset:(int)offset withFirstLocalMoment:(BOOL)firstLocal WithComplete:(void (^)(NSArray *))complete{
+    [[QIMManager sharedInstance] getWorkMoreMomentWithLastMomentTime:lastMomentTime withTagID:tagId WithLimit:limit WithOffset:offset withFirstLocalMoment:firstLocal WithComplete:complete];
+}
+
+- (void)getMomentHistoryWithLastUpdateTime:(long long)updateTime withTagId:(NSNumber *)tagId withPostType:(NSInteger)postType withCallBack:(QIMKitGetMomentHistorySuccessedBlock)callback{
+    [[QIMManager sharedInstance] getMomentHistoryWithLastUpdateTime:updateTime withTagId:tagId withPostType:postType withCallBack:callback];
+}
+
+
+- (void)getMomentTopicTagHeaderWithCurPage:(NSNumber *)curPage pageSize:(NSNumber *)pageSize beginTime:(NSInteger)beginTime endTime:(NSInteger)endTime withCallBack:(QIMKitGetMomentHistorySuccessedBlock)callback{
+    [[QIMManager sharedInstance] getMomentTopicTagHeaderWithCurPage:curPage pageSize:pageSize beginTime:beginTime endTime:endTime withCallBack:callback];
+}
 @end

@@ -132,7 +132,7 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (NSInteger)qim_dbVersion {
-    return 5;
+    return 6;
 }
 
 - (void)updateDBVersionToFileWithVersion:(NSInteger)upgradeResultVersion {
@@ -179,6 +179,10 @@ static dispatch_once_t _onceDBToken;
             result = [self upgradeFrom4To5];
             currentOldVersion = 4;
         }
+        case 5:{
+            result = [self upgradeFrom5To6];
+            currentOldVersion = 5;
+        }
             break;
         default: {
             currentOldVersion = 0;
@@ -217,6 +221,19 @@ static dispatch_once_t _onceDBToken;
     [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
         if ([database columnExists:@"IM_Users" columnName:@"visibleFlag"] == NO) {
             result = [database executeNonQuery:@"ALTER TABLE IM_Users ADD visibleFlag INTEGER DEFAULT 1;" withParameters:nil];
+        } else {
+            result = YES;
+        }
+    }];
+    return result;
+}
+
+- (BOOL)upgradeFrom5To6{
+    QIMVerboseLog(@"upgradeFrom5To6");
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+        if ([database columnExists:@"IM_Work_World" columnName:@"tagList"] == NO) {
+            result = [database executeNonQuery:@"ALTER TABLE IM_Work_World ADD tagList TEXT;" withParameters:nil];
         } else {
             result = YES;
         }
@@ -952,7 +969,8 @@ static dispatch_once_t _onceDBToken;
               likeNum               INTEGER,\
               commentsNum           INTEGER,\
               review_status         INTEGER,\
-              attachCommentList     TEXT);" ];
+              attachCommentList     TEXT,\
+              tagList               TEXT);" ];
     if (result) {
         /* mark
         if ([database checkExistsOnTable:@"IM_Work_World" withColumn:@"postType"] == NO) {
