@@ -184,6 +184,11 @@ static dispatch_once_t _onceDBToken;
             currentOldVersion = 5;
         }
             break;
+        case 5: {
+            result = [self upgradeFrom5To6];
+            currentOldVersion = 5;
+        }
+            break;
         default: {
             currentOldVersion = 0;
             [[NSUserDefaults standardUserDefaults] setObject:@(oldVersion) forKey:@"dBUpdateVersion"];
@@ -330,6 +335,19 @@ static dispatch_once_t _onceDBToken;
                   end" ];
         
         result = [database executeNonQuery:@"delete from logs" withParameters:nil];
+    }];
+    return result;
+}
+
+- (BOOL)upgradeFrom5To6 {
+    QIMVerboseLog(@"upgradeFrom5To6");
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+        if ([database columnExists:@"IM_TRIP_INFO" columnName:@"tripCode"] == NO) {
+            result = [database executeNonQuery:@"ALTER TABLE IM_TRIP_INFO ADD tripCode TEXT;" withParameters:nil];
+        } else {
+            result = YES;
+        }
     }];
     return result;
 }
@@ -927,7 +945,8 @@ static dispatch_once_t _onceDBToken;
               tripRoomNumber TEXT,\
               memberList TEXT,\
               tripRemark TEXT,\
-              canceled Text);" ];
+              canceled TEXT,\
+              tripCode TEXT);" ];
     
     //创建log表
     result = [database executeUpdate:@"CREATE TABLE IF NOT EXISTS logs (\
