@@ -132,7 +132,7 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (NSInteger)qim_dbVersion {
-    return 6;
+    return 7;
 }
 
 - (void)updateDBVersionToFileWithVersion:(NSInteger)upgradeResultVersion {
@@ -184,9 +184,9 @@ static dispatch_once_t _onceDBToken;
             currentOldVersion = 5;
         }
             break;
-        case 5: {
-            result = [self upgradeFrom5To6];
-            currentOldVersion = 5;
+        case 6: {
+            result = [self upgradeFrom6To7];
+            currentOldVersion = 6;
         }
             break;
         default: {
@@ -233,18 +233,6 @@ static dispatch_once_t _onceDBToken;
     return result;
 }
 
-- (BOOL)upgradeFrom5To6{
-    QIMVerboseLog(@"upgradeFrom5To6");
-    __block BOOL result = YES;
-    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
-        if ([database columnExists:@"IM_Work_World" columnName:@"tagList"] == NO) {
-            result = [database executeNonQuery:@"ALTER TABLE IM_Work_World ADD tagList TEXT;" withParameters:nil];
-        } else {
-            result = YES;
-        }
-    }];
-    return result;
-}
 
 - (BOOL)upgradeFrom2To3 {
     QIMVerboseLog(@"upgradeFrom2To3");
@@ -351,6 +339,20 @@ static dispatch_once_t _onceDBToken;
     }];
     return result;
 }
+
+- (BOOL)upgradeFrom6To7{
+    QIMVerboseLog(@"upgradeFrom5To6");
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+        if ([database columnExists:@"IM_Work_World" columnName:@"tagList"] == NO) {
+            result = [database executeNonQuery:@"ALTER TABLE IM_Work_World ADD tagList TEXT;" withParameters:nil];
+        } else {
+            result = YES;
+        }
+    }];
+    return result;
+}
+
 
 - (void)initSQLiteLog {
     QIMDBLogger *sqliteLogger = [[QIMDBLogger alloc] initWithLogDirectory:[self sqliteLogFilesDirectory] WithDBOperator:[self dbInstance]];
