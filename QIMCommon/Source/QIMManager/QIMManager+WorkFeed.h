@@ -76,6 +76,11 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - 驼圈提醒
 - (BOOL)getLocalWorkMomentNotifyConfig;
 
+- (BOOL)getHotPostMomentNotifyConfig;
+
+
+- (BOOL)getTopicFlagMomentNotifyConfig;
+
 - (void)getRemoteWorkMomentSwitch;
 
 - (void)updateRemoteWorkMomentNotifyConfig:(BOOL)flag withCallBack:(QIMKitUpdateMomentNotifyConfigSuccessedBlock)callback;

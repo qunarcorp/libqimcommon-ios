@@ -117,6 +117,14 @@
     return [[QIMManager sharedInstance] getLocalWorkMomentNotifyConfig];
 }
 
+- (BOOL)getHotPostMomentNotifyConfig{
+    return [[QIMManager sharedInstance] getHotPostMomentNotifyConfig];
+}
+
+- (BOOL)getTopicFlagMomentNotifyConfig{
+    return [[QIMManager sharedInstance]getTopicFlagMomentNotifyConfig];
+}
+
 - (void)getRemoteWorkMomentSwitch {
     [[QIMManager sharedInstance] getRemoteWorkMomentSwitch];
 }

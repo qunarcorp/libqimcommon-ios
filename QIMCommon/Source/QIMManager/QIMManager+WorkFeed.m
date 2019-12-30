@@ -1089,6 +1089,26 @@
     }
 }
 
+
+- (BOOL)getHotPostMomentNotifyConfig {
+    BOOL exist = [[IMDataManager qimDB_SharedInstance] qimDB_checkExistUserCacheDataWithKey:@"hotPostFlagSwitchConfig" withType:14];
+    if (exist) {
+        return [[IMDataManager qimDB_SharedInstance] qimDB_getUserCacheDataWithKey:@"hotPostFlagSwitchConfig" withType:14];
+    } else {
+        return YES;
+    }
+}
+
+
+- (BOOL)getTopicFlagMomentNotifyConfig {
+    BOOL exist = [[IMDataManager qimDB_SharedInstance] qimDB_checkExistUserCacheDataWithKey:@"topicFlagSwitchConfig" withType:13];
+    if (exist) {
+        return [[IMDataManager qimDB_SharedInstance] qimDB_getUserCacheDataWithKey:@"topicFlagSwitchConfig" withType:13];
+    } else {
+        return YES;
+    }
+}
+
 - (void)getRemoteWorkMomentSwitch {
     NSString *destUrl = [NSString stringWithFormat:@"%@/cricle_camel/notify_config/getNotifyConfig", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     NSMutableDictionary *bodyDic = [[NSMutableDictionary alloc] init];
@@ -1105,6 +1125,12 @@
                 BOOL flag = [[data objectForKey:@"flag"] boolValue];
                 NSString *notifyKey = [data objectForKey:@"notifyKey"];
                 [[IMDataManager qimDB_SharedInstance] qimDB_UpdateUserCacheDataWithKey:kWorkMomentNotifySwitchConfig withType:12 withValue:@"驼圈开关" withValueInt:flag];
+                
+                BOOL topicFlag = [[data objectForKey:@"topicFlag"] boolValue];
+                [[IMDataManager qimDB_SharedInstance] qimDB_UpdateUserCacheDataWithKey:@"topicFlagSwitchConfig" withType:13 withValue:@"话题池开关" withValueInt:topicFlag];
+                
+                BOOL hotPostFlag = [data objectForKey:@"hotPostFlag"];
+                [[IMDataManager qimDB_SharedInstance] qimDB_UpdateUserCacheDataWithKey:@"hotPostFlagSwitchConfig" withType:14 withValue:@"热帖开关" withValueInt:hotPostFlag];
             }
         }
     } withFailedCallBack:^(NSError *error) {
