@@ -49,8 +49,8 @@ Pod::Spec.new do |s|
   if $debug
     puts 'debug QIMCommon依赖第三方库'
     s.dependency 'QIMOpenSSL'
-    s.default_subspecs = 'Base'
-    # s.default_subspecs = 'Base', 'QIMPrivatePBCommon'
+    # s.default_subspecs = 'Base'
+    s.default_subspecs = 'Base', 'QIMPrivatePBCommon'
 
   else
   
