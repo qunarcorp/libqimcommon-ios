@@ -249,6 +249,7 @@
             NSArray * data = result[@"data"];
             if (data && data.count >0) {
                 block(data);
+                [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"workMomentTag"];
                 [[QIMUserCacheManager sharedInstance] setUserObject:data forKey:@"workMomentTag"];
             }
             else{
