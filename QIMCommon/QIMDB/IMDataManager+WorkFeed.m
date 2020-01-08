@@ -243,7 +243,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     __block NSMutableArray *result = nil;
     CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
     [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-        NSString *sql = [NSString stringWithFormat:@"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList, tagList from IM_Work_World where tagList LIKE '%@:%zd%@' and isAnonymous = 0 order by createTime desc limit %d offset %d;", @"%",tagId.integerValue,@"%", limit, offset];
+        NSString *sql = [NSString stringWithFormat:@"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList, tagList from IM_Work_World where tagList LIKE '%@:%zd,%@' and isAnonymous = 0 order by createTime desc limit %d offset %d;", @"%",tagId.integerValue,@"%", limit, offset];
         NSLog(@"sql : %@", sql);
         DataReader *reader = [database executeReader:sql withParameters:nil];
         NSMutableArray *tempList = nil;
