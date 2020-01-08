@@ -132,7 +132,7 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (NSInteger)qim_dbVersion {
-    return 5;
+    return 7;
 }
 
 - (void)updateDBVersionToFileWithVersion:(NSInteger)upgradeResultVersion {
@@ -179,6 +179,15 @@ static dispatch_once_t _onceDBToken;
             result = [self upgradeFrom4To5];
             currentOldVersion = 4;
         }
+        case 5:{
+            result = [self upgradeFrom5To6];
+            currentOldVersion = 5;
+        }
+            break;
+        case 6: {
+            result = [self upgradeFrom6To7];
+            currentOldVersion = 6;
+        }
             break;
         default: {
             currentOldVersion = 0;
@@ -223,6 +232,7 @@ static dispatch_once_t _onceDBToken;
     }];
     return result;
 }
+
 
 - (BOOL)upgradeFrom2To3 {
     QIMVerboseLog(@"upgradeFrom2To3");
@@ -316,6 +326,33 @@ static dispatch_once_t _onceDBToken;
     }];
     return result;
 }
+
+- (BOOL)upgradeFrom5To6 {
+    QIMVerboseLog(@"upgradeFrom5To6");
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+        if ([database columnExists:@"IM_TRIP_INFO" columnName:@"tripCode"] == NO) {
+            result = [database executeNonQuery:@"ALTER TABLE IM_TRIP_INFO ADD tripCode TEXT;" withParameters:nil];
+        } else {
+            result = YES;
+        }
+    }];
+    return result;
+}
+
+- (BOOL)upgradeFrom6To7{
+    QIMVerboseLog(@"upgradeFrom5To6");
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+        if ([database columnExists:@"IM_Work_World" columnName:@"tagList"] == NO) {
+            result = [database executeNonQuery:@"ALTER TABLE IM_Work_World ADD tagList TEXT;" withParameters:nil];
+        } else {
+            result = YES;
+        }
+    }];
+    return result;
+}
+
 
 - (void)initSQLiteLog {
     QIMDBLogger *sqliteLogger = [[QIMDBLogger alloc] initWithLogDirectory:[self sqliteLogFilesDirectory] WithDBOperator:[self dbInstance]];
@@ -910,7 +947,8 @@ static dispatch_once_t _onceDBToken;
               tripRoomNumber TEXT,\
               memberList TEXT,\
               tripRemark TEXT,\
-              canceled Text);" ];
+              canceled TEXT,\
+              tripCode TEXT);" ];
     
     //创建log表
     result = [database executeUpdate:@"CREATE TABLE IF NOT EXISTS logs (\
@@ -952,7 +990,8 @@ static dispatch_once_t _onceDBToken;
               likeNum               INTEGER,\
               commentsNum           INTEGER,\
               review_status         INTEGER,\
-              attachCommentList     TEXT);" ];
+              attachCommentList     TEXT,\
+              tagList               TEXT);" ];
     if (result) {
         /* mark
         if ([database checkExistsOnTable:@"IM_Work_World" withColumn:@"postType"] == NO) {

@@ -536,7 +536,11 @@ static QIMManager *__IMManager = nil;
     QIMVerboseLog(@"同步同步消息推送设置2");
     
     [self checkClientConfig];
-
+    
+    
+    [self getMomentTagListWithCompleteCallBack:^(NSArray *moments) {
+        
+    }];
     QIMVerboseLog(@"开始获取加密会话密码箱2");
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:@"kNotifyNotificationGetRemoteEncrypt" object:nil];

@@ -15,7 +15,7 @@
 - (NSArray *)qimDB_SelectTripByYearMonth:(NSString *)date {
     __block NSMutableArray *areaList = [[NSMutableArray alloc] init];
     [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-        NSString *sql = [NSString stringWithFormat:@"select * from IM_TRIP_INFO where (tripDate Between '%@' and '%@') and canceled = '%@';", [date stringByAppendingString:@"-01"], [date stringByAppendingString:@"-31"], @"0"];
+        NSString *sql = [NSString stringWithFormat:@"select *,(select Name from IM_USERS where Xmppid=a.tripInviter) from IM_TRIP_INFO as a where (tripDate Between '%@' and '%@') and canceled = '%@';", [date stringByAppendingString:@"-01"], [date stringByAppendingString:@"-31"], @"0"];
         DataReader *reader = [database executeReader:sql withParameters:nil];
         while ([reader read]) {
             if (areaList == nil) {
@@ -36,7 +36,6 @@
             NSString *appointment = [reader objectForColumnIndex:9];
             NSString *tripLocale = [reader objectForColumnIndex:10];
             NSString *tripLocaleNumber = [reader objectForColumnIndex:11];
-            
             NSString *tripRoom = [reader objectForColumnIndex:12];
             
             if (!appointment.length) {
@@ -48,6 +47,9 @@
             
             NSString *tripRemark = [reader objectForColumnIndex:15];
             NSString *canceled = [reader objectForColumnIndex:16];
+            NSString *tripCode = [reader objectForColumnIndex:17];
+            
+            NSString *tripInviterName = [reader objectForColumnIndex:18];
             
             NSMutableDictionary *param = [[NSMutableDictionary alloc] init];
             [param setQIMSafeObject:tripId forKey:@"tripId"];
@@ -68,6 +70,8 @@
             [param setQIMSafeObject:memberListJSON forKey:@"memberList"];
             [param setQIMSafeObject:tripRemark forKey:@"tripRemark"];
             [param setQIMSafeObject:canceled forKey:@"canceled"];
+            [param setQIMSafeObject:tripCode forKey:@"tripCode"];
+            [param setQIMSafeObject:tripInviterName forKey:@"tripInviterName"];
 
             [areaList addObject:param];
         }
@@ -80,10 +84,12 @@
     if (trips.count <= 0) {
         return;
     }
+    __block NSArray * array = [trips mutableCopy];
     [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-        NSString *sql = [NSString stringWithFormat:@"INSERT OR REPLACE INTO IM_TRIP_INFO (tripId, tripName, tripDate, tripType, tripIntr, tripInviter, beginTime, endTime, scheduleTime, appointment, tripLocale, tripLocaleNumber, tripRoom, tripRoomNumber, memberList, tripRemark, canceled) VALUES (:tripId, :tripName, :tripDate, :tripType, :tripIntr, :tripInviter, :beginTime, :endTime, :scheduleTime, :appointment, :tripLocale, :tripLocaleNumber, :tripRoom, :tripRoomNumber, :memberList, :tripRemark, :canceled);"];
+        NSString *sql = [NSString stringWithFormat:@"INSERT OR REPLACE INTO IM_TRIP_INFO (tripId, tripName, tripDate, tripType, tripIntr, tripInviter, beginTime, endTime, scheduleTime, appointment, tripLocale, tripLocaleNumber, tripRoom, tripRoomNumber, memberList, tripRemark, canceled, tripCode) VALUES (:tripId, :tripName, :tripDate, :tripType, :tripIntr, :tripInviter, :beginTime, :endTime, :scheduleTime, :appointment, :tripLocale, :tripLocaleNumber, :tripRoom, :tripRoomNumber, :memberList, :tripRemark, :canceled, :tripCode);"];
         NSMutableArray *paramList = [NSMutableArray array];
-        for (NSDictionary *tripItem in trips) {
+        
+        for (NSDictionary *tripItem in array) {
             NSString *tripId = [tripItem objectForKey:@"tripId"];
             NSString *tripName = [tripItem objectForKey:@"tripName"];
             NSString *tripDate = [tripItem objectForKey:@"tripDate"];
@@ -98,6 +104,8 @@
             
             NSString *tripLocale = [tripItem objectForKey:@"tripLocale"];
             NSString *tripLocaleNumber = [tripItem objectForKey:@"tripLocaleNumber"];
+            
+            NSString * tripCode = [tripItem objectForKey:@"veri_code"];
             
             NSString *tripRoom = [tripItem objectForKey:@"tripRoom"];
             NSString *tripRoomNumber = [tripItem objectForKey:@"tripRoomNumber"];
@@ -139,6 +147,8 @@
             
             [param addObject:tripRemark?tripRemark:@":NULL"];
             [param addObject:canceled?canceled:@":NULL"];
+            [param addObject:tripCode?tripCode:@":NULL"];
+            [param addObject:tripCode?tripCode:@":NULL"];
             [paramList addObject:param];
         }
         BOOL result = [database executeBulkInsert:sql withParameters:paramList];

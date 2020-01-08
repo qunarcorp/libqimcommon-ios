@@ -177,6 +177,152 @@
     }];
 }
 
+- (void)getMomentTopicTagHeaderWithCurPage:(NSNumber *)curPage pageSize:(NSNumber *)pageSize beginTime:(NSNumber *)beginTime endTime:(NSNumber *)endTime withCallBack:(QIMKitGetMomentHistorySuccessedBlock)callback{
+    NSString *destUrl = [NSString stringWithFormat:@"%@/cricle_camel/hotPost/getHotPostList", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    NSMutableDictionary *bodyDic = [NSMutableDictionary dictionaryWithCapacity:1];
+    [bodyDic setQIMSafeObject:curPage forKey:@"curPage"];
+    [bodyDic setQIMSafeObject:pageSize forKey:@"pageSize"];
+    [bodyDic setQIMSafeObject:beginTime forKey:@"beginTime"];
+    [bodyDic setQIMSafeObject:endTime forKey:@"endTime"];
+    
+    NSData *momentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
+    
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+               BOOL ret = [[result objectForKey:@"ret"] boolValue];
+               NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+               if (ret && errcode == 0) {
+                   NSDictionary * data = result[@"data"];
+                   if (data && data.count > 0) {
+                       NSArray * arr = data[@"rows"];
+                       if (arr && arr.count > 0) {
+                           callback(arr);
+                       }
+                       else{
+                           callback(nil);
+                       }
+                   }
+                   else{
+                       callback(nil);
+                   }
+               }
+               else{
+                   callback(nil);
+               }
+    } withFailedCallBack:^(NSError *error) {
+        callback(nil);
+    }];
+}
+
+- (void)getMomentTopicTagHeaderWithTagID:(NSNumber *)tagID CompleteCallBack:(void(^)(NSDictionary * dic))block{
+    NSString *destUrl = [NSString stringWithFormat:@"%@/cricle_camel/tag/getTagStatistic?tagId=%zd", [[QIMNavConfigManager sharedInstance] newerHttpUrl],tagID.integerValue];
+    
+    [self sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary * data = result[@"data"];
+            if (data && data.count >0) {
+                block(data);
+            }
+            else{
+                block(nil);
+            }
+        }
+        else{
+            block(nil);
+        }
+    } withFailedCallBack:^(NSError *error) {
+        block(nil);
+    }];
+}
+
+-(void)getMomentTagListWithCompleteCallBack:(QIMKitGetMomentHistorySuccessedBlock)block{
+    NSString *destUrl = [NSString stringWithFormat:@"%@/cricle_camel/topic/getTopicList", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    
+    [self sendTPGetRequestWithUrl:destUrl withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSArray * data = result[@"data"];
+            if (data && data.count >0) {
+                block(data);
+                [[QIMUserCacheManager sharedInstance] removeUserObjectForKey:@"workMomentTag"];
+                [[QIMUserCacheManager sharedInstance] setUserObject:data forKey:@"workMomentTag"];
+            }
+            else{
+                block(nil);
+            }
+        }
+        else{
+            block(nil);
+        }
+    } withFailedCallBack:^(NSError *error) {
+        block(nil);
+    }];
+}
+
+- (void)getMomentHistoryWithLastUpdateTime:(long long)updateTime withTagId:(NSNumber *)tagId withPostType:(NSInteger)postType withCallBack:(QIMKitGetMomentHistorySuccessedBlock)callback {
+    NSString *destUrl = [NSString stringWithFormat:@"%@/cricle_camel/post/getPostList/v2", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
+    NSMutableDictionary *bodyDic = [NSMutableDictionary dictionaryWithCapacity:1];
+    [bodyDic setQIMSafeObject:@(updateTime) forKey:@"postCreateTime"];
+    [bodyDic setQIMSafeObject:tagId forKey:@"tagId"];
+    [bodyDic setQIMSafeObject:@(20) forKey:@"pageSize"];
+    [bodyDic setQIMSafeObject:@(1) forKey:@"getTop"];
+    [bodyDic setQIMSafeObject:@(postType) forKey:@"postType"];
+
+    QIMVerboseLog(@"post/getPostList : %@", bodyDic);
+    NSData *momentBodyData = [[QIMJSONSerializer sharedInstance] serializeObject:bodyDic error:nil];
+    [self sendTPPOSTRequestWithUrl:destUrl withRequestBodyData:momentBodyData withSuccessCallBack:^(NSData *responseData) {
+        NSDictionary *result = [[QIMJSONSerializer sharedInstance] deserializeObject:responseData error:nil];
+        BOOL ret = [[result objectForKey:@"ret"] boolValue];
+        NSInteger errcode = [[result objectForKey:@"errcode"] integerValue];
+        if (ret && errcode == 0) {
+            NSDictionary *moments = [result objectForKey:@"data"];
+            if ([moments isKindOfClass:[NSDictionary class]]) {
+                NSArray *deletePosts = [moments objectForKey:@"deletePost"];
+                NSArray *newPosts = [moments objectForKey:@"newPost"];
+                if ([deletePosts isKindOfClass:[NSArray class]]) {
+                    [[IMDataManager qimDB_SharedInstance] qimDB_bulkdeleteMoments:deletePosts];
+                }
+                if ([newPosts isKindOfClass:[NSArray class]]) {
+                    if (newPosts.count <= 0) {
+                        [[IMDataManager qimDB_SharedInstance] qimDB_bulkdeleteMomentsWithXmppId:@""];
+                    } else {
+                        [[IMDataManager qimDB_SharedInstance] qimDB_bulkinsertMoments:newPosts];
+                    }
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (callback) {
+                            callback(newPosts);
+                        }
+                    });
+                } else {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (callback) {
+                            callback(nil);
+                        }
+                    });
+                }
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (callback) {
+                        callback(nil);
+                    }
+                });
+            }
+        }
+    } withFailedCallBack:^(NSError *error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (callback) {
+                callback(nil);
+            }
+        });
+    }];
+}
+
+
 - (void)getMomentHistoryWithLastUpdateTime:(long long)updateTime withOwnerXmppId:(NSString *)xmppId withPostType:(NSInteger)postType withCallBack:(QIMKitGetMomentHistorySuccessedBlock)callback {
     NSString *destUrl = [NSString stringWithFormat:@"%@/cricle_camel/post/getPostList/v2", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     NSMutableDictionary *bodyDic = [NSMutableDictionary dictionaryWithCapacity:1];
@@ -945,6 +1091,26 @@
     }
 }
 
+
+- (BOOL)getHotPostMomentNotifyConfig {
+    BOOL exist = [[IMDataManager qimDB_SharedInstance] qimDB_checkExistUserCacheDataWithKey:@"hotPostFlagSwitchConfig" withType:14];
+    if (exist) {
+        return [[IMDataManager qimDB_SharedInstance] qimDB_getUserCacheDataWithKey:@"hotPostFlagSwitchConfig" withType:14];
+    } else {
+        return YES;
+    }
+}
+
+
+- (BOOL)getTopicFlagMomentNotifyConfig {
+    BOOL exist = [[IMDataManager qimDB_SharedInstance] qimDB_checkExistUserCacheDataWithKey:@"topicFlagSwitchConfig" withType:13];
+    if (exist) {
+        return [[IMDataManager qimDB_SharedInstance] qimDB_getUserCacheDataWithKey:@"topicFlagSwitchConfig" withType:13];
+    } else {
+        return YES;
+    }
+}
+
 - (void)getRemoteWorkMomentSwitch {
     NSString *destUrl = [NSString stringWithFormat:@"%@/cricle_camel/notify_config/getNotifyConfig", [[QIMNavConfigManager sharedInstance] newerHttpUrl]];
     NSMutableDictionary *bodyDic = [[NSMutableDictionary alloc] init];
@@ -961,6 +1127,12 @@
                 BOOL flag = [[data objectForKey:@"flag"] boolValue];
                 NSString *notifyKey = [data objectForKey:@"notifyKey"];
                 [[IMDataManager qimDB_SharedInstance] qimDB_UpdateUserCacheDataWithKey:kWorkMomentNotifySwitchConfig withType:12 withValue:@"驼圈开关" withValueInt:flag];
+                
+                BOOL topicFlag = [[data objectForKey:@"topicFlag"] boolValue];
+                [[IMDataManager qimDB_SharedInstance] qimDB_UpdateUserCacheDataWithKey:@"topicFlagSwitchConfig" withType:13 withValue:@"话题池开关" withValueInt:topicFlag];
+                
+                BOOL hotPostFlag = [data objectForKey:@"hotPostFlag"];
+                [[IMDataManager qimDB_SharedInstance] qimDB_UpdateUserCacheDataWithKey:@"hotPostFlagSwitchConfig" withType:14 withValue:@"热帖开关" withValueInt:hotPostFlag];
             }
         }
     } withFailedCallBack:^(NSError *error) {
@@ -1239,6 +1411,54 @@
                     });
                 } else {
                     NSArray *array = [[IMDataManager qimDB_SharedInstance] qimDB_getWorkMomentWithXmppId:xmppId WithLimit:limit WithOffset:offset];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        complete(array);
+                    });
+                }
+            }];
+        });
+    }
+}
+
+-(void)getWorkMoreMomentWithLastMomentTime:(long long)lastMomentTime withTagID:(NSNumber *)tagId WithLimit:(int)limit WithOffset:(int)offset withFirstLocalMoment:(BOOL)firstLocal WithComplete:(void (^)(NSArray *))complete{
+    if (firstLocal) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+//            NSArray *array = [[IMDataManager qimDB_SharedInstance] qimDB_getWorkMomentWithXmppId:xmppId WithLimit:limit WithOffset:offset];
+            NSArray * array = [[IMDataManager qimDB_SharedInstance] qimDB_getWorkMomentWithTagId:tagId WithLimit:limit WithOffset:offset];
+            if (array.count) {
+                __block NSMutableArray *list = [NSMutableArray arrayWithArray:array];
+                if (list.count >= limit) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        complete(list);
+                    });
+                } else {
+                    
+                    NSDictionary *momentDic = [array lastObject];
+                    QIMVerboseLog(@"last momentDic : %@", momentDic);
+                    long long time = [[momentDic objectForKey:@"createTime"] longLongValue];
+                    if (self.load_history_msg == nil) {
+                        self.load_history_msg = dispatch_queue_create("Load History", 0);
+                    }
+                    dispatch_async(self.load_history_msg, ^{
+                        [[QIMManager sharedInstance] getMomentHistoryWithLastUpdateTime:time withTagId:tagId withPostType:1 withCallBack:^(NSArray *moments) {
+                            [list addObjectsFromArray:moments];
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                complete(list);
+                            });
+                        }];
+                    });
+                }
+            }
+        });
+    } else {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+            [[QIMManager sharedInstance] getMomentHistoryWithLastUpdateTime:lastMomentTime withTagId:tagId withPostType:1 withCallBack:^(NSArray *moments) {
+                if (moments) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        complete(moments);
+                    });
+                } else {
+                    NSArray *array = [[IMDataManager qimDB_SharedInstance] qimDB_getWorkMomentWithTagId:tagId WithLimit:limit WithOffset:offset];
                     dispatch_async(dispatch_get_main_queue(), ^{
                         complete(array);
                     });

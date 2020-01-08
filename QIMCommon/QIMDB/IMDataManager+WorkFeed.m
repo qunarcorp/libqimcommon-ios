@@ -47,7 +47,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
 */
 - (void)qimDB_bulkinsertMoments:(NSArray *)moments {
     [[self dbInstance] syncUsingTransaction:^(QIMDataBase* _Nonnull database, BOOL * _Nonnull rollback) {
-        NSString *sql = @"insert or Replace into IM_Work_World(id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList) values(:id, :uuid, :owner, :ownerHost, :isAnonymous, :anonymousName, :anonymousPhoto, :createTime, :updateTime, :content, :atList, :isDelete, :isLike, :likeNum, :commentsNum, :review_status, :attachCommentList);";
+        NSString *sql = @"insert or Replace into IM_Work_World(id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList,tagList) values(:id, :uuid, :owner, :ownerHost, :isAnonymous, :anonymousName, :anonymousPhoto, :createTime, :updateTime, :content, :atList, :isDelete, :isLike, :likeNum, :commentsNum, :review_status, :attachCommentList, :tagList);";
         NSMutableArray *paramList = [[NSMutableArray alloc] init];
         for (NSDictionary *momentDic in moments) {
             NSString *rId = [momentDic objectForKey:@"id"];
@@ -68,6 +68,8 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             NSNumber *reviewStatus = [momentDic objectForKey:@"reviewStatus"];
             NSArray *attachCommentList = [momentDic objectForKey:@"attachCommentList"];
             NSString *attachCommentListStr = [[QIMJSONSerializer sharedInstance] serializeObject:attachCommentList];
+            NSArray * tagList = [momentDic objectForKey:@"tagList"];
+            NSString *tagListStr = [[QIMJSONSerializer sharedInstance] serializeObject:tagList];
             
             NSMutableArray *param = [[NSMutableArray alloc] init];
             [param addObject:rId];
@@ -87,6 +89,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             [param addObject:commentsNum?commentsNum:@(0)];
             [param addObject:reviewStatus];
             [param addObject:attachCommentListStr];
+            [param addObject:tagListStr];
             
             [paramList addObject:param];
         }
@@ -127,7 +130,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
 - (NSDictionary *)qimDB_getWorkMomentWithMomentId:(NSString *)momentId {
     __block NSMutableDictionary *result = nil;
     [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-        NSString *sql = [NSString stringWithFormat:@"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList from IM_Work_World where uuid = '%@'", momentId];
+        NSString *sql = [NSString stringWithFormat:@"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList,tagList from IM_Work_World where uuid = '%@'", momentId];
         DataReader *reader = [database executeReader:sql withParameters:nil];
         if (result == nil) {
             result = [[NSMutableDictionary alloc] init];
@@ -151,6 +154,8 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             NSNumber *review_status = [reader objectForColumnIndex:15];
             NSString *attachCommentListStr = [reader objectForColumnIndex:16];
             NSArray *attachCommentList = [[QIMJSONSerializer sharedInstance] deserializeObject:attachCommentListStr error:nil];
+            NSString * tagListStr = [reader objectForColumnIndex:17];
+            NSArray * tagList = [[QIMJSONSerializer sharedInstance] deserializeObject:tagListStr error:nil];
             
             NSMutableDictionary *msgDic = [[NSMutableDictionary alloc] init];
             [IMDataManager safeSaveForDic:result setObject:rid forKey:@"id"];
@@ -170,6 +175,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             [IMDataManager safeSaveForDic:result setObject:commentsNum forKey:@"commentsNum"];
             [IMDataManager safeSaveForDic:result setObject:review_status forKey:@"review_status"];
             [IMDataManager safeSaveForDic:result setObject:attachCommentList forKey:@"attachCommentList"];
+            [IMDataManager safeSaveForDic:result setObject:tagList forKey:@"tagList"];
         }
         [reader close];
     }];
@@ -179,7 +185,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
 - (NSDictionary *)qimDB_getLastWorkMoment {
     __block NSMutableDictionary *result = nil;
     [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
-        NSString *sql = @"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList from IM_Work_World order by createTime desc limit 1";
+        NSString *sql = @"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList,tagList from IM_Work_World order by createTime desc limit 1";
         DataReader *reader = [database executeReader:sql withParameters:nil];
         if (result == nil) {
             result = [[NSMutableDictionary alloc] init];
@@ -204,6 +210,9 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             NSString *attachCommentListStr = [reader objectForColumnIndex:16];
             NSArray *attachCommentList = [[QIMJSONSerializer sharedInstance] deserializeObject:attachCommentListStr error:nil];
             
+            NSString *tagListStr = [reader objectForColumnIndex:17];
+            NSArray *tagList = [[QIMJSONSerializer sharedInstance] deserializeObject:tagListStr error:nil];
+            
             NSMutableDictionary *msgDic = [[NSMutableDictionary alloc] init];
             [IMDataManager safeSaveForDic:result setObject:rid forKey:@"id"];
             [IMDataManager safeSaveForDic:result setObject:uuid forKey:@"uuid"];
@@ -222,10 +231,76 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             [IMDataManager safeSaveForDic:result setObject:commentsNum forKey:@"commentsNum"];
             [IMDataManager safeSaveForDic:result setObject:review_status forKey:@"review_status"];
             [IMDataManager safeSaveForDic:result setObject:attachCommentList forKey:@"attachCommentList"];
+            [IMDataManager safeSaveForDic:result setObject:tagList forKey:@"tagList"];
         }
         [reader close];
     }];
     return result;
+}
+
+#pragma mark 获取tag列表
+- (NSArray *)qimDB_getWorkMomentWithTagId:(NSNumber *)tagId WithLimit:(int)limit WithOffset:(int)offset{
+    __block NSMutableArray *result = nil;
+    CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
+    [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
+        NSString *sql = [NSString stringWithFormat:@"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList, tagList from IM_Work_World where tagList LIKE '%@:%zd%@' and isAnonymous = 0 order by createTime desc limit %d offset %d;", @"%",tagId.integerValue,@"%", limit, offset];
+        NSLog(@"sql : %@", sql);
+        DataReader *reader = [database executeReader:sql withParameters:nil];
+        NSMutableArray *tempList = nil;
+        if (result == nil) {
+            result = [[NSMutableArray alloc] init];
+        }
+        
+        while ([reader read]) {
+            NSNumber *rid = [reader objectForColumnIndex:0];
+            NSString *uuid = [reader objectForColumnIndex:1];
+            NSString *owner = [reader objectForColumnIndex:2];
+            NSString *ownerHost = [reader objectForColumnIndex:3];
+            NSNumber *isAnonymous = [reader objectForColumnIndex:4];
+            NSString *anonymousName = [reader objectForColumnIndex:5];
+            NSString *anonymousPhoto = [reader objectForColumnIndex:6];
+            NSNumber *createTime = [reader objectForColumnIndex:7];
+            NSNumber *updateTime = [reader objectForColumnIndex:8];
+            NSString *content = [reader objectForColumnIndex:9];
+            NSString *atList = [reader objectForColumnIndex:10];
+            NSNumber *isDelete = [reader objectForColumnIndex:11];
+            NSNumber *isLike = [reader objectForColumnIndex:12];
+            NSNumber *likeNum = [reader objectForColumnIndex:13];
+            NSNumber *commentsNum = [reader objectForColumnIndex:14];
+            NSNumber *review_status = [reader objectForColumnIndex:15];
+            NSString *attachCommentListStr = [reader objectForColumnIndex:16];
+            NSArray *attachCommentList = [[QIMJSONSerializer sharedInstance] deserializeObject:attachCommentListStr error:nil];
+            
+            NSString *tagListStr = [reader objectForColumnIndex:17];
+            NSArray *tagList = [[QIMJSONSerializer sharedInstance] deserializeObject:tagListStr error:nil];
+
+            NSMutableDictionary *msgDic = [[NSMutableDictionary alloc] init];
+            [IMDataManager safeSaveForDic:msgDic setObject:rid forKey:@"id"];
+            [IMDataManager safeSaveForDic:msgDic setObject:uuid forKey:@"uuid"];
+            [IMDataManager safeSaveForDic:msgDic setObject:owner forKey:@"owner"];
+            [IMDataManager safeSaveForDic:msgDic setObject:ownerHost forKey:@"ownerHost"];
+            [IMDataManager safeSaveForDic:msgDic setObject:isAnonymous forKey:@"isAnonymous"];
+            [IMDataManager safeSaveForDic:msgDic setObject:anonymousName forKey:@"anonymousName"];
+            [IMDataManager safeSaveForDic:msgDic setObject:anonymousPhoto forKey:@"anonymousPhoto"];
+            [IMDataManager safeSaveForDic:msgDic setObject:createTime forKey:@"createTime"];
+            [IMDataManager safeSaveForDic:msgDic setObject:updateTime forKey:@"updateTime"];
+            [IMDataManager safeSaveForDic:msgDic setObject:content forKey:@"content"];
+            [IMDataManager safeSaveForDic:msgDic setObject:atList forKey:@"atList"];
+            [IMDataManager safeSaveForDic:msgDic setObject:isDelete forKey:@"isDelete"];
+            [IMDataManager safeSaveForDic:msgDic setObject:isLike forKey:@"isLike"];
+            [IMDataManager safeSaveForDic:msgDic setObject:likeNum forKey:@"likeNum"];
+            [IMDataManager safeSaveForDic:msgDic setObject:commentsNum forKey:@"commentsNum"];
+            [IMDataManager safeSaveForDic:msgDic setObject:review_status forKey:@"review_status"];
+            [IMDataManager safeSaveForDic:msgDic setObject:attachCommentList forKey:@"attachCommentList"];
+            [IMDataManager safeSaveForDic:msgDic setObject:tagList forKey:@"tagList"];
+            [result addObject:msgDic];
+        }
+        
+    }];
+    CFAbsoluteTime endTime = CFAbsoluteTimeGetCurrent();
+    NSLog(@"sql取Moment消息耗时。: %llf", endTime - startTime);
+    return result;
+
 }
 
 - (NSArray *)qimDB_getWorkMomentWithXmppId:(NSString *)xmppId WithLimit:(int)limit WithOffset:(int)offset {
@@ -234,9 +309,9 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
     [[self dbInstance] inDatabase:^(QIMDataBase* _Nonnull database) {
         NSString *sql = nil;
         if (xmppId == nil) {
-            sql = [NSString stringWithFormat:@"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList from IM_Work_World order by createTime desc limit %d offset %d;", limit, offset];
+            sql = [NSString stringWithFormat:@"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList,tagList from IM_Work_World order by createTime desc limit %d offset %d;", limit, offset];
         } else {
-            sql = [NSString stringWithFormat:@"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList from IM_Work_World where owner='%@' and ownerHost='%@' and isAnonymous = 0 order by createTime desc limit %d offset %d;", [[xmppId componentsSeparatedByString:@"@"] firstObject], [[xmppId componentsSeparatedByString:@"@"] lastObject], limit, offset];
+            sql = [NSString stringWithFormat:@"select id, uuid, owner, ownerHost, isAnonymous, anonymousName, anonymousPhoto, createTime, updateTime, content, atList, isDelete, isLike, likeNum, commentsNum, review_status, attachCommentList, tagList from IM_Work_World where owner='%@' and ownerHost='%@' and isAnonymous = 0 order by createTime desc limit %d offset %d;", [[xmppId componentsSeparatedByString:@"@"] firstObject], [[xmppId componentsSeparatedByString:@"@"] lastObject], limit, offset];
         }
         NSLog(@"sql : %@", sql);
         DataReader *reader = [database executeReader:sql withParameters:nil];
@@ -264,6 +339,9 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             NSNumber *review_status = [reader objectForColumnIndex:15];
             NSString *attachCommentListStr = [reader objectForColumnIndex:16];
             NSArray *attachCommentList = [[QIMJSONSerializer sharedInstance] deserializeObject:attachCommentListStr error:nil];
+            
+            NSString *tagListStr = [reader objectForColumnIndex:17];
+            NSArray *tagList = [[QIMJSONSerializer sharedInstance] deserializeObject:tagListStr error:nil];
 
             NSMutableDictionary *msgDic = [[NSMutableDictionary alloc] init];
             [IMDataManager safeSaveForDic:msgDic setObject:rid forKey:@"id"];
@@ -283,7 +361,7 @@ result = [database executeNonQuery:@"CREATE TABLE IM_Work_World (\
             [IMDataManager safeSaveForDic:msgDic setObject:commentsNum forKey:@"commentsNum"];
             [IMDataManager safeSaveForDic:msgDic setObject:review_status forKey:@"review_status"];
             [IMDataManager safeSaveForDic:msgDic setObject:attachCommentList forKey:@"attachCommentList"];
-
+            [IMDataManager safeSaveForDic:msgDic setObject:tagList forKey:@"tagList"];
             [result addObject:msgDic];
         }
         

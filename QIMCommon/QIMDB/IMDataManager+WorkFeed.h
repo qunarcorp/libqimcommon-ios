@@ -86,6 +86,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)qimDB_updateWorkNoticeMessageReadStateWithTime:(long long)time;
 
+
+- (NSArray *)qimDB_getWorkMomentWithTagId:(NSNumber *)tagId WithLimit:(int)limit WithOffset:(int)offset;
 @end
 
 NS_ASSUME_NONNULL_END
