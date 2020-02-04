@@ -132,7 +132,7 @@ static dispatch_once_t _onceDBToken;
 }
 
 - (NSInteger)qim_dbVersion {
-    return 7;
+    return 8;
 }
 
 - (void)updateDBVersionToFileWithVersion:(NSInteger)upgradeResultVersion {
@@ -187,6 +187,11 @@ static dispatch_once_t _onceDBToken;
         case 6: {
             result = [self upgradeFrom6To7];
             currentOldVersion = 6;
+        }
+            break;
+        case 7: {
+            result = [self upgradeFrom7To8];
+            currentOldVersion = 7;
         }
             break;
         default: {
@@ -346,6 +351,24 @@ static dispatch_once_t _onceDBToken;
     [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
         if ([database columnExists:@"IM_Work_World" columnName:@"tagList"] == NO) {
             result = [database executeNonQuery:@"ALTER TABLE IM_Work_World ADD tagList TEXT;" withParameters:nil];
+        } else {
+            result = YES;
+        }
+    }];
+    return result;
+}
+
+- (BOOL)upgradeFrom7To8{
+    QIMVerboseLog(@"upgradeFrom7To8");
+    __block BOOL result = YES;
+    [_databasePool inDatabase:^(QIMDataBase* _Nonnull database) {
+        if ([database columnExists:@"IM_Message" columnName:@"MessageFlag"] == NO) {
+            /*
+             默认是0
+             0：new 新版数据
+             1：old 旧版数据
+             */
+            result = [database executeNonQuery:@"ALTER TABLE IM_Message ADD MessageFlag INTEGER DEFAULT 0;" withParameters:nil];
         } else {
             result = YES;
         }
